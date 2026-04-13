@@ -1,0 +1,42 @@
+{{define "login.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} · Moana</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script type="module" src="/static/js/app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body class="surface login-body">
+  <main class="login-shell">
+    <div class="surface-container layer-card login-card">
+      <h1 class="headline-sm">Moana</h1>
+      <p class="muted small">Income ledger</p>
+      {{if .Error}}
+      <p class="alert alert-error" role="alert">{{.Error}}</p>
+      {{end}}
+      <form class="form-grid" method="post" action="/login">
+        <label class="field">
+          <span class="label">Email</span>
+          <input class="input" type="email" name="email" required autocomplete="username">
+        </label>
+        <label class="field">
+          <span class="label">Password</span>
+          <input class="input" type="password" name="password" required autocomplete="current-password">
+        </label>
+        <div class="field-actions">
+          <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <footer class="site-footer login-footer">
+    <span>{{.Year}}</span>
+  </footer>
+</body>
+</html>
+{{end}}

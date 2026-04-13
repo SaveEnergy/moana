@@ -1,0 +1,56 @@
+{{define "transactions_edit_inner.html"}}
+<section class="surface-lowest layer-card entry-card">
+  <header class="entry-header">
+    <h1 class="entry-title">Edit entry</h1>
+    <p class="muted entry-subtitle">Fix mistakes and save — you return to the same history view.</p>
+  </header>
+  {{if .Error}}
+  <p class="alert alert-error" role="alert">{{.Error}}</p>
+  {{end}}
+  <form class="form-entry" method="post" action="/transactions/{{.TxID}}">
+    <input type="hidden" name="next" value="{{.Next}}">
+    <div class="field field-span field-kind">
+      <span class="label" id="kind-label-edit">Type</span>
+      <div class="kind-toggle" role="radiogroup" aria-labelledby="kind-label-edit">
+        <label class="kind-option">
+          <input type="radio" name="kind" value="income" {{if eq .Kind "income"}}checked{{end}}>
+          <span>Income</span>
+        </label>
+        <label class="kind-option">
+          <input type="radio" name="kind" value="expense" {{if eq .Kind "expense"}}checked{{end}}>
+          <span>Expense</span>
+        </label>
+      </div>
+    </div>
+    <label class="field field-amount">
+      <span class="label">Amount (EUR)</span>
+      <div class="amount-input-wrap">
+        <span class="amount-prefix" aria-hidden="true">€</span>
+        <input class="input input-amount" type="text" name="amount" inputmode="decimal" placeholder="0.00" required autocomplete="off" value="{{.Amount}}">
+      </div>
+    </label>
+    <label class="field">
+      <span class="label">Date</span>
+      <input class="input" type="date" name="occurred_on" value="{{.OccurredOn}}" required>
+    </label>
+    <label class="field field-span">
+      <span class="label">Note</span>
+      <input class="input" type="text" name="description" placeholder="What was this for?" maxlength="500" value="{{.Description}}">
+    </label>
+    <label class="field">
+      <span class="label">Category</span>
+      <select class="input" name="category_id">
+        <option value="">— Optional</option>
+        {{range .Categories}}
+        <option value="{{.ID}}" {{if eq $.SelectedCatID .ID}}selected{{end}}>{{.Name}}</option>
+        {{end}}
+      </select>
+    </label>
+    <div class="field-actions field-span">
+      <button type="submit" class="btn btn-primary btn-save-entry">Save changes</button>
+      <a class="btn btn-tertiary" href="{{.Next}}">Cancel</a>
+    </div>
+  </form>
+  <p class="muted small">Times shown and stored in UTC; dates use your time zone ({{.UserTZ}}).</p>
+</section>
+{{end}}

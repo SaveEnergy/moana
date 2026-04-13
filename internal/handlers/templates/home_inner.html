@@ -1,0 +1,126 @@
+{{define "home_inner.html"}}
+<div class="dashboard">
+  <header class="dashboard-hero">
+    <div class="dashboard-hero-top">
+      <div>
+        <p class="dashboard-kicker">Current portfolio</p>
+        <p class="dashboard-balance{{if lt .RunningTotal 0}} text-error{{end}}">{{formatEUR .RunningTotal}}</p>
+        <div class="dashboard-pills">
+          <span class="pill pill-trend{{if isNegFloat .MoMNetPct}} pill-trend-neg{{end}}">{{formatPercentSigned .MoMNetPct}} net vs prior month</span>
+          <span class="pill pill-live"><span class="pill-live-dot" aria-hidden="true"></span> Live data</span>
+        </div>
+      </div>
+      <div class="dashboard-hero-tools muted" aria-hidden="true">
+        <span title="Calendar">▦</span>
+        <span title="Settings">⚙</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard-grid-top">
+    <section class="dashboard-card dashboard-card-goal">
+      <h2 class="dashboard-card-title">Monthly net vs goal</h2>
+      <p class="dashboard-goal-line">
+        <strong class="{{if lt .MonthNet 0}}text-error{{end}}">{{formatEUR .MonthNet}}</strong>
+        <span class="muted">· goal {{formatEUR .SavingsGoalCents}}</span>
+      </p>
+      <div class="dashboard-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{.SavingsProgress}}">
+        <div class="dashboard-progress-fill" style="width: {{.SavingsProgress}}%"></div>
+      </div>
+    </section>
+
+    <div class="dashboard-stat-grid">
+      <section class="dashboard-card dashboard-stat">
+        <h2 class="dashboard-stat-label">Monthly revenue</h2>
+        <p class="dashboard-stat-value">{{formatEUR .MonthIncome}}</p>
+        <p class="dashboard-stat-sub muted">This month</p>
+      </section>
+      <section class="dashboard-card dashboard-stat">
+        <h2 class="dashboard-stat-label">Total expenses</h2>
+        <p class="dashboard-stat-value text-error">{{formatEURAbs .MonthExpense}}</p>
+        <p class="dashboard-stat-sub muted">{{formatPercentSigned .ExpenseTrendPct}} vs prior month</p>
+      </section>
+      <section class="dashboard-card dashboard-stat">
+        <h2 class="dashboard-stat-label">Year to date</h2>
+        <p class="dashboard-stat-value{{if lt .YTDNet 0}} text-error{{end}}">{{formatEUR .YTDNet}}</p>
+        <p class="dashboard-stat-sub muted">Net across {{.Timezone}}</p>
+      </section>
+    </div>
+  </div>
+
+  {{if .Insight}}
+  <section class="dashboard-insight">
+    <span class="dashboard-insight-icon" aria-hidden="true">✦</span>
+    <p class="dashboard-insight-text">{{.Insight}}</p>
+  </section>
+  {{end}}
+
+  <div class="dashboard-grid-mid">
+    <section class="dashboard-card dashboard-chart-card">
+      <div class="dashboard-card-head">
+        <h2 class="dashboard-card-title">Cashflow</h2>
+        <span class="dashboard-cashflow-pill muted small">This month</span>
+      </div>
+      {{if .CashflowSVG}}
+      <div class="dashboard-cashflow-body" role="presentation">
+        {{.CashflowSVG}}
+      </div>
+      {{else}}
+      <p class="muted dashboard-cashflow-empty">No income recorded this month yet. Add income to see how it flows to expenses and surplus.</p>
+      {{end}}
+    </section>
+
+    <section class="dashboard-card dashboard-donut-card">
+      <h2 class="dashboard-card-title">Categories</h2>
+      <p class="muted small dashboard-donut-sub">This month’s spending</p>
+      {{if .DonutGradient}}
+      <div class="dashboard-donut-wrap">
+        <div class="dashboard-donut" style="background: {{.DonutGradient}}"></div>
+        <div class="dashboard-donut-center">
+          <span class="muted small">Total</span>
+          <span class="dashboard-donut-total">{{formatCompactEUR .DonutTotalAbs}}</span>
+        </div>
+      </div>
+      <ul class="dashboard-donut-legend">
+        {{range .CategorySlices}}
+        <li><span class="dashboard-dot"></span> {{printf "%.0f" .Pct}}% · {{.Name}}</li>
+        {{end}}
+      </ul>
+      {{else}}
+      <p class="muted dashboard-donut-empty">No expense data this month yet.</p>
+      {{end}}
+    </section>
+  </div>
+
+  <section class="dashboard-card dashboard-recent">
+    <div class="dashboard-card-head">
+      <h2 class="dashboard-card-title">Recent activity</h2>
+      <a href="/history" class="dashboard-link">View ledger</a>
+    </div>
+    {{if not .Recent}}
+    <p class="muted">Nothing yet. <a href="/transactions">Add a transaction</a>.</p>
+    {{else}}
+    <ul class="dashboard-recent-list">
+      {{range .Recent}}
+      <li class="dashboard-recent-row">
+        <div class="dashboard-recent-icon{{if lt .AmountCents 0}} dashboard-recent-icon-expense{{else}} dashboard-recent-icon-income{{end}}" aria-hidden="true"></div>
+        <div class="dashboard-recent-body">
+          <div class="dashboard-recent-title">{{if .Description}}{{.Description}}{{else}}<span class="muted">No description</span>{{end}}</div>
+          <div class="dashboard-recent-meta muted small">
+            {{if .CategoryName}}{{.CategoryName}} · {{end}}{{formatLocalTime .OccurredAt $.Timezone}}
+          </div>
+        </div>
+        <div class="dashboard-recent-amt">
+          {{if lt .AmountCents 0}}
+          <span class="tx-amt-expense">-{{formatEURAbs .AmountCents}}</span>
+          {{else}}
+          <span class="tx-amt-income">+{{formatEURAbs .AmountCents}}</span>
+          {{end}}
+        </div>
+      </li>
+      {{end}}
+    </ul>
+    {{end}}
+  </section>
+</div>
+{{end}}

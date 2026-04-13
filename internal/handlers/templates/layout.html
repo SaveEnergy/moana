@@ -1,0 +1,87 @@
+{{define "layout.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} · Moana</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script type="module" src="/static/js/app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body class="surface app-body">
+<div class="app-shell" id="app-shell">
+  <div class="app-sidebar-backdrop" id="app-sidebar-backdrop" aria-hidden="true"></div>
+  <aside class="app-sidebar" id="app-sidebar" aria-label="Main">
+    <div class="app-sidebar-inner">
+      <a class="sidebar-brand-mark" href="/" title="Moana">M</a>
+      <nav class="sidebar-nav" id="app-sidebar-nav">
+        <a href="/" class="sidebar-link{{if eq .Active "home"}} sidebar-link-active{{end}}">
+          <span class="sidebar-link-icon" aria-hidden="true">◫</span>
+          <span class="sidebar-label">Dashboard</span>
+        </a>
+        <a href="/transactions" class="sidebar-link{{if eq .Active "tx"}} sidebar-link-active{{end}}">
+          <span class="sidebar-link-icon" aria-hidden="true">✎</span>
+          <span class="sidebar-label">Transact.</span>
+        </a>
+        <a href="/history" class="sidebar-link{{if eq .Active "history"}} sidebar-link-active{{end}}">
+          <span class="sidebar-link-icon" aria-hidden="true">◷</span>
+          <span class="sidebar-label">History</span>
+        </a>
+        <a href="/categories" class="sidebar-link{{if eq .Active "cat"}} sidebar-link-active{{end}}">
+          <span class="sidebar-link-icon" aria-hidden="true">☷</span>
+          <span class="sidebar-label">Categories</span>
+        </a>
+        {{if eq .User.Role "admin"}}
+        <a href="/admin/users" class="sidebar-link{{if eq .Active "admin"}} sidebar-link-active{{end}}">
+          <span class="sidebar-link-icon" aria-hidden="true">⚙</span>
+          <span class="sidebar-label">Users</span>
+        </a>
+        {{end}}
+      </nav>
+      <a class="sidebar-fab" href="/transactions" title="Add transaction">
+        <span class="sidebar-fab-icon" aria-hidden="true">+</span>
+        <span class="sidebar-label">Add</span>
+      </a>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-avatar" title="{{.User.Email}}">{{userInitial .User.Email}}</div>
+        <form class="sidebar-logout" method="post" action="/logout">
+          <button type="submit" class="sidebar-logout-btn" title="Sign out">
+            <span class="sr-only">Sign out</span>
+            <span aria-hidden="true">↪</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>
+  <div class="app-content">
+    <header class="app-topbar">
+      <button type="button" class="app-sidebar-toggle" id="app-sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="app-sidebar">
+        <svg class="app-sidebar-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="5" y1="5" x2="5" y2="19"/>
+          <line x1="11" y1="7" x2="19" y2="7"/>
+          <line x1="11" y1="12" x2="19" y2="12"/>
+          <line x1="11" y1="17" x2="19" y2="17"/>
+        </svg>
+      </button>
+      <nav class="app-breadcrumb" aria-label="Breadcrumb">
+        <a class="app-breadcrumb-link" href="/">Home</a>
+        <span class="app-breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="app-breadcrumb-current" aria-current="page">{{.Title}}</span>
+      </nav>
+    </header>
+    <main class="{{if .MainClass}}{{.MainClass}}{{else}}layer-stack{{end}}">
+      {{.Body}}
+    </main>
+    <footer class="site-footer">
+      <span>Moana</span>
+      <span class="muted">·</span>
+      <span>{{.Year}}</span>
+    </footer>
+  </div>
+</div>
+</body>
+</html>
+{{end}}

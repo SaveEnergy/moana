@@ -1,0 +1,54 @@
+{{define "transactions_new_inner.html"}}
+<section class="surface-lowest layer-card entry-card">
+  <header class="entry-header">
+    <h1 class="entry-title">New entry</h1>
+    <p class="muted entry-subtitle">Record income or spending with precision.</p>
+  </header>
+  {{if .Error}}
+  <p class="alert alert-error" role="alert">{{.Error}}</p>
+  {{end}}
+  <form class="form-entry" method="post" action="/transactions">
+    <div class="field field-span field-kind">
+      <span class="label" id="kind-label">Type</span>
+      <div class="kind-toggle" role="radiogroup" aria-labelledby="kind-label">
+        <label class="kind-option">
+          <input type="radio" name="kind" value="income" checked>
+          <span>Income</span>
+        </label>
+        <label class="kind-option">
+          <input type="radio" name="kind" value="expense">
+          <span>Expense</span>
+        </label>
+      </div>
+    </div>
+    <label class="field field-amount">
+      <span class="label">Amount (EUR)</span>
+      <div class="amount-input-wrap">
+        <span class="amount-prefix" aria-hidden="true">€</span>
+        <input class="input input-amount" type="text" name="amount" inputmode="decimal" placeholder="0.00" required autocomplete="off">
+      </div>
+    </label>
+    <label class="field">
+      <span class="label">Date</span>
+      <input class="input" type="date" name="occurred_on" value="{{.Today}}" required>
+    </label>
+    <label class="field field-span">
+      <span class="label">Note</span>
+      <input class="input" type="text" name="description" placeholder="What was this for?" maxlength="500">
+    </label>
+    <label class="field">
+      <span class="label">Category</span>
+      <select class="input" name="category_id">
+        <option value="">— Optional</option>
+        {{range .Categories}}
+        <option value="{{.ID}}">{{.Name}}</option>
+        {{end}}
+      </select>
+    </label>
+    <div class="field-actions field-span">
+      <button type="submit" class="btn btn-primary btn-save-entry">Save entry</button>
+    </div>
+  </form>
+  <p class="muted small">Times shown and stored in UTC; dates use your time zone ({{.UserTZ}}).</p>
+</section>
+{{end}}

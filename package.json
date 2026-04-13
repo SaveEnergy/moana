@@ -1,0 +1,15 @@
+{
+  "name": "moana",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build --config frontend/vite.config.ts",
+    "test:go": "go test -race ./...",
+    "test:e2e": "playwright test --config test/e2e/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

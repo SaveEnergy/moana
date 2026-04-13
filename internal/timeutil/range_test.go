@@ -1,0 +1,56 @@
+package timeutil
+
+import (
+	"testing"
+	"time"
+)
+
+func TestPreviousCalendarMonthRangeUTC(t *testing.T) {
+	t.Parallel()
+	loc, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 15 Feb 2026 local -> previous month is Jan 2026
+	ref := time.Date(2026, 2, 15, 12, 0, 0, 0, time.UTC)
+	start, end := PreviousCalendarMonthRangeUTC(loc, ref)
+	localStart := start.In(loc)
+	localEnd := end.In(loc)
+	if localStart.Month() != time.January || localStart.Day() != 1 || localStart.Hour() != 0 {
+		t.Fatalf("start in local: %v", localStart)
+	}
+	if localEnd.Month() != time.January || localEnd.Day() != 31 {
+		t.Fatalf("end in local: %v", localEnd)
+	}
+	if !start.Before(end) {
+		t.Fatalf("start %v not before end %v", start, end)
+	}
+}
+
+func TestPreviousCalendarYearRangeUTC(t *testing.T) {
+	t.Parallel()
+	loc := time.UTC
+	ref := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
+	start, end := PreviousCalendarYearRangeUTC(loc, ref)
+	if start.Year() != 2025 || start.Month() != time.January || start.Day() != 1 {
+		t.Fatalf("start: %v", start)
+	}
+	if end.Year() != 2025 || end.Month() != time.December || end.Day() != 31 {
+		t.Fatalf("end: %v", end)
+	}
+}
+
+func TestDayRangeUTCFromLocalDates(t *testing.T) {
+	t.Parallel()
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		t.Fatal(err)
+	}
+	from, to, err := DayRangeUTCFromLocalDates(loc, "2026-01-10", "2026-01-12")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from.In(loc).Day() != 10 || to.In(loc).Day() != 12 {
+		t.Fatalf("from=%v to=%v", from.In(loc), to.In(loc))
+	}
+}
