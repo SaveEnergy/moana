@@ -1,9 +1,9 @@
-# Frontend (Vite + Bun) → internal/handlers/static
+# Frontend (Vite + Bun) → internal/assets/static
 FROM oven/bun:1 AS assets
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY frontend ./frontend
-COPY internal/handlers/static ./internal/handlers/static
+COPY internal/assets/static ./internal/assets/static
 RUN bun install --frozen-lockfile && bun run build
 
 # Go binary
@@ -13,7 +13,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-COPY --from=assets /app/internal/handlers/static ./internal/handlers/static
+COPY --from=assets /app/internal/assets/static ./internal/assets/static
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/moana ./cmd/moana
 
 # Run

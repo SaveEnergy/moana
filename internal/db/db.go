@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -82,7 +83,6 @@ CREATE TABLE users (
   email TEXT NOT NULL UNIQUE COLLATE NOCASE,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('user', 'admin')),
-  timezone TEXT NOT NULL DEFAULT 'UTC',
   created_at TEXT NOT NULL
 );
 CREATE TABLE categories (
@@ -109,6 +109,96 @@ CREATE INDEX idx_categories_user ON categories(user_id);
 			return err
 		}
 		v = 1
+	}
+
+	if v < 2 {
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE categories ADD COLUMN icon TEXT NOT NULL DEFAULT '';`); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO schema_version (version) VALUES (2)`); err != nil {
+			return err
+		}
+		v = 2
+	}
+
+	if v < 3 {
+		if _, err := tx.ExecContext(ctx, `
+CREATE TABLE households (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL DEFAULT 'My household',
+  created_at TEXT NOT NULL
+);`); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE users ADD COLUMN household_id INTEGER REFERENCES households(id);`); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT '';`); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE users ADD COLUMN last_name TEXT NOT NULL DEFAULT '';`); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE users ADD COLUMN household_role TEXT NOT NULL DEFAULT 'member';`); err != nil {
+			return err
+		}
+		rows, err := tx.QueryContext(ctx, `SELECT id FROM users`)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = rows.Close() }()
+		for rows.Next() {
+			var uid int64
+			if err := rows.Scan(&uid); err != nil {
+				return err
+			}
+			now := time.Now().UTC().Format(time.RFC3339Nano)
+			res, err := tx.ExecContext(ctx, `INSERT INTO households (name, created_at) VALUES ('My household', ?)`, now)
+			if err != nil {
+				return err
+			}
+			hid, err := res.LastInsertId()
+			if err != nil {
+				return err
+			}
+			if _, err := tx.ExecContext(ctx, `UPDATE users SET household_id = ?, household_role = 'owner' WHERE id = ?`, hid, uid); err != nil {
+				return err
+			}
+		}
+		if err := rows.Err(); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO schema_version (version) VALUES (3)`); err != nil {
+			return err
+		}
+		v = 3
+	}
+
+	if v < 4 {
+		var hasTZ bool
+		err := tx.QueryRowContext(ctx, `
+SELECT EXISTS (SELECT 1 FROM pragma_table_info('users') WHERE name = 'timezone')`).Scan(&hasTZ)
+		if err != nil {
+			return err
+		}
+		if hasTZ {
+			if _, err := tx.ExecContext(ctx, `ALTER TABLE users DROP COLUMN timezone`); err != nil {
+				return err
+			}
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO schema_version (version) VALUES (4)`); err != nil {
+			return err
+		}
+		v = 4
+	}
+
+	if v < 5 {
+		if _, err := tx.ExecContext(ctx, `ALTER TABLE categories ADD COLUMN color TEXT NOT NULL DEFAULT ''`); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO schema_version (version) VALUES (5)`); err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()

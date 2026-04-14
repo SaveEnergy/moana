@@ -1,0 +1,54 @@
+package dashboard
+
+import (
+	"moana/internal/money"
+	"moana/internal/store"
+)
+
+// NetPctChange is period-over-period % change for signed net (current vs previous period of same length).
+func NetPctChange(current, previous int64) float64 {
+	if previous == 0 {
+		if current == 0 {
+			return 0
+		}
+		return 100
+	}
+	return float64(current-previous) / float64(money.AbsCents(previous)) * 100
+}
+
+// PctChangeNet is month-over-month % change for net totals (signed).
+func PctChangeNet(prev, prevPrev int64) float64 {
+	if prevPrev == 0 {
+		if prev == 0 {
+			return 0
+		}
+		return 100
+	}
+	return float64(prev-prevPrev) / float64(money.AbsCents(prevPrev)) * 100
+}
+
+// PctChangePositive is period-over-period % change for non-negative amounts (income totals or expense absolutes).
+func PctChangePositive(current, previous int64) float64 {
+	if previous == 0 {
+		if current == 0 {
+			return 0
+		}
+		return 100
+	}
+	return float64(current-previous) / float64(previous) * 100
+}
+
+// MergeCategoryTopN keeps the top (limit-1) categories and merges the rest into "Other".
+func MergeCategoryTopN(rows []store.CategoryAmount, limit int) []store.CategoryAmount {
+	if len(rows) <= limit {
+		return rows
+	}
+	out := make([]store.CategoryAmount, limit)
+	copy(out, rows[:limit-1])
+	var rest int64
+	for _, r := range rows[limit-1:] {
+		rest += r.AmountCents
+	}
+	out[limit-1] = store.CategoryAmount{Name: "Other", AmountCents: rest}
+	return out
+}

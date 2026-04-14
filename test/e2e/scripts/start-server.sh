@@ -8,5 +8,5 @@ export MOANA_DB_PATH="$ROOT/data/e2e-test.db"
 export MOANA_LISTEN=":18080"
 export MOANA_ENV="development"
 export MOANA_SESSION_SECRET="e2e-test-session-secret-32bytes!!"
-go run ./cmd/moana user add --email=e2e@moana.test --password=password123 --role=user --timezone=UTC
+go run ./cmd/moana user add --email=e2e@moana.test --password=password123 --role=user
 exec go run ./cmd/moana serve

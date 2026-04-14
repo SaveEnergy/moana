@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   root: __dirname,
   build: {
-    outDir: resolve(__dirname, '../internal/handlers/static'),
+    outDir: resolve(__dirname, '../internal/assets/static'),
     emptyOutDir: false,
     rollupOptions: {
       input: resolve(__dirname, 'src/main.ts'),

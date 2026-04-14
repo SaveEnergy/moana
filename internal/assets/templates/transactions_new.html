@@ -1,0 +1,80 @@
+{{define "transactions_new.html"}}
+<section class="entry-transaction-page">
+  <header class="entry-header">
+    <h1 class="entry-title">New entry</h1>
+  </header>
+  {{if .Error}}
+  <p class="alert alert-error" role="alert">{{.Error}}</p>
+  {{end}}
+  <form class="entry-transaction-form" method="post" action="/transactions">
+    <div class="entry-transaction-grid">
+      <div class="entry-panel surface-lowest">
+        <div class="float-field entry-field-amount">
+          <span class="float-label">Amount (EUR)</span>
+          <div class="amount-input-wrap">
+            <span class="amount-prefix" aria-hidden="true">€</span>
+            <input class="float-input input-amount" type="text" name="amount" inputmode="decimal" placeholder="0.00" required autocomplete="off">
+          </div>
+        </div>
+        <div class="entry-field entry-field-span field-kind">
+          <span class="label" id="kind-label">Type</span>
+          <div class="kind-toggle" role="radiogroup" aria-labelledby="kind-label">
+            <label class="kind-option">
+              <input type="radio" name="kind" value="income" checked>
+              <span>Income</span>
+            </label>
+            <label class="kind-option">
+              <input type="radio" name="kind" value="expense">
+              <span>Expense</span>
+            </label>
+          </div>
+        </div>
+        <div class="entry-field-row">
+          <div class="float-field">
+            <label class="float-label" for="tx-new-date">Date</label>
+            <input class="float-input" id="tx-new-date" type="date" name="occurred_on" value="{{.Today}}" required>
+          </div>
+          <div class="float-field">
+            <label class="float-label" for="tx-new-note">Note</label>
+            <input class="float-input" id="tx-new-note" type="text" name="description" placeholder="What was this for?" maxlength="500">
+          </div>
+        </div>
+      </div>
+      <aside class="entry-category-column" aria-labelledby="entry-cat-heading">
+        <h2 class="entry-category-heading" id="entry-cat-heading">Categories</h2>
+        <div class="category-picker-scroll">
+          <div class="category-picker" role="radiogroup" aria-labelledby="entry-cat-heading">
+            <label class="category-picker-card category-picker-card--none">
+              <input class="category-picker-input" type="radio" name="category_id" value="" {{if eq .SelectedCatID 0}}checked{{end}}>
+              <span class="category-picker-icon-wrap" aria-hidden="true"><span class="category-picker-icon">{{categoryNoneIcon}}</span></span>
+              <span class="category-picker-text">
+                <span class="category-picker-name">No category</span>
+                <span class="category-picker-hint">Skip for now</span>
+              </span>
+            </label>
+            {{range $i, $c := .Categories}}
+            <label class="category-picker-card" style="--cat-accent: {{categoryPickerAccent $c $i}}">
+              <input class="category-picker-input" type="radio" name="category_id" value="{{$c.ID}}" {{if eq $.SelectedCatID $c.ID}}checked{{end}}>
+              <span class="category-picker-icon-wrap" aria-hidden="true"><span class="category-picker-icon">{{categoryDisplayIcon $c $i}}</span></span>
+              <span class="category-picker-text">
+                <span class="category-picker-name">{{$c.Name}}</span>
+                <span class="category-picker-hint">{{categoryPickerHint $c.Name}}</span>
+              </span>
+            </label>
+            {{end}}
+            <a class="category-picker-more" href="/categories">
+              <span class="category-picker-more-icon" aria-hidden="true">{{moanaIconPlain "plus"}}</span>
+              <span class="category-picker-more-text">More</span>
+              <span class="category-picker-more-sub muted small">Manage labels</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="entry-transaction-actions">
+      <button type="submit" class="btn btn-primary btn-save-entry">Save entry</button>
+    </div>
+  </form>
+  <p class="muted small entry-footnote">Times are stored in UTC. Dates use your browser’s time zone.</p>
+</section>
+{{end}}

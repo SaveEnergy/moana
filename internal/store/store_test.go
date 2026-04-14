@@ -23,7 +23,7 @@ func TestUserCategoryTransactionFlow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	uid, err := st.CreateUser(ctx, "flow@example.com", hash, "user", "Europe/Berlin")
+	uid, err := st.CreateUser(ctx, "flow@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +32,7 @@ func TestUserCategoryTransactionFlow(t *testing.T) {
 		t.Fatalf("user: %+v err=%v", u, err)
 	}
 
-	catID, err := st.CreateCategory(ctx, uid, "Salary")
+	catID, err := st.CreateCategory(ctx, uid, "Salary", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestGetAndUpdateTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	uid, err := st.CreateUser(ctx, "upd@example.com", hash, "user", "UTC")
+	uid, err := st.CreateUser(ctx, "upd@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,11 +128,11 @@ func TestListUsers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = st.CreateUser(ctx, "a@example.com", hash, "user", "UTC")
+	_, err = st.CreateUser(ctx, "a@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = st.CreateUser(ctx, "b@example.com", hash, "admin", "Europe/Berlin")
+	_, err = st.CreateUser(ctx, "b@example.com", hash, "admin")
 	if err != nil {
 		t.Fatal(err)
 	}

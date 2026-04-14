@@ -1,5 +1,7 @@
 # Build output
 /bin/
+/tmp/
+air.log
 
 # Local databases (default: data/moana.db)
 /data/

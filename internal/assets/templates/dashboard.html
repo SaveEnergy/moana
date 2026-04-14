@@ -1,0 +1,162 @@
+{{define "dashboard.html"}}
+<div class="dashboard">
+  <header class="dashboard-hero">
+    <h1 class="dashboard-hero-title">Dashboard</h1>
+    <div class="dashboard-hero-row">
+      <div class="dashboard-hero-balance-stack">
+        <p class="dashboard-hero-balance-label">Balance</p>
+        <p class="dashboard-hero-balance{{if lt .RunningTotal 0}} text-error{{end}}">{{formatEUR .RunningTotal}}</p>
+        <p class="dashboard-hero-trend{{if isNegFloat .NetVsPriorPct}} dashboard-hero-trend--neg{{end}}">{{formatPercentSigned .NetVsPriorPct}} net vs {{.StatsPriorPhrase}}</p>
+      </div>
+      <div class="dashboard-period-filter dashboard-period-filter--hero" role="group" aria-label="Statistics and outflow period">
+        <span class="dashboard-period-filter-label">Period</span>
+        <div class="dashboard-period-seg">
+          <a href="/?period=30d" class="dashboard-period-opt{{if eq .StatsPeriod "30d"}} is-active{{end}}">30 days</a>
+          <a href="/?period=12m" class="dashboard-period-opt{{if eq .StatsPeriod "12m"}} is-active{{end}}">12 months</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="dashboard-card dashboard-heatmap-card">
+    <div class="dashboard-card-inner dashboard-card-inner--stats">
+      <div class="dashboard-kpi-row">
+        <article class="dashboard-kpi-card">
+          <div class="dashboard-kpi-icon" aria-hidden="true">{{moanaIconPlain "circle-dollar-sign"}}</div>
+          <p class="dashboard-kpi-label">Total Income</p>
+          <p class="dashboard-kpi-value">{{formatEUR .MonthIncome}}</p>
+          <p class="dashboard-kpi-trend {{if isNegFloat .IncomeTrendPct}}dashboard-kpi-trend--income-neg{{else if gt .IncomeTrendPct 0.0}}dashboard-kpi-trend--income-pos{{else}}dashboard-kpi-trend--neutral{{end}}">
+            {{if isNegFloat .IncomeTrendPct}}↓{{else if gt .IncomeTrendPct 0.0}}↑{{else}}→{{end}} {{formatPercentSigned .IncomeTrendPct}} vs {{.StatsPriorPhrase}}
+          </p>
+        </article>
+        <article class="dashboard-kpi-card">
+          <div class="dashboard-kpi-icon" aria-hidden="true">{{moanaIconPlain "wallet"}}</div>
+          <p class="dashboard-kpi-label">Total Expenses</p>
+          <p class="dashboard-kpi-value">{{formatEURAbs .MonthExpense}}</p>
+          <p class="dashboard-kpi-trend {{if isNegFloat .ExpenseTrendPct}}dashboard-kpi-trend--expense-good{{else if gt .ExpenseTrendPct 0.0}}dashboard-kpi-trend--expense-bad{{else}}dashboard-kpi-trend--neutral{{end}}">
+            {{if isNegFloat .ExpenseTrendPct}}↓{{else if gt .ExpenseTrendPct 0.0}}↑{{else}}→{{end}} {{formatPercentSigned .ExpenseTrendPct}} vs {{.StatsPriorPhrase}}
+          </p>
+        </article>
+        <article class="dashboard-kpi-card">
+          <div class="dashboard-kpi-icon" aria-hidden="true">{{moanaIconPlain "piggy-bank"}}</div>
+          <p class="dashboard-kpi-label">Net Savings</p>
+          <p class="dashboard-kpi-value dashboard-kpi-value--net{{if lt .MonthNet 0}} dashboard-kpi-value--neg{{end}}">{{formatEUR .MonthNet}}</p>
+          <p class="dashboard-kpi-meta muted">Income minus expenses</p>
+        </article>
+        <article class="dashboard-kpi-card{{if gt .BudgetUsedPct 100.0}} dashboard-kpi-card--over-budget{{end}}">
+          <div class="dashboard-kpi-icon" aria-hidden="true">{{moanaIconPlain "percent"}}</div>
+          <p class="dashboard-kpi-label">Budget Performance</p>
+          <p class="dashboard-kpi-value">{{printf "%.1f" .BudgetUsedPct}}%</p>
+          <div class="dashboard-kpi-budget-bar" role="presentation">
+            <div class="dashboard-kpi-budget-fill" style="width: {{printf "%.1f" .BudgetBarPct}}%"></div>
+          </div>
+          <p class="dashboard-kpi-meta muted">{{.BudgetMeta}}</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="dashboard-card-inner dashboard-card-inner--heatmap-head">
+      <h2 class="dashboard-card-title dashboard-card-title--money">Money movement</h2>
+      <p class="dashboard-money-range muted small">{{.HeatmapRangeLabel}}</p>
+    </div>
+
+    <div class="dashboard-card-inner dashboard-card-inner--heatmap-chart">
+      <div class="dashboard-heatmap" style="--heatmap-cols: {{.HeatmapColCount}}; aspect-ratio: {{.HeatmapColCount}} / 7;" role="img" aria-label="Daily money movement from {{.HeatmapRangeLabel}}">
+        {{range .HeatmapCells}}
+        {{if .Empty}}
+        <span class="dashboard-heatmap-cell dashboard-heatmap-cell--empty"></span>
+        {{else}}
+        <span class="dashboard-heatmap-cell dashboard-heatmap-cell--lv{{.Level}}" title="{{attr .Title}}"></span>
+        {{end}}
+        {{end}}
+      </div>
+    </div>
+
+    <div class="dashboard-card-inner dashboard-card-inner--heatmap-foot">
+      <div class="dashboard-heatmap-legend">
+        <span class="muted small">Less</span>
+        <span class="dashboard-heatmap-legend-swatch dashboard-heatmap-cell--lv1" aria-hidden="true"></span>
+        <span class="dashboard-heatmap-legend-swatch dashboard-heatmap-cell--lv2" aria-hidden="true"></span>
+        <span class="dashboard-heatmap-legend-swatch dashboard-heatmap-cell--lv3" aria-hidden="true"></span>
+        <span class="dashboard-heatmap-legend-swatch dashboard-heatmap-cell--lv4" aria-hidden="true"></span>
+        <span class="muted small">More</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-card dashboard-outflow-card">
+    <div class="dashboard-card-head">
+      <h2 class="dashboard-card-title">Outflows</h2>
+    </div>
+    <div class="dashboard-outflow-body">
+      <div class="dashboard-outflow-donut-col">
+        {{if .OutflowDonutGradient}}
+        <div class="dashboard-donut-wrap dashboard-outflow-donut">
+          <div class="dashboard-donut" style="background: {{.OutflowDonutGradient}}"></div>
+          <div class="dashboard-donut-center">
+            <span class="muted small">Total Outflows</span>
+            <span class="dashboard-donut-total">{{formatEUR .OutflowTotalAbs}}</span>
+          </div>
+        </div>
+        {{else}}
+        <p class="muted dashboard-outflow-empty">No expense data in this period yet.</p>
+        {{end}}
+      </div>
+      <div class="dashboard-outflow-table-wrap">
+        {{if .OutflowRows}}
+        <div class="dashboard-outflow-table-head">
+          <span class="dashboard-outflow-h-cat">CATEGORIES · {{len .OutflowRows}}</span>
+          <span class="dashboard-outflow-h-val">VALUE</span>
+          <span class="dashboard-outflow-h-pct">WEIGHT</span>
+        </div>
+        <ul class="dashboard-outflow-list">
+          {{range $i, $r := .OutflowRows}}
+          <li class="dashboard-outflow-row">
+            <div class="dashboard-outflow-cat">
+              <span class="dashboard-outflow-cat-ico" style="--cat-accent: {{categoryColorHex $r.Category}}">{{categoryDisplayIcon $r.Category $i}}</span>
+              <span class="dashboard-outflow-cat-name">{{$r.Category.Name}}</span>
+            </div>
+            <span class="dashboard-outflow-val">{{formatEURAbs $r.AmountCents}}</span>
+            <span class="dashboard-outflow-pct">{{printf "%.1f" $r.Pct}}%</span>
+          </li>
+          {{end}}
+        </ul>
+        {{else}}
+        <p class="muted small dashboard-outflow-table-empty">Spending by category will appear here.</p>
+        {{end}}
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-card dashboard-recent">
+    <div class="dashboard-card-head">
+      <h2 class="dashboard-card-title">Recent activity</h2>
+      <a href="/history" class="dashboard-link">View history</a>
+    </div>
+    {{if not .Recent}}
+    <p class="muted">Nothing yet. <a href="/transactions">Add a transaction</a>.</p>
+    {{else}}
+    <ul class="dashboard-recent-list">
+      {{range $i, $t := .Recent}}
+      <li class="dashboard-recent-row">
+        <div class="dashboard-recent-icon{{if lt $t.AmountCents 0}} dashboard-recent-icon-expense{{else}} dashboard-recent-icon-income{{end}}" aria-hidden="true">{{dashboardRecentIcon $t $i}}</div>
+        <div class="dashboard-recent-body">
+          <div class="dashboard-recent-title">{{if $t.Description}}{{$t.Description}}{{else}}<span class="muted">No description</span>{{end}}</div>
+          <div class="dashboard-recent-meta muted small">
+            {{if $t.CategoryName}}{{$t.CategoryName}} · {{end}}<time class="js-local-time" datetime="{{formatRFC3339UTC $t.OccurredAt}}">…</time>
+          </div>
+        </div>
+        <div class="dashboard-recent-amt">
+          {{if lt $t.AmountCents 0}}
+          <span class="tx-amt-expense">-{{formatEURAbs $t.AmountCents}}</span>
+          {{else}}
+          <span class="tx-amt-income">+{{formatEURAbs $t.AmountCents}}</span>
+          {{end}}
+        </div>
+      </li>
+      {{end}}
+    </ul>
+    {{end}}
+  </section>
+</div>
+{{end}}

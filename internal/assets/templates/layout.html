@@ -1,0 +1,134 @@
+{{define "layout.html"}}
+<!DOCTYPE html>
+<html lang="en" class="app-html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} · Moana</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script type="module" src="/static/js/app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body class="app-body">
+<div class="app-shell" id="app-shell">
+  <div class="app-sidebar-backdrop" id="app-sidebar-backdrop" aria-hidden="true"></div>
+
+  <aside class="app-sidebar" id="app-sidebar" aria-label="Main navigation">
+    <button type="button" class="app-sidebar-close" id="app-sidebar-close" aria-label="Close navigation menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    <div class="app-sidebar-inner">
+      <a class="sidebar-brand" href="/" aria-label="Moana home">
+        <span class="brand-wordmark sidebar-brand-wordmark" aria-hidden="true">
+          <span class="brand-wordmark-mo">Mo</span><span class="brand-wordmark-ana">ana</span>
+        </span>
+      </a>
+      <nav class="sidebar-nav" id="app-sidebar-nav">
+        <a href="/" class="sidebar-link{{if eq .Active "dashboard"}} sidebar-link-active{{end}}" title="Dashboard">
+          <span class="sidebar-link-icon" aria-hidden="true">{{moanaIconNav "layout-dashboard"}}</span>
+          <span class="sidebar-link-text">Dashboard</span>
+        </a>
+        <a href="/transactions" class="sidebar-link{{if eq .Active "tx"}} sidebar-link-active{{end}}" title="Transactions">
+          <span class="sidebar-link-icon" aria-hidden="true">{{moanaIconNav "square-pen"}}</span>
+          <span class="sidebar-link-text">Transactions</span>
+        </a>
+        <a href="/history" class="sidebar-link{{if eq .Active "history"}} sidebar-link-active{{end}}" title="History">
+          <span class="sidebar-link-icon" aria-hidden="true">{{moanaIconNav "history"}}</span>
+          <span class="sidebar-link-text">History</span>
+        </a>
+        <a href="/categories" class="sidebar-link{{if eq .Active "cat"}} sidebar-link-active{{end}}" title="Categories">
+          <span class="sidebar-link-icon" aria-hidden="true">{{moanaIconNav "layers"}}</span>
+          <span class="sidebar-link-text">Categories</span>
+        </a>
+      </nav>
+      <a class="sidebar-fab" href="/transactions" title="Add transaction">
+        <span class="sidebar-fab-icon" aria-hidden="true">{{moanaIconNav "plus"}}</span>
+        <span class="sidebar-fab-label">Add transaction</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-content">
+    <header class="app-topbar">
+      <button type="button" class="app-sidebar-toggle" id="app-sidebar-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="app-sidebar">
+        <svg class="app-sidebar-toggle-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+      <div class="app-topbar-rule" aria-hidden="true"></div>
+      <form class="app-search" action="/history" method="get" role="search">
+        <label class="sr-only" for="app-global-search">Search transactions</label>
+        <svg class="app-search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/>
+        </svg>
+        <input id="app-global-search" class="app-search-input" type="search" name="q" placeholder="Search" autocomplete="off">
+      </form>
+      <div class="app-topbar-end">
+        <button type="button" class="app-topbar-icon-btn" disabled title="Notifications (coming soon)">
+          <span class="sr-only">Notifications</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+          </svg>
+        </button>
+        <div class="app-topbar-rule app-topbar-rule--desktop" aria-hidden="true"></div>
+        <details class="app-user-menu">
+          <summary class="app-user-menu-btn">
+            <span class="app-user-avatar" aria-hidden="true">{{userInitial .User.Email}}</span>
+            <span class="app-user-label">
+              <span class="app-user-name">{{.User.Email}}</span>
+              <svg class="app-user-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="16" height="16">
+                <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+          </summary>
+          <div class="app-user-menu-panel">
+            <p class="app-user-menu-meta muted small">{{.User.Email}}</p>
+            <nav class="app-user-menu-actions" aria-label="Account">
+              <a href="/settings" class="app-user-menu-settings"{{if eq .Active "settings"}} aria-current="page"{{end}}>Settings</a>
+              <form method="post" action="/logout" class="app-user-menu-logout-form">
+                <button type="submit" class="app-user-menu-logout">Sign out</button>
+              </form>
+            </nav>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main class="app-main{{if .MainClass}} {{.MainClass}}{{end}}">
+      <div class="app-content-container">
+        {{.Body}}
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="app-content-container app-content-container--footer site-footer-inner">
+        <p class="site-footer-copy">
+          <span class="site-footer-brand">
+            <span class="brand-wordmark brand-wordmark--footer">
+              <span class="brand-wordmark-mo">Mo</span><span class="brand-wordmark-ana">ana</span>
+            </span>
+          </span>
+          <span class="muted"> © {{.Year}}</span>
+        </p>
+        <nav class="site-footer-nav" aria-label="Legal and source">
+          <a class="site-footer-link" href="https://opensource.org/licenses/MIT" rel="license noopener noreferrer" target="_blank">MIT License</a>
+          <span class="site-footer-sep muted" aria-hidden="true">·</span>
+          <a class="site-footer-link site-footer-link--github" href="{{.RepoURL}}" rel="noopener noreferrer" target="_blank">
+            <svg class="site-footer-github-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="16" height="16">
+              <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+            </svg>
+            GitHub
+          </a>
+        </nav>
+      </div>
+    </footer>
+  </div>
+</div>
+</body>
+</html>
+{{end}}

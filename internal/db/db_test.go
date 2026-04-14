@@ -21,7 +21,7 @@ func TestOpenMigrateFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v != 1 {
+	if v != 5 {
 		t.Fatalf("schema version = %d", v)
 	}
 	if _, err := os.Stat(path); err != nil {
@@ -41,7 +41,7 @@ func TestOpenMemory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v != 1 {
+	if v != 5 {
 		t.Fatalf("schema version = %d", v)
 	}
 }

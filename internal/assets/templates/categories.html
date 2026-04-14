@@ -1,0 +1,112 @@
+{{define "categories.html"}}
+<section class="surface-container layer-card cat-page-intro">
+  <div class="cat-page-head">
+    <div>
+      <h1 class="headline-sm">Categories</h1>
+    </div>
+    <button type="button" class="btn btn-primary cat-modal-open-create" id="cat-modal-open-create">Add category</button>
+  </div>
+  {{if .Error}}
+  <p class="alert alert-error" role="alert">{{.Error}}</p>
+  {{end}}
+</section>
+
+<section class="surface-container layer-card cat-list-section">
+  <h2 class="headline-sm">Your categories</h2>
+  {{if not .Categories}}
+  <p class="muted">No categories yet. Use <strong>Add category</strong> to create one.</p>
+  {{else}}
+  <ul class="cat-list">
+    {{range $i, $c := .Categories}}
+    <li class="cat-list-row">
+      <span class="cat-preview cat-preview--row" style="--cat-accent: {{categoryPickerAccent $c $i}}" aria-hidden="true">{{categoryDisplayIcon $c $i}}</span>
+      <span class="cat-row-name">{{$c.Name}}</span>
+      <div class="cat-row-actions">
+        <button
+          type="button"
+          class="btn btn-secondary btn-small cat-modal-open-edit"
+          data-id="{{$c.ID}}"
+          data-name="{{attr $c.Name}}"
+          data-color="{{$c.Color}}"
+          data-icon="{{categoryIconFormValue $c}}"
+          data-custom="{{if categoryIsCustomColor $c}}1{{else}}0{{end}}"
+          data-custom-hex="{{categoryColorHex $c}}"
+        >Edit</button>
+        <form method="post" action="/categories/delete" class="cat-delete" onsubmit="return confirm('Remove this category?');">
+          <input type="hidden" name="id" value="{{$c.ID}}">
+          <button type="submit" class="btn btn-ghost btn-small">Remove</button>
+        </form>
+      </div>
+    </li>
+    {{end}}
+  </ul>
+  {{end}}
+</section>
+
+<dialog class="cat-modal" id="cat-modal" aria-labelledby="cat-modal-title">
+  <div class="cat-modal-panel">
+    <header class="cat-modal-header">
+      <h2 class="cat-modal-title" id="cat-modal-title">New category</h2>
+      <button type="button" class="cat-modal-close" id="cat-modal-close" aria-label="Close">×</button>
+    </header>
+
+    <form class="cat-modal-form" id="cat-modal-form" method="post" action="/categories">
+      <input type="hidden" name="id" id="cat-modal-id" value="">
+
+      <div class="cat-modal-preview-wrap">
+        <div class="cat-modal-preview" id="cat-modal-preview" aria-hidden="true">
+          <div class="cat-modal-preview-icon cat-modal-preview-icon--auto" id="cat-modal-preview-icon">A</div>
+        </div>
+      </div>
+
+      <div class="cat-modal-body">
+        <div class="float-field cat-modal-field">
+          <label class="float-label" for="cat-modal-name">Name <span class="cat-modal-required" aria-hidden="true">*</span></label>
+          <input class="float-input" type="text" name="name" id="cat-modal-name" maxlength="120" placeholder="Category name" required autocomplete="off">
+        </div>
+
+        <fieldset class="cat-picker-fieldset">
+          <legend class="cat-picker-legend">Color</legend>
+          <div class="cat-color-row" id="cat-modal-color-row" role="radiogroup" aria-label="Category color">
+            <label class="cat-color-swatch cat-color-swatch--auto" title="Auto">
+              <input type="radio" name="color" value="" checked>
+              <span class="cat-color-dot cat-color-dot--auto"></span>
+            </label>
+            {{range categoryColorPresets}}
+            <label class="cat-color-swatch" style="--swatch: {{.Hex}}" title="{{.Label}}">
+              <input type="radio" name="color" value="{{.Hex}}">
+              <span class="cat-color-dot"></span>
+            </label>
+            {{end}}
+            <label class="cat-color-swatch cat-color-swatch--custom" title="Custom color">
+              <input type="radio" name="color" value="custom" id="cat-modal-color-custom">
+              <input type="color" name="color_custom" value="#818cf8" class="cat-color-native" aria-label="Custom color" id="cat-modal-color-native">
+              <span class="cat-color-dot cat-color-dot--rainbow"></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="cat-picker-fieldset">
+          <legend class="cat-picker-legend">Icon</legend>
+          <div class="cat-icon-grid cat-icon-grid--modal" role="radiogroup" aria-label="Category icon">
+            <label class="cat-icon-cell cat-icon-cell--auto" title="Auto (from name)">
+              <input type="radio" name="icon" value="" checked>
+              <span class="cat-icon-swatch cat-icon-swatch--auto">A</span>
+            </label>
+            {{range categoryIconChoices}}
+            <label class="cat-icon-cell" title="{{.Label}}">
+              <input type="radio" name="icon" value="{{.ID}}">
+              <span class="cat-icon-swatch">{{moanaIcon .ID}}</span>
+            </label>
+            {{end}}
+          </div>
+        </fieldset>
+      </div>
+
+      <footer class="cat-modal-footer">
+        <button type="submit" class="btn cat-modal-submit" id="cat-modal-submit">Create category</button>
+      </footer>
+    </form>
+  </div>
+</dialog>
+{{end}}

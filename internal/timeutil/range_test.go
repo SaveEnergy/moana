@@ -40,6 +40,23 @@ func TestPreviousCalendarYearRangeUTC(t *testing.T) {
 	}
 }
 
+func TestTrailingLocalDaysInclusiveRangeUTC(t *testing.T) {
+	t.Parallel()
+	loc, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ref := time.Date(2026, 4, 13, 15, 0, 0, 0, loc)
+	curS, curE := TrailingLocalDaysInclusiveRangeUTC(loc, ref, 30)
+	prevS, prevE := PriorTrailingLocalDaysInclusiveRangeUTC(loc, ref, 30)
+	if curS.In(loc).Format("2006-01-02") != "2026-03-15" || curE.In(loc).Format("2006-01-02") != "2026-04-13" {
+		t.Fatalf("current window start=%v end=%v", curS.In(loc), curE.In(loc))
+	}
+	if prevS.In(loc).Format("2006-01-02") != "2026-02-13" || prevE.In(loc).Format("2006-01-02") != "2026-03-14" {
+		t.Fatalf("prior window start=%v end=%v", prevS.In(loc), prevE.In(loc))
+	}
+}
+
 func TestDayRangeUTCFromLocalDates(t *testing.T) {
 	t.Parallel()
 	loc, err := time.LoadLocation("America/New_York")

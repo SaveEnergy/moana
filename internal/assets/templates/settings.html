@@ -1,0 +1,179 @@
+{{define "settings.html"}}
+<div class="settings-page" id="settings-top">
+  <h1 class="sr-only">Settings</h1>
+
+  {{if .Error}}
+  <p class="alert alert-error settings-alert" role="alert">{{.Error}}</p>
+  {{end}}
+  {{if eq .Success "saved"}}
+  <p class="alert alert-success settings-alert" role="status">Profile saved.</p>
+  {{end}}
+  {{if eq .Success "password"}}
+  <p class="alert alert-success settings-alert" role="status">Password updated.</p>
+  {{end}}
+  {{if eq .Success "household"}}
+  <p class="alert alert-success settings-alert" role="status">Household name saved.</p>
+  {{end}}
+  {{if eq .Success "member"}}
+  <p class="alert alert-success settings-alert" role="status">Member added.</p>
+  {{end}}
+  {{if eq .Success "removed"}}
+  <p class="alert alert-success settings-alert" role="status">Member removed from the household.</p>
+  {{end}}
+  {{if eq .Success "left"}}
+  <p class="alert alert-success settings-alert" role="status">You left the household.</p>
+  {{end}}
+
+  <section class="settings-card settings-card--personal">
+    <header class="settings-card-header settings-card-header--personal">
+      <h2 class="settings-card-title settings-card-title--personal">Personal</h2>
+    </header>
+
+    <div class="settings-personal-media">
+      <div class="settings-photo-ring" aria-hidden="true">
+        <div class="settings-photo-inner">
+          <svg class="settings-photo-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </div>
+      </div>
+      <button type="button" class="settings-upload-btn" disabled title="Photo upload coming soon">
+        <svg class="settings-upload-cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Upload photo (optional)
+      </button>
+    </div>
+
+    <form class="settings-form settings-form--personal" method="post" action="/settings/profile">
+      <div class="settings-form-grid">
+        <div class="settings-form-span-full">
+          <div class="settings-float-field settings-float-field--readonly">
+            <label class="settings-float-label" for="settings-email">Email</label>
+            <input id="settings-email" class="settings-float-input" type="email" value="{{.User.Email}}" readonly autocomplete="username">
+          </div>
+        </div>
+        <div class="settings-form-span-half">
+          <div class="settings-float-field">
+            <label class="settings-float-label" for="settings-first">First name</label>
+            <input id="settings-first" class="settings-float-input" type="text" name="first_name" value="{{.User.FirstName}}" maxlength="80" autocomplete="given-name">
+          </div>
+        </div>
+        <div class="settings-form-span-half">
+          <div class="settings-float-field">
+            <label class="settings-float-label" for="settings-last">Last name</label>
+            <input id="settings-last" class="settings-float-input" type="text" name="last_name" value="{{.User.LastName}}" maxlength="80" autocomplete="family-name">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-password-block">
+        <p class="settings-password-heading">Change password</p>
+        <div class="settings-form-grid">
+          <div class="settings-form-span-full">
+            <div class="settings-float-field">
+              <label class="settings-float-label" for="settings-cur-pw">Current password</label>
+              <input id="settings-cur-pw" class="settings-float-input" type="password" name="current_password" autocomplete="current-password">
+            </div>
+          </div>
+          <div class="settings-form-span-half">
+            <div class="settings-float-field">
+              <label class="settings-float-label" for="settings-new-pw">New password</label>
+              <input id="settings-new-pw" class="settings-float-input" type="password" name="new_password" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="settings-form-span-half">
+            <div class="settings-float-field">
+              <label class="settings-float-label" for="settings-confirm-pw">Confirm new password</label>
+              <input id="settings-confirm-pw" class="settings-float-input" type="password" name="new_password_confirm" autocomplete="new-password">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card-actions">
+        <button type="submit" class="btn btn-settings-save">Save</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="settings-card settings-card--household">
+    <header class="settings-card-header">
+      <h2 class="settings-card-title">Household</h2>
+    </header>
+    {{if .CanManageMembers}}
+    <form class="settings-form settings-household-name-form" method="post" action="/settings/household">
+      <div class="settings-float-field">
+        <label class="settings-float-label" for="settings-household-name">Household name</label>
+        <input id="settings-household-name" class="settings-float-input" type="text" name="household_name" value="{{.Household.Name}}" maxlength="120" required autocomplete="off">
+      </div>
+      <div class="settings-card-actions">
+        <button type="submit" class="btn btn-secondary">Save household</button>
+      </div>
+    </form>
+    {{else}}
+    <p class="settings-household-readonly"><span class="muted">Household:</span> <strong>{{.Household.Name}}</strong></p>
+    {{end}}
+
+    <div class="settings-member-shell">
+      <p class="settings-member-list-heading">{{.Household.Name}} · {{.MemberCount}}</p>
+      <ul class="settings-member-list">
+        {{range .Members}}
+        <li class="settings-member-row">
+          <div class="settings-member-avatar" aria-hidden="true">{{profileInitial .FirstName .LastName .Email}}</div>
+          <div class="settings-member-body">
+            <div class="settings-member-name">{{profileDisplayName .FirstName .LastName .Email}}</div>
+            <div class="settings-member-email muted small">{{.Email}}</div>
+          </div>
+          <span class="settings-role-badge">{{householdRoleLabel .HouseholdRole}}</span>
+          <div class="settings-member-actions">
+            {{if eq $.User.ID .ID}}
+              {{if settingsCanLeaveHousehold $.User $.MemberCount}}
+              <form method="post" action="/settings/household/members/remove" class="settings-inline-form" onsubmit="return confirm('Leave this household and start your own?');">
+                <input type="hidden" name="user_id" value="{{.ID}}">
+                <button type="submit" class="btn btn-ghost btn-small">Leave</button>
+              </form>
+              {{end}}
+            {{else}}
+              {{if and $.CanManageMembers (settingsCanRemoveMember $.User .)}}
+              <form method="post" action="/settings/household/members/remove" class="settings-inline-form" onsubmit="return confirm('Remove this member from the household?');">
+                <input type="hidden" name="user_id" value="{{.ID}}">
+                <button type="submit" class="settings-member-remove" aria-label="Remove {{profileDisplayName .FirstName .LastName .Email}}">×</button>
+              </form>
+              {{end}}
+            {{end}}
+          </div>
+        </li>
+        {{end}}
+      </ul>
+      {{if .CanManageMembers}}
+      <div class="settings-add-member-wrap">
+        <button type="button" class="btn btn-indigo btn-add-member" id="settings-add-member-open">+ Add member</button>
+      </div>
+      {{end}}
+    </div>
+  </section>
+
+  <dialog id="settings-add-member-dialog" class="admin-add-dialog" aria-labelledby="settings-add-member-title">
+    <div class="admin-add-dialog-header">
+      <h2 id="settings-add-member-title" class="admin-add-dialog-title">Add household member</h2>
+      <button type="button" class="admin-dialog-close" id="settings-add-member-close" aria-label="Close">×</button>
+    </div>
+    <form class="admin-create-form" method="post" action="/settings/household/members">
+      <div class="float-field">
+        <label class="float-label" for="settings-add-email">Email</label>
+        <input id="settings-add-email" class="float-input" type="email" name="email" required autocomplete="off" placeholder="name@example.com">
+      </div>
+      <div class="float-field">
+        <label class="float-label" for="settings-add-password">Initial password</label>
+        <input id="settings-add-password" class="float-input" type="password" name="password" required autocomplete="new-password">
+      </div>
+      <div class="admin-dialog-actions">
+        <button type="button" class="btn btn-secondary" id="settings-add-member-cancel">Cancel</button>
+        <button type="submit" class="btn btn-indigo">Add member</button>
+      </div>
+    </form>
+  </dialog>
+</div>
+{{end}}

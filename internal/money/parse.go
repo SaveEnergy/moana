@@ -56,3 +56,11 @@ func ParseEURToCents(s string) (int64, error) {
 	}
 	return out, nil
 }
+
+// AbsCents returns the absolute value of an amount in cents.
+func AbsCents(c int64) int64 {
+	if c < 0 {
+		return -c
+	}
+	return c
+}

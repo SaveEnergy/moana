@@ -1,0 +1,15 @@
+services:
+  moana:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      MOANA_ENV: production
+      MOANA_LISTEN: ":8080"
+      MOANA_SESSION_SECRET: ${MOANA_SESSION_SECRET:?Set MOANA_SESSION_SECRET in the environment or a .env file next to this compose file}
+    volumes:
+      - moana-data:/data
+    restart: unless-stopped
+
+volumes:
+  moana-data:

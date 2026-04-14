@@ -1,6 +1,6 @@
 .PHONY: build-frontend test test-e2e build dev
 
-# Vite bundles CSS/JS into internal/handlers/static (required for go:embed).
+# Vite bundles CSS/JS into internal/assets/static (required for go:embed).
 build-frontend:
 	bun install && bun run build
 
@@ -15,6 +15,8 @@ test: build-frontend
 test-e2e: build-frontend
 	bun run test:e2e
 
-# Local dev: Vite build, ensure admin@moana.local / changeme, then go run serve.
-dev: build-frontend
+# Hot reload: Vite watch (CSS/JS → internal/assets/static) + Air (Go rebuild & serve).
+# Use http://127.0.0.1:8090 for Air’s proxy + browser live reload (app listens on MOANA_LISTEN, default :8080).
+dev:
+	bun install
 	bash scripts/dev.sh

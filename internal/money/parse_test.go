@@ -37,3 +37,10 @@ func TestParseEURToCents(t *testing.T) {
 		}
 	}
 }
+
+func TestAbsCents(t *testing.T) {
+	t.Parallel()
+	if AbsCents(-5) != 5 || AbsCents(5) != 5 || AbsCents(0) != 0 {
+		t.Fatal()
+	}
+}

@@ -1,0 +1,87 @@
+{{define "history.html"}}
+<div class="history-page">
+  <div class="history-title-row">
+    <h1 class="history-page-title">History</h1>
+    <div class="history-segmented" role="tablist" aria-label="Filter by type">
+      <a href="{{.Nav.LinkAll}}" class="history-seg{{if eq .Kind "all"}} history-seg-active{{end}}" role="tab">All</a>
+      <a href="{{.Nav.LinkExpense}}" class="history-seg{{if eq .Kind "expense"}} history-seg-active{{end}}" role="tab">Expenses</a>
+      <a href="{{.Nav.LinkIncome}}" class="history-seg{{if eq .Kind "income"}} history-seg-active{{end}}" role="tab">Income</a>
+    </div>
+  </div>
+
+  {{if .Error}}
+  <p class="alert alert-error" role="alert">{{.Error}}</p>
+  {{end}}
+
+  <form class="history-controls" method="get" action="/history">
+    <input type="hidden" name="kind" value="{{.Kind}}">
+    <div class="history-search-row">
+      <div class="float-field history-search-field">
+        <label class="float-label" for="history-q">Search</label>
+        <div class="history-search-inner">
+          <span class="history-search-icon" aria-hidden="true">{{moanaIconPlain "search"}}</span>
+          <input id="history-q" class="float-input history-search-input" type="search" name="q" value="{{.Search}}" placeholder="Search by note, category…" autocomplete="off">
+        </div>
+      </div>
+      <div class="float-field history-sort-field">
+        <label class="float-label" for="history-sort">Sort</label>
+        <select id="history-sort" class="float-input history-sort" name="sort" onchange="this.form.submit()">
+          <option value="newest" {{if eq .Sort "newest"}}selected{{end}}>Newest first</option>
+          <option value="oldest" {{if eq .Sort "oldest"}}selected{{end}}>Oldest first</option>
+        </select>
+      </div>
+    </div>
+    <div class="history-date-row">
+      <div class="float-field history-date-field">
+        <label class="float-label" for="history-from">From</label>
+        <input class="float-input" id="history-from" type="date" name="from" value="{{.FilterFrom}}">
+      </div>
+      <div class="float-field history-date-field">
+        <label class="float-label" for="history-to">To</label>
+        <input class="float-input" id="history-to" type="date" name="to" value="{{.FilterTo}}">
+      </div>
+      <button type="submit" class="btn btn-secondary">Apply dates</button>
+      <a class="btn btn-tertiary" href="/history">Clear filters</a>
+    </div>
+  </form>
+
+  {{if not .Groups}}
+  <section class="history-empty surface-container layer-card">
+    {{if or .Search .FilterActive (eq .Kind "income") (eq .Kind "expense")}}
+    <p class="muted">No entries match your filters.</p>
+    {{else}}
+    <p class="muted">No entries yet. <a href="/transactions">Add your first entry</a>.</p>
+    {{end}}
+  </section>
+  {{else}}
+  {{range .Groups}}
+  <section class="history-day-block">
+    <h2 class="history-day-heading">{{.Label}}</h2>
+    <ul class="history-card-list">
+      {{range .Items}}
+      <li class="history-card">
+        <div class="history-card-icon{{if lt .AmountCents 0}} history-card-icon-expense{{else}} history-card-icon-income{{end}}" aria-hidden="true">{{if lt .AmountCents 0}}{{moanaIconPlain "trending-down"}}{{else}}{{moanaIconPlain "trending-up"}}{{end}}</div>
+        <div class="history-card-body">
+          <div class="history-card-title">{{if .Description}}{{.Description}}{{else}}<span class="muted">No description</span>{{end}}</div>
+          <div class="history-card-meta muted small">
+            {{if .CategoryName}}<span>{{.CategoryName}}</span> · {{end}}<time class="js-local-time" datetime="{{formatRFC3339UTC .OccurredAt}}">…</time>
+          </div>
+        </div>
+        <div class="history-card-right">
+          <div class="history-card-amt">
+            {{if lt .AmountCents 0}}
+            <span class="tx-amt-expense">-{{formatEURAbs .AmountCents}}</span>
+            {{else}}
+            <span class="tx-amt-income">+{{formatEURAbs .AmountCents}}</span>
+            {{end}}
+          </div>
+          <a class="history-card-edit" href="/transactions/{{.ID}}/edit?next={{urlQuery $.HistoryReturnURL}}">Edit</a>
+        </div>
+      </li>
+      {{end}}
+    </ul>
+  </section>
+  {{end}}
+  {{end}}
+</div>
+{{end}}

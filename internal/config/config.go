@@ -15,6 +15,8 @@ type Config struct {
 	SecureCookies  bool
 	SessionMaxAge  time.Duration
 	RequestTimeout time.Duration
+	// RepoURL is the public source repository (e.g. GitHub), shown in the app footer.
+	RepoURL string
 }
 
 // Load reads configuration from the environment. MOANA_SESSION_SECRET is required
@@ -45,6 +47,8 @@ func Load() (*Config, error) {
 		timeoutSec = 60
 	}
 
+	repoURL := getenv("MOANA_REPO_URL", "https://github.com/sinan/moana")
+
 	return &Config{
 		Listen:         listen,
 		DBPath:         dbPath,
@@ -52,6 +56,7 @@ func Load() (*Config, error) {
 		SecureCookies:  env == "production",
 		SessionMaxAge:  time.Duration(maxAgeSec) * time.Second,
 		RequestTimeout: time.Duration(timeoutSec) * time.Second,
+		RepoURL:        repoURL,
 	}, nil
 }
 
