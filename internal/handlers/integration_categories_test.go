@@ -69,6 +69,35 @@ func TestCategoryDelete_notFoundShowsMessage(t *testing.T) {
 	}
 }
 
+func TestCategoryCreate_successShowsOnPage(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "cat-ok@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "cat-ok@moana.test", "pw")
+	resp, err := client.PostForm(srv.URL+"/categories", url.Values{
+		"name":  {"FreshCategory"},
+		"icon":  {""},
+		"color": {""},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 after redirect to categories", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "FreshCategory") {
+		t.Fatalf("expected new category on page: %s", s[:min(600, len(s))])
+	}
+	if !strings.Contains(s, "Your categories") {
+		t.Fatal("expected categories page shell")
+	}
+}
+
 func TestCategoryCreate_duplicateNameShowsMessage(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
