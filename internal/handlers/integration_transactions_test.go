@@ -194,3 +194,54 @@ func TestTransactionEditNotFound(t *testing.T) {
 		t.Fatalf("status %d want 404", resp.StatusCode)
 	}
 }
+
+func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	ctx := context.Background()
+	uid := testutil.MustCreateUser(t, app, "tx-upd-bad@moana.test", "pw", "user")
+	u, err := app.Store.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "tx-upd-bad@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"10.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"seed"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	txs, err := app.Store.ListTransactions(ctx, u.HouseholdID, store.TransactionFilter{Limit: 1})
+	if err != nil || len(txs) != 1 {
+		t.Fatalf("list: %v len=%d", err, len(txs))
+	}
+	id := txs[0].ID
+
+	resp2, err := client.PostForm(fmt.Sprintf("%s/transactions/%d", srv.URL, id), url.Values{
+		"next":        {"/history"},
+		"amount":      {"not-a-number"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"x"},
+		"category_id": {""},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp2.Body.Close()
+	if resp2.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 with form error", resp2.StatusCode)
+	}
+	body, _ := io.ReadAll(resp2.Body)
+	s := string(body)
+	if !strings.Contains(s, `class="alert alert-error"`) {
+		t.Fatalf("expected validation error on edit form: %s", s[:min(500, len(s))])
+	}
+}

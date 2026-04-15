@@ -93,6 +93,47 @@ func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	}
 }
 
+func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "dup-mem@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "dup-mem@integration.test", "pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+		"email":    {"dupmember@integration.test"},
+		"password": {"member-initial-secret-99"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("first add status %d", resp.StatusCode)
+	}
+
+	resp2, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+		"email":    {"dupmember@integration.test"},
+		"password": {"member-initial-secret-99"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp2.Body.Close()
+	if resp2.StatusCode != http.StatusOK {
+		t.Fatalf("duplicate add status %d", resp2.StatusCode)
+	}
+	body, _ := io.ReadAll(resp2.Body)
+	s := string(body)
+	if !strings.Contains(s, "Could not add member (duplicate email?).") {
+		t.Fatalf("expected duplicate copy, got: %s", s[:min(900, len(s))])
+	}
+	if !strings.Contains(s, `class="alert alert-error`) {
+		t.Fatal("expected error alert class")
+	}
+}
+
 func TestSettingsHouseholdMemberRemove_ownerRemovesMember(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
