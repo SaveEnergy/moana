@@ -33,3 +33,22 @@ func TestLoginSubmit_wrongPasswordRendersForm(t *testing.T) {
 		t.Fatalf("expected auth error copy, got: %s", s[:min(500, len(s))])
 	}
 }
+
+func TestLoginPage_sessionExpiredBanner(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	resp, err := http.Get(srv.URL + "/login?error=1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Session expired or invalid. Please sign in again.") {
+		t.Fatalf("expected session banner, got: %s", s[:min(600, len(s))])
+	}
+}
