@@ -47,7 +47,7 @@ func Load() (*Config, error) {
 		timeoutSec = 60
 	}
 
-	repoURL := getenv("MOANA_REPO_URL", "https://github.com/sinan/moana")
+	repoURL := getenv("MOANA_REPO_URL", "https://github.com/SaveEnergy/moana")
 
 	return &Config{
 		Listen:         listen,
@@ -58,16 +58,4 @@ func Load() (*Config, error) {
 		RequestTimeout: time.Duration(timeoutSec) * time.Second,
 		RepoURL:        repoURL,
 	}, nil
-}
-
-func getenv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
-}
-
-// DBPath returns MOANA_DB_PATH or the default file path (for CLI tools that only touch the database).
-func DBPath() string {
-	return getenv("MOANA_DB_PATH", "data/moana.db")
 }

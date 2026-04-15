@@ -6,30 +6,17 @@ import (
 	"math"
 	"time"
 
-	"moana/internal/money"
+	"moana/internal/timeutil"
 )
-
-// FormatEUR renders cents as EUR.
-func FormatEUR(cents int64) string {
-	return money.FormatEUR(cents)
-}
 
 // FormatRFC3339UTC formats t as RFC3339Nano in UTC for <time datetime> + client-side local display.
 func FormatRFC3339UTC(t time.Time) string {
-	return t.UTC().Format(time.RFC3339Nano)
+	return timeutil.FormatSQLiteUTC(t)
 }
 
 // Attr escapes text for safe use inside HTML double-quoted attributes.
 func Attr(s string) string {
 	return html.EscapeString(s)
-}
-
-// FormatEURAbs renders absolute cents as EUR.
-func FormatEURAbs(cents int64) string {
-	if cents < 0 {
-		cents = -cents
-	}
-	return money.FormatEUR(cents)
 }
 
 // IsNegFloat reports whether x is a finite negative number.
@@ -47,17 +34,4 @@ func FormatPercentSigned(x float64) string {
 		sign = "+"
 	}
 	return fmt.Sprintf("%s%.1f%%", sign, x)
-}
-
-// FormatCompactEUR abbreviates large EUR amounts (e.g. €12.5k).
-func FormatCompactEUR(cents int64) string {
-	x := cents
-	if x < 0 {
-		x = -x
-	}
-	if x < 100_000 {
-		return money.FormatEUR(cents)
-	}
-	v := float64(x) / 100.0 / 1000.0
-	return fmt.Sprintf("€%.1fk", v)
 }

@@ -13,7 +13,7 @@ func (a *App) History(w http.ResponseWriter, r *http.Request, u *store.User) {
 	ctx := r.Context()
 	loc := tz.DisplayLocation(r)
 
-	data, err := historyview.BuildPage(ctx, a.Store, u.ID, loc, r.URL, r.URL.RequestURI())
+	data, err := historyview.BuildPage(ctx, a.Store, u.HouseholdID, loc, r.URL, r.URL.RequestURI())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

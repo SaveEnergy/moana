@@ -58,6 +58,11 @@ func TestEditTransaction(t *testing.T) {
 	defer cleanup()
 	ctx := context.Background()
 	uid := testutil.MustCreateUser(t, app, "edit@moana.test", "pw", "user")
+	u, err := app.Store.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
 	srv := testutil.NewServer(t, app)
 	defer srv.Close()
 	client := testutil.NewCookieClient(t)
@@ -74,7 +79,7 @@ func TestEditTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
-	txs, err := app.Store.ListTransactions(ctx, uid, store.TransactionFilter{Limit: 1})
+	txs, err := app.Store.ListTransactions(ctx, hid, store.TransactionFilter{Limit: 1})
 	if err != nil || len(txs) != 1 {
 		t.Fatalf("list: %v", err)
 	}
@@ -108,7 +113,7 @@ func TestEditTransaction(t *testing.T) {
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("update status %d (expected 200 after redirect to history)", resp2.StatusCode)
 	}
-	tx, err := app.Store.GetTransactionByID(ctx, uid, id)
+	tx, err := app.Store.GetTransactionByID(ctx, hid, id)
 	if err != nil || tx == nil {
 		t.Fatal(err)
 	}

@@ -8,14 +8,6 @@ import (
 	"moana/internal/money"
 )
 
-// Parsed is the normalized result of a transaction form POST.
-type Parsed struct {
-	AmountCents int64
-	OccurredUTC time.Time
-	Description string
-	CategoryID  *int64
-}
-
 // Parse converts form strings into cents, UTC time, and optional category.
 // kind is typically "income" or "expense" from the form; loc is the user's display timezone for the date field.
 // On validation failure, errMsg is a short English message suitable for the UI.

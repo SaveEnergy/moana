@@ -1,17 +1,15 @@
 package main
 
 import (
-	"context"
 	"log/slog"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"moana/internal/app"
 	"moana/internal/config"
 	"moana/internal/dbutil"
+	"moana/internal/server"
 )
 
 func runServe() {
@@ -43,19 +41,5 @@ func runServe() {
 		WriteTimeout:      cfg.RequestTimeout * 2,
 	}
 
-	go func() {
-		slog.Info("listening", "addr", cfg.Listen)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			slog.Error("server", "err", err)
-			os.Exit(1)
-		}
-	}()
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	<-sig
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	_ = srv.Shutdown(ctx)
-	slog.Info("shutdown complete")
+	server.ListenAndServeGracefully(srv, 10*time.Second)
 }

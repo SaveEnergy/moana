@@ -27,11 +27,3 @@ type TransactionFilter struct {
 	OldestFirst bool   // default false = newest first
 	Limit       int    // if > 0, cap rows (newest/oldest order preserved)
 }
-
-func parseTime(s string) (time.Time, error) {
-	t, err := time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		return time.Parse(time.RFC3339, s)
-	}
-	return t, nil
-}

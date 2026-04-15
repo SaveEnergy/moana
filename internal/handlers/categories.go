@@ -12,7 +12,7 @@ import (
 // Categories lists categories and handles create/delete.
 func (a *App) Categories(w http.ResponseWriter, r *http.Request, u *store.User) {
 	ctx := r.Context()
-	data, err := category.BuildCategoriesList(ctx, a.Store, u.ID, "")
+	data, err := category.BuildCategoriesList(ctx, a.Store, u.HouseholdID, "")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -33,7 +33,7 @@ func (a *App) CategoryCreate(w http.ResponseWriter, r *http.Request, u *store.Us
 	icon := category.NormalizeStoredIcon(r.FormValue("icon"))
 	color := category.ParseColorFromForm(r)
 	ctx := r.Context()
-	if _, err := a.Store.CreateCategory(ctx, u.ID, name, icon, color); err != nil {
+	if _, err := a.Store.CreateCategory(ctx, u.HouseholdID, name, icon, color); err != nil {
 		a.categoriesWithError(w, r, u, "Could not create category (duplicate name?).")
 		return
 	}
@@ -51,7 +51,7 @@ func (a *App) CategoryDelete(w http.ResponseWriter, r *http.Request, u *store.Us
 		return
 	}
 	ctx := r.Context()
-	if err := a.Store.DeleteCategory(ctx, u.ID, id); err != nil {
+	if err := a.Store.DeleteCategory(ctx, u.HouseholdID, id); err != nil {
 		a.categoriesWithError(w, r, u, err.Error())
 		return
 	}
@@ -76,19 +76,9 @@ func (a *App) CategoryUpdate(w http.ResponseWriter, r *http.Request, u *store.Us
 	icon := category.NormalizeStoredIcon(r.FormValue("icon"))
 	color := category.ParseColorFromForm(r)
 	ctx := r.Context()
-	if err := a.Store.UpdateCategory(ctx, u.ID, id, name, icon, color); err != nil {
+	if err := a.Store.UpdateCategory(ctx, u.HouseholdID, id, name, icon, color); err != nil {
 		a.categoriesWithError(w, r, u, "Could not save (duplicate name?).")
 		return
 	}
 	http.Redirect(w, r, "/categories", http.StatusSeeOther)
-}
-
-func (a *App) categoriesWithError(w http.ResponseWriter, r *http.Request, u *store.User, msg string) {
-	ctx := r.Context()
-	data, err := category.BuildCategoriesList(ctx, a.Store, u.ID, msg)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	a.renderShell(w, "categories.html", data, layoutShell("Categories", "cat", u))
 }

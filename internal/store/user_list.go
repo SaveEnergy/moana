@@ -2,24 +2,9 @@ package store
 
 import (
 	"context"
-	"time"
+
+	"moana/internal/timeutil"
 )
-
-// GetUserByEmail returns a user by email (case-insensitive).
-func (s *Store) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	row := s.DB.QueryRowContext(ctx, `
-SELECT id, email, password_hash, role, created_at, household_id, first_name, last_name, household_role
-FROM users WHERE email = ? COLLATE NOCASE`, email)
-	return scanUser(row)
-}
-
-// GetUserByID returns a user by id.
-func (s *Store) GetUserByID(ctx context.Context, id int64) (*User, error) {
-	row := s.DB.QueryRowContext(ctx, `
-SELECT id, email, password_hash, role, created_at, household_id, first_name, last_name, household_role
-FROM users WHERE id = ?`, id)
-	return scanUser(row)
-}
 
 // ListUsers returns all accounts ordered by id (admin).
 func (s *Store) ListUsers(ctx context.Context) ([]UserSummary, error) {
@@ -36,10 +21,7 @@ SELECT id, email, role, created_at FROM users ORDER BY id`)
 		if err := rows.Scan(&u.ID, &u.Email, &u.Role, &created); err != nil {
 			return nil, err
 		}
-		t, err := time.Parse(time.RFC3339Nano, created)
-		if err != nil {
-			t, err = time.Parse(time.RFC3339, created)
-		}
+		t, err := timeutil.ParseSQLiteTimestamp(created)
 		if err != nil {
 			return nil, err
 		}

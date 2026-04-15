@@ -13,8 +13,8 @@ type CategoriesListData struct {
 }
 
 // BuildCategoriesList loads categories; errMsg is set when re-rendering after a validation or store error.
-func BuildCategoriesList(ctx context.Context, st *store.Store, userID int64, errMsg string) (CategoriesListData, error) {
-	cats, err := st.ListCategories(ctx, userID)
+func BuildCategoriesList(ctx context.Context, st *store.Store, householdID int64, errMsg string) (CategoriesListData, error) {
+	cats, err := st.ListCategories(ctx, householdID)
 	if err != nil {
 		return CategoriesListData{}, err
 	}

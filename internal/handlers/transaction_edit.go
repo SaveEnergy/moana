@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"moana/internal/money"
 	"moana/internal/safepath"
@@ -13,28 +12,15 @@ import (
 	"moana/internal/tz"
 )
 
-// txEditFormData is the edit form (GET/POST /transactions/{id}/edit).
-type txEditFormData struct {
-	Error         string
-	Categories    []store.Category
-	TxID          int64
-	Kind          string
-	Amount        string
-	OccurredOn    string
-	Description   string
-	SelectedCatID int64
-	Next          string
-}
-
 // TransactionEdit shows the edit form for a transaction (GET /transactions/{id}/edit).
 func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.User) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if err != nil || id < 1 {
+	id, ok := pathPositiveInt64(r, "id")
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
 	ctx := r.Context()
-	tx, err := a.Store.GetTransactionByID(ctx, u.ID, id)
+	tx, err := a.Store.GetTransactionByID(ctx, u.HouseholdID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -43,7 +29,7 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 		http.NotFound(w, r)
 		return
 	}
-	cats, err := a.Store.ListCategories(ctx, u.ID)
+	cats, err := a.Store.ListCategories(ctx, u.HouseholdID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -76,14 +62,14 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 	if !requireParseForm(w, r) {
 		return
 	}
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if err != nil || id < 1 {
+	id, ok := pathPositiveInt64(r, "id")
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
 	next := safepath.Internal(r.FormValue("next"))
 	ctx := r.Context()
-	existing, err := a.Store.GetTransactionByID(ctx, u.ID, id)
+	existing, err := a.Store.GetTransactionByID(ctx, u.HouseholdID, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -107,7 +93,7 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 		return
 	}
 
-	if err := a.Store.UpdateTransaction(ctx, u.ID, id, p.AmountCents, p.OccurredUTC, p.Description, p.CategoryID); err != nil {
+	if err := a.Store.UpdateTransaction(ctx, u.HouseholdID, u.ID, id, p.AmountCents, p.OccurredUTC, p.Description, p.CategoryID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.NotFound(w, r)
 			return
@@ -116,38 +102,4 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 		return
 	}
 	http.Redirect(w, r, next, http.StatusSeeOther)
-}
-
-func (a *App) renderTransactionEdit(w http.ResponseWriter, u *store.User, data txEditFormData) {
-	a.renderShell(w, "transactions_edit.html", data, layoutShell("Edit entry", "history", u))
-}
-
-// renderTransactionEditFailed re-renders the edit form after POST validation failure (keeps user input).
-func (a *App) renderTransactionEditFailed(w http.ResponseWriter, r *http.Request, u *store.User, id int64, next, msg string) {
-	ctx := r.Context()
-	cats, err := a.Store.ListCategories(ctx, u.ID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	sel := int64(0)
-	if c := r.FormValue("category_id"); c != "" {
-		sel, _ = strconv.ParseInt(c, 10, 64)
-	}
-	kind := r.FormValue("kind")
-	if kind != "income" && kind != "expense" {
-		kind = "income"
-	}
-	data := txEditFormData{
-		Error:         msg,
-		Categories:    cats,
-		TxID:          id,
-		Kind:          kind,
-		Amount:        r.FormValue("amount"),
-		OccurredOn:    r.FormValue("occurred_on"),
-		Description:   r.FormValue("description"),
-		SelectedCatID: sel,
-		Next:          next,
-	}
-	a.renderTransactionEdit(w, u, data)
 }

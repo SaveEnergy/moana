@@ -7,40 +7,6 @@ import (
 	"time"
 )
 
-// SumAmountCents returns the sum of amount_cents for the user in the optional time range.
-func (s *Store) SumAmountCents(ctx context.Context, userID int64, fromUTC, toUTC *time.Time) (int64, error) {
-	return s.SumAmountCentsByKind(ctx, userID, fromUTC, toUTC, "")
-}
-
-// SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense".
-func (s *Store) SumAmountCentsByKind(ctx context.Context, userID int64, fromUTC, toUTC *time.Time, kind string) (int64, error) {
-	q := `SELECT COALESCE(SUM(amount_cents), 0) FROM transactions WHERE user_id = ?`
-	args := []any{userID}
-	if fromUTC != nil {
-		q += ` AND occurred_at >= ?`
-		args = append(args, fromUTC.UTC().Format(time.RFC3339Nano))
-	}
-	if toUTC != nil {
-		q += ` AND occurred_at <= ?`
-		args = append(args, toUTC.UTC().Format(time.RFC3339Nano))
-	}
-	switch kind {
-	case "income":
-		q += ` AND amount_cents > 0`
-	case "expense":
-		q += ` AND amount_cents < 0`
-	}
-	var sum sql.NullInt64
-	err := s.DB.QueryRowContext(ctx, q, args...).Scan(&sum)
-	if err != nil {
-		return 0, err
-	}
-	if !sum.Valid {
-		return 0, nil
-	}
-	return sum.Int64, nil
-}
-
 // CategoryExpense is total negative amount for one category in a range.
 type CategoryExpense struct {
 	CategoryID   sql.NullInt64
@@ -49,7 +15,7 @@ type CategoryExpense struct {
 }
 
 // ListTopExpenseCategories returns categories with the largest expenses (most negative sums), up to limit.
-func (s *Store) ListTopExpenseCategories(ctx context.Context, userID int64, fromUTC, toUTC *time.Time, limit int) ([]CategoryExpense, error) {
+func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, limit int) ([]CategoryExpense, error) {
 	if limit < 1 {
 		limit = 5
 	}
@@ -57,16 +23,10 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, userID int64, from
 SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
 FROM transactions t
 LEFT JOIN categories c ON c.id = t.category_id
-WHERE t.user_id = ? AND t.amount_cents < 0`
-	args := []any{userID}
-	if fromUTC != nil {
-		q += ` AND t.occurred_at >= ?`
-		args = append(args, fromUTC.UTC().Format(time.RFC3339Nano))
-	}
-	if toUTC != nil {
-		q += ` AND t.occurred_at <= ?`
-		args = append(args, toUTC.UTC().Format(time.RFC3339Nano))
-	}
+INNER JOIN users owner ON owner.id = t.user_id
+WHERE owner.household_id = ? AND t.amount_cents < 0`
+	args := []any{householdID}
+	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	q += ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
 	args = append(args, limit)
 
@@ -97,7 +57,7 @@ type CategoryAmount struct {
 
 // ListCategoryAmountsInRange returns per-category totals for income (amount_cents > 0)
 // or expense (amount_cents < 0, returned as positive magnitudes), ordered by size.
-func (s *Store) ListCategoryAmountsInRange(ctx context.Context, userID int64, fromUTC, toUTC *time.Time, kind string) ([]CategoryAmount, error) {
+func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) ([]CategoryAmount, error) {
 	if kind != "income" && kind != "expense" {
 		return nil, errors.New("kind must be income or expense")
 	}
@@ -105,16 +65,10 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, userID int64, fr
 SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
 FROM transactions t
 LEFT JOIN categories c ON c.id = t.category_id
-WHERE t.user_id = ?`
-	args := []any{userID}
-	if fromUTC != nil {
-		q += ` AND t.occurred_at >= ?`
-		args = append(args, fromUTC.UTC().Format(time.RFC3339Nano))
-	}
-	if toUTC != nil {
-		q += ` AND t.occurred_at <= ?`
-		args = append(args, toUTC.UTC().Format(time.RFC3339Nano))
-	}
+INNER JOIN users owner ON owner.id = t.user_id
+WHERE owner.household_id = ?`
+	args := []any{householdID}
+	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	if kind == "income" {
 		q += ` AND t.amount_cents > 0`
 	} else {

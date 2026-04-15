@@ -70,7 +70,7 @@ Then open `http://localhost:8080`. The SQLite file persists in the named volume 
 | `MOANA_SESSION_SECRET` | *(dev fallback)* | Must be set in production |
 | `MOANA_SESSION_MAX_AGE_SEC` | `604800` | Session cookie max age (seconds) |
 | `MOANA_REQUEST_TIMEOUT_SEC` | `60` | Per-request timeout |
-| `MOANA_REPO_URL` | `https://github.com/sinan/moana` | Shown in the app footer |
+| `MOANA_REPO_URL` | `https://github.com/SaveEnergy/moana` | Shown in the app footer |
 
 ## Tests
 

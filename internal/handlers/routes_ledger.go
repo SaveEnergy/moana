@@ -2,8 +2,8 @@ package handlers
 
 import "net/http"
 
-func registerMainRoutes(mux *http.ServeMux, app *App) {
-	mux.Handle("GET /", app.WithAuth(app.Dashboard))
+// registerLedgerRoutes wires transactions, history, and categories (shared money surface).
+func registerLedgerRoutes(mux *http.ServeMux, app *App) {
 	mux.Handle("GET /transactions", app.WithAuth(app.Transactions))
 	mux.Handle("POST /transactions", app.WithAuth(app.TransactionCreate))
 	mux.Handle("GET /transactions/{id}/edit", app.WithAuth(app.TransactionEdit))

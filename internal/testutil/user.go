@@ -8,7 +8,7 @@ import (
 	"moana/internal/handlers"
 )
 
-// MustCreateUser inserts a user with a bcrypt-hashed password and fails the test on error.
+// MustCreateUser inserts a user with a hashed password (Argon2id) and fails the test on error.
 // Role must be "user" or "admin". Returns the new user's id.
 func MustCreateUser(t *testing.T, app *handlers.App, email, password, role string) int64 {
 	t.Helper()

@@ -5,25 +5,18 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"moana/internal/timeutil"
 )
 
 // CreateTransaction inserts a transaction. occurredAt must be UTC.
-func (s *Store) CreateTransaction(ctx context.Context, userID int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) (int64, error) {
-	if categoryID != nil {
-		cat, err := s.GetCategoryByID(ctx, userID, *categoryID)
-		if err != nil {
-			return 0, err
-		}
-		if cat == nil {
-			return 0, errors.New("invalid category")
-		}
+func (s *Store) CreateTransaction(ctx context.Context, userID, householdID int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) (int64, error) {
+	if err := s.validateCategoryOwnership(ctx, householdID, categoryID); err != nil {
+		return 0, err
 	}
-	occ := occurredAt.UTC().Format(time.RFC3339Nano)
-	now := time.Now().UTC().Format(time.RFC3339Nano)
-	var cat sql.NullInt64
-	if categoryID != nil {
-		cat = sql.NullInt64{Int64: *categoryID, Valid: true}
-	}
+	occ := timeutil.FormatSQLiteUTC(occurredAt)
+	now := timeutil.NowSQLiteUTC()
+	cat := sqlNullCategoryID(categoryID)
 	res, err := s.DB.ExecContext(ctx, `
 INSERT INTO transactions (user_id, amount_cents, occurred_at, description, category_id, created_at)
 VALUES (?, ?, ?, ?, ?, ?)`, userID, amountCents, occ, description, cat, now)
@@ -33,25 +26,16 @@ VALUES (?, ?, ?, ?, ?, ?)`, userID, amountCents, occ, description, cat, now)
 	return res.LastInsertId()
 }
 
-// UpdateTransaction updates a row owned by userID. occurredAt must be UTC.
-func (s *Store) UpdateTransaction(ctx context.Context, userID, id int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) error {
-	if categoryID != nil {
-		cat, err := s.GetCategoryByID(ctx, userID, *categoryID)
-		if err != nil {
-			return err
-		}
-		if cat == nil {
-			return errors.New("invalid category")
-		}
+// UpdateTransaction updates a row in the caller's household. categoryID is validated against the household's categories. occurredAt must be UTC.
+func (s *Store) UpdateTransaction(ctx context.Context, householdID, actorUserID, id int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) error {
+	if err := s.validateCategoryOwnership(ctx, householdID, categoryID); err != nil {
+		return err
 	}
-	occ := occurredAt.UTC().Format(time.RFC3339Nano)
-	var cat sql.NullInt64
-	if categoryID != nil {
-		cat = sql.NullInt64{Int64: *categoryID, Valid: true}
-	}
+	occ := timeutil.FormatSQLiteUTC(occurredAt)
+	cat := sqlNullCategoryID(categoryID)
 	res, err := s.DB.ExecContext(ctx, `
 UPDATE transactions SET amount_cents = ?, occurred_at = ?, description = ?, category_id = ?
-WHERE id = ? AND user_id = ?`, amountCents, occ, description, cat, id, userID)
+WHERE id = ? AND user_id IN (SELECT id FROM users WHERE household_id = ?)`, amountCents, occ, description, cat, id, householdID)
 	if err != nil {
 		return err
 	}
@@ -63,4 +47,25 @@ WHERE id = ? AND user_id = ?`, amountCents, occ, description, cat, id, userID)
 		return sql.ErrNoRows
 	}
 	return nil
+}
+
+func (s *Store) validateCategoryOwnership(ctx context.Context, householdID int64, categoryID *int64) error {
+	if categoryID == nil {
+		return nil
+	}
+	cat, err := s.GetCategoryByID(ctx, householdID, *categoryID)
+	if err != nil {
+		return err
+	}
+	if cat == nil {
+		return errors.New("invalid category")
+	}
+	return nil
+}
+
+func sqlNullCategoryID(categoryID *int64) sql.NullInt64 {
+	if categoryID == nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *categoryID, Valid: true}
 }

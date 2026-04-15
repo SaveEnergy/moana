@@ -47,16 +47,6 @@ func AdminDisplayName(email string) string {
 	return strings.Join(words, " ")
 }
 
-// AdminRoleLabel maps a role string to a display label.
-func AdminRoleLabel(role string) string {
-	switch strings.ToLower(strings.TrimSpace(role)) {
-	case "admin":
-		return "Admin"
-	default:
-		return "Member"
-	}
-}
-
 // ProfileDisplayName prefers first+last, else falls back to email-based display.
 func ProfileDisplayName(first, last, email string) string {
 	f := strings.TrimSpace(first)
@@ -80,16 +70,4 @@ func ProfileInitial(first, last, email string) string {
 		return string(r)
 	}
 	return UserInitial(email)
-}
-
-// HouseholdRoleLabel maps household membership role to a display label.
-func HouseholdRoleLabel(role string) string {
-	switch strings.ToLower(strings.TrimSpace(role)) {
-	case "owner":
-		return "Owner"
-	case "admin":
-		return "Admin"
-	default:
-		return "Member"
-	}
 }

@@ -8,12 +8,6 @@ import (
 	"moana/internal/store"
 )
 
-// DayGroup is one collapsible day section on the history page.
-type DayGroup struct {
-	Label string
-	Items []store.Transaction
-}
-
 // GroupByDay buckets transactions by local calendar day and orders day keys.
 func GroupByDay(txs []store.Transaction, loc *time.Location, newestDayFirst bool) []DayGroup {
 	if len(txs) == 0 {

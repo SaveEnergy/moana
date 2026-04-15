@@ -1,10 +1,6 @@
 package store
 
-import (
-	"database/sql"
-	"errors"
-	"time"
-)
+import "time"
 
 // User is an account that can sign in.
 type User struct {
@@ -34,26 +30,4 @@ type HouseholdMember struct {
 	FirstName     string
 	LastName      string
 	HouseholdRole string
-}
-
-func scanUser(row *sql.Row) (*User, error) {
-	var u User
-	var created string
-	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.Role, &created,
-		&u.HouseholdID, &u.FirstName, &u.LastName, &u.HouseholdRole)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	t, err := time.Parse(time.RFC3339Nano, created)
-	if err != nil {
-		t, err = time.Parse(time.RFC3339, created)
-	}
-	if err != nil {
-		return nil, err
-	}
-	u.CreatedAt = t.UTC()
-	return &u, nil
 }
