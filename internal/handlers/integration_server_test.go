@@ -143,6 +143,27 @@ func TestDashboardWithPeriodQuery(t *testing.T) {
 	}
 }
 
+func TestDashboardWithUnknownPeriodQuery(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "period-unknown@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "period-unknown@integration.test", "pw")
+	resp, err := client.Get(srv.URL + "/?period=weekly")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), `class="dashboard-hero-title"`) {
+		t.Fatalf("expected dashboard shell (unknown period should fall back like parseStatsPeriod)")
+	}
+}
+
 func TestLoginAndOverview(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
