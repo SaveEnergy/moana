@@ -471,6 +471,34 @@ func TestSettingsProfileUpdate_wrongCurrentPasswordShowsError(t *testing.T) {
 	}
 }
 
+func TestSettingsProfileUpdate_newPasswordWithoutCurrentShowsError(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "profile-nopw@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "profile-nopw@integration.test", "pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/profile", url.Values{
+		"first_name":           {""},
+		"last_name":            {""},
+		"new_password":         {"new-secret-very-long-2"},
+		"new_password_confirm": {"new-secret-very-long-2"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Enter your current password to set a new one.") {
+		t.Fatalf("expected missing-current copy, got: %s", s[:min(900, len(s))])
+	}
+}
+
 func TestSettingsProfileUpdate_newPasswordMismatchShowsError(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)

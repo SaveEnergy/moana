@@ -59,6 +59,14 @@ func TestParse_zeroAmount(t *testing.T) {
 	}
 }
 
+func TestParse_invalidCategoryID(t *testing.T) {
+	t.Parallel()
+	_, errMsg := Parse("10.00", "2026-06-15", "x", "not-an-int", "expense", time.UTC)
+	if errMsg != "Invalid category." {
+		t.Fatalf("got %q", errMsg)
+	}
+}
+
 func TestParse_unknownKindDefaultsToIncome(t *testing.T) {
 	t.Parallel()
 	p, errMsg := Parse("5.00", "2026-06-15", "x", "", "weird", time.UTC)
