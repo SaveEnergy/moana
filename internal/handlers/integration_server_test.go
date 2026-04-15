@@ -72,6 +72,24 @@ func TestHealth(t *testing.T) {
 	}
 }
 
+func TestHealth_HEAD_returnsOK(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	req, err := http.NewRequest(http.MethodHead, srv.URL+"/health", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("HEAD status %d want 200", resp.StatusCode)
+	}
+}
+
 func TestStatic_cssServed(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)

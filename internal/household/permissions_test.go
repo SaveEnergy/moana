@@ -34,3 +34,19 @@ func TestCanRemoveMember(t *testing.T) {
 		t.Fatal("different household")
 	}
 }
+
+func TestCanLeave(t *testing.T) {
+	t.Parallel()
+	hh := int64(42)
+	owner := &store.User{HouseholdID: hh, HouseholdRole: "owner"}
+	member := &store.User{HouseholdID: hh, HouseholdRole: "member"}
+	if !CanLeave(member, 99) {
+		t.Fatal("non-owner may always leave")
+	}
+	if !CanLeave(owner, 1) {
+		t.Fatal("sole owner may leave")
+	}
+	if CanLeave(owner, 2) {
+		t.Fatal("owner with other members must transfer first")
+	}
+}
