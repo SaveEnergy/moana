@@ -55,3 +55,66 @@ func TestListTransactions_respectsLimit(t *testing.T) {
 		t.Fatalf("unlimited list: want 5, got %d", len(txsAll))
 	}
 }
+
+func TestListTransactions_searchLiteralPercentDoesNotMatchAllRows(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash, err := auth.HashPassword("x")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid, err := st.CreateUser(ctx, "like-pct@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -100, day, "coffee", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -200, day, "a%b", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Search: "%"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 1 || txs[0].Description != "a%b" {
+		t.Fatalf("want 1 row with literal %%, got %+v", txs)
+	}
+}
+
+func TestListTransactions_whitespaceOnlySearchSkipped(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash, err := auth.HashPassword("x")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid, err := st.CreateUser(ctx, "ws-search@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -100, day, "coffee", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Search: " \t  "})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 1 {
+		t.Fatalf("whitespace-only search should not filter, got %d rows", len(txs))
+	}
+}

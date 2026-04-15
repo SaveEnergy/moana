@@ -19,5 +19,8 @@ func userFacingStoreMessage(err error) string {
 	if errors.Is(err, store.ErrDuplicateCategoryName) {
 		return "A category with that name already exists."
 	}
+	if errors.Is(err, store.ErrDuplicateUserEmail) {
+		return "A user with that email already exists."
+	}
 	return httperr.InternalMessage
 }

@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+// ErrInvalidCategoryAmountKind is returned when [Store.ListCategoryAmountsInRange] is called with kind other than "income" or "expense".
+var ErrInvalidCategoryAmountKind = errors.New("kind must be income or expense")
+
 // CategoryExpense is total negative amount for one category in a range.
 type CategoryExpense struct {
 	CategoryID   sql.NullInt64
@@ -55,7 +58,7 @@ type CategoryAmount struct {
 // or expense (amount_cents < 0, returned as positive magnitudes), ordered by size.
 func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) ([]CategoryAmount, error) {
 	if kind != "income" && kind != "expense" {
-		return nil, errors.New("kind must be income or expense")
+		return nil, ErrInvalidCategoryAmountKind
 	}
 	q := `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
 ` + sqlAggregateFromHouseholdTx

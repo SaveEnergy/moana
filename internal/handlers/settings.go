@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"moana/internal/household"
@@ -14,10 +13,6 @@ func (a *App) Settings(w http.ResponseWriter, r *http.Request, u *store.User) {
 	ctx := r.Context()
 	data, err := household.LoadSettingsPage(ctx, a.Store, u, r.URL.Query().Get("err"), r.URL.Query().Get("ok"))
 	if err != nil {
-		if errors.Is(err, household.ErrHouseholdMissing) {
-			http.Error(w, "household not found", http.StatusInternalServerError)
-			return
-		}
 		httperr.Internal(w, r, err)
 		return
 	}

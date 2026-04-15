@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
 
 	"moana/internal/auth"
+	"moana/internal/store"
 )
 
 func runUserAdd(args []string) int {
@@ -43,6 +45,10 @@ func runUserAdd(args []string) int {
 	ctx := context.Background()
 	id, err := st.CreateUser(ctx, strings.TrimSpace(*email), hash, r)
 	if err != nil {
+		if errors.Is(err, store.ErrDuplicateUserEmail) {
+			fmt.Fprintf(os.Stderr, "create user: email already exists\n")
+			return 1
+		}
 		fmt.Fprintf(os.Stderr, "create user: %v\n", err)
 		return 1
 	}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,7 +33,11 @@ func (a *App) SettingsHouseholdMemberAdd(w http.ResponseWriter, r *http.Request,
 	}
 	ctx := r.Context()
 	if _, err := a.Store.CreateHouseholdMember(ctx, u.HouseholdID, email, hash); err != nil {
-		redirectSettingsErr(w, r, "Could not add member (duplicate email?).")
+		if errors.Is(err, store.ErrDuplicateUserEmail) {
+			redirectSettingsErr(w, r, "A user with that email already exists.")
+			return
+		}
+		redirectSettingsErr(w, r, "Could not add member.")
 		return
 	}
 	redirectSettingsOK(w, r, "member")

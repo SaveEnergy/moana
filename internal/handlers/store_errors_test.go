@@ -43,3 +43,12 @@ func TestUserFacingStoreMessage_duplicateCategoryName(t *testing.T) {
 		t.Fatalf("got %q want %q", got, want)
 	}
 }
+
+func TestUserFacingStoreMessage_duplicateUserEmail(t *testing.T) {
+	t.Parallel()
+	got := userFacingStoreMessage(store.ErrDuplicateUserEmail)
+	const want = "A user with that email already exists."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}

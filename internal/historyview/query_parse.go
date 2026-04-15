@@ -40,8 +40,8 @@ func ParseHistoryURL(u *url.URL) HistoryURLParams {
 	if oldestFirst {
 		sortLabel = "oldest"
 	}
-	from := u.Query().Get("from")
-	to := u.Query().Get("to")
+	from := strings.TrimSpace(u.Query().Get("from"))
+	to := strings.TrimSpace(u.Query().Get("to"))
 	filterActive := from != "" && to != ""
 	return HistoryURLParams{
 		kind:         kind,

@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"moana/internal/timeutil"
 )
@@ -26,9 +27,9 @@ WHERE owner.household_id = ?`
 	case "expense":
 		q += ` AND t.amount_cents < 0`
 	}
-	if f.Search != "" {
-		term := "%" + f.Search + "%"
-		q += ` AND (t.description LIKE ? OR COALESCE(c.name, '') LIKE ?)`
+	if search := strings.TrimSpace(f.Search); search != "" {
+		term := "%" + escapeSQLLikePattern(search) + "%"
+		q += ` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`
 		args = append(args, term, term)
 	}
 	if f.OldestFirst {
@@ -47,8 +48,11 @@ WHERE owner.household_id = ?`
 	}
 	defer rows.Close()
 	var out []Transaction
-	if f.Limit > 0 {
+	switch {
+	case f.Limit > 0:
 		out = make([]Transaction, 0, f.Limit)
+	default:
+		out = make([]Transaction, 0, 64)
 	}
 	for rows.Next() {
 		var t Transaction

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -88,5 +89,52 @@ func TestHouseholdMembersSeeSameTransactions(t *testing.T) {
 	got, err := st.GetTransactionByID(ctx, hid, tid)
 	if err != nil || got == nil || got.UserID != ownerID {
 		t.Fatalf("get by household: %+v", got)
+	}
+}
+
+func TestCreateUser_duplicateEmail(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash, err := auth.HashPassword("x")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateUser(ctx, "same@example.com", hash, "user"); err != nil {
+		t.Fatal(err)
+	}
+	_, err = st.CreateUser(ctx, "same@example.com", hash, "user")
+	if !errors.Is(err, ErrDuplicateUserEmail) {
+		t.Fatalf("got %v want %v", err, ErrDuplicateUserEmail)
+	}
+}
+
+func TestCreateHouseholdMember_duplicateEmail(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash, err := auth.HashPassword("x")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid, err := st.CreateUser(ctx, "dup-owner@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner, err := st.GetUserByID(ctx, uid)
+	if err != nil || owner == nil {
+		t.Fatal(err)
+	}
+	hid := owner.HouseholdID
+	hash2, err := auth.HashPassword("y")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateHouseholdMember(ctx, hid, "dup-mem@example.com", hash2); err != nil {
+		t.Fatal(err)
+	}
+	_, err = st.CreateHouseholdMember(ctx, hid, "dup-mem@example.com", hash2)
+	if !errors.Is(err, ErrDuplicateUserEmail) {
+		t.Fatalf("got %v want %v", err, ErrDuplicateUserEmail)
 	}
 }

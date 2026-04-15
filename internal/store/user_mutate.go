@@ -25,6 +25,9 @@ func (s *Store) CreateUser(ctx context.Context, email string, passwordHash []byt
 	}
 	res2, err := tx.ExecContext(ctx, sqlUserInsert, email, passwordHash, role, now, hid, "owner")
 	if err != nil {
+		if sqliteUniqueError(err) {
+			return 0, ErrDuplicateUserEmail
+		}
 		return 0, err
 	}
 	id, err := res2.LastInsertId()

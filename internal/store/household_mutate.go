@@ -2,9 +2,13 @@ package store
 
 import (
 	"context"
+	"errors"
 
 	"moana/internal/timeutil"
 )
+
+// ErrDuplicateUserEmail is returned when inserting a user would violate the unique email constraint.
+var ErrDuplicateUserEmail = errors.New("duplicate user email")
 
 // UpdateHouseholdName sets the display name for a household.
 func (s *Store) UpdateHouseholdName(ctx context.Context, householdID int64, name string) error {
@@ -17,6 +21,9 @@ func (s *Store) CreateHouseholdMember(ctx context.Context, householdID int64, em
 	now := timeutil.NowSQLiteUTC()
 	res, err := s.DB.ExecContext(ctx, sqlUserInsert, email, passwordHash, "user", now, householdID, "member")
 	if err != nil {
+		if sqliteUniqueError(err) {
+			return 0, ErrDuplicateUserEmail
+		}
 		return 0, err
 	}
 	return res.LastInsertId()

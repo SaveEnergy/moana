@@ -40,6 +40,37 @@ func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
 	assertBodyHasErrorAlert(t, s)
 }
 
+func TestTransactionCreate_redirectsToHistory(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "redir-hist@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "redir-hist@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	noFollow := *client
+	noFollow.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	resp, err := noFollow.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"7.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"redirect check"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusSeeOther {
+		t.Fatalf("status %d want %d", resp.StatusCode, http.StatusSeeOther)
+	}
+	loc := resp.Header.Get("Location")
+	if !strings.Contains(loc, "/history") {
+		t.Fatalf("Location %q want redirect target /history", loc)
+	}
+}
+
 func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)

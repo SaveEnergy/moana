@@ -18,21 +18,11 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	curStart, curEnd := timeutil.TrailingLocalDaysInclusiveRangeUTC(loc, now, cfg.InclusiveDays)
 	prevStart, prevEnd := timeutil.PriorTrailingLocalDaysInclusiveRangeUTC(loc, now, cfg.InclusiveDays)
 
-	running, err := st.SumAmountCents(ctx, householdID, nil, nil)
-	if err != nil {
-		return PageData{}, err
-	}
-
-	periodIncome, periodExpense, err := st.SumIncomeExpenseCentsInRange(ctx, householdID, &curStart, &curEnd)
+	running, periodIncome, periodExpense, prevPeriodIncome, prevPeriodExp, err := st.SumRunningTotalAndIncomeExpenseInTwoRanges(ctx, householdID, curStart, curEnd, prevStart, prevEnd)
 	if err != nil {
 		return PageData{}, err
 	}
 	periodNet := periodIncome + periodExpense
-
-	prevPeriodIncome, prevPeriodExp, err := st.SumIncomeExpenseCentsInRange(ctx, householdID, &prevStart, &prevEnd)
-	if err != nil {
-		return PageData{}, err
-	}
 	prevPeriodNet := prevPeriodIncome + prevPeriodExp
 
 	netVsPriorPct := NetPctChange(periodNet, prevPeriodNet)

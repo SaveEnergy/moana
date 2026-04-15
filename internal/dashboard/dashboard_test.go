@@ -39,6 +39,22 @@ func TestNetPctChange(t *testing.T) {
 	}
 }
 
+func TestPctChangePositive(t *testing.T) {
+	t.Parallel()
+	if v := PctChangePositive(150, 100); v < 49.9 || v > 50.1 {
+		t.Fatalf("got %v", v)
+	}
+	if v := PctChangePositive(0, 0); v != 0 {
+		t.Fatalf("both zero: got %v", v)
+	}
+	if v := PctChangePositive(10, 0); v != 100 {
+		t.Fatalf("prior zero: got %v want 100", v)
+	}
+	if v := PctChangePositive(0, 10); v != -100 {
+		t.Fatalf("current zero: got %v want -100", v)
+	}
+}
+
 func TestMergeCategoryTopN(t *testing.T) {
 	t.Parallel()
 	rows := []store.CategoryAmount{

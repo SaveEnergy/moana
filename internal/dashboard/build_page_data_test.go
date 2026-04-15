@@ -38,6 +38,21 @@ func TestBuildPageData_smoke(t *testing.T) {
 	if data.StatsPeriod != "30d" {
 		t.Fatalf("StatsPeriod %q", data.StatsPeriod)
 	}
+	if data.RunningTotal != -5000 {
+		t.Fatalf("RunningTotal %d want -5000 (SumRunningTotalAndIncomeExpenseInTwoRanges)", data.RunningTotal)
+	}
+	if data.MonthExpense != -5000 {
+		t.Fatalf("MonthExpense %d want -5000", data.MonthExpense)
+	}
+	if data.MonthNet != -5000 {
+		t.Fatalf("MonthNet %d want -5000", data.MonthNet)
+	}
+	if data.OutflowTotalAbs != 5000 {
+		t.Fatalf("OutflowTotalAbs %d want 5000", data.OutflowTotalAbs)
+	}
+	if len(data.OutflowRows) != 1 || data.OutflowRows[0].Category.Name != "Uncategorized" {
+		t.Fatalf("outflow rows %+v", data.OutflowRows)
+	}
 	if len(data.Recent) != 1 {
 		t.Fatalf("recent count %d", len(data.Recent))
 	}

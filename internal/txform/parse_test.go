@@ -67,6 +67,17 @@ func TestParse_invalidCategoryID(t *testing.T) {
 	}
 }
 
+func TestParse_descriptionTrimmed(t *testing.T) {
+	t.Parallel()
+	p, errMsg := Parse("10.00", "2026-06-15", "  coffee  ", "", "expense", time.UTC)
+	if errMsg != "" {
+		t.Fatal(errMsg)
+	}
+	if p.Description != "coffee" {
+		t.Fatalf("got %q", p.Description)
+	}
+}
+
 func TestParse_unknownKindDefaultsToIncome(t *testing.T) {
 	t.Parallel()
 	p, errMsg := Parse("5.00", "2026-06-15", "x", "", "weird", time.UTC)

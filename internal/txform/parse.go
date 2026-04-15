@@ -8,7 +8,7 @@ import (
 	"moana/internal/money"
 )
 
-// Parse converts form strings into cents, UTC time, and optional category.
+// Parse converts form strings into cents, UTC time, optional category, and trimmed description.
 // kind is typically "income" or "expense" from the form; loc is the user's display timezone for the date field.
 // On validation failure, errMsg is a short English message suitable for the UI.
 func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (Parsed, string) {
@@ -41,7 +41,7 @@ func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (P
 	return Parsed{
 		AmountCents: cents,
 		OccurredUTC: dayStart.UTC(),
-		Description: desc,
+		Description: strings.TrimSpace(desc),
 		CategoryID:  catID,
 	}, ""
 }

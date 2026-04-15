@@ -23,7 +23,7 @@ type TransactionFilter struct {
 	FromUTC     *time.Time
 	ToUTC       *time.Time
 	Kind        string // "", "all", "income", "expense"
-	Search      string // matches description or category name (substring)
+	Search      string // matches description or category name (substring); whitespace-only is ignored in ListTransactions
 	OldestFirst bool   // default false = newest first
 	Limit       int    // if > 0, cap rows (newest/oldest order preserved)
 }

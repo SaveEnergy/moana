@@ -3,8 +3,10 @@ package handlers_test
 import (
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"moana/internal/testutil"
 )
@@ -122,6 +124,37 @@ func TestStatic_unknownFileReturns404(t *testing.T) {
 	}
 }
 
+func TestUnknownAppRouteReturns404WhenUnauthenticated(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	resp, err := http.Get(srv.URL + "/moana-no-route-anon-xyz")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
+	}
+}
+
+func TestUnknownAppRouteReturns404WhenAuthenticated(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "route404@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "route404@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/moana-no-such-route-xyz")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
+	}
+}
+
 func TestDashboardWithPeriodQuery(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
@@ -161,6 +194,48 @@ func TestDashboardWithUnknownPeriodQuery(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	if !strings.Contains(string(body), `class="dashboard-hero-title"`) {
 		t.Fatalf("expected dashboard shell (unknown period should fall back like parseStatsPeriod)")
+	}
+}
+
+func TestDashboard_outflowShowsExpenseAfterCreate(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "dash-out@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "dash-out@integration.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"42.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"dash outflow"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusSeeOther {
+		t.Fatalf("post status %d", resp.StatusCode)
+	}
+	resp, err = client.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, `class="dashboard-outflow-row"`) {
+		t.Fatalf("expected outflow row, got: %s", s[:min(900, len(s))])
+	}
+	if !strings.Contains(s, "Uncategorized") {
+		t.Fatalf("expected uncategorized category label, got: %s", s[:min(900, len(s))])
+	}
+	if !strings.Contains(s, "€42.00") {
+		t.Fatalf("expected formatted amount in outflow, got: %s", s[:min(900, len(s))])
 	}
 }
 
@@ -302,6 +377,33 @@ func TestHistoryPage_invalidDateRangeShowsBanner(t *testing.T) {
 		t.Fatalf("expected date validation banner, got: %s", s[:min(600, len(s))])
 	}
 	assertBodyHasErrorAlert(t, s)
+}
+
+func TestHistoryPage_partialDateRangeShowsBanner(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "hist-partial@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "hist-partial@moana.test", "pw")
+	for _, path := range []string{"/history?from=2026-01-01", "/history?to=2026-01-31"} {
+		resp, err := client.Get(srv.URL + path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		func() {
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				t.Fatalf("GET %s: status %d", path, resp.StatusCode)
+			}
+			body, _ := io.ReadAll(resp.Body)
+			s := string(body)
+			if !strings.Contains(s, "Invalid date range.") {
+				t.Fatalf("GET %s: expected date validation copy, got: %s", path, s[:min(600, len(s))])
+			}
+			assertBodyHasErrorAlert(t, s)
+		}()
+	}
 }
 
 func TestSettingsPageOKForLoggedInUser(t *testing.T) {

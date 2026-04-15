@@ -116,6 +116,45 @@ func TestSettingsHouseholdUpdate_emptyNameShowsError(t *testing.T) {
 	}
 }
 
+func TestSettingsHouseholdUpdate_memberCannotEditName(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "hh-owner@integration.test", "pw", "user")
+	ctx := context.Background()
+	owner, err := app.Store.GetUserByEmail(ctx, "hh-owner@integration.test")
+	if err != nil || owner == nil {
+		t.Fatal(err)
+	}
+	hash, err := auth.HashPassword("mem-pw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := app.Store.CreateHouseholdMember(ctx, owner.HouseholdID, "hh-member@integration.test", hash); err != nil {
+		t.Fatal(err)
+	}
+
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "hh-member@integration.test", "mem-pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/household", url.Values{
+		"household_name": {"Renamed by member"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "You cannot edit this household.") {
+		t.Fatalf("expected permission copy, got: %s", s[:min(900, len(s))])
+	}
+	assertBodyHasErrorAlert(t, s)
+}
+
 func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
@@ -214,7 +253,7 @@ func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
 	}
 	body, _ := io.ReadAll(resp2.Body)
 	s := string(body)
-	if !strings.Contains(s, "Could not add member (duplicate email?).") {
+	if !strings.Contains(s, "A user with that email already exists.") {
 		t.Fatalf("expected duplicate copy, got: %s", s[:min(900, len(s))])
 	}
 	assertBodyHasErrorAlert(t, s)

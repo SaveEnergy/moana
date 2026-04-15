@@ -21,6 +21,22 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 
 	historyReturn := historyReturnOrDefault(requestURI)
 
+	if partialDateFilter(p.from, p.to) {
+		return PageData{
+			Error:            "Invalid date range.",
+			Kind:             p.kind,
+			Search:           p.search,
+			Sort:             p.sortLabel,
+			FilterFrom:       p.from,
+			FilterTo:         p.to,
+			FilterActive:     true,
+			Nav:              BuildNav(u),
+			Groups:           nil,
+			HistoryReturnURL: historyReturn,
+			TruncationLimit:  defaultHistoryFetchLimit,
+		}, nil
+	}
+
 	if p.filterActive {
 		fu, tu, err := timeutil.DayRangeUTCFromLocalDates(loc, p.from, p.to)
 		if err != nil {
@@ -35,6 +51,7 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 				Nav:              BuildNav(u),
 				Groups:           nil,
 				HistoryReturnURL: historyReturn,
+				TruncationLimit:  defaultHistoryFetchLimit,
 			}, nil
 		}
 		f.FromUTC = &fu
@@ -63,4 +80,9 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 		Truncated:        truncated,
 		TruncationLimit:  defaultHistoryFetchLimit,
 	}, nil
+}
+
+// partialDateFilter is true when exactly one of from/to is set (both are required for filtering).
+func partialDateFilter(from, to string) bool {
+	return (from != "" || to != "") && (from == "" || to == "")
 }
