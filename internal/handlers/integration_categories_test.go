@@ -200,6 +200,42 @@ func TestCategoryUpdate_renamesCategory(t *testing.T) {
 	}
 }
 
+func TestCategoryUpdate_emptyNameShowsError(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "cat-upd-empty@moana.test", "pw", "user")
+	ctx := context.Background()
+	u, err := app.Store.GetUserByEmail(ctx, "cat-upd-empty@moana.test")
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	id, err := app.Store.CreateCategory(ctx, u.HouseholdID, "KeepName", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "cat-upd-empty@moana.test", "pw")
+	resp, err := client.PostForm(srv.URL+"/categories/update", url.Values{
+		"id":    {strconv.FormatInt(id, 10)},
+		"name":  {"  "},
+		"icon":  {""},
+		"color": {""},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 with error banner", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Name is required.") {
+		t.Fatalf("expected validation copy, got: %s", s[:min(600, len(s))])
+	}
+}
+
 func TestCategoryUpdate_invalidIDShowsMessage(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
