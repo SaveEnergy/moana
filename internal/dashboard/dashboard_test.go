@@ -7,6 +7,25 @@ import (
 	"moana/internal/store"
 )
 
+func TestParseStatsPeriod(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		in   string
+		want statsPeriodConfig
+	}{
+		{"", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+		{"30d", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+		{"12m", statsPeriodConfig{Period: "12m", InclusiveDays: 365, PriorPhrase: "prior 12 months"}},
+		{"garbage", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+	}
+	for _, tc := range cases {
+		got := parseStatsPeriod(tc.in)
+		if got != tc.want {
+			t.Fatalf("parseStatsPeriod(%q): %+v want %+v", tc.in, got, tc.want)
+		}
+	}
+}
+
 func TestNetPctChange(t *testing.T) {
 	t.Parallel()
 	if v := NetPctChange(150, 100); v < 49.9 || v > 50.1 {
@@ -29,6 +48,18 @@ func TestMergeCategoryTopN(t *testing.T) {
 	}
 	out := MergeCategoryTopN(rows, 2)
 	if len(out) != 2 || out[0].Name != "a" || out[1].Name != "Other" || out[1].AmountCents != 500 {
+		t.Fatalf("got %+v", out)
+	}
+}
+
+func TestMergeCategoryTopN_invalidLimitReturnsRows(t *testing.T) {
+	t.Parallel()
+	rows := []store.CategoryAmount{
+		{Name: "a", AmountCents: 100},
+		{Name: "b", AmountCents: 200},
+	}
+	out := MergeCategoryTopN(rows, 0)
+	if len(out) != 2 || out[0].Name != "a" {
 		t.Fatalf("got %+v", out)
 	}
 }

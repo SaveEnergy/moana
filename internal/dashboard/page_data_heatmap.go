@@ -9,7 +9,8 @@ import (
 )
 
 func buildHeatmapSection(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, now time.Time) (string, []HeatmapCell, int, error) {
-	todayLocal := time.Date(now.In(loc).Year(), now.In(loc).Month(), now.In(loc).Day(), 0, 0, 0, 0, loc)
+	localNow := now.In(loc)
+	todayLocal := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, loc)
 	yearAgo := todayLocal.AddDate(0, 0, -364)
 	startUTC := yearAgo.UTC()
 	endOfToday := time.Date(todayLocal.Year(), todayLocal.Month(), todayLocal.Day(), 23, 59, 59, 999999999, todayLocal.Location())

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"moana/internal/httperr"
 	"moana/internal/money"
 	"moana/internal/safepath"
 	"moana/internal/store"
@@ -22,7 +23,7 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 	ctx := r.Context()
 	tx, err := a.Store.GetTransactionByID(ctx, u.HouseholdID, id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	if tx == nil {
@@ -31,7 +32,7 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 	}
 	cats, err := a.Store.ListCategories(ctx, u.HouseholdID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	loc := tz.DisplayLocation(r)
@@ -71,7 +72,7 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 	ctx := r.Context()
 	existing, err := a.Store.GetTransactionByID(ctx, u.HouseholdID, id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	if existing == nil {
@@ -98,7 +99,7 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 			http.NotFound(w, r)
 			return
 		}
-		a.renderTransactionEditFailed(w, r, u, id, next, err.Error())
+		a.renderTransactionEditFailed(w, r, u, id, next, userFacingStoreMessage(err))
 		return
 	}
 	http.Redirect(w, r, next, http.StatusSeeOther)

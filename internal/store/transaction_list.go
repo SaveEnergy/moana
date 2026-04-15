@@ -47,6 +47,9 @@ WHERE owner.household_id = ?`
 	}
 	defer rows.Close()
 	var out []Transaction
+	if f.Limit > 0 {
+		out = make([]Transaction, 0, f.Limit)
+	}
 	for rows.Next() {
 		var t Transaction
 		var occ, cre string

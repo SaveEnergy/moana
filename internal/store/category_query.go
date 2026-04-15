@@ -14,7 +14,7 @@ func (s *Store) ListCategories(ctx context.Context, householdID int64) ([]Catego
 		return nil, err
 	}
 	defer rows.Close()
-	var out []Category
+	out := make([]Category, 0, 32)
 	for rows.Next() {
 		var c Category
 		if err := rows.Scan(&c.ID, &c.HouseholdID, &c.Name, &c.Icon, &c.Color); err != nil {

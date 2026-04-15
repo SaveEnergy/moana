@@ -13,4 +13,7 @@ func TestNormalizeStoredIcon(t *testing.T) {
 	if got := NormalizeStoredIcon("💰"); got != "wallet" {
 		t.Fatalf("legacy emoji: %q", got)
 	}
+	if got := NormalizeStoredIcon("not-a-valid-id-or-emoji"); got != "" {
+		t.Fatalf("unknown: %q", got)
+	}
 }

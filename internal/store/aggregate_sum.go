@@ -11,11 +11,20 @@ func (s *Store) SumAmountCents(ctx context.Context, householdID int64, fromUTC, 
 	return s.SumAmountCentsByKind(ctx, householdID, fromUTC, toUTC, "")
 }
 
+// SumIncomeExpenseCentsInRange returns income (positive amounts) and expense (negative amounts) sums
+// for the household in one query. Net equals incomeSum + expenseSum.
+func (s *Store) SumIncomeExpenseCentsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time) (incomeSum int64, expenseSum int64, err error) {
+	q := `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
+COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx
+	args := []any{householdID}
+	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
+	err = s.DB.QueryRowContext(ctx, q, args...).Scan(&incomeSum, &expenseSum)
+	return incomeSum, expenseSum, err
+}
+
 // SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense".
 func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) (int64, error) {
-	q := `SELECT COALESCE(SUM(t.amount_cents), 0) FROM transactions t
-INNER JOIN users u ON u.id = t.user_id
-WHERE u.household_id = ?`
+	q := `SELECT COALESCE(SUM(t.amount_cents), 0) ` + sqlFromHouseholdTx
 	args := []any{householdID}
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	switch kind {

@@ -5,6 +5,22 @@ import (
 	"database/sql"
 )
 
+// migrationSteps runs in order; each migrateVN inserts schema_version (see migrate_steps.go, migrate_v6.go).
+var migrationSteps = []func(context.Context, *sql.Tx) error{
+	migrateV1,
+	migrateV2,
+	migrateV3,
+	migrateV4,
+	migrateV5,
+	migrateV6,
+	migrateV7,
+}
+
+// LatestMigrationVersion is the schema_version after [Open] runs all steps (len(migrationSteps)).
+func LatestMigrationVersion() int {
+	return len(migrationSteps)
+}
+
 func migrate(d *sql.DB) error {
 	ctx := context.Background()
 	tx, err := d.BeginTx(ctx, nil)
@@ -26,43 +42,13 @@ CREATE TABLE IF NOT EXISTS schema_version (
 		return err
 	}
 
-	if v < 1 {
-		if err := migrateV1(ctx, tx); err != nil {
-			return err
-		}
-		v = 1
-	}
-
-	if v < 2 {
-		if err := migrateV2(ctx, tx); err != nil {
-			return err
-		}
-		v = 2
-	}
-
-	if v < 3 {
-		if err := migrateV3(ctx, tx); err != nil {
-			return err
-		}
-		v = 3
-	}
-
-	if v < 4 {
-		if err := migrateV4(ctx, tx); err != nil {
-			return err
-		}
-		v = 4
-	}
-
-	if v < 5 {
-		if err := migrateV5(ctx, tx); err != nil {
-			return err
-		}
-	}
-
-	if v < 6 {
-		if err := migrateV6(ctx, tx); err != nil {
-			return err
+	for i := range migrationSteps {
+		want := i + 1
+		if v < want {
+			if err := migrationSteps[i](ctx, tx); err != nil {
+				return err
+			}
+			v = want
 		}
 	}
 

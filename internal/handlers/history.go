@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"moana/internal/historyview"
+	"moana/internal/httperr"
 	"moana/internal/store"
 	"moana/internal/tz"
 )
@@ -15,7 +16,7 @@ func (a *App) History(w http.ResponseWriter, r *http.Request, u *store.User) {
 
 	data, err := historyview.BuildPage(ctx, a.Store, u.HouseholdID, loc, r.URL, r.URL.RequestURI())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	a.historyRender(w, u, data)

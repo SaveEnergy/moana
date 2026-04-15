@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// historyURLParams holds normalized /history query string fields.
-type historyURLParams struct {
+// HistoryURLParams holds normalized /history query string fields.
+type HistoryURLParams struct {
 	kind         string
 	filterKind   string
 	search       string
@@ -17,7 +17,8 @@ type historyURLParams struct {
 	filterActive bool
 }
 
-func parseHistoryURL(u *url.URL) historyURLParams {
+// ParseHistoryURL extracts normalized filters from a /history URL.
+func ParseHistoryURL(u *url.URL) HistoryURLParams {
 	q := strings.TrimSpace(u.Query().Get("q"))
 	kindParam := strings.TrimSpace(u.Query().Get("kind"))
 	kind := "all"
@@ -42,7 +43,7 @@ func parseHistoryURL(u *url.URL) historyURLParams {
 	from := u.Query().Get("from")
 	to := u.Query().Get("to")
 	filterActive := from != "" && to != ""
-	return historyURLParams{
+	return HistoryURLParams{
 		kind:         kind,
 		filterKind:   filterKind,
 		search:       q,

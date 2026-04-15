@@ -14,13 +14,39 @@ import (
 	"moana/internal/testutil"
 )
 
+func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "badamount@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "badamount@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"not-a-number"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"x"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d (expected 200 with form error)", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, `class="alert alert-error"`) {
+		t.Fatalf("expected validation error in body: %s", s[:min(400, len(s))])
+	}
+}
+
 func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 	t.Parallel()
-	app, cleanup := testApp(t)
+	app, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
 	testutil.MustCreateUser(t, app, "tx@moana.test", "pw", "user")
-	srv := testutil.NewServer(t, app)
-	defer srv.Close()
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "tx@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
@@ -54,7 +80,7 @@ func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 
 func TestEditTransaction(t *testing.T) {
 	t.Parallel()
-	app, cleanup := testApp(t)
+	app, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
 	ctx := context.Background()
 	uid := testutil.MustCreateUser(t, app, "edit@moana.test", "pw", "user")
@@ -63,8 +89,6 @@ func TestEditTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 	hid := u.HouseholdID
-	srv := testutil.NewServer(t, app)
-	defer srv.Close()
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "edit@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
@@ -122,5 +146,51 @@ func TestEditTransaction(t *testing.T) {
 	}
 	if tx.Description != "coffee fixed" {
 		t.Fatalf("desc %q", tx.Description)
+	}
+}
+
+func TestTransactionCreate_invalidCategoryIDShowsMessage(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "badcat@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "badcat@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"10.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"x"},
+		"category_id": {"99999999999999"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 with form error", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "That category is not valid for this household.") {
+		t.Fatalf("expected user-facing category error, got: %s", s[:min(600, len(s))])
+	}
+}
+
+func TestTransactionEditNotFound(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "nf@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "nf@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/transactions/999999999/edit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
 	}
 }

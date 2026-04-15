@@ -19,12 +19,8 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	if limit < 1 {
 		limit = 5
 	}
-	q := `
-SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
-FROM transactions t
-LEFT JOIN categories c ON c.id = t.category_id
-INNER JOIN users owner ON owner.id = t.user_id
-WHERE owner.household_id = ? AND t.amount_cents < 0`
+	q := `SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
+` + sqlAggregateFromHouseholdTx + ` AND t.amount_cents < 0`
 	args := []any{householdID}
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	q += ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
@@ -35,7 +31,7 @@ WHERE owner.household_id = ? AND t.amount_cents < 0`
 		return nil, err
 	}
 	defer rows.Close()
-	var out []CategoryExpense
+	out := make([]CategoryExpense, 0, limit)
 	for rows.Next() {
 		var ce CategoryExpense
 		if err := rows.Scan(&ce.CategoryID, &ce.CategoryName, &ce.TotalCents); err != nil {
@@ -61,12 +57,8 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 	if kind != "income" && kind != "expense" {
 		return nil, errors.New("kind must be income or expense")
 	}
-	q := `
-SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
-FROM transactions t
-LEFT JOIN categories c ON c.id = t.category_id
-INNER JOIN users owner ON owner.id = t.user_id
-WHERE owner.household_id = ?`
+	q := `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
+` + sqlAggregateFromHouseholdTx
 	args := []any{householdID}
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	if kind == "income" {
@@ -86,7 +78,7 @@ WHERE owner.household_id = ?`
 		return nil, err
 	}
 	defer rows.Close()
-	var out []CategoryAmount
+	out := make([]CategoryAmount, 0, 32)
 	for rows.Next() {
 		var ca CategoryAmount
 		var sum int64

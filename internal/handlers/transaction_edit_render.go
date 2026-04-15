@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
+	"moana/internal/httperr"
 	"moana/internal/store"
 )
 
@@ -16,13 +16,10 @@ func (a *App) renderTransactionEditFailed(w http.ResponseWriter, r *http.Request
 	ctx := r.Context()
 	cats, err := a.Store.ListCategories(ctx, u.HouseholdID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
-	sel := int64(0)
-	if c := r.FormValue("category_id"); c != "" {
-		sel, _ = strconv.ParseInt(c, 10, 64)
-	}
+	sel := categoryIDFromForm(r.FormValue("category_id"))
 	kind := r.FormValue("kind")
 	if kind != "income" && kind != "expense" {
 		kind = "income"

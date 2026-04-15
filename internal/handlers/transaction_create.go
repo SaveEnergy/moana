@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"moana/internal/httperr"
 	"moana/internal/store"
 	"moana/internal/txform"
 	"moana/internal/tz"
@@ -16,7 +17,7 @@ func (a *App) Transactions(w http.ResponseWriter, r *http.Request, u *store.User
 	today := time.Now().In(loc).Format("2006-01-02")
 	cats, err := a.Store.ListCategories(ctx, u.HouseholdID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	data := txFormData{
@@ -49,7 +50,7 @@ func (a *App) TransactionCreate(w http.ResponseWriter, r *http.Request, u *store
 
 	ctx := r.Context()
 	if _, err := a.Store.CreateTransaction(ctx, u.ID, u.HouseholdID, p.AmountCents, p.OccurredUTC, p.Description, p.CategoryID); err != nil {
-		a.transactionsError(w, r, u, err.Error())
+		a.transactionsError(w, r, u, userFacingStoreMessage(err))
 		return
 	}
 	http.Redirect(w, r, "/history", http.StatusSeeOther)

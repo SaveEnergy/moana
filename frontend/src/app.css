@@ -2193,6 +2193,12 @@ body.app-body {
   color: var(--primary);
 }
 
+.alert-info {
+  background: color-mix(in srgb, var(--primary) 8%, var(--app-canvas));
+  color: var(--text-muted);
+  border: 1px solid var(--dashboard-edge);
+}
+
 .settings-shell {
   padding-top: 0.25rem;
 }

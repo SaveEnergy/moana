@@ -13,53 +13,27 @@ import (
 
 // BuildPageData loads aggregates and layout data for the dashboard (no HTTP).
 func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, now time.Time, periodQuery string) (PageData, error) {
-	statsPeriod := periodQuery
-	inclusiveDays := 30
-	switch statsPeriod {
-	case "12m":
-		inclusiveDays = 365
-	case "30d", "":
-		statsPeriod = "30d"
-	default:
-		statsPeriod = "30d"
-	}
+	cfg := parseStatsPeriod(periodQuery)
 
-	statsPriorPhrase := "prior 30 days"
-	if statsPeriod == "12m" {
-		statsPriorPhrase = "prior 12 months"
-	}
-
-	curStart, curEnd := timeutil.TrailingLocalDaysInclusiveRangeUTC(loc, now, inclusiveDays)
-	prevStart, prevEnd := timeutil.PriorTrailingLocalDaysInclusiveRangeUTC(loc, now, inclusiveDays)
+	curStart, curEnd := timeutil.TrailingLocalDaysInclusiveRangeUTC(loc, now, cfg.InclusiveDays)
+	prevStart, prevEnd := timeutil.PriorTrailingLocalDaysInclusiveRangeUTC(loc, now, cfg.InclusiveDays)
 
 	running, err := st.SumAmountCents(ctx, householdID, nil, nil)
 	if err != nil {
 		return PageData{}, err
 	}
 
-	periodIncome, err := st.SumAmountCentsByKind(ctx, householdID, &curStart, &curEnd, "income")
-	if err != nil {
-		return PageData{}, err
-	}
-	periodExpense, err := st.SumAmountCentsByKind(ctx, householdID, &curStart, &curEnd, "expense")
+	periodIncome, periodExpense, err := st.SumIncomeExpenseCentsInRange(ctx, householdID, &curStart, &curEnd)
 	if err != nil {
 		return PageData{}, err
 	}
 	periodNet := periodIncome + periodExpense
 
-	prevPeriodNet, err := st.SumAmountCents(ctx, householdID, &prevStart, &prevEnd)
+	prevPeriodIncome, prevPeriodExp, err := st.SumIncomeExpenseCentsInRange(ctx, householdID, &prevStart, &prevEnd)
 	if err != nil {
 		return PageData{}, err
 	}
-
-	prevPeriodExp, err := st.SumAmountCentsByKind(ctx, householdID, &prevStart, &prevEnd, "expense")
-	if err != nil {
-		return PageData{}, err
-	}
-	prevPeriodIncome, err := st.SumAmountCentsByKind(ctx, householdID, &prevStart, &prevEnd, "income")
-	if err != nil {
-		return PageData{}, err
-	}
+	prevPeriodNet := prevPeriodIncome + prevPeriodExp
 
 	netVsPriorPct := NetPctChange(periodNet, prevPeriodNet)
 	incomeTrendPct := PctChangePositive(periodIncome, prevPeriodIncome)
@@ -68,7 +42,7 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	var budgetUsedPct float64
 	var budgetCapCents int64
 	var budgetMeta string
-	switch statsPeriod {
+	switch cfg.Period {
 	case "12m":
 		budgetCapCents = DefaultMonthlyExpenseBudgetCents * 12
 		budgetMeta = fmt.Sprintf("of %s annual budget (12× monthly) used", money.FormatEUR(budgetCapCents))
@@ -97,8 +71,8 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	}
 
 	return PageData{
-		StatsPeriod:          statsPeriod,
-		StatsPriorPhrase:     statsPriorPhrase,
+		StatsPeriod:          cfg.Period,
+		StatsPriorPhrase:     cfg.PriorPhrase,
 		RunningTotal:         running,
 		MonthIncome:          periodIncome,
 		MonthExpense:         periodExpense,

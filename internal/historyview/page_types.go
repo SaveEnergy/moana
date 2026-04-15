@@ -29,4 +29,7 @@ type PageData struct {
 	Nav              Nav
 	Groups           []DayGroup
 	HistoryReturnURL string // current /history path+query for edit "next" links
+	// Truncated is true when more rows matched than defaultHistoryFetchLimit (see limit.go).
+	Truncated       bool
+	TruncationLimit int // copy of default cap for the banner (avoid magic numbers in templates)
 }

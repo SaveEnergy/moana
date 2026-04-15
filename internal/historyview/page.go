@@ -12,7 +12,7 @@ import (
 // BuildPage loads transactions and builds groups + nav for the history UI.
 // requestURI should be r.URL.RequestURI() (or "" to default to /history).
 func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, u *url.URL, requestURI string) (PageData, error) {
-	p := parseHistoryURL(u)
+	p := ParseHistoryURL(u)
 
 	var f store.TransactionFilter
 	f.Kind = p.filterKind
@@ -41,10 +41,13 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 		f.ToUTC = &tu
 	}
 
+	probe := applyHistoryFetchLimit(&f)
+
 	txs, err := st.ListTransactions(ctx, householdID, f)
 	if err != nil {
 		return PageData{}, err
 	}
+	txs, truncated := trimHistoryRows(txs, probe)
 	groups := GroupByDay(txs, loc, !p.oldestFirst)
 	return PageData{
 		Error:            "",
@@ -57,5 +60,7 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 		Nav:              BuildNav(u),
 		Groups:           groups,
 		HistoryReturnURL: historyReturn,
+		Truncated:        truncated,
+		TruncationLimit:  defaultHistoryFetchLimit,
 	}, nil
 }

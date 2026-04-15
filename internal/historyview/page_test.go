@@ -11,11 +11,7 @@ import (
 
 func TestBuildPage_invalidDateRange(t *testing.T) {
 	t.Parallel()
-	st, db, err := dbutil.OpenStore(":memory:")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.Close()
+	st := dbutil.MustOpenMemStore(t)
 	ctx := context.Background()
 	loc := time.UTC
 	u, err := url.Parse("/history?from=not-a-date&to=2020-01-02")

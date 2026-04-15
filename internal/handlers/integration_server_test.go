@@ -3,19 +3,38 @@ package handlers_test
 import (
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 
 	"moana/internal/testutil"
 )
 
+func TestLoginPageOK(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	resp, err := http.Get(srv.URL + "/login")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Sign in to your account") {
+		t.Fatalf("expected login template")
+	}
+	if !strings.Contains(s, `href="`+testutil.DefaultTestRepoURL+`"`) {
+		t.Fatalf("expected login footer repo link (set RepoURL in testutil.DefaultTestConfig)")
+	}
+}
+
 func TestHealth(t *testing.T) {
 	t.Parallel()
-	app, cleanup := testApp(t)
+	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	srv := testutil.NewServer(t, app)
-	defer srv.Close()
 	resp, err := http.Get(srv.URL + "/health")
 	if err != nil {
 		t.Fatal(err)
@@ -30,27 +49,75 @@ func TestHealth(t *testing.T) {
 	}
 }
 
-func TestLoginAndOverview(t *testing.T) {
+func TestStatic_cssServed(t *testing.T) {
 	t.Parallel()
-	app, cleanup := testApp(t)
+	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	testutil.MustCreateUser(t, app, "user@integration.test", "correct-password", "user")
-
-	srv := testutil.NewServer(t, app)
-	defer srv.Close()
-
-	client := testutil.NewCookieClient(t)
-
-	resp, err := client.PostForm(srv.URL+"/login", url.Values{
-		"email":    {"user@integration.test"},
-		"password": {"correct-password"},
-	})
+	resp, err := http.Get(srv.URL + "/static/css/app.css")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("login status %d", resp.StatusCode)
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	b, _ := io.ReadAll(resp.Body)
+	if len(b) < 50 {
+		t.Fatalf("expected non-trivial css, got %d bytes", len(b))
+	}
+}
+
+func TestStatic_unknownFileReturns404(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	resp, err := http.Get(srv.URL + "/static/moana-missing-asset-test-xyz.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
+	}
+}
+
+func TestDashboardWithPeriodQuery(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "period@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "period@integration.test", "pw")
+	resp, err := client.Get(srv.URL + "/?period=12m")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), `class="dashboard-hero-title"`) {
+		t.Fatalf("expected dashboard shell")
+	}
+}
+
+func TestLoginAndOverview(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "user@integration.test", "correct-password", "user")
+
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "user@integration.test", "correct-password")
+
+	resp, err := client.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("overview status %d", resp.StatusCode)
 	}
 	body, _ := io.ReadAll(resp.Body)
 	if !strings.Contains(string(body), `class="dashboard-hero-title"`) {
@@ -62,13 +129,126 @@ func TestLoginAndOverview(t *testing.T) {
 	}
 }
 
+func TestTransactionsPageOKForLoggedInUser(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "txpage@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "txpage@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/transactions")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), "New entry") {
+		t.Fatalf("expected new transaction form")
+	}
+}
+
+func TestCategoriesPageOKForLoggedInUser(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "catpage@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "catpage@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/categories")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), "Your categories") {
+		t.Fatalf("expected categories page shell")
+	}
+}
+
+func TestHistoryPageOKForLoggedInUser(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "hist@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "hist@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/history")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), `class="history-page"`) {
+		t.Fatalf("expected history page shell")
+	}
+}
+
+func TestHistoryPage_withQueryParams(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "histq@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "histq@moana.test", "pw")
+	u := srv.URL + "/history?kind=expense&q=coffee&sort=oldest&from=2026-01-01&to=2026-01-31"
+	resp, err := client.Get(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, `class="history-page"`) {
+		t.Fatalf("expected history page shell")
+	}
+	if !strings.Contains(s, `name="q"`) {
+		t.Fatalf("expected search field preserved")
+	}
+}
+
+func TestHistoryPage_invalidDateRangeShowsBanner(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "histbad@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "histbad@moana.test", "pw")
+	u := srv.URL + "/history?from=not-a-date&to=2020-01-02"
+	resp, err := client.Get(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Invalid date range.") {
+		t.Fatalf("expected date validation banner, got: %s", s[:min(600, len(s))])
+	}
+	if !strings.Contains(s, `class="alert alert-error"`) {
+		t.Fatal("expected alert-error class")
+	}
+}
+
 func TestSettingsPageOKForLoggedInUser(t *testing.T) {
 	t.Parallel()
-	app, cleanup := testApp(t)
+	app, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
 	testutil.MustCreateUser(t, app, "plain@moana.test", "pw", "user")
-	srv := testutil.NewServer(t, app)
-	defer srv.Close()
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "plain@moana.test", "pw")
 	resp, err := client.Get(srv.URL + "/settings")

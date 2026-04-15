@@ -9,6 +9,9 @@ import (
 	"moana/internal/timeutil"
 )
 
+// ErrInvalidCategory is returned when a category id does not exist in the household.
+var ErrInvalidCategory = errors.New("invalid category")
+
 // CreateTransaction inserts a transaction. occurredAt must be UTC.
 func (s *Store) CreateTransaction(ctx context.Context, userID, householdID int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) (int64, error) {
 	if err := s.validateCategoryOwnership(ctx, householdID, categoryID); err != nil {
@@ -58,7 +61,7 @@ func (s *Store) validateCategoryOwnership(ctx context.Context, householdID int64
 		return err
 	}
 	if cat == nil {
-		return errors.New("invalid category")
+		return ErrInvalidCategory
 	}
 	return nil
 }

@@ -57,6 +57,20 @@ func TestTrailingLocalDaysInclusiveRangeUTC(t *testing.T) {
 	}
 }
 
+func TestLoadLocation(t *testing.T) {
+	t.Parallel()
+	if LoadLocation("") != time.UTC {
+		t.Fatal("empty name must be UTC")
+	}
+	if LoadLocation("not-a-real-zone-name-xyz") != time.UTC {
+		t.Fatal("invalid name must be UTC")
+	}
+	berlin := LoadLocation("Europe/Berlin")
+	if berlin == nil || berlin == time.UTC {
+		t.Fatal("valid zone must not be UTC")
+	}
+}
+
 func TestDayRangeUTCFromLocalDates(t *testing.T) {
 	t.Parallel()
 	loc, err := time.LoadLocation("America/New_York")

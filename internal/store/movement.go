@@ -9,16 +9,15 @@ import (
 
 // DailyAbsMovementByLocalDate returns total absolute cents moved per calendar day in loc (sum of |amount_cents| per day) for the household.
 func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int64, fromUTC, toUTC time.Time, loc *time.Location) (map[string]int64, error) {
-	q := `SELECT t.occurred_at, t.amount_cents FROM transactions t
-INNER JOIN users owner ON owner.id = t.user_id
-WHERE owner.household_id = ? AND t.occurred_at >= ? AND t.occurred_at <= ?`
+	q := `SELECT t.occurred_at, t.amount_cents ` + sqlFromHouseholdTx + ` AND t.occurred_at >= ? AND t.occurred_at <= ?`
 	args := []any{householdID, timeutil.FormatSQLiteUTC(fromUTC), timeutil.FormatSQLiteUTC(toUTC)}
 	rows, err := s.DB.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	out := make(map[string]int64)
+	// At most one entry per calendar day in range (~366 for rolling year heatmap).
+	out := make(map[string]int64, 400)
 	for rows.Next() {
 		var occ string
 		var cents int64

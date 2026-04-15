@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"moana/internal/auth"
+	"moana/internal/httperr"
 )
 
 // LoginPage shows the sign-in form.
@@ -34,7 +35,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	u, err := a.Store.GetUserByEmail(ctx, email)
 	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	if u == nil || auth.CheckPassword(u.PasswordHash, password) != nil {
@@ -45,10 +46,13 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("remember") == "on" {
 		maxAge = 30 * 24 * time.Hour
 	}
-	_ = auth.SignSession(w, a.Config.SessionSecret, auth.SessionPayload{
+	if err := auth.SignSession(w, a.Config.SessionSecret, auth.SessionPayload{
 		UserID: u.ID,
 		Role:   u.Role,
-	}, maxAge, a.Config.SecureCookies)
+	}, maxAge, a.Config.SecureCookies); err != nil {
+		httperr.Internal(w, r, err)
+		return
+	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

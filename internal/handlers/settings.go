@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"moana/internal/household"
+	"moana/internal/httperr"
 	"moana/internal/store"
 )
 
@@ -17,7 +18,7 @@ func (a *App) Settings(w http.ResponseWriter, r *http.Request, u *store.User) {
 			http.Error(w, "household not found", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 	a.renderShell(w, "settings.html", data, layoutShellMain("Settings", "settings", "settings-shell", u))

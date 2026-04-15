@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"moana/internal/dashboard"
+	"moana/internal/httperr"
 	"moana/internal/store"
 	"moana/internal/tz"
 )
@@ -17,7 +18,7 @@ func (a *App) Dashboard(w http.ResponseWriter, r *http.Request, u *store.User) {
 
 	data, err := dashboard.BuildPageData(ctx, a.Store, u.HouseholdID, loc, now, r.URL.Query().Get("period"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperr.Internal(w, r, err)
 		return
 	}
 

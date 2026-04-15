@@ -13,6 +13,10 @@
   <p class="alert alert-error" role="alert">{{.Error}}</p>
   {{end}}
 
+  {{if .Truncated}}
+  <p class="alert alert-info" role="status">Showing the first {{.TruncationLimit}} entries by date. Narrow your filters or date range to see more.</p>
+  {{end}}
+
   <form class="history-controls" method="get" action="/history">
     <input type="hidden" name="kind" value="{{.Kind}}">
     <div class="history-search-row">

@@ -34,10 +34,8 @@ func LoadSettingsPage(ctx context.Context, st *store.Store, u *store.User, errMs
 	if err != nil {
 		return SettingsPageData{}, err
 	}
-	n, err := st.CountHouseholdMembers(ctx, u.HouseholdID)
-	if err != nil {
-		return SettingsPageData{}, err
-	}
+	// MemberCount matches the list length (same as COUNT(*) for this household) without a second query.
+	n := int64(len(members))
 	return SettingsPageData{
 		Error:            errMsg,
 		Success:          successMsg,

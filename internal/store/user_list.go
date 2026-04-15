@@ -14,7 +14,7 @@ SELECT id, email, role, created_at FROM users ORDER BY id`)
 		return nil, err
 	}
 	defer rows.Close()
-	var out []UserSummary
+	out := make([]UserSummary, 0, 16)
 	for rows.Next() {
 		var u UserSummary
 		var created string
@@ -40,7 +40,7 @@ FROM users WHERE household_id = ? ORDER BY id`, householdID)
 		return nil, err
 	}
 	defer rows.Close()
-	var out []HouseholdMember
+	out := make([]HouseholdMember, 0, 16)
 	for rows.Next() {
 		var m HouseholdMember
 		if err := rows.Scan(&m.ID, &m.Email, &m.FirstName, &m.LastName, &m.HouseholdRole); err != nil {

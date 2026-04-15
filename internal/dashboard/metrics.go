@@ -39,8 +39,9 @@ func PctChangePositive(current, previous int64) float64 {
 }
 
 // MergeCategoryTopN keeps the top (limit-1) categories and merges the rest into "Other".
+// If limit is less than 1, rows are returned unchanged (defensive; production uses a fixed positive limit).
 func MergeCategoryTopN(rows []store.CategoryAmount, limit int) []store.CategoryAmount {
-	if len(rows) <= limit {
+	if limit < 1 || len(rows) <= limit {
 		return rows
 	}
 	out := make([]store.CategoryAmount, limit)

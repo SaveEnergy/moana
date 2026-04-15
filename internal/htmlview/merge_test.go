@@ -19,3 +19,13 @@ func TestMergeFuncMaps(t *testing.T) {
 		t.Fatal("last x should win")
 	}
 }
+
+func TestMergeFuncMaps_capacityMatchesKeys(t *testing.T) {
+	t.Parallel()
+	a := template.FuncMap{"a": func() {}, "b": func() {}}
+	b := template.FuncMap{"c": func() {}}
+	m := MergeFuncMaps(a, b)
+	if len(m) != 3 {
+		t.Fatalf("len=%d", len(m))
+	}
+}

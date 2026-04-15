@@ -10,6 +10,9 @@ import (
 	"moana/internal/handlers"
 )
 
+// DefaultTestRepoURL matches [config.Load] when MOANA_REPO_URL is unset (footer + login GitHub link).
+const DefaultTestRepoURL = "https://github.com/SaveEnergy/moana"
+
 // DefaultTestConfig returns a config suitable for integration tests (in-memory DB, non-secure cookies).
 func DefaultTestConfig() *config.Config {
 	return &config.Config{
@@ -19,6 +22,7 @@ func DefaultTestConfig() *config.Config {
 		SecureCookies:  false,
 		SessionMaxAge:  time.Hour,
 		RequestTimeout: 30 * time.Second,
+		RepoURL:        DefaultTestRepoURL,
 	}
 }
 
