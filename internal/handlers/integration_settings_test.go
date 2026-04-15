@@ -202,6 +202,79 @@ func TestSettingsHouseholdMemberRemove_memberCannotRemoveOwner(t *testing.T) {
 	}
 }
 
+func TestSettingsHouseholdMemberRemove_ownerCannotLeaveWithOtherMembers(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "leave-block@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "leave-block@integration.test", "pw")
+
+	addResp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+		"email":    {"leave-block-mem@integration.test"},
+		"password": {"member-secret-1"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer addResp.Body.Close()
+	if addResp.StatusCode != http.StatusOK {
+		t.Fatalf("add member status %d", addResp.StatusCode)
+	}
+
+	ctx := context.Background()
+	owner, err := app.Store.GetUserByEmail(ctx, "leave-block@integration.test")
+	if err != nil || owner == nil {
+		t.Fatalf("owner: %+v err=%v", owner, err)
+	}
+
+	resp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+		"user_id": {strconv.FormatInt(owner.ID, 10)},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Transfer ownership before leaving the household.") {
+		t.Fatalf("expected transfer-ownership copy, got: %s", s[:min(900, len(s))])
+	}
+}
+
+func TestSettingsHouseholdMemberRemove_soleOwnerLeavesHousehold(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "leave-solo@integration.test", "pw", "user")
+	ctx := context.Background()
+	u, err := app.Store.GetUserByEmail(ctx, "leave-solo@integration.test")
+	if err != nil || u == nil {
+		t.Fatalf("user: %+v err=%v", u, err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "leave-solo@integration.test", "pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+		"user_id": {strconv.FormatInt(u.ID, 10)},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "You left the household.") {
+		t.Fatalf("expected leave banner, got: %s", s[:min(900, len(s))])
+	}
+}
+
 func TestSettingsProfileUpdate_passwordChangeShowsSuccess(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)

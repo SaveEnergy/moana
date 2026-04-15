@@ -31,6 +31,29 @@ func TestLoginPageOK(t *testing.T) {
 	}
 }
 
+func TestUnauthenticatedDashboardRedirectsToLogin(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	resp, err := client.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusSeeOther {
+		t.Fatalf("status %d want %d", resp.StatusCode, http.StatusSeeOther)
+	}
+	loc := resp.Header.Get("Location")
+	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+		t.Fatalf("unexpected Location %q (want /login?error=1)", loc)
+	}
+}
+
 func TestHealth(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
