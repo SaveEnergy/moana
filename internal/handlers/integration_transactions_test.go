@@ -42,6 +42,61 @@ func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
 	}
 }
 
+func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "zero-amt@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "zero-amt@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"0.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"x"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 with form error", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Amount must be greater than zero.") {
+		t.Fatalf("expected zero-amount copy, got: %s", s[:min(500, len(s))])
+	}
+}
+
+func TestTransactionCreate_emptyDateShowsMessage(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "nodate@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "nodate@moana.test", "pw")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"10.00"},
+		"kind":        {"expense"},
+		"occurred_on": {""},
+		"description": {"x"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 with form error", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Date is required.") {
+		t.Fatalf("expected date required copy, got: %s", s[:min(500, len(s))])
+	}
+}
+
 func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
