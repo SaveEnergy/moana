@@ -67,6 +67,58 @@ func TestSettingsHouseholdUpdate_nameShowsSuccess(t *testing.T) {
 	}
 }
 
+func TestSettingsPage_showsErrQueryMessage(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "settings-err@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "settings-err@integration.test", "pw")
+	msg := "Something went wrong."
+	resp, err := client.Get(srv.URL + "/settings?err=" + url.QueryEscape(msg))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, msg) {
+		t.Fatalf("expected err query in page: %s", s[:min(800, len(s))])
+	}
+	// settings.html uses `class="alert alert-error settings-alert"` (prefix match, no closing quote here).
+	if !strings.Contains(s, `class="alert alert-error`) {
+		t.Fatal("expected error alert class")
+	}
+}
+
+func TestSettingsHouseholdUpdate_emptyNameShowsError(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "hh-empty@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "hh-empty@integration.test", "pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/household", url.Values{
+		"household_name": {"  "},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Household name is required.") {
+		t.Fatalf("expected validation copy, got: %s", s[:min(800, len(s))])
+	}
+}
+
 func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
@@ -90,6 +142,45 @@ func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	s := string(body)
 	if !strings.Contains(s, "Member added.") {
 		t.Fatalf("expected member success banner, got: %s", s[:min(900, len(s))])
+	}
+}
+
+func TestSettingsHouseholdMemberAdd_memberCannotAdd(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "owner-mgr@integration.test", "pw", "user")
+	ctx := context.Background()
+	owner, err := app.Store.GetUserByEmail(ctx, "owner-mgr@integration.test")
+	if err != nil || owner == nil {
+		t.Fatal(err)
+	}
+	hash, err := auth.HashPassword("mem-pw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := app.Store.CreateHouseholdMember(ctx, owner.HouseholdID, "plain-member@integration.test", hash); err != nil {
+		t.Fatal(err)
+	}
+
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "plain-member@integration.test", "mem-pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+		"email":    {"new@integration.test"},
+		"password": {"secret-initial-1"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "You cannot add members.") {
+		t.Fatalf("expected permission error, got: %s", s[:min(900, len(s))])
 	}
 }
 
