@@ -149,6 +149,96 @@ func TestEditTransaction(t *testing.T) {
 	}
 }
 
+func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	ctx := context.Background()
+	uid := testutil.MustCreateUser(t, app, "next-safe@moana.test", "pw", "user")
+	u, err := app.Store.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "next-safe@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"5.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"n"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	txs, err := app.Store.ListTransactions(ctx, u.HouseholdID, store.TransactionFilter{Limit: 1})
+	if err != nil || len(txs) != 1 {
+		t.Fatalf("list: %v", err)
+	}
+	id := txs[0].ID
+
+	resp2, err := client.Get(fmt.Sprintf("%s/transactions/%d/edit?next=/categories", srv.URL, id))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp2.Body.Close()
+	body, _ := io.ReadAll(resp2.Body)
+	s := string(body)
+	if !strings.Contains(s, `name="next"`) || !strings.Contains(s, `value="/categories"`) {
+		t.Fatalf("expected hidden next=/categories, got: %s", s[:min(600, len(s))])
+	}
+}
+
+func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	ctx := context.Background()
+	uid := testutil.MustCreateUser(t, app, "next-unsafe@moana.test", "pw", "user")
+	u, err := app.Store.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "next-unsafe@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+		"amount":      {"5.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"n"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	txs, err := app.Store.ListTransactions(ctx, u.HouseholdID, store.TransactionFilter{Limit: 1})
+	if err != nil || len(txs) != 1 {
+		t.Fatalf("list: %v", err)
+	}
+	id := txs[0].ID
+
+	resp2, err := client.Get(fmt.Sprintf("%s/transactions/%d/edit?next=//evil.com/foo", srv.URL, id))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp2.Body.Close()
+	body, _ := io.ReadAll(resp2.Body)
+	s := string(body)
+	if strings.Contains(s, "evil.com") {
+		t.Fatalf("unsafe next host leaked into HTML")
+	}
+	idx := strings.Index(s, `name="next"`)
+	if idx < 0 {
+		t.Fatal("missing hidden next field")
+	}
+	snippet := s[idx:min(idx+120, len(s))]
+	if !strings.Contains(snippet, `value="/history"`) {
+		t.Fatalf("expected sanitized default /history in hidden next, snippet: %q", snippet)
+	}
+}
+
 func TestTransactionCreate_invalidCategoryIDShowsMessage(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
