@@ -301,9 +301,7 @@ func TestHistoryPage_invalidDateRangeShowsBanner(t *testing.T) {
 	if !strings.Contains(s, "Invalid date range.") {
 		t.Fatalf("expected date validation banner, got: %s", s[:min(600, len(s))])
 	}
-	if !strings.Contains(s, `class="alert alert-error"`) {
-		t.Fatal("expected alert-error class")
-	}
+	assertBodyHasErrorAlert(t, s)
 }
 
 func TestSettingsPageOKForLoggedInUser(t *testing.T) {

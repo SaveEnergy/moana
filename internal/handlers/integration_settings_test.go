@@ -88,10 +88,7 @@ func TestSettingsPage_showsErrQueryMessage(t *testing.T) {
 	if !strings.Contains(s, msg) {
 		t.Fatalf("expected err query in page: %s", s[:min(800, len(s))])
 	}
-	// settings.html uses `class="alert alert-error settings-alert"` (prefix match, no closing quote here).
-	if !strings.Contains(s, `class="alert alert-error`) {
-		t.Fatal("expected error alert class")
-	}
+	assertBodyHasErrorAlert(t, s)
 }
 
 func TestSettingsHouseholdUpdate_emptyNameShowsError(t *testing.T) {
@@ -220,9 +217,7 @@ func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
 	if !strings.Contains(s, "Could not add member (duplicate email?).") {
 		t.Fatalf("expected duplicate copy, got: %s", s[:min(900, len(s))])
 	}
-	if !strings.Contains(s, `class="alert alert-error`) {
-		t.Fatal("expected error alert class")
-	}
+	assertBodyHasErrorAlert(t, s)
 }
 
 func TestSettingsHouseholdMemberRemove_ownerRemovesMember(t *testing.T) {
@@ -291,9 +286,7 @@ func TestSettingsHouseholdMemberRemove_invalidUserIDShowsError(t *testing.T) {
 	if !strings.Contains(s, "Invalid member.") {
 		t.Fatalf("expected validation error, got: %s", s[:min(900, len(s))])
 	}
-	if !strings.Contains(s, `class="alert alert-error`) {
-		t.Fatal("expected error alert class")
-	}
+	assertBodyHasErrorAlert(t, s)
 }
 
 func TestSettingsHouseholdMemberRemove_memberCannotRemoveOwner(t *testing.T) {

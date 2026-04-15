@@ -37,9 +37,7 @@ func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
 	}
 	body, _ := io.ReadAll(resp.Body)
 	s := string(body)
-	if !strings.Contains(s, `class="alert alert-error"`) {
-		t.Fatalf("expected validation error in body: %s", s[:min(400, len(s))])
-	}
+	assertBodyHasErrorAlert(t, s)
 }
 
 func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
@@ -386,7 +384,5 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	}
 	body, _ := io.ReadAll(resp2.Body)
 	s := string(body)
-	if !strings.Contains(s, `class="alert alert-error"`) {
-		t.Fatalf("expected validation error on edit form: %s", s[:min(500, len(s))])
-	}
+	assertBodyHasErrorAlert(t, s)
 }
