@@ -41,3 +41,26 @@ func TestLogout_redirectsToLoginAndClearsSession(t *testing.T) {
 		t.Fatal("expected auth gate to login after session cleared")
 	}
 }
+
+func TestLogout_withoutSessionRedirectsToLogin(t *testing.T) {
+	t.Parallel()
+	_, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	resp, err := client.PostForm(srv.URL+"/logout", url.Values{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusSeeOther {
+		t.Fatalf("status %d want %d", resp.StatusCode, http.StatusSeeOther)
+	}
+	loc := resp.Header.Get("Location")
+	if !strings.Contains(loc, "/login") {
+		t.Fatalf("unexpected Location %q", loc)
+	}
+}

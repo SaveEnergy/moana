@@ -12,6 +12,39 @@ import (
 	"moana/internal/testutil"
 )
 
+func TestCategoryDelete_removesExisting(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "catdelok@moana.test", "pw", "user")
+	ctx := context.Background()
+	u, err := app.Store.GetUserByEmail(ctx, "catdelok@moana.test")
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	id, err := app.Store.CreateCategory(ctx, u.HouseholdID, "ToDeleteMe", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "catdelok@moana.test", "pw")
+	resp, err := client.PostForm(srv.URL+"/categories/delete", url.Values{
+		"id": {strconv.FormatInt(id, 10)},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 after redirect to categories", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if strings.Contains(s, "ToDeleteMe") {
+		t.Fatalf("deleted category name should not appear on page: %s", s[:min(600, len(s))])
+	}
+}
+
 func TestCategoryDelete_notFoundShowsMessage(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
