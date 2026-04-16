@@ -33,7 +33,7 @@ func TestLoginPageOK(t *testing.T) {
 	}
 }
 
-func TestUnauthenticatedDashboardRedirectsToLogin(t *testing.T) {
+func TestUnauthenticatedProtectedRoutesRedirectToLogin(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
@@ -42,17 +42,19 @@ func TestUnauthenticatedDashboardRedirectsToLogin(t *testing.T) {
 			return http.ErrUseLastResponse
 		},
 	}
-	resp, err := client.Get(srv.URL + "/")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusSeeOther {
-		t.Fatalf("status %d want %d", resp.StatusCode, http.StatusSeeOther)
-	}
-	loc := resp.Header.Get("Location")
-	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
-		t.Fatalf("unexpected Location %q (want /login?error=1)", loc)
+	for _, path := range []string{"/", "/history", "/transactions", "/categories", "/settings"} {
+		resp, err := client.Get(srv.URL + path)
+		if err != nil {
+			t.Fatalf("%s: %v", path, err)
+		}
+		_ = resp.Body.Close()
+		if resp.StatusCode != http.StatusSeeOther {
+			t.Fatalf("%s: status %d want %d", path, resp.StatusCode, http.StatusSeeOther)
+		}
+		loc := resp.Header.Get("Location")
+		if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+			t.Fatalf("%s: unexpected Location %q (want /login?error=1)", path, loc)
+		}
 	}
 }
 
