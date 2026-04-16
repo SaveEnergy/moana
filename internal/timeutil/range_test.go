@@ -65,6 +65,9 @@ func TestLoadLocation(t *testing.T) {
 	if LoadLocation("not-a-real-zone-name-xyz") != time.UTC {
 		t.Fatal("invalid name must be UTC")
 	}
+	if LoadLocation("UTC") != time.UTC {
+		t.Fatal(`LoadLocation("UTC") must be time.UTC`)
+	}
 	berlin := LoadLocation("Europe/Berlin")
 	if berlin == nil || berlin == time.UTC {
 		t.Fatal("valid zone must not be UTC")
