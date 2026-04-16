@@ -32,7 +32,7 @@ func BuildHeatmapCellsRolling365(endDay time.Time, loc *time.Location, byDay map
 	}
 
 	pad := int(startDay.Weekday())
-	var cells []HeatmapCell
+	cells := make([]HeatmapCell, 0, pad+365)
 	for i := 0; i < pad; i++ {
 		cells = append(cells, HeatmapCell{Empty: true})
 	}
