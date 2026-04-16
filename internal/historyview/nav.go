@@ -1,6 +1,7 @@
 package historyview
 
 import (
+	"maps"
 	"net/url"
 )
 
@@ -35,11 +36,5 @@ func BuildNav(u *url.URL) Nav {
 }
 
 func cloneQuery(u *url.URL) url.Values {
-	v := url.Values{}
-	for k, vals := range u.Query() {
-		for _, x := range vals {
-			v.Add(k, x)
-		}
-	}
-	return v
+	return maps.Clone(u.Query())
 }
