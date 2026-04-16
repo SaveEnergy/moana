@@ -16,7 +16,9 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	}
 	q := sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
-	args := []any{householdID}
+	// At most: household, from, to, 2×search, limit.
+	args := make([]any, 0, 6)
+	args = append(args, householdID)
 	if f.FromUTC != nil {
 		q += ` AND t.occurred_at >= ?`
 		args = append(args, timeutil.FormatSQLiteUTC(*f.FromUTC))
