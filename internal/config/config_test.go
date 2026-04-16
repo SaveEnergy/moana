@@ -138,6 +138,20 @@ func TestLoad_invalidSessionMaxAgeFallsBackToDefault(t *testing.T) {
 	}
 }
 
+func TestDBPath_defaultWhenUnsetOrEmpty(t *testing.T) {
+	t.Setenv("MOANA_DB_PATH", "")
+	if got := DBPath(); got != "data/moana.db" {
+		t.Fatalf("DBPath() = %q want data/moana.db", got)
+	}
+}
+
+func TestDBPath_fromEnv(t *testing.T) {
+	t.Setenv("MOANA_DB_PATH", "/tmp/moana-dbpath-regression.db")
+	if got := DBPath(); got != "/tmp/moana-dbpath-regression.db" {
+		t.Fatalf("DBPath() = %q", got)
+	}
+}
+
 func TestLoad_listenAndDbPathFromEnv(t *testing.T) {
 	t.Setenv("MOANA_ENV", "development")
 	t.Setenv("MOANA_SESSION_SECRET", "")
