@@ -33,3 +33,15 @@ func TestInternal_nilErrNoop(t *testing.T) {
 		t.Fatal("expected no response body")
 	}
 }
+
+func TestInternal_nilRequestWithError(t *testing.T) {
+	t.Parallel()
+	w := httptest.NewRecorder()
+	Internal(w, nil, errors.New("render failure"))
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("code %d", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), InternalMessage) {
+		t.Fatalf("body %q", w.Body.String())
+	}
+}
