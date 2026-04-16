@@ -39,6 +39,16 @@ func TestCookieZone_invalidIANA(t *testing.T) {
 	}
 }
 
+func TestCookieZone_whitespaceOnly(t *testing.T) {
+	t.Parallel()
+	r := &http.Request{Header: http.Header{}}
+	// Spaces-only: LoadLocation("") succeeds in stdlib, but we normalize to "UTC" for a stable zone name.
+	r.AddCookie(&http.Cookie{Name: CookieName, Value: "     "})
+	if got := CookieZone(r); got != "UTC" {
+		t.Fatalf("got %q want UTC", got)
+	}
+}
+
 func TestDisplayLocation(t *testing.T) {
 	t.Parallel()
 	r := &http.Request{Header: http.Header{}}

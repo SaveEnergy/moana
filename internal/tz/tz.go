@@ -21,6 +21,9 @@ func CookieZone(r *http.Request) string {
 		return "UTC"
 	}
 	v := strings.TrimSpace(c.Value)
+	if v == "" {
+		return "UTC"
+	}
 	if _, err := time.LoadLocation(v); err != nil {
 		return "UTC"
 	}

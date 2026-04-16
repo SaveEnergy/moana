@@ -14,10 +14,13 @@ func TestParseEURToCents(t *testing.T) {
 		{"12.34", 1234, false},
 		{"12.3", 1230, false},
 		{"1,234.56", 123456, false},
+		{"€12.50", 1250, false},
+		{"  €3.00  ", 300, false},
 		{"  42.00  ", 4200, false},
 		{"-10.00", -1000, false},
 		{"", 0, true},
 		{"12.345", 0, true},
+		{"1.2.3", 0, true},
 		{"not", 0, true},
 	}
 	for _, tc := range tests {
