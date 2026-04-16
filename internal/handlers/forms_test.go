@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"testing/iotest"
@@ -35,5 +36,29 @@ func TestRequireParseForm_bodyReadError(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "bad form") {
 		t.Fatalf("body %q", rec.Body.String())
+	}
+}
+
+func TestRequireParseFormSettings_bodyReadError(t *testing.T) {
+	t.Parallel()
+	req := httptest.NewRequest(http.MethodPost, "/settings/profile", iotest.ErrReader(errors.New("read fail")))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+	if requireParseFormSettings(rec, req) {
+		t.Fatal("expected false")
+	}
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("code %d", rec.Code)
+	}
+	loc := rec.Result().Header.Get("Location")
+	u, err := url.Parse(loc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Path != "/settings" {
+		t.Fatalf("path %q", u.Path)
+	}
+	if got := u.Query().Get("err"); got != "Invalid form." {
+		t.Fatalf("err param %q", got)
 	}
 }
