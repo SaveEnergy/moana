@@ -369,6 +369,47 @@ func TestTransactionEditNotFound(t *testing.T) {
 	}
 }
 
+func TestTransactionEdit_invalidPathIDReturns404(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "bad-id-get@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "bad-id-get@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/transactions/not-a-number/edit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
+	}
+}
+
+func TestTransactionUpdate_invalidPathIDReturns404(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "bad-id-post@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "bad-id-post@moana.test", "pw")
+	day := time.Now().UTC().Format("2006-01-02")
+	resp, err := client.PostForm(srv.URL+"/transactions/not-a-number", url.Values{
+		"next":        {"/history"},
+		"amount":      {"1.00"},
+		"kind":        {"expense"},
+		"occurred_on": {day},
+		"description": {"x"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
+	}
+}
+
 func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
