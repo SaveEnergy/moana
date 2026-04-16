@@ -24,7 +24,9 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	}
 	q := `SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
 ` + sqlAggregateFromHouseholdTx + ` AND t.amount_cents < 0`
-	args := []any{householdID}
+	// cap: household + optional from/to + limit.
+	args := make([]any, 0, 4)
+	args = append(args, householdID)
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	q += ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
 	args = append(args, limit)
@@ -62,7 +64,9 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 	}
 	q := `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
 ` + sqlAggregateFromHouseholdTx
-	args := []any{householdID}
+	// cap: household + optional from/to.
+	args := make([]any, 0, 3)
+	args = append(args, householdID)
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	if kind == "income" {
 		q += ` AND t.amount_cents > 0`
