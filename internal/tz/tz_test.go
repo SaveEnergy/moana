@@ -61,3 +61,13 @@ func TestDisplayLocation(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestDisplayLocation_whitespaceCookieFallsBackToUTC(t *testing.T) {
+	t.Parallel()
+	r := &http.Request{Header: http.Header{}}
+	r.AddCookie(&http.Cookie{Name: CookieName, Value: "   "})
+	loc := DisplayLocation(r)
+	if loc != time.UTC {
+		t.Fatalf("got %v want UTC", loc)
+	}
+}
