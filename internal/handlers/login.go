@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"moana/internal/auth"
@@ -26,7 +27,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	if !requireParseForm(w, r) {
 		return
 	}
-	email := r.FormValue("email")
+	email := strings.TrimSpace(r.FormValue("email"))
 	password := r.FormValue("password")
 	if email == "" || password == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
