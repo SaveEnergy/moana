@@ -52,3 +52,12 @@ func TestUserFacingStoreMessage_duplicateUserEmail(t *testing.T) {
 		t.Fatalf("got %q want %q", got, want)
 	}
 }
+
+func TestUserFacingStoreMessage_invalidUserEmail(t *testing.T) {
+	t.Parallel()
+	got := userFacingStoreMessage(store.ErrInvalidUserEmail)
+	const want = "That email address is not valid."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}

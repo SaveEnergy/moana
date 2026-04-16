@@ -8,7 +8,7 @@ import (
 	"moana/internal/timeutil"
 )
 
-// CookieName is the cookie set by the client with the browser's IANA zone (see frontend/src/main.ts).
+// CookieName is the cookie set by the client with the browser's IANA zone (see internal/assets/static/js/app.js).
 const CookieName = "moana_tz"
 
 // CookieZone returns an IANA zone name from the cookie, or "UTC" if missing/invalid.

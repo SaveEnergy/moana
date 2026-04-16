@@ -22,5 +22,8 @@ func userFacingStoreMessage(err error) string {
 	if errors.Is(err, store.ErrDuplicateUserEmail) {
 		return "A user with that email already exists."
 	}
+	if errors.Is(err, store.ErrInvalidUserEmail) {
+		return "That email address is not valid."
+	}
 	return httperr.InternalMessage
 }
