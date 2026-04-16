@@ -114,3 +114,13 @@ func TestDonutConicGradient(t *testing.T) {
 		t.Fatal(s)
 	}
 }
+
+func TestDonutConicGradient_empty(t *testing.T) {
+	t.Parallel()
+	if DonutConicGradient(nil, nil) != "" {
+		t.Fatal("nil slices")
+	}
+	if DonutConicGradient([]float64{}, []string{}) != "" {
+		t.Fatal("empty slices")
+	}
+}

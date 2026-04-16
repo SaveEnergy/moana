@@ -126,3 +126,36 @@ func TestListTransactions_whitespaceOnlySearchSkipped(t *testing.T) {
 		t.Fatalf("whitespace-only search should not filter, got %d rows", len(txs))
 	}
 }
+
+func TestListTransactions_kindIgnoresSurroundingSpace(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash, err := auth.HashPassword("x")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid, err := st.CreateUser(ctx, "kind-trim@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 7, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "in", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -50, day, "out", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Kind: "  income  "})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 1 || txs[0].AmountCents != 100 {
+		t.Fatalf("want 1 income row, got %+v", txs)
+	}
+}

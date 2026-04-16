@@ -25,7 +25,7 @@ WHERE owner.household_id = ?`
 		q += ` AND t.occurred_at <= ?`
 		args = append(args, timeutil.FormatSQLiteUTC(*f.ToUTC))
 	}
-	switch f.Kind {
+	switch strings.TrimSpace(f.Kind) {
 	case "income":
 		q += ` AND t.amount_cents > 0`
 	case "expense":
