@@ -34,6 +34,19 @@ func TestSVG_unknownFallsBackToPalette(t *testing.T) {
 	}
 }
 
+func TestSVG_escapesClassAttribute(t *testing.T) {
+	t.Parallel()
+	// Class is interpolated into HTML; must not allow breaking out of the attribute.
+	h := SVG("heart", `"><img src=x`)
+	s := string(h)
+	if strings.Contains(s, `"><img`) {
+		t.Fatalf("class not escaped: %s", s)
+	}
+	if !strings.Contains(s, `class="`) {
+		t.Fatalf("missing class attr: %s", s)
+	}
+}
+
 func TestInner(t *testing.T) {
 	t.Parallel()
 	if Inner("heart") == "" {
@@ -41,5 +54,8 @@ func TestInner(t *testing.T) {
 	}
 	if Inner("not-a-real-lucide-id-xyz") != "" {
 		t.Fatal("unknown should be empty")
+	}
+	if Inner("") != "" {
+		t.Fatal("empty id should be empty inner")
 	}
 }
