@@ -38,6 +38,7 @@ func formatThousands(n int64) string {
 		return s
 	}
 	var b strings.Builder
+	b.Grow(len(s) + (len(s)-1)/3)
 	lead := len(s) % 3
 	if lead == 0 {
 		lead = 3

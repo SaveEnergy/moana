@@ -29,3 +29,11 @@ func TestMergeFuncMaps_capacityMatchesKeys(t *testing.T) {
 		t.Fatalf("len=%d", len(m))
 	}
 }
+
+func TestMergeFuncMaps_noArgs(t *testing.T) {
+	t.Parallel()
+	m := MergeFuncMaps()
+	if len(m) != 0 {
+		t.Fatalf("want empty map, len=%d", len(m))
+	}
+}
