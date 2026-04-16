@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"moana/internal/httperr"
 )
 
 func TestEngineSimple(t *testing.T) {
@@ -23,5 +25,23 @@ func TestEngineSimple(t *testing.T) {
 	body := rec.Body.String()
 	if !strings.Contains(body, "<p>ok</p>") {
 		t.Fatalf("body %q", body)
+	}
+}
+
+func TestSimple_execErrorDoesNotWritePartialHTML(t *testing.T) {
+	t.Parallel()
+	tmpl := template.Must(template.New("bad.html").Parse(`<!doctype html><p>{{.Missing}}</p>`))
+	e := &Engine{Templates: tmpl}
+	rec := httptest.NewRecorder()
+	e.Simple(rec, "bad.html", struct{}{})
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("status %d want 500", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "<p>") || strings.Contains(body, "<!doctype") {
+		t.Fatalf("unexpected partial HTML: %q", body)
+	}
+	if !strings.Contains(body, httperr.InternalMessage) {
+		t.Fatalf("expected internal message, got %q", body)
 	}
 }
