@@ -16,9 +16,10 @@ func buildOutflowSection(ctx context.Context, st *store.Store, householdID int64
 	}
 	outflowMerged := MergeCategoryTopN(expenseRows, defaultOutflowMergeLimit)
 	totalAbs := money.AbsCents(periodExpense)
-	var outflowRows []OutflowRow
-	var pcts []float64
-	var hexes []string
+	n := len(outflowMerged)
+	outflowRows := make([]OutflowRow, 0, n)
+	pcts := make([]float64, 0, n)
+	hexes := make([]string, 0, n)
 	for _, ca := range outflowMerged {
 		if totalAbs <= 0 {
 			break

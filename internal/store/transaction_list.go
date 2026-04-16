@@ -10,6 +10,10 @@ import (
 
 // ListTransactions returns transactions for the household, ordered by occurred_at (and id).
 func (s *Store) ListTransactions(ctx context.Context, householdID int64, f TransactionFilter) ([]Transaction, error) {
+	limit := f.Limit
+	if limit < 0 {
+		limit = 0
+	}
 	q := sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
 	args := []any{householdID}
@@ -37,9 +41,9 @@ WHERE owner.household_id = ?`
 	} else {
 		q += ` ORDER BY t.occurred_at DESC, t.id DESC`
 	}
-	if f.Limit > 0 {
+	if limit > 0 {
 		q += ` LIMIT ?`
-		args = append(args, f.Limit)
+		args = append(args, limit)
 	}
 
 	rows, err := s.DB.QueryContext(ctx, q, args...)
@@ -49,8 +53,8 @@ WHERE owner.household_id = ?`
 	defer rows.Close()
 	var out []Transaction
 	switch {
-	case f.Limit > 0:
-		out = make([]Transaction, 0, f.Limit)
+	case limit > 0:
+		out = make([]Transaction, 0, limit)
 	default:
 		out = make([]Transaction, 0, 64)
 	}

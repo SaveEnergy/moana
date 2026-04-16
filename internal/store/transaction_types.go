@@ -25,5 +25,5 @@ type TransactionFilter struct {
 	Kind        string // "", "all", "income", "expense"
 	Search      string // matches description or category name (substring); whitespace-only is ignored in ListTransactions
 	OldestFirst bool   // default false = newest first
-	Limit       int    // if > 0, cap rows (newest/oldest order preserved)
+	Limit       int    // if > 0, cap rows (newest/oldest order preserved); zero or negative means no cap
 }

@@ -54,6 +54,14 @@ func TestListTransactions_respectsLimit(t *testing.T) {
 	if len(txsAll) != 5 {
 		t.Fatalf("unlimited list: want 5, got %d", len(txsAll))
 	}
+
+	txsNeg, err := st.ListTransactions(ctx, hid, TransactionFilter{Limit: -1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txsNeg) != 5 {
+		t.Fatalf("negative limit treated as no cap: want 5, got %d", len(txsNeg))
+	}
 }
 
 func TestListTransactions_searchLiteralPercentDoesNotMatchAllRows(t *testing.T) {
