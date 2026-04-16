@@ -21,13 +21,18 @@ func FormatEURAbs(cents int64) string {
 
 // FormatCompactEUR abbreviates large EUR amounts (e.g. €12.5k).
 func FormatCompactEUR(cents int64) string {
+	neg := cents < 0
 	x := cents
-	if x < 0 {
+	if neg {
 		x = -x
 	}
 	if x < 100_000 {
 		return money.FormatEUR(cents)
 	}
 	v := float64(x) / 100.0 / 1000.0
-	return fmt.Sprintf("€%.1fk", v)
+	s := fmt.Sprintf("€%.1fk", v)
+	if neg {
+		return "-" + s
+	}
+	return s
 }

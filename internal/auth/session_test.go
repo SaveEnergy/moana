@@ -72,6 +72,32 @@ func TestReadSession_wrongSecret(t *testing.T) {
 	}
 }
 
+func TestClearSession_expiresCookie(t *testing.T) {
+	t.Parallel()
+	t.Run("secure", func(t *testing.T) {
+		t.Parallel()
+		w := httptest.NewRecorder()
+		ClearSession(w, true)
+		cs := w.Result().Cookies()
+		if len(cs) != 1 {
+			t.Fatalf("cookies: %d", len(cs))
+		}
+		c := cs[0]
+		if c.Name != cookieName || c.Value != "" || c.MaxAge != -1 || !c.HttpOnly || !c.Secure || c.SameSite != http.SameSiteLaxMode {
+			t.Fatalf("cookie: %+v", c)
+		}
+	})
+	t.Run("not_secure", func(t *testing.T) {
+		t.Parallel()
+		w := httptest.NewRecorder()
+		ClearSession(w, false)
+		c := w.Result().Cookies()[0]
+		if c.Secure {
+			t.Fatal("want Secure false")
+		}
+	})
+}
+
 func TestReadSession_invalidRole(t *testing.T) {
 	t.Parallel()
 	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
