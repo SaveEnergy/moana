@@ -43,10 +43,14 @@ func runUserAdd(args []string) int {
 		return 1
 	}
 	ctx := context.Background()
-	id, err := st.CreateUser(ctx, strings.TrimSpace(*email), hash, r)
+	id, err := st.CreateUser(ctx, *email, hash, r)
 	if err != nil {
 		if errors.Is(err, store.ErrDuplicateUserEmail) {
 			fmt.Fprintf(os.Stderr, "create user: email already exists\n")
+			return 1
+		}
+		if errors.Is(err, store.ErrInvalidUserEmail) {
+			fmt.Fprintf(os.Stderr, "create user: invalid email\n")
 			return 1
 		}
 		fmt.Fprintf(os.Stderr, "create user: %v\n", err)

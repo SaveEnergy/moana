@@ -8,6 +8,10 @@ import (
 
 // CreateUser inserts a new user with their own household (CLI / bootstrap).
 func (s *Store) CreateUser(ctx context.Context, email string, passwordHash []byte, role string) (int64, error) {
+	email = normalizeUserEmail(email)
+	if email == "" {
+		return 0, ErrInvalidUserEmail
+	}
 	now := timeutil.NowSQLiteUTC()
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {

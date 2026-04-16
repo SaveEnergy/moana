@@ -181,6 +181,35 @@ func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	}
 }
 
+func TestSettingsHouseholdMemberAdd_trimsEmailForNewMemberLogin(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "owner-trim-mem@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "owner-trim-mem@integration.test", "pw")
+
+	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+		"email":    {"  paddedmember@integration.test  "},
+		"password": {"member-initial-secret-99"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 after redirect to settings", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Member added.") {
+		t.Fatalf("expected member success banner, got: %s", s[:min(900, len(s))])
+	}
+
+	client2 := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client2, srv.URL, "paddedmember@integration.test", "member-initial-secret-99")
+}
+
 func TestSettingsHouseholdMemberAdd_memberCannotAdd(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)

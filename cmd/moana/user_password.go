@@ -30,7 +30,7 @@ func runUserPassword(args []string) int {
 	defer sqlDB.Close()
 
 	ctx := context.Background()
-	u, err := st.GetUserByEmail(ctx, strings.TrimSpace(*email))
+	u, err := st.GetUserByEmail(ctx, *email)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "lookup: %v\n", err)
 		return 1

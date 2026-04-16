@@ -37,6 +37,10 @@ func (a *App) SettingsHouseholdMemberAdd(w http.ResponseWriter, r *http.Request,
 			redirectSettingsErr(w, r, "A user with that email already exists.")
 			return
 		}
+		if errors.Is(err, store.ErrInvalidUserEmail) {
+			redirectSettingsErr(w, r, "Email and password are required.")
+			return
+		}
 		redirectSettingsErr(w, r, "Could not add member.")
 		return
 	}

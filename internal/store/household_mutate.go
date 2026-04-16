@@ -10,6 +10,9 @@ import (
 // ErrDuplicateUserEmail is returned when inserting a user would violate the unique email constraint.
 var ErrDuplicateUserEmail = errors.New("duplicate user email")
 
+// ErrInvalidUserEmail is returned when an email is empty or only whitespace after normalization.
+var ErrInvalidUserEmail = errors.New("invalid user email")
+
 // UpdateHouseholdName sets the display name for a household.
 func (s *Store) UpdateHouseholdName(ctx context.Context, householdID int64, name string) error {
 	_, err := s.DB.ExecContext(ctx, `UPDATE households SET name = ? WHERE id = ?`, name, householdID)
@@ -18,6 +21,10 @@ func (s *Store) UpdateHouseholdName(ctx context.Context, householdID int64, name
 
 // CreateHouseholdMember adds a user with role member to an existing household.
 func (s *Store) CreateHouseholdMember(ctx context.Context, householdID int64, email string, passwordHash []byte) (int64, error) {
+	email = normalizeUserEmail(email)
+	if email == "" {
+		return 0, ErrInvalidUserEmail
+	}
 	now := timeutil.NowSQLiteUTC()
 	res, err := s.DB.ExecContext(ctx, sqlUserInsert, email, passwordHash, "user", now, householdID, "member")
 	if err != nil {
