@@ -18,7 +18,9 @@ func (s *Store) SumAmountCents(ctx context.Context, householdID int64, fromUTC, 
 func (s *Store) SumIncomeExpenseCentsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time) (incomeSum int64, expenseSum int64, err error) {
 	q := `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
 COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx
-	args := []any{householdID}
+	// cap: household + optional from/to.
+	args := make([]any, 0, 3)
+	args = append(args, householdID)
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	err = s.DB.QueryRowContext(ctx, q, args...).Scan(&incomeSum, &expenseSum)
 	return incomeSum, expenseSum, err
@@ -53,7 +55,9 @@ func (s *Store) SumRunningTotalAndIncomeExpenseInTwoRanges(ctx context.Context, 
 // SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense".
 func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) (int64, error) {
 	q := `SELECT COALESCE(SUM(t.amount_cents), 0) ` + sqlFromHouseholdTx
-	args := []any{householdID}
+	// cap: household + optional from/to.
+	args := make([]any, 0, 3)
+	args = append(args, householdID)
 	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
 	switch kind {
 	case "income":
