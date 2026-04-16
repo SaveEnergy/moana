@@ -29,3 +29,23 @@ func TestParseSQLiteTimestampRFC3339Fallback(t *testing.T) {
 		t.Fatalf("got %v", got)
 	}
 }
+
+func TestParseSQLiteTimestamp_invalid(t *testing.T) {
+	t.Parallel()
+	_, err := ParseSQLiteTimestamp("totally not a date")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestNowSQLiteUTC_roundTrips(t *testing.T) {
+	t.Parallel()
+	s := NowSQLiteUTC()
+	got, err := ParseSQLiteTimestamp(s)
+	if err != nil {
+		t.Fatalf("NowSQLiteUTC() = %q: %v", s, err)
+	}
+	if got.IsZero() {
+		t.Fatal("parsed time is zero")
+	}
+}
