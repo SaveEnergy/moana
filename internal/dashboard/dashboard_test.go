@@ -108,6 +108,22 @@ func TestBuildHeatmapCellsRolling365_todayIsLastCell(t *testing.T) {
 	}
 }
 
+func TestBuildHeatmapCellsRolling365_nilLocationMatchesUTC(t *testing.T) {
+	t.Parallel()
+	end := time.Date(2026, 4, 13, 0, 0, 0, 0, time.UTC)
+	byDay := map[string]int64{"2026-04-13": 100}
+	got := BuildHeatmapCellsRolling365(end, nil, byDay)
+	want := BuildHeatmapCellsRolling365(end, time.UTC, byDay)
+	if len(got) != len(want) {
+		t.Fatalf("len %d vs %d", len(got), len(want))
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			t.Fatalf("cell %d: %+v vs %+v", i, got[i], want[i])
+		}
+	}
+}
+
 func TestDonutConicGradient(t *testing.T) {
 	t.Parallel()
 	s := DonutConicGradient([]float64{40, 60}, []string{"#111111", "#222222"})

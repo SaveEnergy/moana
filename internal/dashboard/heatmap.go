@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"moana/internal/money"
+	"moana/internal/timeutil"
 )
 
 // HeatmapCell is one square in the year activity grid (padding cells use Empty=true).
@@ -19,7 +20,9 @@ type HeatmapCell struct {
 // BuildHeatmapCellsRolling365 builds a GitHub-style column-major grid (7 rows × N weeks) for the
 // last 365 local calendar days ending on endDay (inclusive). The last cell is always endDay (today).
 // Leading empty cells align the first day to the correct weekday row; no trailing padding.
+// A nil loc is treated as UTC ([time.Date] panics if loc is nil).
 func BuildHeatmapCellsRolling365(endDay time.Time, loc *time.Location, byDay map[string]int64) []HeatmapCell {
+	loc = timeutil.OrUTC(loc)
 	endDay = time.Date(endDay.Year(), endDay.Month(), endDay.Day(), 0, 0, 0, 0, loc)
 	startDay := endDay.AddDate(0, 0, -364)
 
