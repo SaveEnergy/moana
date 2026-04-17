@@ -1,10 +1,12 @@
 package handlers_test
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	moanaapp "moana/internal/app"
 	"moana/internal/dbutil"
@@ -54,6 +56,38 @@ func TestRegisterRoutes_loginGET_ok(t *testing.T) {
 	body := rec.Body.String()
 	if !strings.Contains(body, "Sign in to your account") {
 		t.Fatalf("expected login page HTML, body len %d", len(body))
+	}
+}
+
+// TestRegisterRoutes_loginPOST_emptyFields_redirects verifies POST /login is registered; missing email/password redirects to /login.
+func TestRegisterRoutes_loginPOST_emptyFields_redirects(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader("email=&password="))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	mux.ServeHTTP(rec, req)
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("POST /login: status %d want 303", rec.Code)
+	}
+	loc := rec.Header().Get("Location")
+	if !strings.Contains(loc, "/login") {
+		t.Fatalf("Location %q want /login", loc)
+	}
+}
+
+// TestRegisterRoutes_loginPOST_badForm_returns400 verifies POST /login returns 400 when the body cannot be parsed.
+func TestRegisterRoutes_loginPOST_badForm_returns400(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/login", iotest.ErrReader(errors.New("read fail")))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	mux.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("POST /login: status %d want 400", rec.Code)
 	}
 }
 
