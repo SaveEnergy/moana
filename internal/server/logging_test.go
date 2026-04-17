@@ -62,6 +62,27 @@ func TestStatusWriter_flushNoPanicWithoutFlusher(t *testing.T) {
 	sw.Flush()
 }
 
+func TestStatusWriter_unwrapReturnsUnderlying(t *testing.T) {
+	t.Parallel()
+	rec := httptest.NewRecorder()
+	sw := &statusWriter{ResponseWriter: rec}
+	uw, ok := any(sw).(interface{ Unwrap() http.ResponseWriter })
+	if !ok {
+		t.Fatal("expected Unwrap method on statusWriter")
+	}
+	if uw.Unwrap() != rec {
+		t.Fatal("Unwrap expected to return the wrapped ResponseWriter")
+	}
+}
+
+func TestStatusWriter_pushReturnsErrNotSupportedWithoutPusher(t *testing.T) {
+	t.Parallel()
+	sw := &statusWriter{ResponseWriter: noFlusher{}}
+	if err := sw.Push("/x", nil); err != http.ErrNotSupported {
+		t.Fatalf("Push err %v want ErrNotSupported", err)
+	}
+}
+
 func TestRequestLogging_delegatesToInner(t *testing.T) {
 	t.Parallel()
 	var saw bool
