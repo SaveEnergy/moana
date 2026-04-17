@@ -64,6 +64,24 @@ func TestHTTPHandler_servesHealth(t *testing.T) {
 	}
 }
 
+func TestHTTPHandler_healthHeadOK(t *testing.T) {
+	t.Parallel()
+	st, db, err := dbutil.OpenStore(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	h, err := moanaapp.HTTPHandler(testutil.DefaultTestConfig(), st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodHead, "/health", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d", rec.Code)
+	}
+}
+
 func TestHTTPHandler_servesStaticCSS(t *testing.T) {
 	t.Parallel()
 	st, db, err := dbutil.OpenStore(":memory:")
