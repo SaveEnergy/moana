@@ -28,6 +28,19 @@ func newRegisterRoutesTestMux(t *testing.T) (*http.ServeMux, func()) {
 	return mux, func() { db.Close() }
 }
 
+func assertRedirectToLogin(t *testing.T, mux http.Handler, path string) {
+	t.Helper()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("%s: status %d want %d", path, rec.Code, http.StatusSeeOther)
+	}
+	loc := rec.Header().Get("Location")
+	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+		t.Fatalf("%s: Location %q want /login?...error=1...", path, loc)
+	}
+}
+
 // TestRegisterRoutes_loginGET_ok verifies GET /login is registered and serves the login template (no auth).
 func TestRegisterRoutes_loginGET_ok(t *testing.T) {
 	t.Parallel()
@@ -44,18 +57,20 @@ func TestRegisterRoutes_loginGET_ok(t *testing.T) {
 	}
 }
 
-// TestRegisterRoutes_notificationsGET verifies GET /notifications is registered (auth → redirect when anonymous).
-func TestRegisterRoutes_notificationsGET(t *testing.T) {
+// TestRegisterRoutes_protectedGET_redirectsAnonymous verifies auth-wrapped GET routes redirect when there is no session.
+func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 	t.Parallel()
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/notifications", nil))
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("GET /notifications: status %d want %d", rec.Code, http.StatusSeeOther)
+	paths := []string{
+		"/",               // dashboard (GET /{$})
+		"/transactions",
+		"/history",
+		"/categories",
+		"/settings",
+		"/notifications",
 	}
-	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
-		t.Fatalf("Location %q want /login?...error=1...", loc)
+	for _, path := range paths {
+		assertRedirectToLogin(t, mux, path)
 	}
 }
