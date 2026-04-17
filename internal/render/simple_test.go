@@ -22,6 +22,9 @@ func TestEngineSimple(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
+	if ct := rec.Header().Get("Content-Type"); ct != "text/html; charset=utf-8" {
+		t.Fatalf("Content-Type %q", ct)
+	}
 	body := rec.Body.String()
 	if !strings.Contains(body, "<p>ok</p>") {
 		t.Fatalf("body %q", body)

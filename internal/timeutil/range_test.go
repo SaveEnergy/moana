@@ -102,3 +102,37 @@ func TestDayRangeUTCFromLocalDates(t *testing.T) {
 		t.Fatalf("from=%v to=%v", from.In(loc), to.In(loc))
 	}
 }
+
+func TestDayRangeUTCFromLocalDates_singleDayInclusive(t *testing.T) {
+	t.Parallel()
+	loc := time.UTC
+	from, to, err := DayRangeUTCFromLocalDates(loc, "2026-06-01", "2026-06-01")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if from != time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC) {
+		t.Fatalf("start of day: %v", from)
+	}
+	if !to.After(from) {
+		t.Fatalf("end of inclusive day must be after start: from=%v to=%v", from, to)
+	}
+}
+
+func TestDayRangeUTCFromLocalDates_swappedArgsMatchForwardRange(t *testing.T) {
+	t.Parallel()
+	loc, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fwdFrom, fwdTo, err := DayRangeUTCFromLocalDates(loc, "2026-01-10", "2026-01-12")
+	if err != nil {
+		t.Fatal(err)
+	}
+	revFrom, revTo, err := DayRangeUTCFromLocalDates(loc, "2026-01-12", "2026-01-10")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !fwdFrom.Equal(revFrom) || !fwdTo.Equal(revTo) {
+		t.Fatalf("swapped args should match forward range: fwd %v..%v rev %v..%v", fwdFrom, fwdTo, revFrom, revTo)
+	}
+}
