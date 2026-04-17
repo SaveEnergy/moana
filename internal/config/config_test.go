@@ -189,6 +189,25 @@ func TestLoad_invalidSessionMaxAgeFallsBackToDefault(t *testing.T) {
 	}
 }
 
+func TestLoad_nonPositiveSessionMaxAgeFallsBackToDefault(t *testing.T) {
+	want := 604800 * time.Second // 7d
+	// Sequential subtests: env is process-wide; avoid parallel Setenv races.
+	for _, raw := range []string{"0", "-1", "-999"} {
+		t.Run(raw, func(t *testing.T) {
+			t.Setenv("MOANA_ENV", "development")
+			t.Setenv("MOANA_SESSION_SECRET", "")
+			t.Setenv("MOANA_SESSION_MAX_AGE_SEC", raw)
+			c, err := Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.SessionMaxAge != want {
+				t.Fatalf("MOANA_SESSION_MAX_AGE_SEC=%q: SessionMaxAge %v want %v", raw, c.SessionMaxAge, want)
+			}
+		})
+	}
+}
+
 func TestDBPath_defaultWhenUnsetOrEmpty(t *testing.T) {
 	t.Setenv("MOANA_DB_PATH", "")
 	if got := DBPath(); got != "data/moana.db" {
