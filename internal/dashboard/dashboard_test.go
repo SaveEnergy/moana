@@ -40,6 +40,15 @@ func TestNetPctChange(t *testing.T) {
 	}
 }
 
+func TestNetPctChange_negativePreviousUsesAbsInDenominator(t *testing.T) {
+	t.Parallel()
+	// current 100, previous -50 -> (100-(-50)) / Abs(-50) * 100 = 300
+	v := NetPctChange(100, -50)
+	if v < 299.9 || v > 300.1 {
+		t.Fatalf("got %v want ~300", v)
+	}
+}
+
 func TestPctChangePositive(t *testing.T) {
 	t.Parallel()
 	if v := PctChangePositive(150, 100); v < 49.9 || v > 50.1 {
