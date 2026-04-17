@@ -46,6 +46,19 @@ func TestOpenMemory(t *testing.T) {
 	}
 }
 
+func TestOpen_secondPingSucceeds(t *testing.T) {
+	t.Parallel()
+	d, err := Open(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	// Open already pings after migrate; pool must remain usable.
+	if err := d.PingContext(context.Background()); err != nil {
+		t.Fatalf("post-Open ping: %v", err)
+	}
+}
+
 func TestOpen_synchronousNormal(t *testing.T) {
 	t.Parallel()
 	d, err := Open(":memory:")

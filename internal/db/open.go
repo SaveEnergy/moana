@@ -34,6 +34,7 @@ func Open(path string) (*sql.DB, error) {
 		return nil, err
 	}
 	d.SetMaxOpenConns(1)
+	d.SetMaxIdleConns(1)
 
 	if path != ":memory:" {
 		if _, err := d.ExecContext(context.Background(), `PRAGMA journal_mode = WAL;`); err != nil {
@@ -54,6 +55,10 @@ func Open(path string) (*sql.DB, error) {
 	if err := migrate(d); err != nil {
 		_ = d.Close()
 		return nil, err
+	}
+	if err := d.PingContext(context.Background()); err != nil {
+		_ = d.Close()
+		return nil, fmt.Errorf("ping: %w", err)
 	}
 	return d, nil
 }
