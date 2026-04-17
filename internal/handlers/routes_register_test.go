@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -30,17 +31,30 @@ func newRegisterRoutesTestMux(t *testing.T) (*http.ServeMux, func()) {
 	return mux, func() { db.Close() }
 }
 
-func assertRedirectToLogin(t *testing.T, mux http.Handler, path string) {
+// assertSeeOtherToLogin checks 303 to /login; wantError1 requires query error=1 (WithAuth redirects).
+func assertSeeOtherToLogin(t *testing.T, mux http.Handler, method, path string, body io.Reader, wantError1 bool) {
 	t.Helper()
 	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+	req := httptest.NewRequest(method, path, body)
+	if body != nil && (method == http.MethodPost || method == http.MethodPut || method == http.MethodPatch) {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+	mux.ServeHTTP(rec, req)
 	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("%s: status %d want %d", path, rec.Code, http.StatusSeeOther)
+		t.Fatalf("%s %s: status %d want %d", method, path, rec.Code, http.StatusSeeOther)
 	}
 	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
-		t.Fatalf("%s: Location %q want /login?...error=1...", path, loc)
+	if !strings.Contains(loc, "/login") {
+		t.Fatalf("%s %s: Location %q want /login", method, path, loc)
 	}
+	if wantError1 && !strings.Contains(loc, "error=1") {
+		t.Fatalf("%s %s: Location %q want ...error=1...", method, path, loc)
+	}
+}
+
+func assertRedirectToLogin(t *testing.T, mux http.Handler, path string) {
+	t.Helper()
+	assertSeeOtherToLogin(t, mux, http.MethodGet, path, nil, true)
 }
 
 // TestRegisterRoutes_loginGET_ok verifies GET /login is registered and serves the login template (no auth).
@@ -64,17 +78,7 @@ func TestRegisterRoutes_loginPOST_emptyFields_redirects(t *testing.T) {
 	t.Parallel()
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader("email=&password="))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	mux.ServeHTTP(rec, req)
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("POST /login: status %d want 303", rec.Code)
-	}
-	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") {
-		t.Fatalf("Location %q want /login", loc)
-	}
+	assertSeeOtherToLogin(t, mux, http.MethodPost, "/login", strings.NewReader("email=&password="), false)
 }
 
 // TestRegisterRoutes_loginPOST_badForm_returns400 verifies POST /login returns 400 when the body cannot be parsed.
@@ -97,7 +101,7 @@ func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
 	paths := []string{
-		"/",               // dashboard (GET /{$})
+		"/", // dashboard (GET /{$})
 		"/transactions",
 		"/transactions/42/edit", // path param (GET /transactions/{id}/edit)
 		"/history",
@@ -115,15 +119,7 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 	t.Parallel()
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/logout", nil))
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("POST /logout: status %d want %d", rec.Code, http.StatusSeeOther)
-	}
-	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") {
-		t.Fatalf("Location %q want /login", loc)
-	}
+	assertSeeOtherToLogin(t, mux, http.MethodPost, "/logout", nil, false)
 }
 
 // TestRegisterRoutes_unknownGET_404 verifies paths not matched by RegisterRoutes yield 404 (not the dashboard).
@@ -158,15 +154,7 @@ func TestRegisterRoutes_protectedPOST_redirectsAnonymous(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
 			t.Parallel()
-			rec := httptest.NewRecorder()
-			mux.ServeHTTP(rec, httptest.NewRequest(tc.method, tc.path, nil))
-			if rec.Code != http.StatusSeeOther {
-				t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
-			}
-			loc := rec.Header().Get("Location")
-			if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
-				t.Fatalf("Location %q want /login?...error=1...", loc)
-			}
+			assertSeeOtherToLogin(t, mux, tc.method, tc.path, nil, true)
 		})
 	}
 }
