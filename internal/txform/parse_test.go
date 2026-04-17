@@ -67,6 +67,17 @@ func TestParse_invalidCategoryID(t *testing.T) {
 	}
 }
 
+func TestParse_categoryIdZero(t *testing.T) {
+	t.Parallel()
+	p, errMsg := Parse("10.00", "2026-06-15", "x", "0", "expense", time.UTC)
+	if errMsg != "" {
+		t.Fatal(errMsg)
+	}
+	if p.CategoryID == nil || *p.CategoryID != 0 {
+		t.Fatalf("got %+v", p)
+	}
+}
+
 func TestParse_descriptionTrimmed(t *testing.T) {
 	t.Parallel()
 	p, errMsg := Parse("10.00", "2026-06-15", "  coffee  ", "", "expense", time.UTC)
