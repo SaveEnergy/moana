@@ -102,3 +102,36 @@ func TestRegisterRoutes_unknownGET_404(t *testing.T) {
 		t.Fatalf("GET unknown path: status %d want %d", rec.Code, http.StatusNotFound)
 	}
 }
+
+// TestRegisterRoutes_protectedPOST_redirectsAnonymous verifies POST handlers wrapped in WithAuth redirect before touching the store.
+func TestRegisterRoutes_protectedPOST_redirectsAnonymous(t *testing.T) {
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	cases := []struct {
+		method, path string
+	}{
+		{http.MethodPost, "/transactions"},
+		{http.MethodPost, "/transactions/42"},
+		{http.MethodPost, "/categories"},
+		{http.MethodPost, "/categories/update"},
+		{http.MethodPost, "/categories/delete"},
+		{http.MethodPost, "/settings/profile"},
+		{http.MethodPost, "/settings/household"},
+		{http.MethodPost, "/settings/household/members"},
+		{http.MethodPost, "/settings/household/members/remove"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.method+" "+tc.path, func(t *testing.T) {
+			t.Parallel()
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, httptest.NewRequest(tc.method, tc.path, nil))
+			if rec.Code != http.StatusSeeOther {
+				t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
+			}
+			loc := rec.Header().Get("Location")
+			if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+				t.Fatalf("Location %q want /login?...error=1...", loc)
+			}
+		})
+	}
+}
