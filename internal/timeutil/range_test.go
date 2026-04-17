@@ -136,3 +136,18 @@ func TestDayRangeUTCFromLocalDates_swappedArgsMatchForwardRange(t *testing.T) {
 		t.Fatalf("swapped args should match forward range: fwd %v..%v rev %v..%v", fwdFrom, fwdTo, revFrom, revTo)
 	}
 }
+
+func TestDayRangeUTCFromLocalDates_nilLocationUsesUTC(t *testing.T) {
+	t.Parallel()
+	fromNil, toNil, err := DayRangeUTCFromLocalDates(nil, "2026-06-01", "2026-06-01")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fromUTC, toUTC, err := DayRangeUTCFromLocalDates(time.UTC, "2026-06-01", "2026-06-01")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !fromNil.Equal(fromUTC) || !toNil.Equal(toUTC) {
+		t.Fatalf("nil loc: %v..%v want same as UTC %v..%v", fromNil, toNil, fromUTC, toUTC)
+	}
+}

@@ -109,3 +109,15 @@ func TestParse_unknownKindDefaultsToIncome(t *testing.T) {
 		t.Fatalf("want positive income cents, got %+v", p)
 	}
 }
+
+func TestParse_nilLocationUsesUTC(t *testing.T) {
+	t.Parallel()
+	p, errMsg := Parse("1.00", "2026-03-20", "", "", "income", nil)
+	if errMsg != "" {
+		t.Fatal(errMsg)
+	}
+	want := time.Date(2026, 3, 20, 0, 0, 0, 0, time.UTC)
+	if !p.OccurredUTC.Equal(want) {
+		t.Fatalf("OccurredUTC=%v want %v", p.OccurredUTC, want)
+	}
+}

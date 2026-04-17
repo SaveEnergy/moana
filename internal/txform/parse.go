@@ -9,7 +9,8 @@ import (
 )
 
 // Parse converts form strings into cents, UTC time, optional category, and trimmed description.
-// kind is typically "income" or "expense" from the form; loc is the user's display timezone for the date field.
+// kind is typically "income" or "expense" from the form; loc is the user's display timezone for the date field
+// (nil is treated as UTC; [time.ParseInLocation] panics if loc is nil).
 // On validation failure, errMsg is a short English message suitable for the UI.
 func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (Parsed, string) {
 	cents, err := money.ParseEURToCents(amountStr)
@@ -25,6 +26,9 @@ func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (P
 	}
 	if strings.TrimSpace(dateStr) == "" {
 		return Parsed{}, "Date is required."
+	}
+	if loc == nil {
+		loc = time.UTC
 	}
 	dayStart, err := time.ParseInLocation("2006-01-02", dateStr, loc)
 	if err != nil {
