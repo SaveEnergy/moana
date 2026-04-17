@@ -71,3 +71,11 @@ func TestDisplayLocation_whitespaceCookieFallsBackToUTC(t *testing.T) {
 		t.Fatalf("got %v want UTC", loc)
 	}
 }
+
+func TestDisplayLocation_nilRequestIsUTCAndNonNil(t *testing.T) {
+	t.Parallel()
+	loc := DisplayLocation(nil)
+	if loc == nil || loc != time.UTC {
+		t.Fatalf("got %v want non-nil UTC", loc)
+	}
+}

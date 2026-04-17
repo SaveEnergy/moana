@@ -31,6 +31,7 @@ func CookieZone(r *http.Request) string {
 }
 
 // DisplayLocation is the browser time zone for this request, or UTC.
+// The result is never nil ([timeutil.OrUTC] defends against a nil *Location from the loader).
 func DisplayLocation(r *http.Request) *time.Location {
-	return timeutil.LoadLocation(CookieZone(r))
+	return timeutil.OrUTC(timeutil.LoadLocation(CookieZone(r)))
 }
