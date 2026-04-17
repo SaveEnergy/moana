@@ -19,6 +19,16 @@ func TestHashPasswordArgon2idRoundTrip(t *testing.T) {
 	}
 }
 
+func TestCheckPassword_emptyHash(t *testing.T) {
+	t.Parallel()
+	if err := CheckPassword(nil, "x"); err == nil {
+		t.Fatal("nil hash must not verify")
+	}
+	if err := CheckPassword([]byte{}, "x"); err == nil {
+		t.Fatal("empty hash must not verify")
+	}
+}
+
 func TestCheckPasswordBcryptLegacy(t *testing.T) {
 	legacy, err := bcrypt.GenerateFromPassword([]byte("legacy-secret"), 10)
 	if err != nil {
