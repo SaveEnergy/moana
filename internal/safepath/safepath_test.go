@@ -10,6 +10,9 @@ func TestInternal(t *testing.T) {
 	if got := Internal("/foo/bar"); got != "/foo/bar" {
 		t.Fatal(got)
 	}
+	if got := Internal("/"); got != "/" {
+		t.Fatalf("root path: got %q want /", got)
+	}
 	if got := Internal("//evil.com"); got != Default {
 		t.Fatal(got)
 	}
