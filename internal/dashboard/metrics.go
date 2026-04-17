@@ -5,8 +5,8 @@ import (
 	"moana/internal/store"
 )
 
-// NetPctChange is period-over-period % change for signed net (current vs previous period of same length).
-func NetPctChange(current, previous int64) float64 {
+// pctChangeVsPrior is period-over-period % change: (current−previous) / |previous| × 100, with prior=0 handled as 0% or 100%.
+func pctChangeVsPrior(current, previous int64) float64 {
 	if previous == 0 {
 		if current == 0 {
 			return 0
@@ -16,16 +16,14 @@ func NetPctChange(current, previous int64) float64 {
 	return float64(current-previous) / float64(money.AbsCents(previous)) * 100
 }
 
-// PctChangePositive is period-over-period % change for non-negative amounts (income totals or expense absolutes).
-// The denominator uses [money.AbsCents] so a negative prior total (unexpected input) does not flip the sign of the ratio.
+// NetPctChange is period-over-period % change for signed net (current vs previous period of same length).
+func NetPctChange(current, previous int64) float64 {
+	return pctChangeVsPrior(current, previous)
+}
+
+// PctChangePositive is period-over-period % change for income totals or expense absolutes (same formula as [NetPctChange]; name reflects call-site intent).
 func PctChangePositive(current, previous int64) float64 {
-	if previous == 0 {
-		if current == 0 {
-			return 0
-		}
-		return 100
-	}
-	return float64(current-previous) / float64(money.AbsCents(previous)) * 100
+	return pctChangeVsPrior(current, previous)
 }
 
 // MergeCategoryTopN keeps the top (limit-1) categories and merges the rest into "Other".
