@@ -2,6 +2,7 @@ package money
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -49,6 +50,12 @@ func ParseEURToCents(s string) (int64, error) {
 			return 0, fmt.Errorf("invalid amount")
 		}
 		cents = c
+	}
+	// int64 multiply wraps on overflow; reject before euros*100+cents.
+	maxEuros := int64(math.MaxInt64 / 100)
+	maxRem := int64(math.MaxInt64 % 100)
+	if euros > maxEuros || (euros == maxEuros && cents > maxRem) {
+		return 0, fmt.Errorf("amount too large")
 	}
 	out := euros*100 + cents
 	if neg {

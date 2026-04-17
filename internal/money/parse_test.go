@@ -24,6 +24,9 @@ func TestParseEURToCents(t *testing.T) {
 		// Leading + on the euros part is accepted (strconv.ParseInt semantics).
 		{"+5.00", 500, false},
 		{"not", 0, true},
+		// Regression: ParseInt accepts huge euros; int64 multiply must not wrap silently.
+		{"922337203685477580.00", 0, true},
+		{"92233720368547758.08", 0, true},
 	}
 	for _, tc := range tests {
 		got, err := ParseEURToCents(tc.in)

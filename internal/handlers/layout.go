@@ -11,12 +11,17 @@ import (
 // LayoutData is the authenticated page shell; see [render.LayoutData].
 type LayoutData = render.LayoutData
 
+// shellYear is the footer copyright year for authenticated shells (single clock read per call).
+func shellYear() int {
+	return time.Now().UTC().Year()
+}
+
 // layoutShell builds standard authenticated shell metadata (title, nav highlight, footer year).
 func layoutShell(title, navKey string, u *store.User) LayoutData {
 	return LayoutData{
 		Title:  title,
 		User:   u,
-		Year:   time.Now().UTC().Year(),
+		Year:   shellYear(),
 		Active: navKey,
 	}
 }
@@ -26,7 +31,7 @@ func layoutShellMain(title, navKey, mainClass string, u *store.User) LayoutData 
 	return LayoutData{
 		Title:     title,
 		User:      u,
-		Year:      time.Now().UTC().Year(),
+		Year:      shellYear(),
 		Active:    navKey,
 		MainClass: mainClass,
 	}
