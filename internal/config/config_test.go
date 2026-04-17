@@ -144,6 +144,24 @@ func TestLoad_invalidRequestTimeoutFallsBackToDefault(t *testing.T) {
 	}
 }
 
+func TestLoad_nonPositiveRequestTimeoutFallsBackToDefault(t *testing.T) {
+	// Sequential subtests: env is process-wide; avoid parallel Setenv races.
+	for _, raw := range []string{"0", "-1", "-999"} {
+		t.Run(raw, func(t *testing.T) {
+			t.Setenv("MOANA_ENV", "development")
+			t.Setenv("MOANA_SESSION_SECRET", "")
+			t.Setenv("MOANA_REQUEST_TIMEOUT_SEC", raw)
+			c, err := Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.RequestTimeout != 60*time.Second {
+				t.Fatalf("MOANA_REQUEST_TIMEOUT_SEC=%q: RequestTimeout %v want 60s", raw, c.RequestTimeout)
+			}
+		})
+	}
+}
+
 func TestLoad_sessionMaxAgeFromEnv(t *testing.T) {
 	t.Setenv("MOANA_ENV", "development")
 	t.Setenv("MOANA_SESSION_SECRET", "")
