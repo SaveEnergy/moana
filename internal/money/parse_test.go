@@ -21,6 +21,8 @@ func TestParseEURToCents(t *testing.T) {
 		{"", 0, true},
 		{"12.345", 0, true},
 		{"1.2.3", 0, true},
+		// Leading + on the euros part is accepted (strconv.ParseInt semantics).
+		{"+5.00", 500, false},
 		{"not", 0, true},
 	}
 	for _, tc := range tests {
