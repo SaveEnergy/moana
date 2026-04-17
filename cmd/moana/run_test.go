@@ -15,3 +15,10 @@ func TestRun_userWithoutSubcommand(t *testing.T) {
 		t.Fatalf("exit %d want 2", g)
 	}
 }
+
+func TestRun_userUnknownSubcommand(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "user", "nope"}); g != 2 {
+		t.Fatalf("exit %d want 2", g)
+	}
+}
