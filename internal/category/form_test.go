@@ -32,3 +32,21 @@ func TestParseColorFromForm_invalid(t *testing.T) {
 		t.Fatalf("got %q", got)
 	}
 }
+
+func TestParseColorFromForm_customInvalidHex(t *testing.T) {
+	t.Parallel()
+	r := httptest.NewRequest("POST", "/", strings.NewReader("color=custom&color_custom=not-a-hex"))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if got := ParseColorFromForm(r); got != "" {
+		t.Fatalf("got %q", got)
+	}
+}
+
+func TestParseColorFromForm_empty(t *testing.T) {
+	t.Parallel()
+	r := httptest.NewRequest("POST", "/", strings.NewReader("color="))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if got := ParseColorFromForm(r); got != "" {
+		t.Fatalf("got %q", got)
+	}
+}
