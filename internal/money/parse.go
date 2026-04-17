@@ -1,11 +1,15 @@
 package money
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
 	"strings"
 )
+
+// ErrAmountTooLarge is returned when the parsed euro amount cannot fit in cents as int64.
+var ErrAmountTooLarge = errors.New("amount too large")
 
 // ParseEURToCents parses a decimal euro amount (e.g. "1234.56", "1234") into integer cents.
 func ParseEURToCents(s string) (int64, error) {
@@ -55,7 +59,7 @@ func ParseEURToCents(s string) (int64, error) {
 	maxEuros := int64(math.MaxInt64 / 100)
 	maxRem := int64(math.MaxInt64 % 100)
 	if euros > maxEuros || (euros == maxEuros && cents > maxRem) {
-		return 0, fmt.Errorf("amount too large")
+		return 0, ErrAmountTooLarge
 	}
 	out := euros*100 + cents
 	if neg {

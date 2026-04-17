@@ -1,6 +1,9 @@
 package money
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestParseEURToCents(t *testing.T) {
 	t.Parallel()
@@ -50,5 +53,13 @@ func TestAbsCents(t *testing.T) {
 	t.Parallel()
 	if AbsCents(-5) != 5 || AbsCents(5) != 5 || AbsCents(0) != 0 {
 		t.Fatal()
+	}
+}
+
+func TestParseEURToCents_errAmountTooLargeSentinel(t *testing.T) {
+	t.Parallel()
+	_, err := ParseEURToCents("922337203685477580.00")
+	if !errors.Is(err, ErrAmountTooLarge) {
+		t.Fatalf("got %v want %v", err, ErrAmountTooLarge)
 	}
 }

@@ -3,6 +3,8 @@ package txform
 import (
 	"testing"
 	"time"
+
+	"moana/internal/money"
 )
 
 func TestParse_ok(t *testing.T) {
@@ -21,6 +23,14 @@ func TestParse_invalidAmount(t *testing.T) {
 	_, errMsg := Parse("abc", "2026-01-01", "", "", "income", time.UTC)
 	if errMsg == "" {
 		t.Fatal("expected error")
+	}
+}
+
+func TestParse_amountTooLarge(t *testing.T) {
+	t.Parallel()
+	_, errMsg := Parse("922337203685477580.00", "2026-01-01", "", "", "income", time.UTC)
+	if errMsg != money.ErrAmountTooLarge.Error() {
+		t.Fatalf("got errMsg %q want overflow from money.ParseEURToCents", errMsg)
 	}
 }
 
