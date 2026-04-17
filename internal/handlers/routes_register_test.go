@@ -74,3 +74,31 @@ func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 		assertRedirectToLogin(t, mux, path)
 	}
 }
+
+// TestRegisterRoutes_logoutPOST_redirectsToLogin verifies POST /logout is registered (no auth) and redirects to sign-in.
+func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/logout", nil))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("POST /logout: status %d want %d", rec.Code, http.StatusSeeOther)
+	}
+	loc := rec.Header().Get("Location")
+	if !strings.Contains(loc, "/login") {
+		t.Fatalf("Location %q want /login", loc)
+	}
+}
+
+// TestRegisterRoutes_unknownGET_404 verifies paths not matched by RegisterRoutes yield 404 (not the dashboard).
+func TestRegisterRoutes_unknownGET_404(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/moana-route-register-test-unknown", nil))
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("GET unknown path: status %d want %d", rec.Code, http.StatusNotFound)
+	}
+}
