@@ -2,7 +2,6 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
 	"os"
 	"time"
 
@@ -33,13 +32,7 @@ func runServe() {
 		slog.Error("app", "err", err)
 		os.Exit(1)
 	}
-	srv := &http.Server{
-		Addr:              cfg.Listen,
-		Handler:           handler,
-		ReadHeaderTimeout: cfg.RequestTimeout,
-		ReadTimeout:       cfg.RequestTimeout * 2,
-		WriteTimeout:      cfg.RequestTimeout * 2,
-	}
+	srv := server.NewHTTPServer(cfg.Listen, cfg.RequestTimeout, handler)
 
 	server.ListenAndServeGracefully(srv, 10*time.Second)
 }
