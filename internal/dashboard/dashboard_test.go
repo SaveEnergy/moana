@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -122,5 +123,21 @@ func TestDonutConicGradient_empty(t *testing.T) {
 	}
 	if DonutConicGradient([]float64{}, []string{}) != "" {
 		t.Fatal("empty slices")
+	}
+}
+
+func TestDonutConicGradient_fallbackColorWhenHexBlank(t *testing.T) {
+	t.Parallel()
+	got := DonutConicGradient([]float64{50, 50}, []string{"#111111", "  "})
+	if !strings.Contains(got, "#111111") || !strings.Contains(got, "#4a7d82") {
+		t.Fatalf("expected custom first + palette fallback second, got %q", got)
+	}
+}
+
+func TestDonutConicGradient_clampsCumulativePast100(t *testing.T) {
+	t.Parallel()
+	got := DonutConicGradient([]float64{60, 50}, []string{"#aaaaaa", "#bbbbbb"})
+	if !strings.Contains(got, "100.000%") {
+		t.Fatalf("expected cap at 100%%, got %q", got)
 	}
 }
