@@ -57,6 +57,20 @@ func TestTrailingLocalDaysInclusiveRangeUTC(t *testing.T) {
 	}
 }
 
+func TestTrailingLocalDaysInclusiveRangeUTC_nonPositiveDaysUsesOne(t *testing.T) {
+	t.Parallel()
+	loc := time.UTC
+	ref := time.Date(2026, 4, 13, 12, 0, 0, 0, loc)
+	curS, curE := TrailingLocalDaysInclusiveRangeUTC(loc, ref, 0)
+	if curS.In(loc).Format("2006-01-02") != "2026-04-13" || curE.In(loc).Format("2006-01-02") != "2026-04-13" {
+		t.Fatalf("current single-day window: %v .. %v", curS.In(loc), curE.In(loc))
+	}
+	prevS, prevE := PriorTrailingLocalDaysInclusiveRangeUTC(loc, ref, -3)
+	if prevS.In(loc).Format("2006-01-02") != "2026-04-12" || prevE.In(loc).Format("2006-01-02") != "2026-04-12" {
+		t.Fatalf("prior single-day window: %v .. %v", prevS.In(loc), prevE.In(loc))
+	}
+}
+
 func TestLoadLocation(t *testing.T) {
 	t.Parallel()
 	if LoadLocation("") != time.UTC {
