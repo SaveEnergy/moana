@@ -446,7 +446,11 @@ func TestSettingsPageOKForLoggedInUser(t *testing.T) {
 		t.Fatalf("status %d", resp.StatusCode)
 	}
 	body, _ := io.ReadAll(resp.Body)
-	if !strings.Contains(string(body), "settings-page") {
+	s := string(body)
+	if !strings.Contains(s, "settings-page") {
 		t.Fatalf("expected settings page")
+	}
+	if !strings.Contains(s, "Custom profile photos") || !strings.Contains(s, "settings-photo-initial") {
+		t.Fatalf("expected profile photo hint and initial, got prefix %q", s[:min(600, len(s))])
 	}
 }
