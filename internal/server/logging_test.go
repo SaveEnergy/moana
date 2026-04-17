@@ -29,6 +29,39 @@ func TestStatusWriter_defaultOKBeforeWriteHeader(t *testing.T) {
 	}
 }
 
+type flushCounter struct {
+	*httptest.ResponseRecorder
+	n int
+}
+
+func (c *flushCounter) Flush() {
+	c.n++
+	c.ResponseRecorder.Flush()
+}
+
+func TestStatusWriter_flushDelegatesToUnderlying(t *testing.T) {
+	t.Parallel()
+	rec := httptest.NewRecorder()
+	cf := &flushCounter{ResponseRecorder: rec}
+	sw := &statusWriter{ResponseWriter: cf}
+	sw.Flush()
+	if cf.n != 1 {
+		t.Fatalf("underlying Flush calls %d want 1", cf.n)
+	}
+}
+
+type noFlusher struct{}
+
+func (noFlusher) Header() http.Header       { return http.Header{} }
+func (noFlusher) Write([]byte) (int, error) { return 0, nil }
+func (noFlusher) WriteHeader(int)           {}
+
+func TestStatusWriter_flushNoPanicWithoutFlusher(t *testing.T) {
+	t.Parallel()
+	sw := &statusWriter{ResponseWriter: noFlusher{}}
+	sw.Flush()
+}
+
 func TestRequestLogging_delegatesToInner(t *testing.T) {
 	t.Parallel()
 	var saw bool

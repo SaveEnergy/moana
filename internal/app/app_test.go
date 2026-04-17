@@ -101,6 +101,9 @@ func TestHTTPHandler_servesStaticCSS(t *testing.T) {
 	if n := rec.Body.Len(); n < 100 {
 		t.Fatalf("expected non-trivial css, got %d bytes", n)
 	}
+	if cc := rec.Header().Get("Cache-Control"); !strings.Contains(cc, "max-age=") {
+		t.Fatalf("expected Cache-Control with max-age, got %q", cc)
+	}
 }
 
 func TestHTTPHandler_getLoginPage(t *testing.T) {

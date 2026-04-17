@@ -30,3 +30,11 @@ func (w *statusWriter) WriteHeader(code int) {
 	w.status = code
 	w.ResponseWriter.WriteHeader(code)
 }
+
+// Flush implements [http.Flusher] so middleware that wraps the response (e.g.
+// compression) can flush through [statusWriter] without losing the type assertion.
+func (w *statusWriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
