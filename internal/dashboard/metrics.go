@@ -16,17 +16,6 @@ func NetPctChange(current, previous int64) float64 {
 	return float64(current-previous) / float64(money.AbsCents(previous)) * 100
 }
 
-// PctChangeNet is month-over-month % change for net totals (signed).
-func PctChangeNet(prev, prevPrev int64) float64 {
-	if prevPrev == 0 {
-		if prev == 0 {
-			return 0
-		}
-		return 100
-	}
-	return float64(prev-prevPrev) / float64(money.AbsCents(prevPrev)) * 100
-}
-
 // PctChangePositive is period-over-period % change for non-negative amounts (income totals or expense absolutes).
 func PctChangePositive(current, previous int64) float64 {
 	if previous == 0 {
