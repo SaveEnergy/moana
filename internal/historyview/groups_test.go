@@ -44,3 +44,26 @@ func TestGroupByDay_bucketsAndOrder(t *testing.T) {
 		t.Fatalf("oldest-first first group: %+v", gOld[0])
 	}
 }
+
+func TestGroupByDay_nilLocationUsesUTC(t *testing.T) {
+	t.Parallel()
+	loc := time.UTC
+	day1 := time.Date(2020, 6, 15, 10, 0, 0, 0, loc)
+	txs := []store.Transaction{{OccurredAt: day1, Description: "x"}}
+	got := GroupByDay(txs, nil, true)
+	want := GroupByDay(txs, time.UTC, true)
+	if len(got) != len(want) || len(got) != 1 {
+		t.Fatalf("got %d groups want 1", len(got))
+	}
+	if got[0].Label != want[0].Label || len(got[0].Items) != len(want[0].Items) {
+		t.Fatalf("nil vs UTC: got %+v want %+v", got[0], want[0])
+	}
+}
+
+func TestFormatDayLabel_nilLocationMatchesUTC(t *testing.T) {
+	t.Parallel()
+	d := time.Date(2020, 6, 15, 0, 0, 0, 0, time.UTC)
+	if got, want := FormatDayLabel(d, nil), FormatDayLabel(d, time.UTC); got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
