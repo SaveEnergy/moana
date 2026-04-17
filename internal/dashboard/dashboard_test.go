@@ -65,6 +65,16 @@ func TestPctChangePositive(t *testing.T) {
 	}
 }
 
+func TestPctChangePositive_negativePreviousUsesAbsDenominator(t *testing.T) {
+	t.Parallel()
+	// Prior total was negative (bad aggregate); denominator uses magnitude like NetPctChange.
+	// (0-(-10))/10*100 = 100
+	v := PctChangePositive(0, -10)
+	if v < 99.9 || v > 100.1 {
+		t.Fatalf("got %v want ~100", v)
+	}
+}
+
 func TestMergeCategoryTopN(t *testing.T) {
 	t.Parallel()
 	rows := []store.CategoryAmount{

@@ -17,6 +17,7 @@ func NetPctChange(current, previous int64) float64 {
 }
 
 // PctChangePositive is period-over-period % change for non-negative amounts (income totals or expense absolutes).
+// The denominator uses [money.AbsCents] so a negative prior total (unexpected input) does not flip the sign of the ratio.
 func PctChangePositive(current, previous int64) float64 {
 	if previous == 0 {
 		if current == 0 {
@@ -24,7 +25,7 @@ func PctChangePositive(current, previous int64) float64 {
 		}
 		return 100
 	}
-	return float64(current-previous) / float64(previous) * 100
+	return float64(current-previous) / float64(money.AbsCents(previous)) * 100
 }
 
 // MergeCategoryTopN keeps the top (limit-1) categories and merges the rest into "Other".
