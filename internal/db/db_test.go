@@ -45,3 +45,21 @@ func TestOpenMemory(t *testing.T) {
 		t.Fatalf("schema version = %d", v)
 	}
 }
+
+func TestOpen_synchronousNormal(t *testing.T) {
+	t.Parallel()
+	d, err := Open(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	var sync int
+	err = d.QueryRowContext(context.Background(), `PRAGMA synchronous`).Scan(&sync)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// SQLite: 1 = NORMAL (set in Open after WAL/busy_timeout).
+	if sync != 1 {
+		t.Fatalf("PRAGMA synchronous = %d want 1 (NORMAL)", sync)
+	}
+}

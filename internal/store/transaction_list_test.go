@@ -55,6 +55,14 @@ func TestListTransactions_respectsLimit(t *testing.T) {
 		t.Fatalf("unlimited list: want 5, got %d", len(txsAll))
 	}
 
+	txsZero, err := st.ListTransactions(ctx, hid, TransactionFilter{Limit: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txsZero) != len(txsAll) {
+		t.Fatalf("Limit 0: want %d rows like empty filter, got %d", len(txsAll), len(txsZero))
+	}
+
 	txsNeg, err := st.ListTransactions(ctx, hid, TransactionFilter{Limit: -1})
 	if err != nil {
 		t.Fatal(err)

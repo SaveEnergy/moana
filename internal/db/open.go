@@ -45,6 +45,11 @@ func Open(path string) (*sql.DB, error) {
 		_ = d.Close()
 		return nil, fmt.Errorf("busy_timeout: %w", err)
 	}
+	// NORMAL balances durability with throughput under WAL (default is often FULL).
+	if _, err := d.ExecContext(context.Background(), `PRAGMA synchronous = NORMAL;`); err != nil {
+		_ = d.Close()
+		return nil, fmt.Errorf("synchronous: %w", err)
+	}
 
 	if err := migrate(d); err != nil {
 		_ = d.Close()
