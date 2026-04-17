@@ -65,6 +65,7 @@ func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 	paths := []string{
 		"/",               // dashboard (GET /{$})
 		"/transactions",
+		"/transactions/42/edit", // path param (GET /transactions/{id}/edit)
 		"/history",
 		"/categories",
 		"/settings",
