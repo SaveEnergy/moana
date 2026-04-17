@@ -9,6 +9,7 @@ import (
 
 // DailyAbsMovementByLocalDate returns total absolute cents moved per calendar day in loc (sum of |amount_cents| per day) for the household.
 func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int64, fromUTC, toUTC time.Time, loc *time.Location) (map[string]int64, error) {
+	loc = timeutil.OrUTC(loc)
 	q := `SELECT t.occurred_at, t.amount_cents ` + sqlFromHouseholdTx + ` AND t.occurred_at >= ? AND t.occurred_at <= ?`
 	args := make([]any, 0, 3)
 	args = append(args, householdID, timeutil.FormatSQLiteUTC(fromUTC), timeutil.FormatSQLiteUTC(toUTC))

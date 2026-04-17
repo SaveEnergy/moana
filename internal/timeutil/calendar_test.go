@@ -49,3 +49,28 @@ func TestCurrentCalendarYearToDateRangeUTC(t *testing.T) {
 		t.Fatalf("end nanosecond %d", end.Nanosecond())
 	}
 }
+
+func TestCalendarRangeHelpers_nilLocationMatchesUTC(t *testing.T) {
+	t.Parallel()
+	ref := time.Date(2026, 4, 13, 12, 0, 0, 0, time.UTC)
+	a, b := PreviousCalendarMonthRangeUTC(nil, ref)
+	a2, b2 := PreviousCalendarMonthRangeUTC(time.UTC, ref)
+	if !a.Equal(a2) || !b.Equal(b2) {
+		t.Fatalf("PreviousCalendarMonthRangeUTC nil vs UTC: %v %v vs %v %v", a, b, a2, b2)
+	}
+	a, b = PreviousCalendarYearRangeUTC(nil, ref)
+	a2, b2 = PreviousCalendarYearRangeUTC(time.UTC, ref)
+	if !a.Equal(a2) || !b.Equal(b2) {
+		t.Fatalf("PreviousCalendarYearRangeUTC nil vs UTC: %v %v vs %v %v", a, b, a2, b2)
+	}
+	a, b = CalendarMonthRangeUTC(nil, ref, 0)
+	a2, b2 = CalendarMonthRangeUTC(time.UTC, ref, 0)
+	if !a.Equal(a2) || !b.Equal(b2) {
+		t.Fatalf("CalendarMonthRangeUTC nil vs UTC: %v %v vs %v %v", a, b, a2, b2)
+	}
+	a, b = CurrentCalendarYearToDateRangeUTC(nil, ref)
+	a2, b2 = CurrentCalendarYearToDateRangeUTC(time.UTC, ref)
+	if !a.Equal(a2) || !b.Equal(b2) {
+		t.Fatalf("CurrentCalendarYearToDateRangeUTC nil vs UTC: %v %v vs %v %v", a, b, a2, b2)
+	}
+}

@@ -5,9 +5,7 @@ import "time"
 // DayRangeUTCFromLocalDates parses YYYY-MM-DD in loc and returns inclusive UTC range for those local calendar days.
 // A nil loc is treated as UTC ([time.ParseInLocation] panics if loc is nil).
 func DayRangeUTCFromLocalDates(loc *time.Location, fromDate, toDate string) (fromUTC, toUTC time.Time, err error) {
-	if loc == nil {
-		loc = time.UTC
-	}
+	loc = OrUTC(loc)
 	from, err := time.ParseInLocation("2006-01-02", fromDate, loc)
 	if err != nil {
 		return time.Time{}, time.Time{}, err

@@ -5,6 +5,7 @@ import "time"
 // TrailingLocalDaysInclusiveRangeUTC returns [start, end] UTC for inclusiveDays local calendar days
 // ending on ref's local calendar day (inclusive). E.g. inclusiveDays=30 is the last 30 local days.
 func TrailingLocalDaysInclusiveRangeUTC(loc *time.Location, ref time.Time, inclusiveDays int) (startUTC, endUTC time.Time) {
+	loc = OrUTC(loc)
 	if inclusiveDays < 1 {
 		inclusiveDays = 1
 	}
@@ -19,6 +20,7 @@ func TrailingLocalDaysInclusiveRangeUTC(loc *time.Location, ref time.Time, inclu
 // PriorTrailingLocalDaysInclusiveRangeUTC returns the same-length window immediately before
 // TrailingLocalDaysInclusiveRangeUTC (for period-over-period comparisons).
 func PriorTrailingLocalDaysInclusiveRangeUTC(loc *time.Location, ref time.Time, inclusiveDays int) (startUTC, endUTC time.Time) {
+	loc = OrUTC(loc)
 	if inclusiveDays < 1 {
 		inclusiveDays = 1
 	}

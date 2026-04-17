@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"moana/internal/store"
+	"moana/internal/timeutil"
 )
 
 func buildHeatmapSection(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, now time.Time) (string, []HeatmapCell, int, error) {
+	loc = timeutil.OrUTC(loc)
 	localNow := now.In(loc)
 	todayLocal := time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, loc)
 	yearAgo := todayLocal.AddDate(0, 0, -364)

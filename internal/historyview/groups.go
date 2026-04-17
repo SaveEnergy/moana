@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"moana/internal/store"
+	"moana/internal/timeutil"
 )
 
 // GroupByDay buckets transactions by local calendar day and orders day keys.
@@ -14,9 +15,7 @@ func GroupByDay(txs []store.Transaction, loc *time.Location, newestDayFirst bool
 	if len(txs) == 0 {
 		return nil
 	}
-	if loc == nil {
-		loc = time.UTC
-	}
+	loc = timeutil.OrUTC(loc)
 	byDay := make(map[string][]store.Transaction)
 	for _, tx := range txs {
 		k := tx.OccurredAt.In(loc).Format("2006-01-02")
@@ -49,9 +48,7 @@ func GroupByDay(txs []store.Transaction, loc *time.Location, newestDayFirst bool
 // FormatDayLabel returns a short heading like "Today, JAN 2" or "Monday, Jan 2".
 // A nil loc is treated as UTC.
 func FormatDayLabel(day time.Time, loc *time.Location) string {
-	if loc == nil {
-		loc = time.UTC
-	}
+	loc = timeutil.OrUTC(loc)
 	d := day.In(loc)
 	now := time.Now().In(loc)
 	d0 := time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, loc)

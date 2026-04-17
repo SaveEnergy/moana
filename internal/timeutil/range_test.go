@@ -151,3 +151,23 @@ func TestDayRangeUTCFromLocalDates_nilLocationUsesUTC(t *testing.T) {
 		t.Fatalf("nil loc: %v..%v want same as UTC %v..%v", fromNil, toNil, fromUTC, toUTC)
 	}
 }
+
+func TestTrailingLocalDaysInclusiveRangeUTC_nilLocationMatchesUTC(t *testing.T) {
+	t.Parallel()
+	ref := time.Date(2026, 4, 13, 15, 0, 0, 0, time.UTC)
+	s, e := TrailingLocalDaysInclusiveRangeUTC(nil, ref, 30)
+	s2, e2 := TrailingLocalDaysInclusiveRangeUTC(time.UTC, ref, 30)
+	if !s.Equal(s2) || !e.Equal(e2) {
+		t.Fatalf("nil vs UTC: %v..%v vs %v..%v", s, e, s2, e2)
+	}
+}
+
+func TestPriorTrailingLocalDaysInclusiveRangeUTC_nilLocationMatchesUTC(t *testing.T) {
+	t.Parallel()
+	ref := time.Date(2026, 4, 13, 15, 0, 0, 0, time.UTC)
+	s, e := PriorTrailingLocalDaysInclusiveRangeUTC(nil, ref, 30)
+	s2, e2 := PriorTrailingLocalDaysInclusiveRangeUTC(time.UTC, ref, 30)
+	if !s.Equal(s2) || !e.Equal(e2) {
+		t.Fatalf("nil vs UTC: %v..%v vs %v..%v", s, e, s2, e2)
+	}
+}

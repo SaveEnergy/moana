@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"moana/internal/money"
+	"moana/internal/timeutil"
 )
 
 // Parse converts form strings into cents, UTC time, optional category, and trimmed description.
@@ -27,9 +28,7 @@ func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (P
 	if strings.TrimSpace(dateStr) == "" {
 		return Parsed{}, "Date is required."
 	}
-	if loc == nil {
-		loc = time.UTC
-	}
+	loc = timeutil.OrUTC(loc)
 	dayStart, err := time.ParseInLocation("2006-01-02", dateStr, loc)
 	if err != nil {
 		return Parsed{}, "Invalid date."
