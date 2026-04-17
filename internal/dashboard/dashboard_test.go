@@ -81,6 +81,19 @@ func TestMergeCategoryTopN_invalidLimitReturnsRows(t *testing.T) {
 	}
 }
 
+// TestMergeCategoryTopN_limitOneRollsAllIntoOther documents limit=1: no named top rows, single "Other" bucket.
+func TestMergeCategoryTopN_limitOneRollsAllIntoOther(t *testing.T) {
+	t.Parallel()
+	rows := []store.CategoryAmount{
+		{Name: "a", AmountCents: 100},
+		{Name: "b", AmountCents: 200},
+	}
+	out := MergeCategoryTopN(rows, 1)
+	if len(out) != 1 || out[0].Name != "Other" || out[0].AmountCents != 300 {
+		t.Fatalf("got %+v", out)
+	}
+}
+
 func TestBuildHeatmapCellsRolling365_todayIsLastCell(t *testing.T) {
 	t.Parallel()
 	loc, err := time.LoadLocation("Europe/Berlin")
