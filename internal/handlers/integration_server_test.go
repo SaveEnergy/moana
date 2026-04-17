@@ -31,6 +31,9 @@ func TestLoginPageOK(t *testing.T) {
 	if !strings.Contains(s, `href="`+testutil.DefaultTestRepoURL+`"`) {
 		t.Fatalf("expected login footer repo link (set RepoURL in testutil.DefaultTestConfig)")
 	}
+	if !strings.Contains(s, `class="login-oauth"`) || !strings.Contains(s, "OAuth sign-in (not available") {
+		t.Fatalf("expected OAuth stub group with aria-label")
+	}
 }
 
 func TestUnauthenticatedProtectedRoutesRedirectToLogin(t *testing.T) {

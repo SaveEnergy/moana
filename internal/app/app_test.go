@@ -122,8 +122,12 @@ func TestHTTPHandler_getLoginPage(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
-	if !strings.Contains(rec.Body.String(), "Sign in to your account") {
+	body := rec.Body.String()
+	if !strings.Contains(body, "Sign in to your account") {
 		t.Fatalf("unexpected login HTML (len %d)", rec.Body.Len())
+	}
+	if !strings.Contains(body, `class="login-oauth"`) {
+		t.Fatalf("expected login OAuth stub section")
 	}
 }
 
