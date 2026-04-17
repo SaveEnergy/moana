@@ -3,6 +3,7 @@ package app_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	moanaapp "moana/internal/app"
@@ -81,5 +82,26 @@ func TestHTTPHandler_servesStaticCSS(t *testing.T) {
 	}
 	if n := rec.Body.Len(); n < 100 {
 		t.Fatalf("expected non-trivial css, got %d bytes", n)
+	}
+}
+
+func TestHTTPHandler_getLoginPage(t *testing.T) {
+	t.Parallel()
+	st, db, err := dbutil.OpenStore(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	h, err := moanaapp.HTTPHandler(testutil.DefaultTestConfig(), st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/login", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "Sign in to your account") {
+		t.Fatalf("unexpected login HTML (len %d)", rec.Body.Len())
 	}
 }
