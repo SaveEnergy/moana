@@ -12,20 +12,43 @@ import (
 	"moana/internal/testutil"
 )
 
-// TestRegisterRoutes_notificationsGET verifies GET /notifications is registered (auth → redirect when anonymous).
-func TestRegisterRoutes_notificationsGET(t *testing.T) {
-	t.Parallel()
+func newRegisterRoutesTestMux(t *testing.T) (*http.ServeMux, func()) {
+	t.Helper()
 	st, db, err := dbutil.OpenStore(":memory:")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.Close()
 	a, err := moanaapp.New(testutil.DefaultTestConfig(), st)
 	if err != nil {
+		db.Close()
 		t.Fatal(err)
 	}
 	mux := http.NewServeMux()
 	handlers.RegisterRoutes(mux, a)
+	return mux, func() { db.Close() }
+}
+
+// TestRegisterRoutes_loginGET_ok verifies GET /login is registered and serves the login template (no auth).
+func TestRegisterRoutes_loginGET_ok(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/login", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /login: status %d want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "Sign in to your account") {
+		t.Fatalf("expected login page HTML, body len %d", len(body))
+	}
+}
+
+// TestRegisterRoutes_notificationsGET verifies GET /notifications is registered (auth → redirect when anonymous).
+func TestRegisterRoutes_notificationsGET(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/notifications", nil))
 	if rec.Code != http.StatusSeeOther {
