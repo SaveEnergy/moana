@@ -105,3 +105,25 @@ func TestHTTPHandler_getLoginPage(t *testing.T) {
 		t.Fatalf("unexpected login HTML (len %d)", rec.Body.Len())
 	}
 }
+
+func TestHTTPHandler_unauthenticatedRootRedirectsToLogin(t *testing.T) {
+	t.Parallel()
+	st, db, err := dbutil.OpenStore(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	h, err := moanaapp.HTTPHandler(testutil.DefaultTestConfig(), st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
+	}
+	loc := rec.Header().Get("Location")
+	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+		t.Fatalf("Location %q", loc)
+	}
+}
