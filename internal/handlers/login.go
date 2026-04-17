@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -11,8 +12,13 @@ import (
 
 // LoginPage shows the sign-in form.
 func (a *App) LoginPage(w http.ResponseWriter, r *http.Request) {
-	if _, err := a.CurrentUser(r); err == nil {
+	_, err := a.CurrentUser(r)
+	if err == nil {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	if !errors.Is(err, ErrAuthRequired) {
+		httperr.Internal(w, r, err)
 		return
 	}
 	data := a.loginTemplateData("")

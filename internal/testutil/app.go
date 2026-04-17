@@ -1,6 +1,7 @@
 package testutil
 
 import (
+	"database/sql"
 	"testing"
 	"time"
 
@@ -26,8 +27,9 @@ func DefaultTestConfig() *config.Config {
 	}
 }
 
-// NewApp returns a handlers.App backed by SQLite :memory: and a cleanup that closes the DB.
-func NewApp(t *testing.T) (*handlers.App, func()) {
+// NewAppWithDB returns a handlers.App, the underlying [*sql.DB] (for tests that need to close
+// or inspect the connection), and a cleanup that closes the database.
+func NewAppWithDB(t *testing.T) (*handlers.App, *sql.DB, func()) {
 	t.Helper()
 	st, sqlDB, err := dbutil.OpenStore(":memory:")
 	if err != nil {
@@ -39,5 +41,11 @@ func NewApp(t *testing.T) (*handlers.App, func()) {
 		sqlDB.Close()
 		t.Fatal(err)
 	}
-	return a, func() { sqlDB.Close() }
+	return a, sqlDB, func() { sqlDB.Close() }
+}
+
+// NewApp returns a handlers.App backed by SQLite :memory: and a cleanup that closes the DB.
+func NewApp(t *testing.T) (*handlers.App, func()) {
+	app, _, cleanup := NewAppWithDB(t)
+	return app, cleanup
 }
