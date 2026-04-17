@@ -70,12 +70,12 @@
         <input id="app-global-search" class="app-search-input" type="search" name="q" placeholder="Search" autocomplete="off">
       </form>
       <div class="app-topbar-end">
-        <button type="button" class="app-topbar-icon-btn" disabled title="Notifications (coming soon)">
+        <a class="app-topbar-icon-btn" href="/notifications" title="Notifications"{{if eq .Active "notifications"}} aria-current="page"{{end}}>
           <span class="sr-only">Notifications</span>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
           </svg>
-        </button>
+        </a>
         <div class="app-topbar-rule app-topbar-rule--desktop" aria-hidden="true"></div>
         <details class="app-user-menu">
           <summary class="app-user-menu-btn">

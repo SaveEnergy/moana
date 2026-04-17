@@ -8,4 +8,5 @@ func RegisterRoutes(mux *http.ServeMux, app *App) {
 	registerDashboardRoutes(mux, app)
 	registerLedgerRoutes(mux, app)
 	registerSettingsRoutes(mux, app)
+	registerNotificationsRoutes(mux, app)
 }

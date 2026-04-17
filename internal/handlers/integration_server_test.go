@@ -42,7 +42,7 @@ func TestUnauthenticatedProtectedRoutesRedirectToLogin(t *testing.T) {
 			return http.ErrUseLastResponse
 		},
 	}
-	for _, path := range []string{"/", "/history", "/transactions", "/categories", "/settings"} {
+	for _, path := range []string{"/", "/history", "/transactions", "/categories", "/settings", "/notifications"} {
 		resp, err := client.Get(srv.URL + path)
 		if err != nil {
 			t.Fatalf("%s: %v", path, err)
@@ -405,6 +405,28 @@ func TestHistoryPage_partialDateRangeShowsBanner(t *testing.T) {
 			}
 			assertBodyHasErrorAlert(t, s)
 		}()
+	}
+}
+
+func TestNotificationsPageOKForLoggedInUser(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "notif@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "notif@moana.test", "pw")
+	resp, err := client.Get(srv.URL + "/notifications")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Notifications") || !strings.Contains(s, "no notifications") {
+		t.Fatalf("expected notifications page shell, got prefix %q", s[:min(500, len(s))])
 	}
 }
 
