@@ -106,6 +106,27 @@ func TestHTTPHandler_getLoginPage(t *testing.T) {
 	}
 }
 
+func TestHTTPHandler_loginPageWithErrorQueryShowsSessionBanner(t *testing.T) {
+	t.Parallel()
+	st, db, err := dbutil.OpenStore(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	h, err := moanaapp.HTTPHandler(testutil.DefaultTestConfig(), st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/login?error=1", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "Session expired or invalid") {
+		t.Fatalf("expected error banner on login page (len %d)", rec.Body.Len())
+	}
+}
+
 func TestHTTPHandler_unauthenticatedRootRedirectsToLogin(t *testing.T) {
 	t.Parallel()
 	st, db, err := dbutil.OpenStore(":memory:")
