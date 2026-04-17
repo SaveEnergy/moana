@@ -57,6 +57,27 @@ func TestLoad_productionRejectsShortSessionSecret(t *testing.T) {
 	}
 }
 
+func TestLoad_productionRejects31CharSessionSecret(t *testing.T) {
+	t.Setenv("MOANA_ENV", "production")
+	t.Setenv("MOANA_SESSION_SECRET", "0123456789012345678901234567890") // 31
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestLoad_productionAcceptsExactly32CharSessionSecret(t *testing.T) {
+	t.Setenv("MOANA_ENV", "production")
+	t.Setenv("MOANA_SESSION_SECRET", "01234567890123456789012345678901") // 32
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(c.SessionSecret) != 32 {
+		t.Fatalf("len %d want 32", len(c.SessionSecret))
+	}
+}
+
 func TestLoad_defaultRepoURL(t *testing.T) {
 	t.Setenv("MOANA_ENV", "development")
 	t.Setenv("MOANA_SESSION_SECRET", "")
