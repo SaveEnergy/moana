@@ -50,7 +50,7 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 		TxID:          tx.ID,
 		Kind:          kind,
 		Amount:        money.FormatDecimalEURAbs(tx.AmountCents),
-		OccurredOn:    tx.OccurredAt.In(loc).Format("2006-01-02"),
+		OccurredOn:    formatLocalCalendarDate(tx.OccurredAt, loc),
 		Description:   tx.Description,
 		SelectedCatID: sel,
 		Next:          safepath.Internal(r.URL.Query().Get("next")),

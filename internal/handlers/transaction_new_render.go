@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
 	"moana/internal/httperr"
 	"moana/internal/store"
@@ -17,7 +16,7 @@ func (a *App) transactionsError(w http.ResponseWriter, r *http.Request, u *store
 		return
 	}
 	loc := tz.DisplayLocation(r)
-	today := time.Now().In(loc).Format("2006-01-02")
+	today := todayLocalCalendarDate(loc)
 	sel := categoryIDFromForm(r.FormValue("category_id"))
 	data := txFormData{
 		Error:         msg,

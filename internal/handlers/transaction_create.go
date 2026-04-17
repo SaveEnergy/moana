@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
 	"moana/internal/httperr"
 	"moana/internal/store"
@@ -14,7 +13,7 @@ import (
 func (a *App) Transactions(w http.ResponseWriter, r *http.Request, u *store.User) {
 	ctx := r.Context()
 	loc := tz.DisplayLocation(r)
-	today := time.Now().In(loc).Format("2006-01-02")
+	today := todayLocalCalendarDate(loc)
 	cats, err := a.Store.ListCategories(ctx, u.HouseholdID)
 	if err != nil {
 		httperr.Internal(w, r, err)
