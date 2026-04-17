@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+// minProductionSessionSecretLen is the minimum MOANA_SESSION_SECRET length when
+// MOANA_ENV=production (sufficient entropy for HMAC session signing).
+const minProductionSessionSecretLen = 32
+
 // Config holds runtime settings loaded from the environment.
 type Config struct {
 	Listen         string
@@ -29,6 +33,9 @@ func Load() (*Config, error) {
 	secretStr := os.Getenv("MOANA_SESSION_SECRET")
 	if env == "production" && secretStr == "" {
 		return nil, fmt.Errorf("MOANA_SESSION_SECRET is required when MOANA_ENV=production")
+	}
+	if env == "production" && len(secretStr) < minProductionSessionSecretLen {
+		return nil, fmt.Errorf("MOANA_SESSION_SECRET must be at least %d characters when MOANA_ENV=production", minProductionSessionSecretLen)
 	}
 	var secret []byte
 	if secretStr != "" {
