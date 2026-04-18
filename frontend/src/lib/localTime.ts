@@ -17,10 +17,18 @@ export function applyLocalTimeElements(root: ParentNode = document): void {
   if (nodes.length === 0) {
     return
   }
+  /** Same ISO often repeats (same-minute entries); format once per distinct attribute value. */
+  const byIso = new Map<string, string>()
   for (const el of nodes) {
     const iso = el.getAttribute('datetime')
     if (!iso) continue
-    const label = formatLocalTimeLabel(iso)
-    if (label) el.textContent = label
+    let label = byIso.get(iso)
+    if (label === undefined) {
+      const formatted = formatLocalTimeLabel(iso)
+      if (!formatted) continue
+      byIso.set(iso, formatted)
+      label = formatted
+    }
+    el.textContent = label
   }
 }
