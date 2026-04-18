@@ -1,3 +1,5 @@
+import { MOBILE_SHELL_MEDIA_QUERY } from './shellBreakpoints'
+
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
 export function initShellSidebar(): void {
   const shell = document.getElementById('app-shell')
@@ -9,7 +11,7 @@ export function initShellSidebar(): void {
   const closeBtn = document.getElementById('app-sidebar-close')
   const backdrop = document.getElementById('app-sidebar-backdrop')
 
-  const mqMobile = window.matchMedia('(max-width: 1023px)')
+  const mqMobile = window.matchMedia(MOBILE_SHELL_MEDIA_QUERY)
 
   function setExpanded(open: boolean) {
     toggle?.setAttribute('aria-expanded', open ? 'true' : 'false')

@@ -1,3 +1,5 @@
+import { sanitizeCategoryCustomHex } from './categoryColor'
+
 export function initCategoryModal(): void {
   const dialog = document.getElementById('cat-modal') as HTMLDialogElement | null
   if (!dialog) {
@@ -108,7 +110,7 @@ export function initCategoryModal(): void {
     } else if (isCustom) {
       catForm.querySelector<HTMLInputElement>('input[name="color"][value="custom"]')!.checked = true
       const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
-      if (nat) nat.value = /^#[0-9a-fA-F]{6}$/.test(customHex) ? customHex : '#818cf8'
+      if (nat) nat.value = sanitizeCategoryCustomHex(customHex)
     } else {
       const preset = Array.from(catForm.querySelectorAll<HTMLInputElement>('input[name="color"]')).find(
         (r) => r.value === rawColor,
