@@ -18,8 +18,8 @@ func TestLoginSubmit_trimmedEmailAuthenticates(t *testing.T) {
 	testutil.MustCreateUser(t, app, "trimlogin@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	resp, err := client.PostForm(srv.URL+handlers.LoginPath, url.Values{
-		"email":    {"  trimlogin@integration.test  "},
-		"password": {"pw"},
+		handlers.LoginFieldEmail:    {"  trimlogin@integration.test  "},
+		handlers.LoginFieldPassword: {"pw"},
 	})
 	if err != nil {
 		t.Fatal(err)

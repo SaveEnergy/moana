@@ -13,9 +13,9 @@ func (a *App) SettingsProfileUpdate(w http.ResponseWriter, r *http.Request, u *s
 	if !requireParseFormSettings(w, r) {
 		return
 	}
-	first := strings.TrimSpace(r.FormValue("first_name"))
-	last := strings.TrimSpace(r.FormValue("last_name"))
-	newPw := r.FormValue("new_password")
+	first := strings.TrimSpace(r.FormValue(SettingsFieldFirstName))
+	last := strings.TrimSpace(r.FormValue(SettingsFieldLastName))
+	newPw := r.FormValue(SettingsFieldNewPassword)
 	ctx := r.Context()
 	if err := a.Store.UpdateUserProfile(ctx, u.ID, first, last); err != nil {
 		redirectSettingsErr(w, r, "Could not save profile.")
@@ -31,7 +31,7 @@ func (a *App) SettingsProfileUpdate(w http.ResponseWriter, r *http.Request, u *s
 			redirectSettingsErr(w, r, "Current password is incorrect.")
 			return
 		}
-		confirm := r.FormValue("new_password_confirm")
+		confirm := r.FormValue(SettingsFieldNewPasswordConfirm)
 		if newPw != confirm {
 			redirectSettingsErr(w, r, "New passwords do not match.")
 			return

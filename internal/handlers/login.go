@@ -33,8 +33,8 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	if !requireParseForm(w, r) {
 		return
 	}
-	email := strings.TrimSpace(r.FormValue("email"))
-	password := r.FormValue("password")
+	email := strings.TrimSpace(r.FormValue(LoginFieldEmail))
+	password := r.FormValue(LoginFieldPassword)
 	if email == "" || password == "" {
 		http.Redirect(w, r, LoginPath, http.StatusSeeOther)
 		return
@@ -50,7 +50,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	maxAge := a.Config.SessionMaxAge
-	if r.FormValue("remember") == "on" {
+	if r.FormValue(LoginFieldRemember) == "on" {
 		maxAge = 30 * 24 * time.Hour
 	}
 	if err := auth.SignSession(w, a.Config.SessionSecret, auth.SessionPayload{

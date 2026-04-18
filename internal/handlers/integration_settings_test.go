@@ -23,8 +23,8 @@ func TestSettingsProfileUpdate_firstNameShowsSuccess(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "profile@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
-		"first_name": {"Pat"},
-		"last_name":  {""},
+		handlers.SettingsFieldFirstName: {"Pat"},
+		handlers.SettingsFieldLastName:  {""},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -162,8 +162,8 @@ func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "owner-mem@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"newmember@integration.test"},
-		"password": {"member-initial-secret-99"},
+		handlers.LoginFieldEmail:    {"newmember@integration.test"},
+		handlers.LoginFieldPassword: {"member-initial-secret-99"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -188,8 +188,8 @@ func TestSettingsHouseholdMemberAdd_trimsEmailForNewMemberLogin(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "owner-trim-mem@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"  paddedmember@integration.test  "},
-		"password": {"member-initial-secret-99"},
+		handlers.LoginFieldEmail:    {"  paddedmember@integration.test  "},
+		handlers.LoginFieldPassword: {"member-initial-secret-99"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -227,8 +227,8 @@ func TestSettingsHouseholdMemberAdd_memberCannotAdd(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "plain-member@integration.test", "mem-pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"new@integration.test"},
-		"password": {"secret-initial-1"},
+		handlers.LoginFieldEmail:    {"new@integration.test"},
+		handlers.LoginFieldPassword: {"secret-initial-1"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -253,8 +253,8 @@ func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "dup-mem@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"dupmember@integration.test"},
-		"password": {"member-initial-secret-99"},
+		handlers.LoginFieldEmail:    {"dupmember@integration.test"},
+		handlers.LoginFieldPassword: {"member-initial-secret-99"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -265,8 +265,8 @@ func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
 	}
 
 	resp2, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"dupmember@integration.test"},
-		"password": {"member-initial-secret-99"},
+		handlers.LoginFieldEmail:    {"dupmember@integration.test"},
+		handlers.LoginFieldPassword: {"member-initial-secret-99"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -292,8 +292,8 @@ func TestSettingsHouseholdMemberRemove_ownerRemovesMember(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "rem-owner@integration.test", "pw")
 
 	addResp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"rem-member@integration.test"},
-		"password": {"rem-member-secret-9"},
+		handlers.LoginFieldEmail:    {"rem-member@integration.test"},
+		handlers.LoginFieldPassword: {"rem-member-secret-9"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -396,8 +396,8 @@ func TestSettingsHouseholdMemberRemove_ownerCannotLeaveWithOtherMembers(t *testi
 	testutil.MustLogin(t, client, srv.URL, "leave-block@integration.test", "pw")
 
 	addResp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
-		"email":    {"leave-block-mem@integration.test"},
-		"password": {"member-secret-1"},
+		handlers.LoginFieldEmail:    {"leave-block-mem@integration.test"},
+		handlers.LoginFieldPassword: {"member-secret-1"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -469,11 +469,11 @@ func TestSettingsProfileUpdate_passwordChangeShowsSuccess(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "profile-pw@integration.test", "original-secret-1")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
-		"first_name":           {"Pat"},
-		"last_name":            {""},
-		"current_password":     {"original-secret-1"},
-		"new_password":         {"new-secret-very-long-2"},
-		"new_password_confirm": {"new-secret-very-long-2"},
+		handlers.SettingsFieldFirstName:          {"Pat"},
+		handlers.SettingsFieldLastName:           {""},
+		"current_password":                       {"original-secret-1"},
+		handlers.SettingsFieldNewPassword:        {"new-secret-very-long-2"},
+		handlers.SettingsFieldNewPasswordConfirm: {"new-secret-very-long-2"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -504,11 +504,11 @@ func TestSettingsProfileUpdate_wrongCurrentPasswordShowsError(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "profile-badcur@integration.test", "good-secret-1")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
-		"first_name":           {""},
-		"last_name":            {""},
-		"current_password":     {"wrong-password"},
-		"new_password":         {"new-secret-very-long-2"},
-		"new_password_confirm": {"new-secret-very-long-2"},
+		handlers.SettingsFieldFirstName:          {""},
+		handlers.SettingsFieldLastName:           {""},
+		"current_password":                       {"wrong-password"},
+		handlers.SettingsFieldNewPassword:        {"new-secret-very-long-2"},
+		handlers.SettingsFieldNewPasswordConfirm: {"new-secret-very-long-2"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -533,10 +533,10 @@ func TestSettingsProfileUpdate_newPasswordWithoutCurrentShowsError(t *testing.T)
 	testutil.MustLogin(t, client, srv.URL, "profile-nopw@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
-		"first_name":           {""},
-		"last_name":            {""},
-		"new_password":         {"new-secret-very-long-2"},
-		"new_password_confirm": {"new-secret-very-long-2"},
+		handlers.SettingsFieldFirstName:          {""},
+		handlers.SettingsFieldLastName:           {""},
+		handlers.SettingsFieldNewPassword:        {"new-secret-very-long-2"},
+		handlers.SettingsFieldNewPasswordConfirm: {"new-secret-very-long-2"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -561,11 +561,11 @@ func TestSettingsProfileUpdate_newPasswordMismatchShowsError(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "profile-mismatch@integration.test", "good-secret-1")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
-		"first_name":           {""},
-		"last_name":            {""},
-		"current_password":     {"good-secret-1"},
-		"new_password":         {"new-secret-very-long-2"},
-		"new_password_confirm": {"other-secret-3"},
+		handlers.SettingsFieldFirstName:          {""},
+		handlers.SettingsFieldLastName:           {""},
+		"current_password":                       {"good-secret-1"},
+		handlers.SettingsFieldNewPassword:        {"new-secret-very-long-2"},
+		handlers.SettingsFieldNewPasswordConfirm: {"other-secret-3"},
 	})
 	if err != nil {
 		t.Fatal(err)

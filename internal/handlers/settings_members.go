@@ -19,8 +19,8 @@ func (a *App) SettingsHouseholdMemberAdd(w http.ResponseWriter, r *http.Request,
 		redirectSettingsErr(w, r, "You cannot add members.")
 		return
 	}
-	email := strings.TrimSpace(r.FormValue("email"))
-	password := r.FormValue("password")
+	email := strings.TrimSpace(r.FormValue(LoginFieldEmail))
+	password := r.FormValue(LoginFieldPassword)
 	if email == "" || password == "" {
 		redirectSettingsErr(w, r, "Email and password are required.")
 		return

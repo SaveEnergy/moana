@@ -13,7 +13,7 @@ func (a *App) SettingsHouseholdUpdate(w http.ResponseWriter, r *http.Request, u 
 	if !requireParseFormSettings(w, r) {
 		return
 	}
-	name := strings.TrimSpace(r.FormValue("household_name"))
+	name := strings.TrimSpace(r.FormValue(SettingsFieldHouseholdName))
 	if name == "" {
 		redirectSettingsErr(w, r, "Household name is required.")
 		return
