@@ -55,6 +55,9 @@ test('sidebar active link matches current route', async ({ page }) => {
   await page.goto('/transactions')
   await expect(page.locator('#app-sidebar-nav a[href="/transactions"]')).toHaveClass(/sidebar-link-active/)
 
+  await page.goto('/categories')
+  await expect(page.locator('#app-sidebar-nav a[href="/categories"]')).toHaveClass(/sidebar-link-active/)
+
   await page.goto('/')
   await expect(page.locator('#app-sidebar-nav a[href="/"]')).toHaveClass(/sidebar-link-active/)
 })

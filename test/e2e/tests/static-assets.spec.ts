@@ -31,3 +31,9 @@ test('dashboard head modulepreloads app.js', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
 })
+
+test('categories page head modulepreloads app.js', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/categories')
+  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
+})
