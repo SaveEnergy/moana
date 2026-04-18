@@ -52,7 +52,7 @@ func TestBuildNav_preservesSearchAndDateFilters(t *testing.T) {
 		}
 	}
 	all, _ := url.Parse(nav.LinkAll)
-	if all.Query().Get(QueryKind) != "all" {
+	if all.Query().Get(QueryKind) != KindAll {
 		t.Fatalf("LinkAll kind: %s", nav.LinkAll)
 	}
 	inc, _ := url.Parse(nav.LinkIncome)
@@ -60,7 +60,7 @@ func TestBuildNav_preservesSearchAndDateFilters(t *testing.T) {
 		t.Fatalf("LinkIncome kind: %s", nav.LinkIncome)
 	}
 	exp, _ := url.Parse(nav.LinkExpense)
-	if exp.Query().Get(QueryKind) != "expense" {
+	if exp.Query().Get(QueryKind) != KindExpense {
 		t.Fatalf("LinkExpense kind: %s", nav.LinkExpense)
 	}
 }

@@ -24,7 +24,7 @@ func TestParseHistoryURL_defaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := ParseHistoryURL(u)
-	if p.kind != "all" || p.filterKind != "" || p.search != "" || p.sortLabel != "newest" || p.oldestFirst || p.filterActive {
+	if p.kind != KindAll || p.filterKind != "" || p.search != "" || p.sortLabel != SortLabelNewest || p.oldestFirst || p.filterActive {
 		t.Fatalf("%+v", p)
 	}
 }
@@ -36,7 +36,7 @@ func TestParseHistoryURL_kindAndSort(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := ParseHistoryURL(u)
-	if p.kind != "income" || p.filterKind != "income" || p.search != "rent" || p.sortLabel != "oldest" || !p.oldestFirst {
+	if p.kind != KindIncome || p.filterKind != KindIncome || p.search != "rent" || p.sortLabel != SortOldestValue || !p.oldestFirst {
 		t.Fatalf("%+v", p)
 	}
 }
@@ -60,8 +60,8 @@ func TestParseHistoryURL_allQueryParamsTogether(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := ParseHistoryURL(u)
-	if p.kind != "expense" || p.filterKind != "expense" || p.search != "coffee" ||
-		p.sortLabel != "oldest" || !p.oldestFirst || !p.filterActive ||
+	if p.kind != KindExpense || p.filterKind != KindExpense || p.search != "coffee" ||
+		p.sortLabel != SortOldestValue || !p.oldestFirst || !p.filterActive ||
 		p.from != "2026-01-01" || p.to != "2026-01-31" {
 		t.Fatalf("%+v", p)
 	}

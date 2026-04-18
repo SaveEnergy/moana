@@ -27,24 +27,24 @@ func ParseHistoryURL(u *url.URL) HistoryURLParams {
 func parseHistoryURLValues(v url.Values) HistoryURLParams {
 	q := strings.TrimSpace(v.Get(QuerySearch))
 	kindParam := strings.TrimSpace(v.Get(QueryKind))
-	kind := "all"
+	kind := KindAll
 	filterKind := ""
 	switch kindParam {
-	case "income":
-		kind = "income"
-		filterKind = "income"
-	case "expense":
-		kind = "expense"
-		filterKind = "expense"
+	case KindIncome:
+		kind = KindIncome
+		filterKind = KindIncome
+	case KindExpense:
+		kind = KindExpense
+		filterKind = KindExpense
 	default:
-		kind = "all"
+		kind = KindAll
 		filterKind = ""
 	}
 	sortParam := strings.TrimSpace(v.Get(QuerySort))
 	oldestFirst := sortParam == SortOldestValue
-	sortLabel := "newest"
+	sortLabel := SortLabelNewest
 	if oldestFirst {
-		sortLabel = "oldest"
+		sortLabel = SortOldestValue
 	}
 	from := strings.TrimSpace(v.Get(QueryFrom))
 	to := strings.TrimSpace(v.Get(QueryTo))

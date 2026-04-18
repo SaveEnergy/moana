@@ -24,13 +24,13 @@ func buildNavFromValues(q url.Values) Nav {
 	}
 	return Nav{
 		LinkAll: with(func(v url.Values) {
-			v.Set(QueryKind, "all")
+			v.Set(QueryKind, KindAll)
 		}),
 		LinkIncome: with(func(v url.Values) {
-			v.Set(QueryKind, "income")
+			v.Set(QueryKind, KindIncome)
 		}),
 		LinkExpense: with(func(v url.Values) {
-			v.Set(QueryKind, "expense")
+			v.Set(QueryKind, KindExpense)
 		}),
 		SortNewest: with(func(v url.Values) {
 			v.Del(QuerySort)
