@@ -58,7 +58,7 @@ func TestRequireParseFormSettings_bodyReadError(t *testing.T) {
 	if u.Path != SettingsPath {
 		t.Fatalf("path %q", u.Path)
 	}
-	if got := u.Query().Get("err"); got != "Invalid form." {
+	if got := u.Query().Get(SettingsErrorQueryParam); got != "Invalid form." {
 		t.Fatalf("err param %q", got)
 	}
 }

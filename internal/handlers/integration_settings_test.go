@@ -76,7 +76,7 @@ func TestSettingsPage_showsErrQueryMessage(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "settings-err@integration.test", "pw")
 	msg := "Something went wrong."
-	resp, err := client.Get(srv.URL + handlers.SettingsPath + "?err=" + url.QueryEscape(msg))
+	resp, err := client.Get(srv.URL + handlers.SettingsPath + "?" + handlers.SettingsErrorQueryParam + "=" + url.QueryEscape(msg))
 	if err != nil {
 		t.Fatal(err)
 	}

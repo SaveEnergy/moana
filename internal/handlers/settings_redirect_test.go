@@ -23,7 +23,7 @@ func TestRedirectSettingsErr_roundtripQuery(t *testing.T) {
 	if u.Path != SettingsPath {
 		t.Fatalf("path %q", u.Path)
 	}
-	if got := u.Query().Get("err"); got != `bad & "quotes"` {
+	if got := u.Query().Get(SettingsErrorQueryParam); got != `bad & "quotes"` {
 		t.Fatalf("err param %q", got)
 	}
 }
@@ -41,7 +41,7 @@ func TestRedirectSettingsOK_roundtripQuery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := u.Query().Get("ok"); got != "ok&key" {
+	if got := u.Query().Get(SettingsOKQueryParam); got != "ok&key" {
 		t.Fatalf("ok param %q", got)
 	}
 }

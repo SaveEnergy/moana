@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -29,6 +30,24 @@ func TestHistoryPath_matchesSafepathDefault(t *testing.T) {
 	if HistoryPath != safepath.Default {
 		t.Fatalf("HistoryPath=%q must equal safepath.Default (%q) so ledger redirects match safe internal paths",
 			HistoryPath, safepath.Default)
+	}
+}
+
+func TestSettingsFlashQueryParams_roundtripInURLs(t *testing.T) {
+	t.Parallel()
+	errU, err := url.Parse(SettingsPath + "?" + SettingsErrorQueryParam + "=" + url.QueryEscape(`bad & "msg"`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := errU.Query().Get(SettingsErrorQueryParam); got != `bad & "msg"` {
+		t.Fatalf("err flash: got %q", got)
+	}
+	okU, err := url.Parse(SettingsPath + "?" + SettingsOKQueryParam + "=" + url.QueryEscape("saved&key"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := okU.Query().Get(SettingsOKQueryParam); got != "saved&key" {
+		t.Fatalf("ok flash: got %q", got)
 	}
 }
 

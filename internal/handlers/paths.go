@@ -7,11 +7,16 @@ const (
 	DashboardPath = "/"
 	// DashboardRootPattern is the Go 1.22+ [http.ServeMux] pattern for an exact match on "/" only.
 	// Use with [http.MethodGet]; bare "GET /" matches every path as a prefix — see routes_dashboard.go.
-	DashboardRootPattern               = "/{$}"
-	LoginPath                          = "/login"
-	LoginRedirectAuth                  = LoginPath + "?error=1" // WithAuth redirect; see paths_test.
-	LogoutPath                         = "/logout"
-	SettingsPath                       = "/settings"
+	DashboardRootPattern = "/{$}"
+	LoginPath            = "/login"
+	// LoginErrorQueryParam is the query key set when [WithAuth] redirects anonymous users ([LoginRedirectAuth]).
+	LoginErrorQueryParam = "error"
+	LoginRedirectAuth    = LoginPath + "?" + LoginErrorQueryParam + "=1" // WithAuth redirect; see paths_test.
+	LogoutPath           = "/logout"
+	SettingsPath         = "/settings"
+	// SettingsErrorQueryParam and SettingsOKQueryParam are flash query keys for [App.Settings] (see settings_redirect).
+	SettingsErrorQueryParam            = "err"
+	SettingsOKQueryParam               = "ok"
 	SettingsProfilePath                = SettingsPath + "/profile"
 	SettingsHouseholdPath              = SettingsPath + "/household"
 	SettingsHouseholdMembersPath       = SettingsHouseholdPath + "/members"

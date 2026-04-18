@@ -12,7 +12,7 @@ import (
 func (a *App) Settings(w http.ResponseWriter, r *http.Request, u *store.User) {
 	ctx := r.Context()
 	q := r.URL.Query()
-	data, err := household.LoadSettingsPage(ctx, a.Store, u, q.Get("err"), q.Get("ok"))
+	data, err := household.LoadSettingsPage(ctx, a.Store, u, q.Get(SettingsErrorQueryParam), q.Get(SettingsOKQueryParam))
 	if err != nil {
 		httperr.Internal(w, r, err)
 		return
