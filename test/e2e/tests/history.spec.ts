@@ -44,6 +44,13 @@ test('history apply dates submits from and to on GET', async ({ page }) => {
   await expect(page).toHaveURL(/[?&]to=2026-04-19(?:&|$)/)
 })
 
+test('history kind tab active class follows kind query', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/history?kind=expense')
+  await expect(page.getByRole('tab', { name: 'Expenses' })).toHaveClass(/history-seg-active/)
+  await expect(page.getByRole('tab', { name: 'All' })).not.toHaveClass(/history-seg-active/)
+})
+
 test('history kind tabs preserve query and switch kind', async ({ page }) => {
   await signInAsTestUser(page)
   const q = 'e2e-kind-nav'
