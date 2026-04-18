@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
+import { APP_JS_MODULE_PRELOAD } from '../helpers/modulePreload'
 
 test('health endpoint responds OK', async ({ request }) => {
   const res = await request.get('/health')
@@ -23,7 +24,7 @@ test('static app.js is served with bytes', async ({ request }) => {
 
 test('login page head modulepreloads app.js', async ({ page }) => {
   await page.goto('/login')
-  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
+  await expect(page.locator(APP_JS_MODULE_PRELOAD)).toHaveCount(1)
 })
 
 const authenticatedShellModulePreload = [
@@ -39,6 +40,6 @@ for (const [label, path] of authenticatedShellModulePreload) {
   test(`layout modulepreloads app.js — ${label}`, async ({ page }) => {
     await signInAsTestUser(page)
     await page.goto(path)
-    await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
+    await expect(page.locator(APP_JS_MODULE_PRELOAD)).toHaveCount(1)
   })
 }
