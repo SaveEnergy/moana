@@ -7,8 +7,12 @@ import (
 
 // BuildNav preserves the current query string while swapping kind/sort presets.
 func BuildNav(u *url.URL) Nav {
-	// Parse RawQuery once; each nav link mutates a clone of these values.
-	base := maps.Clone(u.Query())
+	return buildNavFromValues(u.Query())
+}
+
+// buildNavFromValues builds nav links from url.Values (usually the same URL.Query map as parseHistoryURLValues).
+func buildNavFromValues(q url.Values) Nav {
+	base := maps.Clone(q)
 	with := func(mut func(v url.Values)) string {
 		v := maps.Clone(base)
 		mut(v)

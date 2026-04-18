@@ -19,8 +19,12 @@ type HistoryURLParams struct {
 
 // ParseHistoryURL extracts normalized filters from a /history URL.
 func ParseHistoryURL(u *url.URL) HistoryURLParams {
-	// URL.Query parses RawQuery on each call; reuse one Values map for all params.
-	v := u.Query()
+	return parseHistoryURLValues(u.Query())
+}
+
+// parseHistoryURLValues normalizes filters from a url.Values produced by URL.Query.
+// BuildPage passes the same Values to this and to buildNavFromValues (one query parse per request).
+func parseHistoryURLValues(v url.Values) HistoryURLParams {
 	q := strings.TrimSpace(v.Get("q"))
 	kindParam := strings.TrimSpace(v.Get("kind"))
 	kind := "all"

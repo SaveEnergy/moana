@@ -15,6 +15,18 @@ func TestBuildNav(t *testing.T) {
 	}
 }
 
+func TestBuildNav_matchesBuildNavFromValues(t *testing.T) {
+	t.Parallel()
+	raw := "/history?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest"
+	u, err := url.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := BuildNav(u), buildNavFromValues(u.Query()); got != want {
+		t.Fatalf("BuildNav vs buildNavFromValues:\n%+v\n%+v", got, want)
+	}
+}
+
 func TestBuildNav_preservesSearchAndDateFilters(t *testing.T) {
 	t.Parallel()
 	raw := "/history?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest"
