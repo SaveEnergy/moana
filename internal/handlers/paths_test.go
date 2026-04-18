@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"strings"
 	"testing"
 
 	"moana/internal/safepath"
@@ -19,5 +20,28 @@ func TestHistoryPath_matchesSafepathDefault(t *testing.T) {
 	if HistoryPath != safepath.Default {
 		t.Fatalf("HistoryPath=%q must equal safepath.Default (%q) so ledger redirects match safe internal paths",
 			HistoryPath, safepath.Default)
+	}
+}
+
+func TestCategoryMutatePaths_haveCategoriesPrefix(t *testing.T) {
+	t.Parallel()
+	for _, p := range []string{CategoriesUpdatePath, CategoriesDeletePath} {
+		if !strings.HasPrefix(p, CategoriesPath+"/") {
+			t.Fatalf("%q must be under %q/", p, CategoriesPath)
+		}
+	}
+}
+
+func TestSettingsPOSTPaths_haveSettingsPrefix(t *testing.T) {
+	t.Parallel()
+	for _, p := range []string{
+		SettingsProfilePath,
+		SettingsHouseholdPath,
+		SettingsHouseholdMembersPath,
+		SettingsHouseholdMembersRemovePath,
+	} {
+		if !strings.HasPrefix(p, SettingsPath+"/") {
+			t.Fatalf("%q must be under %q/", p, SettingsPath)
+		}
 	}
 }
