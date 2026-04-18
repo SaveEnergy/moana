@@ -13,6 +13,11 @@ test('dashboard loads design tokens and overview', async ({ page }) => {
   )
   expect(primary.toLowerCase()).toBe('#306369')
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  await expect(
+    page.getByRole('group', { name: /Statistics and outflow period/i }),
+  ).toBeVisible()
+  await expect(page.getByText('Total Income', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Money movement' })).toBeVisible()
 })
 
 test('dashboard period links set period query', async ({ page }) => {
