@@ -1,5 +1,5 @@
-import { clickEventTargetElement } from './clickTarget'
 import { shouldDeferMobileShellEscape } from './dialogKeyboard'
+import { shouldCloseMobileSidebarFromShellClick } from './mobileShellDismiss'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
@@ -46,20 +46,12 @@ export function initShellSidebar(): void {
     toggleMobileSidebar()
   })
 
-  /** Backdrop + in-drawer close — one bubbling listener; `clickEventTargetElement` covers SVG/text hits. */
+  /** Backdrop + in-drawer close — one bubbling listener (see `mobileShellDismiss.ts`). */
   appShell.addEventListener('click', (e) => {
     if (!mqMobile.matches) {
       return
     }
-    const el = clickEventTargetElement(e)
-    if (!el) {
-      return
-    }
-    if (backdrop && el === backdrop) {
-      closeMobileSidebar()
-      return
-    }
-    if (el.closest('#app-sidebar-close')) {
+    if (shouldCloseMobileSidebarFromShellClick(e, backdrop)) {
       closeMobileSidebar()
     }
   })
