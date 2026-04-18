@@ -1,3 +1,4 @@
+import { clickEventTargetElement } from './clickTarget'
 import { shouldDeferMobileShellEscape } from './dialogKeyboard'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
@@ -9,7 +10,6 @@ export function initShellSidebar(): void {
   }
   const appShell = shell
   const toggle = document.getElementById('app-sidebar-toggle')
-  const closeBtn = document.getElementById('app-sidebar-close')
   const backdrop = document.getElementById('app-sidebar-backdrop')
 
   const mqMobile = window.matchMedia(MOBILE_SHELL_MEDIA_QUERY)
@@ -46,12 +46,22 @@ export function initShellSidebar(): void {
     toggleMobileSidebar()
   })
 
-  backdrop?.addEventListener('click', () => {
-    closeMobileSidebar()
-  })
-
-  closeBtn?.addEventListener('click', () => {
-    closeMobileSidebar()
+  /** Backdrop + in-drawer close — one bubbling listener; `clickEventTargetElement` covers SVG/text hits. */
+  appShell.addEventListener('click', (e) => {
+    if (!mqMobile.matches) {
+      return
+    }
+    const el = clickEventTargetElement(e)
+    if (!el) {
+      return
+    }
+    if (backdrop && el === backdrop) {
+      closeMobileSidebar()
+      return
+    }
+    if (el.closest('#app-sidebar-close')) {
+      closeMobileSidebar()
+    }
   })
 
   onMediaQueryChange(mqMobile, () => {

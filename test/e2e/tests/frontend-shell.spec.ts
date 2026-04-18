@@ -48,6 +48,26 @@ test('mobile sidebar toggles', async ({ page }) => {
   await expect(shell).not.toHaveClass(/sidebar-open/)
 })
 
+test('mobile sidebar closes on backdrop click', async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 })
+  await page.goto('/')
+  const shell = page.locator('#app-shell')
+  await page.getByRole('button', { name: 'Open navigation menu' }).click()
+  await expect(shell).toHaveClass(/sidebar-open/)
+  await page.locator('#app-sidebar-backdrop').click()
+  await expect(shell).not.toHaveClass(/sidebar-open/)
+})
+
+test('mobile sidebar closes on drawer close control', async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 })
+  await page.goto('/')
+  const shell = page.locator('#app-shell')
+  await page.getByRole('button', { name: 'Open navigation menu' }).click()
+  await expect(shell).toHaveClass(/sidebar-open/)
+  await page.locator('#app-sidebar-close').click()
+  await expect(shell).not.toHaveClass(/sidebar-open/)
+})
+
 test('mobile: Escape does not collapse drawer while account menu is open', async ({ page }) => {
   await page.setViewportSize({ width: 600, height: 800 })
   await page.goto('/')
