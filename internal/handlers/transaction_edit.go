@@ -53,7 +53,7 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 		OccurredOn:    formatLocalCalendarDate(tx.OccurredAt, loc),
 		Description:   tx.Description,
 		SelectedCatID: sel,
-		Next:          safepath.Internal(r.URL.Query().Get("next")),
+		Next:          safepath.Internal(r.URL.Query().Get(TransactionNextQueryParam)),
 	}
 	a.renderTransactionEdit(w, u, data)
 }
@@ -68,7 +68,7 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 		http.NotFound(w, r)
 		return
 	}
-	next := safepath.Internal(r.FormValue("next"))
+	next := safepath.Internal(r.FormValue(TransactionNextQueryParam))
 	ctx := r.Context()
 	existing, err := a.Store.GetTransactionByID(ctx, u.HouseholdID, id)
 	if err != nil {

@@ -16,7 +16,7 @@ func (a *App) Dashboard(w http.ResponseWriter, r *http.Request, u *store.User) {
 	loc := tz.DisplayLocation(r)
 	now := time.Now().UTC()
 
-	data, err := dashboard.BuildPageData(ctx, a.Store, u.HouseholdID, loc, now, r.URL.Query().Get("period"))
+	data, err := dashboard.BuildPageData(ctx, a.Store, u.HouseholdID, loc, now, r.URL.Query().Get(DashboardPeriodQueryParam))
 	if err != nil {
 		httperr.Internal(w, r, err)
 		return

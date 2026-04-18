@@ -29,5 +29,9 @@ const (
 	// TransactionPathPattern and TransactionEditPathPattern are Go 1.22+ [http.ServeMux] patterns (wildcard segment {id}).
 	TransactionPathPattern     = TransactionsPath + "/{id}"
 	TransactionEditPathPattern = TransactionsPath + "/{id}/edit"
-	NotificationsPath          = "/notifications"
+	// TransactionNextQueryParam is the form/query field for post-edit redirects ([safepath.Internal]); templates use the same name.
+	TransactionNextQueryParam = "next"
+	// DashboardPeriodQueryParam selects the dashboard stats window (?period=30d|12m).
+	DashboardPeriodQueryParam = "period"
+	NotificationsPath         = "/notifications"
 )
