@@ -30,6 +30,17 @@ export function initCategoryModal(): void {
   const catIconWrap = iconWrap
   const catName = nameInput
 
+  function radiosByValue(name: 'color' | 'icon'): Map<string, HTMLInputElement> {
+    const m = new Map<string, HTMLInputElement>()
+    for (const r of catForm.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)) {
+      m.set(r.value, r)
+    }
+    return m
+  }
+
+  const colorRadioByValue = radiosByValue('color')
+  const iconRadioByValue = radiosByValue('icon')
+
   function syncCatModalPreview() {
     const cr = catForm.querySelector<HTMLInputElement>('input[name="color"]:checked')
     let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
@@ -82,8 +93,8 @@ export function initCategoryModal(): void {
     catTitle.textContent = 'New category'
     catSubmit.textContent = 'Create category'
     catForm.reset()
-    catForm.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
-    catForm.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
+    colorRadioByValue.get('')!.checked = true
+    iconRadioByValue.get('')!.checked = true
     const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
     if (nat) nat.value = '#818cf8'
     syncCatModalPreview()
@@ -106,34 +117,24 @@ export function initCategoryModal(): void {
     const customHex = (btn.dataset.customHex ?? '#818cf8').trim()
 
     if (!rawColor) {
-      catForm.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
+      colorRadioByValue.get('')!.checked = true
     } else if (isCustom) {
-      catForm.querySelector<HTMLInputElement>('input[name="color"][value="custom"]')!.checked = true
+      colorRadioByValue.get('custom')!.checked = true
       const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
       if (nat) nat.value = sanitizeCategoryCustomHex(customHex)
+    } else if (colorRadioByValue.has(rawColor)) {
+      colorRadioByValue.get(rawColor)!.checked = true
     } else {
-      const preset = Array.from(catForm.querySelectorAll<HTMLInputElement>('input[name="color"]')).find(
-        (r) => r.value === rawColor,
-      )
-      if (preset) {
-        preset.checked = true
-      } else {
-        catForm.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
-      }
+      colorRadioByValue.get('')!.checked = true
     }
 
     const iconVal = (btn.dataset.icon ?? '').trim()
     if (!iconVal) {
-      catForm.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
+      iconRadioByValue.get('')!.checked = true
+    } else if (iconRadioByValue.has(iconVal)) {
+      iconRadioByValue.get(iconVal)!.checked = true
     } else {
-      const iconRadio = Array.from(catForm.querySelectorAll<HTMLInputElement>('input[name="icon"]')).find(
-        (r) => r.value === iconVal,
-      )
-      if (iconRadio) {
-        iconRadio.checked = true
-      } else {
-        catForm.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
-      }
+      iconRadioByValue.get('')!.checked = true
     }
 
     syncCatModalPreview()
