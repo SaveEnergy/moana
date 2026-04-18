@@ -6,6 +6,7 @@ const stubs = vi.hoisted(() => ({
   initShellSidebar: vi.fn(),
   initSettingsMemberDialog: vi.fn(),
   initCategoryModal: vi.fn(),
+  initHistoryControls: vi.fn(),
 }))
 
 vi.mock('./lib/localTime', () => ({ applyLocalTimeElements: stubs.applyLocalTimeElements }))
@@ -13,6 +14,7 @@ vi.mock('./lib/timezoneCookie', () => ({ setBrowserTimezoneCookie: stubs.setBrow
 vi.mock('./lib/shellSidebar', () => ({ initShellSidebar: stubs.initShellSidebar }))
 vi.mock('./lib/settingsMemberDialog', () => ({ initSettingsMemberDialog: stubs.initSettingsMemberDialog }))
 vi.mock('./lib/categoryModal', () => ({ initCategoryModal: stubs.initCategoryModal }))
+vi.mock('./lib/historyControls', () => ({ initHistoryControls: stubs.initHistoryControls }))
 
 import { BOOT_APP_INITIALIZERS, bootApp } from './boot'
 
@@ -22,7 +24,7 @@ describe('bootApp', () => {
   })
 
   it('BOOT_APP_INITIALIZERS lists one entry per boot step', () => {
-    expect(BOOT_APP_INITIALIZERS).toHaveLength(5)
+    expect(BOOT_APP_INITIALIZERS).toHaveLength(6)
   })
 
   it('invokes each initializer once', () => {
@@ -32,6 +34,7 @@ describe('bootApp', () => {
     expect(stubs.initShellSidebar).toHaveBeenCalledTimes(1)
     expect(stubs.initSettingsMemberDialog).toHaveBeenCalledTimes(1)
     expect(stubs.initCategoryModal).toHaveBeenCalledTimes(1)
+    expect(stubs.initHistoryControls).toHaveBeenCalledTimes(1)
   })
 
   it('runs initializers in a stable order', () => {
@@ -51,6 +54,9 @@ describe('bootApp', () => {
     stubs.initCategoryModal.mockImplementation(() => {
       order.push('categoryModal')
     })
+    stubs.initHistoryControls.mockImplementation(() => {
+      order.push('historyControls')
+    })
     bootApp()
     expect(order).toEqual([
       'timezone',
@@ -58,6 +64,7 @@ describe('bootApp', () => {
       'shell',
       'settingsDialog',
       'categoryModal',
+      'historyControls',
     ])
   })
 })

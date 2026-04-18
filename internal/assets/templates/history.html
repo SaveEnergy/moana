@@ -29,7 +29,7 @@
       </div>
       <div class="float-field history-sort-field">
         <label class="float-label" for="history-sort">Sort</label>
-        <select id="history-sort" class="float-input history-sort" name="sort" onchange="this.form.submit()">
+        <select id="history-sort" class="float-input history-sort" name="sort">
           <option value="newest" {{if eq .Sort "newest"}}selected{{end}}>Newest first</option>
           <option value="oldest" {{if eq .Sort "oldest"}}selected{{end}}>Oldest first</option>
         </select>
