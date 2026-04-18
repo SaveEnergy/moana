@@ -51,7 +51,7 @@ func (a *App) SettingsHouseholdMemberRemove(w http.ResponseWriter, r *http.Reque
 	if !requireParseFormSettings(w, r) {
 		return
 	}
-	targetID, ok := formPositiveInt64(r, "user_id")
+	targetID, ok := formPositiveInt64(r, SettingsFieldMemberUserID)
 	if !ok {
 		redirectSettingsErr(w, r, "Invalid member.")
 		return

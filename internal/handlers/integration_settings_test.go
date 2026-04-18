@@ -310,7 +310,7 @@ func TestSettingsHouseholdMemberRemove_ownerRemovesMember(t *testing.T) {
 	}
 
 	rmResp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
-		"user_id": {strconv.FormatInt(member.ID, 10)},
+		handlers.SettingsFieldMemberUserID: {strconv.FormatInt(member.ID, 10)},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -335,7 +335,7 @@ func TestSettingsHouseholdMemberRemove_invalidUserIDShowsError(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "rem-invalid@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
-		"user_id": {"not-a-number"},
+		handlers.SettingsFieldMemberUserID: {"not-a-number"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -371,7 +371,7 @@ func TestSettingsHouseholdMemberRemove_memberCannotRemoveOwner(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "rem-m@integration.test", "mem-pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
-		"user_id": {strconv.FormatInt(owner.ID, 10)},
+		handlers.SettingsFieldMemberUserID: {strconv.FormatInt(owner.ID, 10)},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -414,7 +414,7 @@ func TestSettingsHouseholdMemberRemove_ownerCannotLeaveWithOtherMembers(t *testi
 	}
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
-		"user_id": {strconv.FormatInt(owner.ID, 10)},
+		handlers.SettingsFieldMemberUserID: {strconv.FormatInt(owner.ID, 10)},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -444,7 +444,7 @@ func TestSettingsHouseholdMemberRemove_soleOwnerLeavesHousehold(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "leave-solo@integration.test", "pw")
 
 	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
-		"user_id": {strconv.FormatInt(u.ID, 10)},
+		handlers.SettingsFieldMemberUserID: {strconv.FormatInt(u.ID, 10)},
 	})
 	if err != nil {
 		t.Fatal(err)

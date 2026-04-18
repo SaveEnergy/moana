@@ -8,7 +8,7 @@ func TestFormFieldNameConstants_nonEmpty(t *testing.T) {
 		LoginFieldEmail, LoginFieldPassword, LoginFieldRemember,
 		SettingsFieldFirstName, SettingsFieldLastName,
 		SettingsFieldCurrentPassword, SettingsFieldNewPassword, SettingsFieldNewPasswordConfirm,
-		SettingsFieldHouseholdName,
+		SettingsFieldHouseholdName, SettingsFieldMemberUserID,
 	}
 	for _, name := range names {
 		if name == "" {

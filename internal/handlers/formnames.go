@@ -15,4 +15,6 @@ const (
 	SettingsFieldNewPassword        = "new_password"
 	SettingsFieldNewPasswordConfirm = "new_password_confirm"
 	SettingsFieldHouseholdName      = "household_name"
+	// SettingsFieldMemberUserID is the hidden field for member remove / leave (settings.html).
+	SettingsFieldMemberUserID = "user_id"
 )
