@@ -46,3 +46,13 @@ func TestMergeFuncMaps_mergesDistinctKeys(t *testing.T) {
 		t.Fatalf("a=%d b=%d", af(), bf())
 	}
 }
+
+func BenchmarkMergeFuncMaps_threeMaps(b *testing.B) {
+	a := template.FuncMap{"a": func() int { return 1 }}
+	x := template.FuncMap{"b": func() int { return 2 }}
+	z := template.FuncMap{"c": func() int { return 3 }}
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		_ = MergeFuncMaps(a, x, z)
+	}
+}
