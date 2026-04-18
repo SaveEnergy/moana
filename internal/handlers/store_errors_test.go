@@ -72,3 +72,20 @@ func TestUserFacingStoreMessage_invalidUserEmail(t *testing.T) {
 		t.Fatalf("got %q want %q", got, want)
 	}
 }
+
+func TestUserFacingStoreMessage_invalidCategoryAmountKind_mapsToInternal(t *testing.T) {
+	t.Parallel()
+	// Used by dashboard aggregates only; handlers must not surface raw strings if this ever leaks.
+	got := userFacingStoreMessage(store.ErrInvalidCategoryAmountKind)
+	if got != httperr.InternalMessage {
+		t.Fatalf("got %q want internal message", got)
+	}
+}
+
+func TestUserFacingStoreMessage_nilError_mapsToInternal(t *testing.T) {
+	t.Parallel()
+	got := userFacingStoreMessage(nil)
+	if got != httperr.InternalMessage {
+		t.Fatalf("got %q want internal message", got)
+	}
+}
