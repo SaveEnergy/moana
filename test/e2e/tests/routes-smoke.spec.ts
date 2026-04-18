@@ -55,6 +55,7 @@ test('transaction edit loads from history and save returns to history', async ({
   await page.getByRole('link', { name: 'Edit' }).first().click()
   await expect(page).toHaveURL(/\/transactions\/\d+\/edit/)
   await expect(page.getByRole('heading', { name: 'Edit entry' })).toBeVisible()
+  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
 
   await page.locator('#tx-edit-note').fill('e2e edit smoke')
   await page.getByRole('button', { name: 'Save changes' }).click()
