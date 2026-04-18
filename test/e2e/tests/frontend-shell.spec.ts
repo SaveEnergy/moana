@@ -21,6 +21,15 @@ test('global search control is in shell', async ({ page }) => {
   await expect(page.getByPlaceholder('Search')).toBeVisible()
 })
 
+test('topbar search submits to history with q', async ({ page }) => {
+  await page.goto('/')
+  const q = 'e2e-topbar-search'
+  await page.locator('#app-global-search').fill(q)
+  await page.locator('#app-global-search').press('Enter')
+  await expect(page).toHaveURL(/\/history(\?|$)/)
+  expect(new URL(page.url()).searchParams.get('q')).toBe(q)
+})
+
 test('notifications link is reachable', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('link', { name: 'Notifications' }).click()
