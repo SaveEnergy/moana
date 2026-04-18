@@ -1,3 +1,4 @@
+import { keyEventInvolvesOpenDialog } from './dialogKeyboard'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
@@ -58,10 +59,6 @@ export function initShellSidebar(): void {
       closeMobileSidebar()
     }
   })
-
-  function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
-    return e.composedPath().some((n) => n instanceof HTMLDialogElement && n.open)
-  }
 
   /* Capture phase: decide before bubble so we still see `dialog.open` during the same Escape. */
   document.addEventListener(
