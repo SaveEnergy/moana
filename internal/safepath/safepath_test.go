@@ -7,6 +7,9 @@ func TestInternal(t *testing.T) {
 	if got := Internal(""); got != Default {
 		t.Fatal(got)
 	}
+	if got := Internal("   "); got != Default {
+		t.Fatalf("whitespace-only: got %q want %q", got, Default)
+	}
 	if got := Internal("/foo/bar"); got != "/foo/bar" {
 		t.Fatal(got)
 	}

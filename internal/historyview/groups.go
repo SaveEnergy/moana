@@ -16,7 +16,8 @@ func GroupByDay(txs []store.Transaction, loc *time.Location, newestDayFirst bool
 		return nil
 	}
 	loc = timeutil.OrUTC(loc)
-	byDay := make(map[string][]store.Transaction)
+	// At most one bucket per row (distinct local days); hint reduces rehashing on large pages.
+	byDay := make(map[string][]store.Transaction, len(txs))
 	for _, tx := range txs {
 		k := timeutil.LocalCalendarDateKey(tx.OccurredAt, loc)
 		byDay[k] = append(byDay[k], tx)
