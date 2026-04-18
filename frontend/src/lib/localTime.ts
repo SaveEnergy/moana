@@ -11,23 +11,48 @@ export function formatLocalTimeLabel(iso: string): string | null {
   return localTimeFormatter.format(d)
 }
 
+/**
+ * Memoize `formatLocalTimeLabel` per distinct ISO string (exports for unit tests).
+ * Valid outputs live in a `Map`; known-invalid attrs are recorded in a `Set` so repeated bad values do not re-hit `Date` parsing.
+ */
+export function createLocalTimeLabelMemo(): (iso: string) => string | undefined {
+  const ok = new Map<string, string>()
+  const bad = new Set<string>()
+  return (iso: string) => {
+    if (!iso) {
+      return undefined
+    }
+    if (ok.has(iso)) {
+      return ok.get(iso)
+    }
+    if (bad.has(iso)) {
+      return undefined
+    }
+    const formatted = formatLocalTimeLabel(iso)
+    if (!formatted) {
+      bad.add(iso)
+      return undefined
+    }
+    ok.set(iso, formatted)
+    return formatted
+  }
+}
+
 /** Fill all `time.js-local-time[datetime]` elements in `root`. */
 export function applyLocalTimeElements(root: ParentNode = document): void {
   const nodes = root.querySelectorAll<HTMLTimeElement>('time.js-local-time[datetime]')
   if (nodes.length === 0) {
     return
   }
-  /** Same ISO often repeats (same-minute entries); format once per distinct attribute value. */
-  const byIso = new Map<string, string>()
+  const labelFor = createLocalTimeLabelMemo()
   for (const el of nodes) {
     const iso = el.getAttribute('datetime')
-    if (!iso) continue
-    let label = byIso.get(iso)
-    if (label === undefined) {
-      const formatted = formatLocalTimeLabel(iso)
-      if (!formatted) continue
-      byIso.set(iso, formatted)
-      label = formatted
+    if (!iso) {
+      continue
+    }
+    const label = labelFor(iso)
+    if (!label) {
+      continue
     }
     el.textContent = label
   }
