@@ -32,7 +32,7 @@
           data-custom="{{if categoryIsCustomColor $c}}1{{else}}0{{end}}"
           data-custom-hex="{{categoryColorHex $c}}"
         >Edit</button>
-        <form method="post" action="/categories/delete" class="cat-delete" onsubmit="return confirm('Remove this category?');">
+        <form method="post" action="/categories/delete" class="cat-delete" data-confirm="Remove this category?">
           <input type="hidden" name="id" value="{{$c.ID}}">
           <button type="submit" class="btn btn-ghost btn-small">Remove</button>
         </form>

@@ -122,14 +122,14 @@
           <div class="settings-member-actions">
             {{if eq $.User.ID .ID}}
               {{if settingsCanLeaveHousehold $.User $.MemberCount}}
-              <form method="post" action="/settings/household/members/remove" class="settings-inline-form" onsubmit="return confirm('Leave this household and start your own?');">
+              <form method="post" action="/settings/household/members/remove" class="settings-inline-form" data-confirm="Leave this household and start your own?">
                 <input type="hidden" name="user_id" value="{{.ID}}">
                 <button type="submit" class="btn btn-ghost btn-small">Leave</button>
               </form>
               {{end}}
             {{else}}
               {{if and $.CanManageMembers (settingsCanRemoveMember $.User .)}}
-              <form method="post" action="/settings/household/members/remove" class="settings-inline-form" onsubmit="return confirm('Remove this member from the household?');">
+              <form method="post" action="/settings/household/members/remove" class="settings-inline-form" data-confirm="Remove this member from the household?">
                 <input type="hidden" name="user_id" value="{{.ID}}">
                 <button type="submit" class="settings-member-remove" aria-label="Remove {{profileDisplayName .FirstName .LastName .Email}}">×</button>
               </form>

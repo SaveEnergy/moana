@@ -7,6 +7,7 @@ const stubs = vi.hoisted(() => ({
   initSettingsMemberDialog: vi.fn(),
   initCategoryModal: vi.fn(),
   initHistoryControls: vi.fn(),
+  initConfirmSubmitForms: vi.fn(),
 }))
 
 vi.mock('./lib/localTime', () => ({ applyLocalTimeElements: stubs.applyLocalTimeElements }))
@@ -15,6 +16,7 @@ vi.mock('./lib/shellSidebar', () => ({ initShellSidebar: stubs.initShellSidebar 
 vi.mock('./lib/settingsMemberDialog', () => ({ initSettingsMemberDialog: stubs.initSettingsMemberDialog }))
 vi.mock('./lib/categoryModal', () => ({ initCategoryModal: stubs.initCategoryModal }))
 vi.mock('./lib/historyControls', () => ({ initHistoryControls: stubs.initHistoryControls }))
+vi.mock('./lib/confirmSubmitForms', () => ({ initConfirmSubmitForms: stubs.initConfirmSubmitForms }))
 
 import { BOOT_APP_INITIALIZERS, bootApp } from './boot'
 
@@ -24,7 +26,7 @@ describe('bootApp', () => {
   })
 
   it('BOOT_APP_INITIALIZERS lists one entry per boot step', () => {
-    expect(BOOT_APP_INITIALIZERS).toHaveLength(6)
+    expect(BOOT_APP_INITIALIZERS).toHaveLength(7)
   })
 
   it('invokes each initializer once', () => {
@@ -35,6 +37,7 @@ describe('bootApp', () => {
     expect(stubs.initSettingsMemberDialog).toHaveBeenCalledTimes(1)
     expect(stubs.initCategoryModal).toHaveBeenCalledTimes(1)
     expect(stubs.initHistoryControls).toHaveBeenCalledTimes(1)
+    expect(stubs.initConfirmSubmitForms).toHaveBeenCalledTimes(1)
   })
 
   it('runs initializers in a stable order', () => {
@@ -57,6 +60,9 @@ describe('bootApp', () => {
     stubs.initHistoryControls.mockImplementation(() => {
       order.push('historyControls')
     })
+    stubs.initConfirmSubmitForms.mockImplementation(() => {
+      order.push('confirmSubmitForms')
+    })
     bootApp()
     expect(order).toEqual([
       'timezone',
@@ -65,6 +71,7 @@ describe('bootApp', () => {
       'settingsDialog',
       'categoryModal',
       'historyControls',
+      'confirmSubmitForms',
     ])
   })
 })
