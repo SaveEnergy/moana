@@ -34,6 +34,16 @@ test('history clear filters link returns to bare /history', async ({ page }) => 
   expect(new URL(page.url()).search).toBe('')
 })
 
+test('history apply dates submits from and to on GET', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/history')
+  await page.locator('#history-from').fill('2026-01-10')
+  await page.locator('#history-to').fill('2026-04-19')
+  await page.getByRole('button', { name: 'Apply dates' }).click()
+  await expect(page).toHaveURL(/[?&]from=2026-01-10(?:&|$)/)
+  await expect(page).toHaveURL(/[?&]to=2026-04-19(?:&|$)/)
+})
+
 test('history kind tabs preserve query and switch kind', async ({ page }) => {
   await signInAsTestUser(page)
   const q = 'e2e-kind-nav'
