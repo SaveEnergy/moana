@@ -46,7 +46,7 @@ export function initCategoryModal(): void {
   const iconRadioByValue = radiosByValue('icon')
 
   function syncCatModalPreview() {
-    const cr = catForm.querySelector<HTMLInputElement>('input[name="color"]:checked')
+    const cr = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="color"]:checked')
     let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
     if (cr?.value === 'custom') {
       const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
@@ -56,7 +56,7 @@ export function initCategoryModal(): void {
     }
     catPreview.style.background = bg
 
-    const ir = catForm.querySelector<HTMLInputElement>('input[name="icon"]:checked')
+    const ir = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="icon"]:checked')
     catIconWrap.innerHTML = ''
     if (!ir?.value) {
       catIconWrap.classList.add('cat-modal-preview-icon--auto')

@@ -33,7 +33,7 @@ test('settings profile loads', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Personal' })).toBeVisible()
 })
 
-test('transaction edit page loads from history', async ({ page }) => {
+test('transaction edit loads from history and save returns to history', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/transactions')
   await page.locator('input[name="amount"]').fill('1.00')
@@ -44,4 +44,8 @@ test('transaction edit page loads from history', async ({ page }) => {
   await page.getByRole('link', { name: 'Edit' }).first().click()
   await expect(page).toHaveURL(/\/transactions\/\d+\/edit/)
   await expect(page.getByRole('heading', { name: 'Edit entry' })).toBeVisible()
+
+  await page.locator('#tx-edit-note').fill('e2e edit smoke')
+  await page.getByRole('button', { name: 'Save changes' }).click()
+  await expect(page).toHaveURL(/\/history/)
 })
