@@ -25,7 +25,8 @@ func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (P
 	if kind == "expense" {
 		cents = -cents
 	}
-	if strings.TrimSpace(dateStr) == "" {
+	dateStr = strings.TrimSpace(dateStr)
+	if dateStr == "" {
 		return Parsed{}, "Date is required."
 	}
 	loc = timeutil.OrUTC(loc)
@@ -34,8 +35,8 @@ func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (P
 		return Parsed{}, "Invalid date."
 	}
 	var catID *int64
-	if catStr != "" {
-		id, err := strconv.ParseInt(catStr, 10, 64)
+	if catTrim := strings.TrimSpace(catStr); catTrim != "" {
+		id, err := strconv.ParseInt(catTrim, 10, 64)
 		if err != nil {
 			return Parsed{}, "Invalid category."
 		}

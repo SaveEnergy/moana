@@ -121,3 +121,36 @@ func TestParse_nilLocationUsesUTC(t *testing.T) {
 		t.Fatalf("OccurredUTC=%v want %v", p.OccurredUTC, want)
 	}
 }
+
+func TestParse_dateTrimmedForLayout(t *testing.T) {
+	t.Parallel()
+	p, errMsg := Parse("2.00", "  2026-08-01  ", "x", "", "expense", time.UTC)
+	if errMsg != "" {
+		t.Fatalf("padded date should parse, got %q", errMsg)
+	}
+	if p.AmountCents != -200 {
+		t.Fatalf("%+v", p)
+	}
+}
+
+func TestParse_categoryIdTrimmed(t *testing.T) {
+	t.Parallel()
+	p, errMsg := Parse("2.00", "2026-08-01", "x", "  99  ", "expense", time.UTC)
+	if errMsg != "" {
+		t.Fatal(errMsg)
+	}
+	if p.CategoryID == nil || *p.CategoryID != 99 {
+		t.Fatalf("got %+v", p.CategoryID)
+	}
+}
+
+func TestParse_categoryWhitespaceOnlyOmitsCategory(t *testing.T) {
+	t.Parallel()
+	p, errMsg := Parse("2.00", "2026-08-01", "x", " \t ", "expense", time.UTC)
+	if errMsg != "" {
+		t.Fatal(errMsg)
+	}
+	if p.CategoryID != nil {
+		t.Fatalf("want no category, got %+v", p.CategoryID)
+	}
+}
