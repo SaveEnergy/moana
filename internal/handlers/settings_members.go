@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"moana/internal/auth"
@@ -52,9 +51,8 @@ func (a *App) SettingsHouseholdMemberRemove(w http.ResponseWriter, r *http.Reque
 	if !requireParseFormSettings(w, r) {
 		return
 	}
-	idStr := r.FormValue("user_id")
-	targetID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil || targetID <= 0 {
+	targetID, ok := formPositiveInt64(r, "user_id")
+	if !ok {
 		redirectSettingsErr(w, r, "Invalid member.")
 		return
 	}
