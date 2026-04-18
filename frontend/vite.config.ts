@@ -6,6 +6,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   root: __dirname,
+  esbuild: {
+    legalComments: 'none',
+  },
   build: {
     target: 'es2022',
     cssMinify: true,

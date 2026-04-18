@@ -1,10 +1,9 @@
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
 export function initShellSidebar(): void {
-  if (!document.getElementById('app-shell')) {
+  const shell = document.getElementById('app-shell')
+  if (!shell) {
     return
   }
-
-  const shell = document.getElementById('app-shell')
   const toggle = document.getElementById('app-sidebar-toggle')
   const closeBtn = document.getElementById('app-sidebar-close')
   const backdrop = document.getElementById('app-sidebar-backdrop')

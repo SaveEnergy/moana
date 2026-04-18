@@ -193,14 +193,14 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 ## 13. Build and source of truth
 
 - **Edit CSS in:** `frontend/src/styles/*.css` (preserve **import order** in `frontend/src/app.css`)  
-- **Build:** `npm run build` — Vite outputs to `internal/assets/static/css/app.css` and `js/app.js` (see `frontend/vite.config.ts`; `es2022` target, CSS minify enabled, compressed-size reporting off for faster builds).  
+- **Build:** `npm run build` — Vite outputs to `internal/assets/static/css/app.css` and `js/app.js` (see `frontend/vite.config.ts`; `es2022` target, CSS minify, **esbuild strips `legalComments`** from JS for a smaller bundle, compressed-size reporting off for faster builds).  
 - **Do not hand-edit** generated files under `internal/assets/static/`.
 
 ## 14. Tests
 
 - **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
 - **Unit:** `npm run test:unit` — Vitest (`vitest.config.ts`), tests for `frontend/src/lib` (e.g. local time formatting).  
-- **E2E:** `npm run test:e2e` — Playwright: sign-in, dashboard shell, tokens, notifications, mobile sidebar, history, plus route smoke (categories, new transaction, settings).  
+- **E2E:** `npm run test:e2e` — Playwright: sign-in, dashboard shell, tokens, notifications link + inbox page, mobile sidebar, history, route smoke (categories, new transaction, settings).  
 - **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.
 
 ## 15. Risk snapshot
