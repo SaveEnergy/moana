@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"moana/internal/handlers"
 	"moana/internal/testutil"
 )
 
@@ -15,7 +16,7 @@ func TestLoginPageOK(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	resp, err := http.Get(srv.URL + "/login")
+	resp, err := http.Get(srv.URL + handlers.LoginPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +46,14 @@ func TestUnauthenticatedProtectedRoutesRedirectToLogin(t *testing.T) {
 			return http.ErrUseLastResponse
 		},
 	}
-	for _, path := range []string{"/", "/history", "/transactions", "/categories", "/settings", "/notifications"} {
+	for _, path := range []string{
+		handlers.DashboardPath,
+		handlers.HistoryPath,
+		handlers.TransactionsPath,
+		handlers.CategoriesPath,
+		handlers.SettingsPath,
+		handlers.NotificationsPath,
+	} {
 		resp, err := client.Get(srv.URL + path)
 		if err != nil {
 			t.Fatalf("%s: %v", path, err)

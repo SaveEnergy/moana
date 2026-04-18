@@ -14,7 +14,7 @@ import (
 func (a *App) LoginPage(w http.ResponseWriter, r *http.Request) {
 	_, err := a.CurrentUser(r)
 	if err == nil {
-		http.Redirect(w, r, dashboardPath, http.StatusSeeOther)
+		http.Redirect(w, r, DashboardPath, http.StatusSeeOther)
 		return
 	}
 	if !errors.Is(err, ErrAuthRequired) {
@@ -36,7 +36,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.FormValue("email"))
 	password := r.FormValue("password")
 	if email == "" || password == "" {
-		http.Redirect(w, r, loginPath, http.StatusSeeOther)
+		http.Redirect(w, r, LoginPath, http.StatusSeeOther)
 		return
 	}
 	ctx := r.Context()
@@ -60,13 +60,13 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		httperr.Internal(w, r, err)
 		return
 	}
-	http.Redirect(w, r, dashboardPath, http.StatusSeeOther)
+	http.Redirect(w, r, DashboardPath, http.StatusSeeOther)
 }
 
 // Logout clears the session.
 func (a *App) Logout(w http.ResponseWriter, r *http.Request) {
 	auth.ClearSession(w, a.Config.SecureCookies)
-	http.Redirect(w, r, loginPath, http.StatusSeeOther)
+	http.Redirect(w, r, LoginPath, http.StatusSeeOther)
 }
 
 // loginTemplateData is passed to login.html (standalone, no app layout).

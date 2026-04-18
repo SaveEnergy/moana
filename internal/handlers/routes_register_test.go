@@ -63,7 +63,7 @@ func TestRegisterRoutes_loginGET_ok(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
 	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/login", nil))
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.LoginPath, nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("GET /login: status %d want 200", rec.Code)
 	}
@@ -78,7 +78,7 @@ func TestRegisterRoutes_loginPOST_emptyFields_redirects(t *testing.T) {
 	t.Parallel()
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
-	assertSeeOtherToLogin(t, mux, http.MethodPost, "/login", strings.NewReader("email=&password="), false)
+	assertSeeOtherToLogin(t, mux, http.MethodPost, handlers.LoginPath, strings.NewReader("email=&password="), false)
 }
 
 // TestRegisterRoutes_loginPOST_badForm_returns400 verifies POST /login returns 400 when the body cannot be parsed.
@@ -87,7 +87,7 @@ func TestRegisterRoutes_loginPOST_badForm_returns400(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/login", iotest.ErrReader(errors.New("read fail")))
+	req := httptest.NewRequest(http.MethodPost, handlers.LoginPath, iotest.ErrReader(errors.New("read fail")))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	mux.ServeHTTP(rec, req)
 	if rec.Code != http.StatusBadRequest {
@@ -101,13 +101,13 @@ func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
 	paths := []string{
-		"/", // dashboard (GET /{$})
-		"/transactions",
-		"/transactions/42/edit", // path param (GET /transactions/{id}/edit)
-		"/history",
-		"/categories",
-		"/settings",
-		"/notifications",
+		handlers.DashboardPath, // GET /{$}
+		handlers.TransactionsPath,
+		handlers.TransactionsPath + "/42/edit", // path param (GET /transactions/{id}/edit)
+		handlers.HistoryPath,
+		handlers.CategoriesPath,
+		handlers.SettingsPath,
+		handlers.NotificationsPath,
 	}
 	for _, path := range paths {
 		assertRedirectToLogin(t, mux, path)

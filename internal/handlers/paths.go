@@ -1,13 +1,16 @@
 package handlers
 
-// Route path constants for redirects. Keep in sync with routes_*.go registrations.
+// HTTP route paths for redirects and [net/http.ServeMux] registrations.
+// Keep in sync with routes_*.go; exported for integration tests and external call sites.
 const (
-	dashboardPath = "/" // GET /{$} exact root (see routes_dashboard.go)
-	loginPath     = "/login"
-	// loginRedirectAuth is the WithAuth redirect; must stay loginPath + ?error=1 (see paths_test).
-	loginRedirectAuth = "/login?error=1"
-	logoutPath        = "/logout"
-	settingsPath      = "/settings"
-	historyPath       = "/history" // must match [safepath.Default] (see paths_test).
-	categoriesPath    = "/categories"
+	DashboardPath = "/" // GET /{$} exact root (see routes_dashboard.go)
+	LoginPath     = "/login"
+	// LoginRedirectAuth is WithAuth's redirect; must stay LoginPath + ?error=1 (see paths_test).
+	LoginRedirectAuth = "/login?error=1"
+	LogoutPath        = "/logout"
+	SettingsPath      = "/settings"
+	HistoryPath       = "/history" // must match [safepath.Default] (see paths_test).
+	CategoriesPath    = "/categories"
+	TransactionsPath  = "/transactions"
+	NotificationsPath = "/notifications"
 )

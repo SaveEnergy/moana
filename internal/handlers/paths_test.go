@@ -8,16 +8,16 @@ import (
 
 func TestLoginRedirectAuth_matchesLoginPathWithErrorQuery(t *testing.T) {
 	t.Parallel()
-	if want := loginPath + "?error=1"; loginRedirectAuth != want {
-		t.Fatalf("loginRedirectAuth=%q want %q (middleware WithAuth must match [routes_auth] GET %s)",
-			loginRedirectAuth, want, loginPath)
+	if want := LoginPath + "?error=1"; LoginRedirectAuth != want {
+		t.Fatalf("LoginRedirectAuth=%q want %q (middleware WithAuth must match [routes_auth] GET %s)",
+			LoginRedirectAuth, want, LoginPath)
 	}
 }
 
 func TestHistoryPath_matchesSafepathDefault(t *testing.T) {
 	t.Parallel()
-	if historyPath != safepath.Default {
-		t.Fatalf("historyPath=%q must equal safepath.Default (%q) so ledger redirects match safe internal paths",
-			historyPath, safepath.Default)
+	if HistoryPath != safepath.Default {
+		t.Fatalf("HistoryPath=%q must equal safepath.Default (%q) so ledger redirects match safe internal paths",
+			HistoryPath, safepath.Default)
 	}
 }
