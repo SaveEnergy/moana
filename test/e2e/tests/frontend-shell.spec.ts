@@ -28,6 +28,12 @@ test('dashboard period links set period query', async ({ page }) => {
   await expect(page).toHaveURL(/[?&]period=30d(?:&|$)/)
 })
 
+test('dashboard period active class follows period query', async ({ page }) => {
+  await page.goto('/?period=12m')
+  await expect(page.getByRole('link', { name: '12 months' })).toHaveClass(/is-active/)
+  await expect(page.getByRole('link', { name: '30 days' })).not.toHaveClass(/is-active/)
+})
+
 test('sidebar main nav links reach primary routes', async ({ page }) => {
   await page.goto('/')
   const nav = page.locator('#app-sidebar-nav')
