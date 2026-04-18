@@ -41,6 +41,30 @@ func TestParseHistoryURL_kindAndSort(t *testing.T) {
 	}
 }
 
+func TestParseHistoryURL_unknownKindFallsBackToAll(t *testing.T) {
+	t.Parallel()
+	u, err := url.Parse(RoutePath + "?kind=nope&sort=oldest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := ParseHistoryURL(u)
+	if p.kind != KindAll || p.filterKind != "" || !p.oldestFirst || p.sortLabel != SortOldestValue {
+		t.Fatalf("%+v", p)
+	}
+}
+
+func TestParseHistoryURL_unknownSortFallsBackToNewest(t *testing.T) {
+	t.Parallel()
+	u, err := url.Parse(RoutePath + "?kind=expense&sort=newestish")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := ParseHistoryURL(u)
+	if p.kind != KindExpense || p.filterKind != KindExpense || p.oldestFirst || p.sortLabel != SortLabelNewest {
+		t.Fatalf("%+v", p)
+	}
+}
+
 func TestParseHistoryURL_dateFilterActive(t *testing.T) {
 	t.Parallel()
 	u, err := url.Parse(RoutePath + "?from=2026-01-01&to=2026-01-31")
