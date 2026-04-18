@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   eventPathIncludesOpenDetails,
   eventPathIncludesOpenDialog,
   keyEventInvolvesOpenDialog,
+  shouldDeferMobileShellEscape,
 } from './dialogKeyboard'
 
 describe('eventPathIncludesOpenDialog', () => {
@@ -38,5 +39,33 @@ describe('keyEventInvolvesOpenDialog', () => {
       composedPath: () => [{ tagName: 'DETAILS', open: true }],
     } as unknown as KeyboardEvent
     expect(keyEventInvolvesOpenDialog(e)).toBe(false)
+  })
+})
+
+describe('shouldDeferMobileShellEscape', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('defers for open dialog in path', () => {
+    vi.stubGlobal('document', { querySelector: () => null })
+    const e = {
+      composedPath: () => [{ tagName: 'DIALOG', open: true }],
+    } as unknown as KeyboardEvent
+    expect(shouldDeferMobileShellEscape(e)).toBe(true)
+  })
+
+  it('defers when details.app-user-menu[open] exists', () => {
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => (sel === 'details.app-user-menu[open]' ? ({} as Element) : null),
+    })
+    const e = { composedPath: () => [] } as unknown as KeyboardEvent
+    expect(shouldDeferMobileShellEscape(e)).toBe(true)
+  })
+
+  it('is false when neither applies', () => {
+    vi.stubGlobal('document', { querySelector: () => null })
+    const e = { composedPath: () => [] } as unknown as KeyboardEvent
+    expect(shouldDeferMobileShellEscape(e)).toBe(false)
   })
 })

@@ -43,3 +43,8 @@ export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
 export function isAppUserMenuDetailsOpen(): boolean {
   return document.querySelector('details.app-user-menu[open]') !== null
 }
+
+/** Single guard for `shellSidebar` Escape: open `dialog` in path or open account `<details>`. */
+export function shouldDeferMobileShellEscape(e: KeyboardEvent): boolean {
+  return keyEventInvolvesOpenDialog(e) || isAppUserMenuDetailsOpen()
+}

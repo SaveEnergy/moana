@@ -1,4 +1,4 @@
-import { isAppUserMenuDetailsOpen, keyEventInvolvesOpenDialog } from './dialogKeyboard'
+import { shouldDeferMobileShellEscape } from './dialogKeyboard'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
@@ -67,7 +67,7 @@ export function initShellSidebar(): void {
       if (e.key !== 'Escape' || !mqMobile.matches) {
         return
       }
-      if (keyEventInvolvesOpenDialog(e) || isAppUserMenuDetailsOpen()) {
+      if (shouldDeferMobileShellEscape(e)) {
         return
       }
       closeMobileSidebar()
