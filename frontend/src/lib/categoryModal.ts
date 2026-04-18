@@ -1,4 +1,6 @@
 import { CATEGORY_MODAL_DEFAULT_PREVIEW_BG, sanitizeCategoryCustomHex } from './categoryColor'
+import { attachNativeDialogDismiss } from './dialogDismiss'
+import { clickEventTargetElement } from './clickTarget'
 
 export function initCategoryModal(): void {
   const dialog = document.getElementById('cat-modal') as HTMLDialogElement | null
@@ -155,8 +157,8 @@ export function initCategoryModal(): void {
   const editDelegationRoot = document.querySelector('.cat-list-section')
   if (editDelegationRoot) {
     editDelegationRoot.addEventListener('click', (e) => {
-      const el = e.target
-      if (!(el instanceof Element)) {
+      const el = clickEventTargetElement(e as MouseEvent)
+      if (!el) {
         return
       }
       const btn = el.closest('.cat-modal-open-edit')
@@ -167,18 +169,5 @@ export function initCategoryModal(): void {
     })
   }
 
-  /** Backdrop and × — one listener; closest covers inner nodes on the close control. */
-  modal.addEventListener('click', (e) => {
-    const el = e.target
-    if (!(el instanceof Element)) {
-      return
-    }
-    if (el === modal) {
-      modal.close()
-      return
-    }
-    if (el.closest('#cat-modal-close') !== null) {
-      modal.close()
-    }
-  })
+  attachNativeDialogDismiss(modal, ['#cat-modal-close'])
 }
