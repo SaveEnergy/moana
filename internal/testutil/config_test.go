@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"testing"
+	"time"
 )
 
 func TestDefaultTestConfig_repoURLMatchesDefaultRepoConstant(t *testing.T) {
@@ -24,7 +25,10 @@ func TestDefaultTestConfig_integrationDefaults(t *testing.T) {
 	if c.SecureCookies {
 		t.Fatal("SecureCookies must be false for httptest clients without TLS")
 	}
-	if c.RequestTimeout <= 0 || c.SessionMaxAge <= 0 {
-		t.Fatalf("timeouts must be positive: RequestTimeout=%v SessionMaxAge=%v", c.RequestTimeout, c.SessionMaxAge)
+	if c.RequestTimeout != 30*time.Second {
+		t.Fatalf("RequestTimeout %v want 30s (faster than [config.Load] default for integration tests)", c.RequestTimeout)
+	}
+	if c.SessionMaxAge != time.Hour {
+		t.Fatalf("SessionMaxAge %v want 1h", c.SessionMaxAge)
 	}
 }
