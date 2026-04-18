@@ -188,7 +188,7 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 - **Transactions / entry:** Category picker cards with **`--cat-accent`** left border and icon well  
 - **History:** Day groupings, `.history-card` rows, search/sort/date filters  
 - **Categories:** Modal create/edit; color presets from `internal/category/colors.go`; icon grid; preview  
-- **Settings:** Float-field forms, add-member dialog, member list with role badges  
+- **Settings:** Float-field forms, add-member dialog (delegated **`click`** on the **`dialog`** for backdrop, close, and Cancel), member list with role badges  
 - **Login:** `.login-split` — stacked on small screens; split layout with hero image from **1024px**
 
 ## 13. Build and source of truth

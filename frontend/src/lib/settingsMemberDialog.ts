@@ -5,23 +5,25 @@ export function initSettingsMemberDialog(): void {
   }
 
   const openBtn = document.getElementById('settings-add-member-open')
-  const closeBtn = document.getElementById('settings-add-member-close')
-  const cancelBtn = document.getElementById('settings-add-member-cancel')
 
   openBtn?.addEventListener('click', () => {
     dialog.showModal()
   })
 
-  closeBtn?.addEventListener('click', () => {
-    dialog.close()
-  })
-
-  cancelBtn?.addEventListener('click', () => {
-    dialog.close()
-  })
-
+  /** Backdrop, × close, and Cancel — one listener; use closest so clicks on inner nodes still match. */
   dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) {
+    const el = e.target
+    if (!(el instanceof Element)) {
+      return
+    }
+    if (el === dialog) {
+      dialog.close()
+      return
+    }
+    if (
+      el.closest('#settings-add-member-close') !== null ||
+      el.closest('#settings-add-member-cancel') !== null
+    ) {
       dialog.close()
     }
   })
