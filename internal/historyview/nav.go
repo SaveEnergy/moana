@@ -7,8 +7,10 @@ import (
 
 // BuildNav preserves the current query string while swapping kind/sort presets.
 func BuildNav(u *url.URL) Nav {
+	// Parse RawQuery once; each nav link mutates a clone of these values.
+	base := maps.Clone(u.Query())
 	with := func(mut func(v url.Values)) string {
-		v := cloneQuery(u)
+		v := maps.Clone(base)
 		mut(v)
 		enc := v.Encode()
 		if enc == "" {
@@ -33,8 +35,4 @@ func BuildNav(u *url.URL) Nav {
 			v.Set("sort", "oldest")
 		}),
 	}
-}
-
-func cloneQuery(u *url.URL) url.Values {
-	return maps.Clone(u.Query())
 }

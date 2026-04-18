@@ -83,3 +83,14 @@ func TestFormatDayLabel_today(t *testing.T) {
 		t.Fatal(s)
 	}
 }
+
+func BenchmarkBuildNav(b *testing.B) {
+	u, err := url.Parse("/history?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest")
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ReportAllocs()
+	for b.Loop() {
+		_ = BuildNav(u)
+	}
+}
