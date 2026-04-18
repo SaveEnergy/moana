@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test'
 
+import { signInAsTestUser } from '../helpers/auth'
+
 test('static app.css is served with bytes', async ({ request }) => {
   const res = await request.get('/static/css/app.css')
   expect(res.ok()).toBeTruthy()
@@ -12,4 +14,15 @@ test('static app.js is served with bytes', async ({ request }) => {
   expect(res.ok()).toBeTruthy()
   const len = (await res.body()).length
   expect(len).toBeGreaterThan(100)
+})
+
+test('login page head modulepreloads app.js', async ({ page }) => {
+  await page.goto('/login')
+  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
+})
+
+test('dashboard head modulepreloads app.js', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/')
+  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
 })

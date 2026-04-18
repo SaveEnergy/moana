@@ -15,7 +15,7 @@ Moana’s UI is a **server-rendered, CSS-first “editorial shell”**: warm **c
 | **JS** | `frontend/src/main.ts` loads CSS then calls **`bootApp()`** from `frontend/src/boot.ts`, which runs the same `lib/*` initializers in order. Each module **no-ops** when its DOM is absent (e.g. no `#app-shell` on login-only pages, no category modal on dashboard-only loads). |
 | **Icons** | Embedded Lucide-derived SVG via Go (`internal/icons/`), classes `.moana-icon` and size modifiers. |
 
-Templates load `/static/css/app.css` and Google Fonts in `<head>`; **`app.js` is loaded at the end of `<body>`** (parses markup before running TS). The login template also includes `app.js` so the **timezone cookie** is set before the first authenticated request.
+Templates load `/static/css/app.css` and Google Fonts in `<head>`; **`rel="modulepreload"`** on `/static/js/app.js` starts fetch early while HTML parses. **`app.js` executes at the end of `<body>`** (module deferred, runs after parse). The login template also includes `app.js` so the **timezone cookie** is set before the first authenticated request.
 
 There is **no React component library** in-repo; “components” are **CSS class contracts** in HTML. **Structure:** ordered style partials preserve cascade; behavior is split into small TypeScript modules for testing and navigation.
 
@@ -200,7 +200,7 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 
 - **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
 - **Unit:** `npm run test:unit` — Vitest, config **merged into `frontend/vite.config.ts`** (`test` block). Covers `frontend/src/lib/*`, **`bootApp()` wiring** (`boot.test.ts`), timezone cookie string, local time.  
-- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies).  
+- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies), **`modulepreload`** for `app.js` on login and dashboard.  
 - **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.
 
 ## 15. Risk snapshot
