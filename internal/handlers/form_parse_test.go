@@ -17,11 +17,22 @@ func TestCategoryIDFromForm(t *testing.T) {
 		{"0", 0},
 		{"-3", 0},
 		{"42", 42},
+		{"  42  ", 42},
 	}
 	for _, tc := range cases {
 		if got := categoryIDFromForm(tc.in); got != tc.want {
 			t.Fatalf("categoryIDFromForm(%q) = %d want %d", tc.in, got, tc.want)
 		}
+	}
+}
+
+func TestPositiveInt64String(t *testing.T) {
+	t.Parallel()
+	if id, ok := positiveInt64String("  7  "); !ok || id != 7 {
+		t.Fatalf("got %d ok=%v", id, ok)
+	}
+	if _, ok := positiveInt64String("  "); ok {
+		t.Fatal("whitespace-only")
 	}
 }
 
