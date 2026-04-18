@@ -41,6 +41,18 @@ test('sidebar main nav links reach primary routes', async ({ page }) => {
   await expect(page).toHaveURL(/\/$/)
 })
 
+test('sidebar active link matches current route', async ({ page }) => {
+  await page.goto('/history')
+  await expect(page.locator('#app-sidebar-nav a[href="/history"]')).toHaveClass(/sidebar-link-active/)
+  await expect(page.locator('#app-sidebar-nav a[href="/"]')).not.toHaveClass(/sidebar-link-active/)
+
+  await page.goto('/transactions')
+  await expect(page.locator('#app-sidebar-nav a[href="/transactions"]')).toHaveClass(/sidebar-link-active/)
+
+  await page.goto('/')
+  await expect(page.locator('#app-sidebar-nav a[href="/"]')).toHaveClass(/sidebar-link-active/)
+})
+
 test('sidebar FAB links to new transaction', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('link', { name: 'Add transaction' }).click()

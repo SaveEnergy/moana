@@ -89,7 +89,7 @@ Heavy use of **`color-mix(in srgb, …)`** for hovers, selection, and tinted bac
 
 **Structure:** `.app-shell` → `.app-sidebar` + `.app-content`.
 
-- **Sidebar:** Sticky, full height, `z-index: 50`, wordmark, `.sidebar-nav` links, `.sidebar-fab` primary CTA (“Add transaction”).
+- **Sidebar:** Sticky, full height, `z-index: 50`, wordmark, `.sidebar-nav` links (current route: **`.sidebar-link-active`** from `layout.html` **`Active`**), `.sidebar-fab` primary CTA (“Add transaction”).
 - **Top bar:** `.app-topbar` — mobile menu control, global search (`.app-search`, GET `/history`), notifications link (`.app-topbar-icon-btn`), `<details class="app-user-menu">` for account.  
 - **Mobile drawer (≤1023px):** Open via `#app-sidebar-toggle`; close via toggle, **Escape**, or **delegated `click` on `#app-shell`** (backdrop `#app-sidebar-backdrop` or `#app-sidebar-close`; predicate **`mobileShellDismiss.ts`**).
 - **Main:** `.app-main`; optional **`.dashboard-page`** narrows `.app-content-container` to `max-width: 72rem` versus default `80rem`.
