@@ -14,7 +14,7 @@ import (
 func (a *App) LoginPage(w http.ResponseWriter, r *http.Request) {
 	_, err := a.CurrentUser(r)
 	if err == nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, dashboardPath, http.StatusSeeOther)
 		return
 	}
 	if !errors.Is(err, ErrAuthRequired) {
@@ -60,7 +60,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		httperr.Internal(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, dashboardPath, http.StatusSeeOther)
 }
 
 // Logout clears the session.

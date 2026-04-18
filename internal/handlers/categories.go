@@ -37,7 +37,7 @@ func (a *App) CategoryCreate(w http.ResponseWriter, r *http.Request, u *store.Us
 		a.categoriesWithError(w, r, u, userFacingStoreMessage(err))
 		return
 	}
-	http.Redirect(w, r, "/categories", http.StatusSeeOther)
+	http.Redirect(w, r, categoriesPath, http.StatusSeeOther)
 }
 
 // CategoryDelete handles POST /categories/delete.
@@ -47,7 +47,7 @@ func (a *App) CategoryDelete(w http.ResponseWriter, r *http.Request, u *store.Us
 	}
 	id, ok := formPositiveInt64(r, "id")
 	if !ok {
-		http.Redirect(w, r, "/categories", http.StatusSeeOther)
+		http.Redirect(w, r, categoriesPath, http.StatusSeeOther)
 		return
 	}
 	ctx := r.Context()
@@ -55,7 +55,7 @@ func (a *App) CategoryDelete(w http.ResponseWriter, r *http.Request, u *store.Us
 		a.categoriesWithError(w, r, u, userFacingStoreMessage(err))
 		return
 	}
-	http.Redirect(w, r, "/categories", http.StatusSeeOther)
+	http.Redirect(w, r, categoriesPath, http.StatusSeeOther)
 }
 
 // CategoryUpdate handles POST /categories/update (name + icon).
@@ -80,5 +80,5 @@ func (a *App) CategoryUpdate(w http.ResponseWriter, r *http.Request, u *store.Us
 		a.categoriesWithError(w, r, u, userFacingStoreMessage(err))
 		return
 	}
-	http.Redirect(w, r, "/categories", http.StatusSeeOther)
+	http.Redirect(w, r, categoriesPath, http.StatusSeeOther)
 }

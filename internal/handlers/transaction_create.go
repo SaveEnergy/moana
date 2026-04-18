@@ -52,5 +52,5 @@ func (a *App) TransactionCreate(w http.ResponseWriter, r *http.Request, u *store
 		a.transactionsError(w, r, u, userFacingStoreMessage(err))
 		return
 	}
-	http.Redirect(w, r, "/history", http.StatusSeeOther)
+	http.Redirect(w, r, historyPath, http.StatusSeeOther)
 }
