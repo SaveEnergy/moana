@@ -6,18 +6,15 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestListUsers(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "a@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "x")
+	_, err := st.CreateUser(ctx, "a@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,10 +39,7 @@ func TestHouseholdMembersSeeSameTransactions(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-a")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "pw-a")
 	ownerID, err := st.CreateUser(ctx, "owner@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -56,10 +50,7 @@ func TestHouseholdMembersSeeSameTransactions(t *testing.T) {
 	}
 	hid := owner.HouseholdID
 
-	hashB, err := auth.HashPassword("pw-b")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hashB := passwordtest.MustHash(t, "pw-b")
 	memberID, err := st.CreateHouseholdMember(ctx, hid, "member@example.com", hashB)
 	if err != nil {
 		t.Fatal(err)
@@ -96,14 +87,11 @@ func TestCreateUser_duplicateEmail(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	if _, err := st.CreateUser(ctx, "same@example.com", hash, "user"); err != nil {
 		t.Fatal(err)
 	}
-	_, err = st.CreateUser(ctx, "same@example.com", hash, "user")
+	_, err := st.CreateUser(ctx, "same@example.com", hash, "user")
 	if !errors.Is(err, ErrDuplicateUserEmail) {
 		t.Fatalf("got %v want %v", err, ErrDuplicateUserEmail)
 	}
@@ -113,10 +101,7 @@ func TestCreateHouseholdMember_duplicateEmail(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "dup-owner@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -126,10 +111,7 @@ func TestCreateHouseholdMember_duplicateEmail(t *testing.T) {
 		t.Fatal(err)
 	}
 	hid := owner.HouseholdID
-	hash2, err := auth.HashPassword("y")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash2 := passwordtest.MustHash(t, "y")
 	if _, err := st.CreateHouseholdMember(ctx, hid, "dup-mem@example.com", hash2); err != nil {
 		t.Fatal(err)
 	}

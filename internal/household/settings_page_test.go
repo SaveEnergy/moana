@@ -4,18 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"moana/internal/auth"
 	"moana/internal/dbutil"
+	"moana/internal/passwordtest"
 )
 
 func TestLoadSettingsPage_memberCountMatchesMemberList(t *testing.T) {
 	t.Parallel()
 	st := dbutil.MustOpenMemStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "settings-owner@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -34,10 +31,7 @@ func TestLoadSettingsPage_memberCountMatchesMemberList(t *testing.T) {
 		t.Fatalf("solo household: MemberCount=%d len=%d", data.MemberCount, len(data.Members))
 	}
 
-	hash2, err := auth.HashPassword("y")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash2 := passwordtest.MustHash(t, "y")
 	if _, err := st.CreateHouseholdMember(ctx, hid, "settings-member@example.com", hash2); err != nil {
 		t.Fatal(err)
 	}

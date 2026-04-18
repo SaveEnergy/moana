@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestCreateTransaction_rejectsOtherHouseholdCategory(t *testing.T) {
@@ -14,11 +14,8 @@ func TestCreateTransaction_rejectsOtherHouseholdCategory(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-mutate-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "mutate-a@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "pw-mutate-test")
+	_, err := st.CreateUser(ctx, "mutate-a@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,11 +55,8 @@ func TestUpdateTransaction_rejectsOtherHouseholdCategory(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-mutate-up")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "mutate-up-a@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "pw-mutate-up")
+	_, err := st.CreateUser(ctx, "mutate-up-a@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}

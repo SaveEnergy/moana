@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestDailyAbsMovementByLocalDate_bucketingBerlin(t *testing.T) {
@@ -13,10 +13,7 @@ func TestDailyAbsMovementByLocalDate_bucketingBerlin(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-movement-test")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "pw-movement-test")
 	uid, err := st.CreateUser(ctx, "movement-tz@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -61,10 +58,7 @@ func TestDailyAbsMovementByLocalDate_nilLocationMatchesUTC(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("pw-movement-nil")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "pw-movement-nil")
 	uid, err := st.CreateUser(ctx, "movement-nil@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)

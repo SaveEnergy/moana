@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestUserCategoryTransactionFlow(t *testing.T) {
@@ -13,10 +13,7 @@ func TestUserCategoryTransactionFlow(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-test-123")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "pw-test-123")
 	uid, err := st.CreateUser(ctx, "flow@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestListTransactions_respectsLimit(t *testing.T) {
@@ -13,10 +13,7 @@ func TestListTransactions_respectsLimit(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-limit-test")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "pw-limit-test")
 	uid, err := st.CreateUser(ctx, "limit-list@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -76,10 +73,7 @@ func TestListTransactions_searchLiteralPercentDoesNotMatchAllRows(t *testing.T) 
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "like-pct@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -109,10 +103,7 @@ func TestListTransactions_whitespaceOnlySearchSkipped(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "ws-search@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -139,10 +130,7 @@ func TestListTransactions_kindIgnoresSurroundingSpace(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "kind-trim@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)

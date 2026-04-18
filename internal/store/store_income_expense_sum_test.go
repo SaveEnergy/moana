@@ -5,17 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestSumIncomeExpenseCentsInRange_matchesSplitQueries(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "agg@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -61,10 +58,7 @@ func TestSumIncomeExpenseCentsInTwoRanges_matchesSeparateQueries(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "two-range@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -117,10 +111,7 @@ func TestSumRunningTotalAndIncomeExpenseInTwoRanges_matchesSeparateQueries(t *te
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "run-two@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)

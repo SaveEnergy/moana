@@ -5,18 +5,15 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
 	"moana/internal/dbutil"
+	"moana/internal/passwordtest"
 )
 
 func TestBuildPageData_smoke(t *testing.T) {
 	t.Parallel()
 	st := dbutil.MustOpenMemStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "dash-smoke@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)

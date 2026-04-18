@@ -6,17 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestListCategoryAmountsInRange_invalidKind(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "cat-kind@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -39,10 +36,7 @@ func TestListCategoryAmountsInRange_expenseUncategorizedAndCategory(t *testing.T
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "cat-exp@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
@@ -86,10 +80,7 @@ func TestListCategoryAmountsInRange_incomeOrderedBySize(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash, err := auth.HashPassword("x")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "x")
 	uid, err := st.CreateUser(ctx, "cat-inc@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)

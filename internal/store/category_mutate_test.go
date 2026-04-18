@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 )
 
 func TestDeleteCategory_notFound(t *testing.T) {
@@ -13,11 +13,8 @@ func TestDeleteCategory_notFound(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-cat-del")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "cat-del-nf@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "pw-cat-del")
+	_, err := st.CreateUser(ctx, "cat-del-nf@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,11 +34,8 @@ func TestUpdateCategory_notFound(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-cat-up")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "cat-up-nf@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "pw-cat-up")
+	_, err := st.CreateUser(ctx, "cat-up-nf@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,11 +55,8 @@ func TestCreateCategory_duplicateName(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-cat-dup")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "cat-dup@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "pw-cat-dup")
+	_, err := st.CreateUser(ctx, "cat-dup@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,11 +81,8 @@ func TestUpdateCategory_duplicateRename(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash, err := auth.HashPassword("pw-cat-dup2")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = st.CreateUser(ctx, "cat-dup2@example.com", hash, "user")
+	hash := passwordtest.MustHash(t, "pw-cat-dup2")
+	_, err := st.CreateUser(ctx, "cat-dup2@example.com", hash, "user")
 	if err != nil {
 		t.Fatal(err)
 	}

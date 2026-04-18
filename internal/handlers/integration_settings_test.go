@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"moana/internal/auth"
+	"moana/internal/passwordtest"
 	"moana/internal/testutil"
 )
 
@@ -126,10 +126,7 @@ func TestSettingsHouseholdUpdate_memberCannotEditName(t *testing.T) {
 	if err != nil || owner == nil {
 		t.Fatal(err)
 	}
-	hash, err := auth.HashPassword("mem-pw")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "mem-pw")
 	if _, err := app.Store.CreateHouseholdMember(ctx, owner.HouseholdID, "hh-member@integration.test", hash); err != nil {
 		t.Fatal(err)
 	}
@@ -220,10 +217,7 @@ func TestSettingsHouseholdMemberAdd_memberCannotAdd(t *testing.T) {
 	if err != nil || owner == nil {
 		t.Fatal(err)
 	}
-	hash, err := auth.HashPassword("mem-pw")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "mem-pw")
 	if _, err := app.Store.CreateHouseholdMember(ctx, owner.HouseholdID, "plain-member@integration.test", hash); err != nil {
 		t.Fatal(err)
 	}
@@ -367,10 +361,7 @@ func TestSettingsHouseholdMemberRemove_memberCannotRemoveOwner(t *testing.T) {
 	if err != nil || owner == nil {
 		t.Fatalf("owner: %+v err=%v", owner, err)
 	}
-	hash, err := auth.HashPassword("mem-pw")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := passwordtest.MustHash(t, "mem-pw")
 	if _, err := app.Store.CreateHouseholdMember(ctx, owner.HouseholdID, "rem-m@integration.test", hash); err != nil {
 		t.Fatal(err)
 	}

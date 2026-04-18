@@ -26,22 +26,28 @@ func BuildHeatmapCellsRolling365(endDay time.Time, loc *time.Location, byDay map
 	endDay = time.Date(endDay.Year(), endDay.Month(), endDay.Day(), 0, 0, 0, 0, loc)
 	startDay := endDay.AddDate(0, 0, -364)
 
+	// Single walk over the 365-day window: one YYYY-MM-DD format per day, reuse for cells below.
+	keys := make([]string, 0, 366)
+	centsSeq := make([]int64, 0, 366)
 	maxC := int64(1)
-	for d := startDay; !d.After(endDay); d = d.AddDate(0, 0, 1) {
-		k := d.Format("2006-01-02")
-		if v := byDay[k]; v > maxC {
-			maxC = v
-		}
-	}
-
-	pad := int(startDay.Weekday())
-	cells := make([]HeatmapCell, 0, pad+365)
-	for i := 0; i < pad; i++ {
-		cells = append(cells, HeatmapCell{Empty: true})
-	}
 	for d := startDay; !d.After(endDay); d = d.AddDate(0, 0, 1) {
 		key := d.Format("2006-01-02")
 		cents := byDay[key]
+		if cents > maxC {
+			maxC = cents
+		}
+		keys = append(keys, key)
+		centsSeq = append(centsSeq, cents)
+	}
+
+	pad := int(startDay.Weekday())
+	cells := make([]HeatmapCell, 0, pad+len(keys))
+	for i := 0; i < pad; i++ {
+		cells = append(cells, HeatmapCell{Empty: true})
+	}
+	for i := range keys {
+		key := keys[i]
+		cents := centsSeq[i]
 		lvl := heatmapLevel(cents, maxC)
 		title := fmt.Sprintf("%s — %s total activity", key, money.FormatEUR(cents))
 		cells = append(cells, HeatmapCell{
