@@ -83,6 +83,35 @@ func TestStatusWriter_pushReturnsErrNotSupportedWithoutPusher(t *testing.T) {
 	}
 }
 
+type mockPusher struct {
+	*httptest.ResponseRecorder
+	lastTarget string
+	lastOpts   *http.PushOptions
+}
+
+func (m *mockPusher) Push(target string, opts *http.PushOptions) error {
+	m.lastTarget = target
+	m.lastOpts = opts
+	return nil
+}
+
+func TestStatusWriter_pushDelegatesToUnderlying(t *testing.T) {
+	t.Parallel()
+	rec := httptest.NewRecorder()
+	mp := &mockPusher{ResponseRecorder: rec}
+	sw := &statusWriter{ResponseWriter: mp}
+	opts := &http.PushOptions{Method: http.MethodGet}
+	if err := sw.Push("/x.js", opts); err != nil {
+		t.Fatalf("Push: %v", err)
+	}
+	if mp.lastTarget != "/x.js" {
+		t.Fatalf("target %q", mp.lastTarget)
+	}
+	if mp.lastOpts != opts {
+		t.Fatal("opts not forwarded")
+	}
+}
+
 func TestRequestLogging_delegatesToInner(t *testing.T) {
 	t.Parallel()
 	var saw bool

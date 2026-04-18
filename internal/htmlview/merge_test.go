@@ -20,6 +20,17 @@ func TestMergeFuncMaps_laterMapOverrides(t *testing.T) {
 	}
 }
 
+func TestMergeFuncMaps_emptyIsNonNil(t *testing.T) {
+	t.Parallel()
+	m := MergeFuncMaps()
+	if m == nil {
+		t.Fatal("expected non-nil map")
+	}
+	if len(m) != 0 {
+		t.Fatalf("len %d", len(m))
+	}
+}
+
 func TestMergeFuncMaps_mergesDistinctKeys(t *testing.T) {
 	t.Parallel()
 	m := MergeFuncMaps(

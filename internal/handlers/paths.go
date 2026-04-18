@@ -21,5 +21,8 @@ const (
 	CategoriesUpdatePath               = CategoriesPath + "/update"
 	CategoriesDeletePath               = CategoriesPath + "/delete"
 	TransactionsPath                   = "/transactions"
-	NotificationsPath                  = "/notifications"
+	// TransactionPathPattern and TransactionEditPathPattern are Go 1.22+ [http.ServeMux] patterns (wildcard segment {id}).
+	TransactionPathPattern     = TransactionsPath + "/{id}"
+	TransactionEditPathPattern = TransactionsPath + "/{id}/edit"
+	NotificationsPath          = "/notifications"
 )

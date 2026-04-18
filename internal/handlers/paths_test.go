@@ -32,6 +32,15 @@ func TestHistoryPath_matchesSafepathDefault(t *testing.T) {
 	}
 }
 
+func TestTransactionPathPatterns_useStdlibWildcardSegment(t *testing.T) {
+	t.Parallel()
+	for _, p := range []string{TransactionPathPattern, TransactionEditPathPattern} {
+		if !strings.Contains(p, "{id}") {
+			t.Fatalf("%q must contain {id} (Go 1.22+ ServeMux named wildcard)", p)
+		}
+	}
+}
+
 func TestCategoryMutatePaths_haveCategoriesPrefix(t *testing.T) {
 	t.Parallel()
 	for _, p := range []string{CategoriesUpdatePath, CategoriesDeletePath} {
