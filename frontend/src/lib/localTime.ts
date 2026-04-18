@@ -38,19 +38,21 @@ export function createLocalTimeLabelMemo(): (iso: string) => string | undefined 
   }
 }
 
+/** One memo for the page so repeat `applyLocalTimeElements` calls reuse parsed ISO labels. */
+const labelForIso = createLocalTimeLabelMemo()
+
 /** Fill all `time.js-local-time[datetime]` elements in `root`. */
 export function applyLocalTimeElements(root: ParentNode = document): void {
   const nodes = root.querySelectorAll<HTMLTimeElement>('time.js-local-time[datetime]')
   if (nodes.length === 0) {
     return
   }
-  const labelFor = createLocalTimeLabelMemo()
   for (const el of nodes) {
     const iso = el.getAttribute('datetime')
     if (!iso) {
       continue
     }
-    const label = labelFor(iso)
+    const label = labelForIso(iso)
     if (!label) {
       continue
     }

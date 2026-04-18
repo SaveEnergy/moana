@@ -26,14 +26,17 @@ test('login page head modulepreloads app.js', async ({ page }) => {
   await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
 })
 
-test('dashboard head modulepreloads app.js', async ({ page }) => {
-  await signInAsTestUser(page)
-  await page.goto('/')
-  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
-})
+const authenticatedShellModulePreload = [
+  ['dashboard', '/'],
+  ['categories', '/categories'],
+  ['history', '/history'],
+  ['new transaction', '/transactions'],
+] as const
 
-test('categories page head modulepreloads app.js', async ({ page }) => {
-  await signInAsTestUser(page)
-  await page.goto('/categories')
-  await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
-})
+for (const [label, path] of authenticatedShellModulePreload) {
+  test(`layout modulepreloads app.js — ${label}`, async ({ page }) => {
+    await signInAsTestUser(page)
+    await page.goto(path)
+    await expect(page.locator('link[rel="modulepreload"][href="/static/js/app.js"]')).toHaveCount(1)
+  })
+}
