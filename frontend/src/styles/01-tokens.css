@@ -1,0 +1,50 @@
+/* Moana — editorial shell: warm canvas + paper (aligned with dashboard) */
+
+:root {
+  --surface: #f5f6f7;
+  --surface-container: #e6e8ea;
+  --surface-container-low: #eff1f2;
+  --surface-lowest: #ffffff;
+  --primary: #306369;
+  --primary-container: #b2e6ec;
+  --on-primary: #ffffff;
+  --secondary: #78909c;
+  --secondary-container: #e2e8f0;
+  --on-secondary-container: #1c2529;
+  --tertiary: #a03a0f;
+  --tertiary-container: #ff946e;
+  --error: #b31b25;
+  --on-surface: #1c1d1e;
+  --on-surface-variant: #5c5f62;
+  --outline-variant: #abadae;
+  --font-display: "Manrope", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --dashboard-canvas: #f0ebe3;
+  --dashboard-paper: #ffffff;
+  --dashboard-edge: rgba(28, 29, 30, 0.08);
+  --app-canvas: var(--dashboard-canvas);
+  --app-paper: var(--dashboard-paper);
+  --radius-lg: 0.5rem;
+  --shadow-float: 0 12px 32px rgba(44, 47, 48, 0.06);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  /* App shell — rails share page canvas; cards/content use --app-paper */
+  --app-sidebar-width: 13.75rem;
+  --sidebar-bg: var(--app-canvas);
+  --sidebar-edge: var(--dashboard-edge);
+  --sidebar-text: var(--on-surface-variant);
+  --sidebar-text-strong: var(--on-surface);
+  --sidebar-hover: color-mix(in srgb, var(--primary) 8%, var(--app-canvas));
+  --sidebar-active-bg: color-mix(in srgb, var(--primary) 14%, var(--app-canvas));
+  --sidebar-active-text: var(--primary);
+  --shell-topbar: var(--app-canvas);
+  --shell-search-icon: var(--on-surface-variant);
+  /* Controls on warm canvas: blend paper + canvas (avoid flat cool greys in forms) */
+  --input-surface: color-mix(in srgb, var(--app-canvas) 36%, var(--app-paper));
+  --input-surface-strong: color-mix(in srgb, var(--app-canvas) 50%, var(--app-paper));
+  --input-surface-muted: color-mix(in srgb, var(--app-canvas) 58%, var(--app-paper));
+  --input-surface-readonly: color-mix(in srgb, var(--app-canvas) 42%, var(--surface-lowest));
+  /* Secondary body copy (alerts, subdued labels) — alias of variant on-surface */
+  --text-muted: var(--on-surface-variant);
+}
+

@@ -6,5 +6,5 @@ test('sign in and see overview', async ({ page }) => {
   await page.locator('input[name="password"]').fill('password123')
   await page.getByRole('button', { name: /sign in/i }).click()
   await expect(page).toHaveURL(/\/$/)
-  await expect(page.getByText('Running total')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
 })

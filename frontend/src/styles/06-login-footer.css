@@ -1,0 +1,245 @@
+/* Login — split panel + hero (Moana tokens: surface + primary teal) */
+.login-html {
+  height: 100%;
+}
+
+.login-body {
+  margin: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  color: var(--on-surface);
+  background: var(--app-canvas);
+}
+
+.login-split {
+  display: flex;
+  min-height: 100%;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.login-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem 1.25rem 2rem;
+  background: var(--app-paper);
+}
+
+.login-panel-inner {
+  width: 100%;
+  max-width: 24rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .login-panel {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .login-split {
+    flex-direction: row;
+  }
+
+  .login-panel {
+    flex: 1 1 0;
+    padding: 3rem 2.5rem;
+    border-right: 1px solid var(--dashboard-edge);
+    box-shadow: var(--shadow-card);
+  }
+
+  .login-panel-inner {
+    max-width: 26rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .login-panel {
+    padding: 3rem 5rem;
+  }
+}
+
+.login-brand {
+  margin-bottom: 0.35rem;
+}
+
+.login-brand-wordmark {
+  font-size: 1.85rem;
+  line-height: 1.1;
+  display: inline-block;
+}
+
+.login-title {
+  margin: 1.75rem 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 3vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--on-surface);
+}
+
+.login-alert {
+  margin: 1.25rem 0 0;
+}
+
+.login-form {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.login-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.login-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  color: var(--on-surface);
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-checkbox {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border-radius: 0.2rem;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.login-forgot {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: default;
+}
+
+.login-submit {
+  margin-top: 0.25rem;
+  min-height: 2.75rem;
+  font-size: 0.9375rem;
+}
+
+.login-divider {
+  position: relative;
+  margin: 2rem 0 0;
+  text-align: center;
+}
+
+.login-divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: color-mix(in srgb, var(--outline-variant) 80%, transparent);
+}
+
+.login-divider-text {
+  position: relative;
+  display: inline-block;
+  padding: 0 1rem;
+  background: var(--app-paper);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+}
+
+.login-oauth {
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.login-oauth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 65%, transparent);
+  background: var(--input-surface);
+  color: var(--on-surface);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.login-oauth-btn:hover {
+  opacity: 0.65;
+}
+
+.login-oauth-icon {
+  flex-shrink: 0;
+}
+
+.login-oauth-icon--gh {
+  color: var(--on-surface);
+}
+
+.login-foot {
+  margin: 2.25rem 0 0;
+  text-align: center;
+}
+
+.login-foot-link {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.login-foot-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.login-hero {
+  display: none;
+  position: relative;
+  flex: 1 1 0;
+  min-height: 14rem;
+  background: color-mix(in srgb, var(--primary) 12%, var(--app-canvas));
+}
+
+@media (min-width: 1024px) {
+  .login-hero {
+    display: block;
+  }
+}
+
+.login-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.site-footer {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant);
+  border-top: 1px solid var(--dashboard-edge);
+  background: var(--app-canvas);
+}
+

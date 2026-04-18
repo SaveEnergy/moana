@@ -1,0 +1,61 @@
+/** Mobile drawer: open/close sidebar, sync aria and backdrop. */
+export function initShellSidebar(): void {
+  const shell = document.getElementById('app-shell')
+  const toggle = document.getElementById('app-sidebar-toggle')
+  const closeBtn = document.getElementById('app-sidebar-close')
+  const backdrop = document.getElementById('app-sidebar-backdrop')
+
+  const mqMobile = window.matchMedia('(max-width: 1023px)')
+
+  function setExpanded(open: boolean) {
+    toggle?.setAttribute('aria-expanded', open ? 'true' : 'false')
+    toggle?.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu')
+  }
+
+  function openMobileSidebar() {
+    shell?.classList.add('sidebar-open')
+    backdrop?.setAttribute('aria-hidden', 'false')
+    setExpanded(true)
+  }
+
+  function closeMobileSidebar() {
+    shell?.classList.remove('sidebar-open')
+    backdrop?.setAttribute('aria-hidden', 'true')
+    setExpanded(false)
+  }
+
+  function toggleMobileSidebar() {
+    if (shell?.classList.contains('sidebar-open')) {
+      closeMobileSidebar()
+    } else {
+      openMobileSidebar()
+    }
+  }
+
+  toggle?.addEventListener('click', () => {
+    if (!mqMobile.matches) {
+      return
+    }
+    toggleMobileSidebar()
+  })
+
+  backdrop?.addEventListener('click', () => {
+    closeMobileSidebar()
+  })
+
+  closeBtn?.addEventListener('click', () => {
+    closeMobileSidebar()
+  })
+
+  mqMobile.addEventListener('change', () => {
+    if (!mqMobile.matches) {
+      closeMobileSidebar()
+    }
+  })
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mqMobile.matches) {
+      closeMobileSidebar()
+    }
+  })
+}

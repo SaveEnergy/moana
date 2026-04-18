@@ -1,0 +1,14 @@
+/* Respect OS motion preference — only disable the noisiest transitions. */
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar {
+    transition: none;
+  }
+
+  .app-sidebar-close {
+    transition: none;
+  }
+
+  .app-user-chevron {
+    transition: none;
+  }
+}

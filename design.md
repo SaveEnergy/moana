@@ -1,0 +1,214 @@
+# Moana UI — design system
+
+Documentation grounded in `frontend/src/app.css`, `frontend/src/styles/*.css`, `frontend/src/lib/*.ts`, `internal/assets/templates/`, and `frontend/src/main.ts`.
+
+## 1. Intent and voice
+
+Moana’s UI is a **server-rendered, CSS-first “editorial shell”**: warm **canvas** (`#f0ebe3`) behind cool-neutral **paper** cards, with **Fraunces** for display wordmark and section titles, **Inter** for body, and **Manrope** for numeric and display emphasis. The product reads as a **personal finance dashboard** (period filters, KPIs, heatmaps, transaction history), not a generic admin UI.
+
+## 2. Architecture
+
+| Layer | Role |
+|--------|------|
+| **HTML** | Go `html/template` files under `internal/assets/templates/` (e.g. `layout.html`). |
+| **CSS** | **Entry:** `frontend/src/app.css` `@import`s ordered partials under `frontend/src/styles/` (`01-tokens.css` … `07-reduced-motion.css`). **Build:** Vite concatenates/minifies to **one** `internal/assets/static/css/app.css` (single network request, unchanged URL). |
+| **JS** | `frontend/src/main.ts` composes `frontend/src/lib/*` (timezone cookie, local time labels, sidebar, dialogs, category modal) → `internal/assets/static/js/app.js`. |
+| **Icons** | Embedded Lucide-derived SVG via Go (`internal/icons/`), classes `.moana-icon` and size modifiers. |
+
+Templates load `/static/css/app.css` and `/static/js/app.js` and Google Fonts (Fraunces, Inter, Manrope).
+
+There is **no React component library** in-repo; “components” are **CSS class contracts** in HTML. **Structure:** ordered style partials preserve cascade; behavior is split into small TypeScript modules for testing and navigation.
+
+## 3. Design tokens (`:root`)
+
+Tokens follow **Material-style naming** (surface / on-surface / primary / container) plus app-specific **dashboard** aliases.
+
+### Core palette
+
+- **Primary (brand / actions):** `--primary: #306369`, `--primary-container: #b2e6ec`, `--on-primary: #ffffff`
+- **Secondary (muted chrome):** `--secondary`, `--secondary-container`, `--on-secondary-container`
+- **Tertiary (accent — “expense” affordances):** `--tertiary: #a03a0f`, `--tertiary-container: #ff946e`
+- **Neutrals:** `--on-surface`, `--on-surface-variant`, `--outline-variant`, surface stops (`--surface` … `--surface-lowest`)
+- **Muted copy:** `--text-muted` — alias of `--on-surface-variant` (alerts, secondary lines)
+- **Error:** `--error: #b31b25`
+
+### App frame
+
+- `--dashboard-canvas` / `--dashboard-paper` / `--dashboard-edge` — page background, card fill, hairline borders
+- `--app-canvas` / `--app-paper` — aliases; shell rails use canvas; cards and primary content use paper
+
+### Form surfaces (on warm canvas)
+
+- `--input-surface`, `--input-surface-strong`, `--input-surface-muted`, `--input-surface-readonly` — `color-mix()` blends canvas and paper so controls avoid flat cool greys.
+
+### Layout and chrome
+
+- `--app-sidebar-width: 13.75rem`, sidebar text / hover / active tokens, `--shell-topbar`, `--shell-search-icon`
+
+### Radii and elevation
+
+- `--radius-lg: 0.5rem` — default control radius  
+- Many cards use literal `border-radius: 1rem` (not tokenized)
+- `--shadow-float`, `--shadow-card`
+
+### Typography tokens
+
+- `--font-body`: Inter  
+- `--font-serif`: Fraunces  
+- `--font-display`: Manrope  
+
+### Fluid color
+
+Heavy use of **`color-mix(in srgb, …)`** for hovers, selection, and tinted backgrounds.
+
+## 4. Typography
+
+| Token | Usage |
+|--------|--------|
+| `--font-body` | Default UI text, inputs, buttons, tables |
+| `--font-serif` | Brand wordmark (`.brand-wordmark`), page and section titles (dashboard hero, card titles, entry titles, history title, settings cards, modal titles) |
+| `--font-display` | Numbers and KPIs: balances, amounts, emphasis in charts-related UI |
+
+**Base scale:** `html.app-html` sets `font-size: 16px`; `body` uses **`font-size: 0.875rem` (14px)** and `line-height: 1.5` — dense, product-style rhythm.
+
+**Utility classes:** `.headline-sm`, `.display-lg`, `.display-sm`, `.label`, `.muted`, `.small`, `.text-error`.
+
+## 5. Color semantics (product meaning)
+
+| Meaning | Implementation |
+|----------|----------------|
+| **Primary / brand** | `--primary`, navigation active states, income-flavored accents |
+| **Expense accent** | `--tertiary` — expense icons, expense category chrome, expense side of kind toggles |
+| **Positive money** | **Hardcoded green** `#1b5e20` in several rules (KPI trends, income amounts, pills) — not a CSS variable |
+| **Negative / danger** | `--error` and additional reds (e.g. `#b91c1c`, `#b85454`) in trend text |
+| **Category accents** | `--cat-accent` set per row/card; fallback to `--primary` |
+
+**Maintainability note:** Consider tokenizing success/negative money colors (e.g. `--semantic-positive`, `--semantic-negative`) to replace scattered hex values.
+
+## 6. Layout — app shell
+
+**Structure:** `.app-shell` → `.app-sidebar` + `.app-content`.
+
+- **Sidebar:** Sticky, full height, `z-index: 50`, wordmark, `.sidebar-nav` links, `.sidebar-fab` primary CTA (“Add transaction”).
+- **Top bar:** `.app-topbar` — mobile menu control, global search (`.app-search`, GET `/history`), notifications link (`.app-topbar-icon-btn`), `<details class="app-user-menu">` for account.
+- **Main:** `.app-main`; optional **`.dashboard-page`** narrows `.app-content-container` to `max-width: 72rem` versus default `80rem`.
+
+**Content column:** `.app-content-container` uses responsive horizontal padding (notable breakpoints at **640px** and **1024px**), max width **80rem**, vertical padding for page rhythm.
+
+**Footer:** `.site-footer` with wordmark and legal links; `.app-content-container--footer` adjusts spacing.
+
+## 7. Responsive behavior
+
+Breakpoints are **declared per component** (not one shared map). Representative values:
+
+- **520px** — form columns, hero row stacking  
+- **540px** — entry field rows  
+- **640px** — two-column grids, history controls, login padding  
+- **720px** — category icon grid density  
+- **768px** — footer switches to row layout  
+- **800px** — dashboard outflow split  
+- **880px** — transaction entry two-column layout  
+- **900px** — main vertical padding  
+- **1023px** — **mobile shell:** sidebar off-canvas, backdrop, toggle visible; Escape closes menu (`main.ts`)
+
+Pattern: **desktop-first shell** with a **1023px** cutoff for drawer navigation.
+
+## 8. Component patterns
+
+### Buttons (`.btn`)
+
+- `.btn-primary` / `.btn-indigo` — both use primary fill (`btn-indigo` is legacy naming; color is teal, not indigo)
+- `.btn-secondary` — neutral filled  
+- `.btn-tertiary` — text style, primary color  
+- `.btn-ghost` — muted text + hover wash  
+- `.btn-small`, `.btn-block`
+
+**Interaction:** `:active { transform: translateY(1px) }`; hover via **opacity** or **`filter: brightness(1.06)`** on solid fills.
+
+### Forms
+
+- **Underline style:** `.input` — focus draws a bottom edge in `--primary`
+- **Float pattern:** `.float-field`, `.float-label`, `.float-input` inside bordered surfaces; focus uses border + outer shadow
+- **Amount entry:** `.amount-input-wrap`, `.input-amount` — large Manrope numerics; wrap highlights with `--primary-container` on focus
+
+### Segmented controls
+
+- **Dashboard period:** underline tabs — `.dashboard-period-seg`, `.dashboard-period-opt.is-active`
+- **History:** pill control — `.history-segmented`, `.history-seg`, `.history-seg-active`
+- **Transaction kind:** pill radios — `.kind-toggle`, `.kind-option`
+
+### Cards
+
+- **Dashboard:** `.dashboard-card`, `.dashboard-kpi-row`, heatmap-specific wrappers  
+- **Generic:** `.entry-card`, `.layer-card`, `.settings-card`  
+- **Elevation:** `var(--shadow-card)` or float shadow
+
+### Alerts
+
+`.alert` with `.alert-error`, `.alert-success`, `.alert-info`
+
+### Dialogs
+
+Native `<dialog>`: `.admin-add-dialog` (settings add member), `.cat-modal` (categories) with `.cat-modal-panel`, header, footer, full-width primary actions.
+
+### Chips / status
+
+`.pill`, `.pill-trend`, `.pill-trend-neg`, `.pill-live`
+
+### Lists
+
+`.dashboard-outflow-*`, `.history-card-list`, `.tx-list`, `.dashboard-recent-*` — recurring pattern: **icon tile + body + right-aligned amount**
+
+## 9. Icons
+
+- **Base:** `.moana-icon`; modifiers: `--sm`, `--grid`, `--nav`, `--cat-preview`
+- **Rendering:** Inline SVG from template helpers; see `internal/icons/data_gen.go`
+- **Color:** `currentColor` — parent sets semantic color
+
+## 10. Motion and depth
+
+- Transitions roughly **0.12–0.28s** on hovers; sidebar uses **`cubic-bezier(0.4, 0, 0.2, 1)`**
+- Heatmap budget bar width transitions  
+- Category modal uses **backdrop blur**
+- **`prefers-reduced-motion: reduce`:** `frontend/src/styles/07-reduced-motion.css` disables the heaviest UI transitions (sidebar slide, chevron spin).
+
+## 11. Accessibility
+
+- **`.sr-only`** for visually hidden labels  
+- **Landmarks:** `<main>`, `<nav>` with `aria-label`, `aria-current` where used  
+- **`<details>`/`<summary>`** for user menu  
+- **`:focus-visible`** on some controls (e.g. sidebar brand)
+
+Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on future audit scope.
+
+## 12. Domain-specific surfaces
+
+- **Dashboard:** Hero balance, period filter, KPI grid (1 / 2 / 4 columns by breakpoint), donut outflow, heatmap levels `--lv0`–`lv4`, recent transactions  
+- **Transactions / entry:** Category picker cards with **`--cat-accent`** left border and icon well  
+- **History:** Day groupings, `.history-card` rows, search/sort/date filters  
+- **Categories:** Modal create/edit; color presets from `internal/category/colors.go`; icon grid; preview  
+- **Settings:** Float-field forms, add-member dialog, member list with role badges  
+- **Login:** `.login-split` — stacked on small screens; split layout with hero image from **1024px**
+
+## 13. Build and source of truth
+
+- **Edit CSS in:** `frontend/src/styles/*.css` (preserve **import order** in `frontend/src/app.css`)  
+- **Build:** `npm run build` — Vite outputs to `internal/assets/static/css/app.css` and `js/app.js` (see `frontend/vite.config.ts`; `es2022` target, CSS minify enabled).  
+- **Do not hand-edit** generated files under `internal/assets/static/`.
+
+## 14. Tests
+
+- **Unit:** `npm run test:unit` — Vitest (`vitest.config.ts`), tests for `frontend/src/lib` (e.g. local time formatting).  
+- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/`): sign-in, dashboard shell, design tokens, notifications link, mobile sidebar.
+
+## 15. Risk snapshot
+
+| Item | Severity | Note |
+|------|----------|------|
+| Magic hex for income/loss greens/reds | Low–medium | Drift risk; consider semantic tokens |
+| Many CSS partials | Low | Import order matters; edit via `app.css` import list |
+| `btn-indigo` naming | Low | Misleading for contributors |
+
+---
+
+*Last reviewed against repository UI sources.*
