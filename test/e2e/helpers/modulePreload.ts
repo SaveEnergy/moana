@@ -7,6 +7,11 @@ export const STATIC_APP_CSS_PATH = '/static/css/app.css'
 export const STATIC_APP_JS_PATH = '/static/js/app.js'
 
 /**
+ * Playwright locator for `<link rel="stylesheet" href="…app.css">` (single bundle; see `app.css` import tree).
+ */
+export const APP_CSS_STYLESHEET = `link[rel="stylesheet"][href="${STATIC_APP_CSS_PATH}"]`
+
+/**
  * Playwright locator for `<link rel="modulepreload" href="…app.js">` on shell pages.
  */
 export const APP_JS_MODULE_PRELOAD = `link[rel="modulepreload"][href="${STATIC_APP_JS_PATH}"]`

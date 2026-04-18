@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
 import {
+  APP_CSS_STYLESHEET,
   APP_JS_MODULE_PRELOAD,
   STATIC_APP_CSS_PATH,
   STATIC_APP_JS_PATH,
@@ -26,8 +27,9 @@ test('static app.js is served with bytes', async ({ request }) => {
   expect(len).toBeGreaterThan(100)
 })
 
-test('login page head modulepreloads app.js', async ({ page }) => {
+test('login page head links app.css and modulepreloads app.js', async ({ page }) => {
   await page.goto('/login')
+  await expect(page.locator(APP_CSS_STYLESHEET)).toHaveCount(1)
   await expect(page.locator(APP_JS_MODULE_PRELOAD)).toHaveCount(1)
 })
 
@@ -41,9 +43,10 @@ const authenticatedShellModulePreload = [
 ] as const
 
 for (const [label, path] of authenticatedShellModulePreload) {
-  test(`layout modulepreloads app.js — ${label}`, async ({ page }) => {
+  test(`layout head links app.css and modulepreloads app.js — ${label}`, async ({ page }) => {
     await signInAsTestUser(page)
     await page.goto(path)
+    await expect(page.locator(APP_CSS_STYLESHEET)).toHaveCount(1)
     await expect(page.locator(APP_JS_MODULE_PRELOAD)).toHaveCount(1)
   })
 }
