@@ -38,7 +38,7 @@ func TestPositiveInt64String(t *testing.T) {
 
 func TestFormPositiveInt64(t *testing.T) {
 	t.Parallel()
-	r := httptest.NewRequest("POST", "/categories/delete", strings.NewReader("id=42&empty=&bad=0&neg=-1&space=+19+"))
+	r := httptest.NewRequest("POST", CategoriesDeletePath, strings.NewReader("id=42&empty=&bad=0&neg=-1&space=+19+"))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	if err := r.ParseForm(); err != nil {
 		t.Fatal(err)

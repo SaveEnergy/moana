@@ -12,7 +12,7 @@ import (
 
 func TestRequireParseForm_success(t *testing.T) {
 	t.Parallel()
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("a=b&c=d"))
+	req := httptest.NewRequest(http.MethodPost, DashboardPath, strings.NewReader("a=b&c=d"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 	if !requireParseForm(rec, req) {
@@ -25,7 +25,7 @@ func TestRequireParseForm_success(t *testing.T) {
 
 func TestRequireParseForm_bodyReadError(t *testing.T) {
 	t.Parallel()
-	req := httptest.NewRequest(http.MethodPost, "/", iotest.ErrReader(errors.New("read fail")))
+	req := httptest.NewRequest(http.MethodPost, DashboardPath, iotest.ErrReader(errors.New("read fail")))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 	if requireParseForm(rec, req) {
@@ -55,7 +55,7 @@ func TestRequireParseFormSettings_bodyReadError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if u.Path != "/settings" {
+	if u.Path != SettingsPath {
 		t.Fatalf("path %q", u.Path)
 	}
 	if got := u.Query().Get("err"); got != "Invalid form." {
