@@ -82,11 +82,11 @@ func (a *App) TransactionUpdate(w http.ResponseWriter, r *http.Request, u *store
 
 	loc := tz.DisplayLocation(r)
 	p, errMsg := txform.Parse(
-		r.FormValue("amount"),
-		r.FormValue("occurred_on"),
-		r.FormValue("description"),
-		r.FormValue("category_id"),
-		r.FormValue("kind"),
+		r.FormValue(txform.FieldAmount),
+		r.FormValue(txform.FieldOccurredOn),
+		r.FormValue(txform.FieldDescription),
+		r.FormValue(txform.FieldCategoryID),
+		r.FormValue(txform.FieldKind),
 		loc,
 	)
 	if errMsg != "" {

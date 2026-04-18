@@ -5,6 +5,7 @@ import (
 
 	"moana/internal/httperr"
 	"moana/internal/store"
+	"moana/internal/txform"
 	"moana/internal/tz"
 )
 
@@ -17,7 +18,7 @@ func (a *App) transactionsError(w http.ResponseWriter, r *http.Request, u *store
 	}
 	loc := tz.DisplayLocation(r)
 	today := todayLocalCalendarDate(loc)
-	sel := categoryIDFromForm(r.FormValue("category_id"))
+	sel := categoryIDFromForm(r.FormValue(txform.FieldCategoryID))
 	data := txFormData{
 		Error:         msg,
 		Categories:    cats,

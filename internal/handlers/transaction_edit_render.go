@@ -5,6 +5,7 @@ import (
 
 	"moana/internal/httperr"
 	"moana/internal/store"
+	"moana/internal/txform"
 )
 
 func (a *App) renderTransactionEdit(w http.ResponseWriter, u *store.User, data txEditFormData) {
@@ -19,8 +20,8 @@ func (a *App) renderTransactionEditFailed(w http.ResponseWriter, r *http.Request
 		httperr.Internal(w, r, err)
 		return
 	}
-	sel := categoryIDFromForm(r.FormValue("category_id"))
-	kind := r.FormValue("kind")
+	sel := categoryIDFromForm(r.FormValue(txform.FieldCategoryID))
+	kind := r.FormValue(txform.FieldKind)
 	if kind != "income" && kind != "expense" {
 		kind = "income"
 	}
@@ -29,9 +30,9 @@ func (a *App) renderTransactionEditFailed(w http.ResponseWriter, r *http.Request
 		Categories:    cats,
 		TxID:          id,
 		Kind:          kind,
-		Amount:        r.FormValue("amount"),
-		OccurredOn:    r.FormValue("occurred_on"),
-		Description:   r.FormValue("description"),
+		Amount:        r.FormValue(txform.FieldAmount),
+		OccurredOn:    r.FormValue(txform.FieldOccurredOn),
+		Description:   r.FormValue(txform.FieldDescription),
 		SelectedCatID: sel,
 		Next:          next,
 	}
