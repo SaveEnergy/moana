@@ -26,6 +26,14 @@ test('history sort select submits sort on change', async ({ page }) => {
   await expect(page).toHaveURL(/[?&]sort=oldest(?:&|$)/)
 })
 
+test('history clear filters link returns to bare /history', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/history?q=e2e-clear&kind=expense&sort=oldest')
+  await page.getByRole('link', { name: 'Clear filters' }).click()
+  await expect(page).toHaveURL(/\/history$/)
+  expect(new URL(page.url()).search).toBe('')
+})
+
 test('history kind tabs preserve query and switch kind', async ({ page }) => {
   await signInAsTestUser(page)
   const q = 'e2e-kind-nav'
