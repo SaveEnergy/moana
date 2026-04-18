@@ -23,6 +23,19 @@ test('add-member dialog closes on Escape', async ({ page }) => {
   await expect(dlg).toBeHidden()
 })
 
+test('add-member dialog closes on backdrop click outside card', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/settings')
+  await page.locator('#settings-add-member-open').click()
+  const dlg = page.locator('#settings-add-member-dialog')
+  await expect(dlg).toBeVisible()
+  const header = page.locator('.admin-add-dialog-header')
+  const box = await header.boundingBox()
+  expect(box).not.toBeNull()
+  await page.mouse.click(box!.x + box!.width / 2, Math.max(8, box!.y - 24))
+  await expect(dlg).toBeHidden()
+})
+
 test('mobile: first Escape closes add-member dialog with sidebar left open', async ({ page }) => {
   await signInAsTestUser(page)
   await page.setViewportSize({ width: 600, height: 800 })

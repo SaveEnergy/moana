@@ -23,6 +23,20 @@ test('category modal closes on Escape', async ({ page }) => {
   await expect(dialog).toBeHidden()
 })
 
+test('category modal closes on backdrop click outside panel', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/categories')
+  await page.locator('#cat-modal-open-create').click()
+  const dialog = page.locator('#cat-modal')
+  const panel = page.locator('.cat-modal-panel')
+  await expect(dialog).toBeVisible()
+  const box = await panel.boundingBox()
+  expect(box).not.toBeNull()
+  /* Viewport pixel above the card — ::backdrop / dimmed area (regresses if dismiss logic misses engines). */
+  await page.mouse.click(box!.x + box!.width / 2, Math.max(8, box!.y - 24))
+  await expect(dialog).toBeHidden()
+})
+
 test('mobile: first Escape closes modal with sidebar left open', async ({ page }) => {
   await signInAsTestUser(page)
   await page.setViewportSize({ width: 600, height: 800 })
