@@ -13,7 +13,6 @@ export function initCategoryModal(): void {
   const preview = document.getElementById('cat-modal-preview')
   const iconWrap = document.getElementById('cat-modal-preview-icon')
   const nameInput = document.getElementById('cat-modal-name') as HTMLInputElement | null
-  const closeBtn = document.getElementById('cat-modal-close')
   const addCategoryBtn = document.getElementById('cat-modal-open-create')
 
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
@@ -168,9 +167,17 @@ export function initCategoryModal(): void {
     })
   }
 
-  closeBtn?.addEventListener('click', () => modal.close())
+  /** Backdrop and × — one listener; closest covers inner nodes on the close control. */
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
+    const el = e.target
+    if (!(el instanceof Element)) {
+      return
+    }
+    if (el === modal) {
+      modal.close()
+      return
+    }
+    if (el.closest('#cat-modal-close') !== null) {
       modal.close()
     }
   })

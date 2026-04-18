@@ -15,6 +15,16 @@ test('new transaction page renders', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'New entry' })).toBeVisible()
 })
 
+test('new transaction kind pills switch income and expense', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/transactions')
+  // Inputs are visually hidden (styled pill labels); click the labels like a user.
+  await page.locator('label.kind-option:has(input[name="kind"][value="expense"])').click()
+  await expect(page.locator('input[name="kind"][value="expense"]')).toBeChecked()
+  await page.locator('label.kind-option:has(input[name="kind"][value="income"])').click()
+  await expect(page.locator('input[name="kind"][value="income"]')).toBeChecked()
+})
+
 test('settings profile loads', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/settings')
