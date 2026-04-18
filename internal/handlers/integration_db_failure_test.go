@@ -114,7 +114,7 @@ func TestAuthenticatedRoute_redirectsWhenSessionRoleMismatchWithDB(t *testing.T)
 		t.Fatalf("after DB role change: status %d want 303", respAfter.StatusCode)
 	}
 	loc := respAfter.Header.Get("Location")
-	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
-		t.Fatalf("after DB role change: Location %q want /login?...error=1...", loc)
+	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, handlers.LoginErrorQueryParam+"=1") {
+		t.Fatalf("after DB role change: Location %q want /login?...%s=1...", loc, handlers.LoginErrorQueryParam)
 	}
 }

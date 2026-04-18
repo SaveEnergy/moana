@@ -22,7 +22,7 @@ func (a *App) LoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := a.loginTemplateData("")
-	if r.URL.Query().Get("error") != "" {
+	if r.URL.Query().Get(LoginErrorQueryParam) != "" {
 		data.Error = "Session expired or invalid. Please sign in again."
 	}
 	a.renderSimple(w, "login.html", data)

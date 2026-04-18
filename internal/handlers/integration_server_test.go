@@ -64,8 +64,8 @@ func TestUnauthenticatedProtectedRoutesRedirectToLogin(t *testing.T) {
 			t.Fatalf("%s: status %d want %d", path, resp.StatusCode, http.StatusSeeOther)
 		}
 		loc := resp.Header.Get("Location")
-		if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
-			t.Fatalf("%s: unexpected Location %q (want login+error=1)", path, loc)
+		if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, handlers.LoginErrorQueryParam+"=1") {
+			t.Fatalf("%s: unexpected Location %q (want login+%s=1)", path, loc, handlers.LoginErrorQueryParam)
 		}
 	}
 }

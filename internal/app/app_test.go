@@ -171,7 +171,7 @@ func TestHTTPHandler_unauthenticatedRootRedirectsToLogin(t *testing.T) {
 		t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
 	}
 	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
+	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, handlers.LoginErrorQueryParam+"=1") {
 		t.Fatalf("Location %q", loc)
 	}
 }
@@ -193,7 +193,7 @@ func TestHTTPHandler_unauthenticatedNotificationsRedirectsToLogin(t *testing.T) 
 		t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
 	}
 	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
+	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, handlers.LoginErrorQueryParam+"=1") {
 		t.Fatalf("Location %q", loc)
 	}
 }
