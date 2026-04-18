@@ -144,18 +144,21 @@ export function initCategoryModal(): void {
 
   addCategoryBtn?.addEventListener('click', () => openCreateModal())
 
-  /** One listener scales to long category lists; `closest` handles clicks on nested nodes. */
-  document.addEventListener('click', (e) => {
-    const el = e.target
-    if (!(el instanceof Element)) {
-      return
-    }
-    const btn = el.closest('.cat-modal-open-edit')
-    if (!btn) {
-      return
-    }
-    openEditModal(btn as HTMLElement)
-  })
+  /** Scoped to the list card so topbar/sidebar clicks do not run this handler. */
+  const editDelegationRoot = document.querySelector('.cat-list-section')
+  if (editDelegationRoot) {
+    editDelegationRoot.addEventListener('click', (e) => {
+      const el = e.target
+      if (!(el instanceof Element)) {
+        return
+      }
+      const btn = el.closest('.cat-modal-open-edit')
+      if (!btn) {
+        return
+      }
+      openEditModal(btn as HTMLElement)
+    })
+  }
 
   closeBtn?.addEventListener('click', () => modal.close())
   modal.addEventListener('click', (e) => {
