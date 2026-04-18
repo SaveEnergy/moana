@@ -45,3 +45,29 @@ func TestSettingsPOSTPaths_haveSettingsPrefix(t *testing.T) {
 		}
 	}
 }
+
+func TestCategoryPaths_derivedFromCategoriesPath(t *testing.T) {
+	t.Parallel()
+	if got, want := CategoriesUpdatePath, CategoriesPath+"/update"; got != want {
+		t.Fatalf("CategoriesUpdatePath=%q want %q", got, want)
+	}
+	if got, want := CategoriesDeletePath, CategoriesPath+"/delete"; got != want {
+		t.Fatalf("CategoriesDeletePath=%q want %q", got, want)
+	}
+}
+
+func TestSettingsPaths_derivedFromSettingsPath(t *testing.T) {
+	t.Parallel()
+	if got, want := SettingsProfilePath, SettingsPath+"/profile"; got != want {
+		t.Fatalf("SettingsProfilePath=%q want %q", got, want)
+	}
+	if got, want := SettingsHouseholdPath, SettingsPath+"/household"; got != want {
+		t.Fatalf("SettingsHouseholdPath=%q want %q", got, want)
+	}
+	if got, want := SettingsHouseholdMembersPath, SettingsHouseholdPath+"/members"; got != want {
+		t.Fatalf("SettingsHouseholdMembersPath=%q want %q", got, want)
+	}
+	if got, want := SettingsHouseholdMembersRemovePath, SettingsHouseholdMembersPath+"/remove"; got != want {
+		t.Fatalf("SettingsHouseholdMembersRemovePath=%q want %q", got, want)
+	}
+}
