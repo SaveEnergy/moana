@@ -28,11 +28,11 @@ func TestBuildPageData_smoke(t *testing.T) {
 	}
 	loc := time.UTC
 	now := day
-	data, err := BuildPageData(ctx, st, u.HouseholdID, loc, now, "30d")
+	data, err := BuildPageData(ctx, st, u.HouseholdID, loc, now, StatsPeriod30d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if data.StatsPeriod != "30d" {
+	if data.StatsPeriod != StatsPeriod30d {
 		t.Fatalf("StatsPeriod %q", data.StatsPeriod)
 	}
 	if data.RunningTotal != -5000 {
@@ -53,11 +53,11 @@ func TestBuildPageData_smoke(t *testing.T) {
 	if len(data.Recent) != 1 {
 		t.Fatalf("recent count %d", len(data.Recent))
 	}
-	data12, err := BuildPageData(ctx, st, u.HouseholdID, loc, now, "12m")
+	data12, err := BuildPageData(ctx, st, u.HouseholdID, loc, now, StatsPeriod12m)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if data12.StatsPeriod != "12m" {
+	if data12.StatsPeriod != StatsPeriod12m {
 		t.Fatalf("12m period %q", data12.StatsPeriod)
 	}
 }

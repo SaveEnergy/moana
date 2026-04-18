@@ -11,8 +11,8 @@
       <div class="dashboard-period-filter dashboard-period-filter--hero" role="group" aria-label="Statistics and outflow period">
         <span class="dashboard-period-filter-label">Period</span>
         <div class="dashboard-period-seg">
-          <a href="/?period=30d" class="dashboard-period-opt{{if eq .StatsPeriod "30d"}} is-active{{end}}">30 days</a>
-          <a href="/?period=12m" class="dashboard-period-opt{{if eq .StatsPeriod "12m"}} is-active{{end}}">12 months</a>
+          <a href="{{dashboardPeriodHref (statsPeriod30d)}}" class="dashboard-period-opt{{if eq .StatsPeriod (statsPeriod30d)}} is-active{{end}}">30 days</a>
+          <a href="{{dashboardPeriodHref (statsPeriod12m)}}" class="dashboard-period-opt{{if eq .StatsPeriod (statsPeriod12m)}} is-active{{end}}">12 months</a>
         </div>
       </div>
     </div>

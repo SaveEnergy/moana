@@ -33,8 +33,6 @@ const (
 	TransactionEditPathPattern = TransactionsPath + "/{id}/edit"
 	// TransactionNextQueryParam is the form/query field for post-edit redirects ([safepath.Internal]); templates use the same name.
 	TransactionNextQueryParam = "next"
-	// DashboardPeriodQueryParam selects the dashboard stats window (?period=30d|12m).
-	DashboardPeriodQueryParam = "period"
 	NotificationsPath         = "/notifications"
 )
 

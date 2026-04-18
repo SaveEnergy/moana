@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"moana/internal/category"
+	"moana/internal/dashboard"
 	"moana/internal/household"
 	"moana/internal/htmlview"
 )
@@ -26,6 +27,9 @@ func TemplateFuncMap() template.FuncMap {
 		"settingsCanRemoveMember":   household.CanRemoveMemberRow,
 		"settingsCanLeaveHousehold": household.CanLeave,
 		"urlQuery":                  func(s string) string { return url.QueryEscape(s) },
+		"statsPeriod30d":            func() string { return dashboard.StatsPeriod30d },
+		"statsPeriod12m":            func() string { return dashboard.StatsPeriod12m },
+		"dashboardPeriodHref":       dashboard.PeriodQueryRelative,
 	}
 	return htmlview.MergeFuncMaps(
 		htmlview.TemplateFuncs(),

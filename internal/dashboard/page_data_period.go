@@ -9,21 +9,21 @@ type statsPeriodConfig struct {
 
 func parseStatsPeriod(periodQuery string) statsPeriodConfig {
 	switch periodQuery {
-	case "12m":
+	case StatsPeriod12m:
 		return statsPeriodConfig{
-			Period:        "12m",
+			Period:        StatsPeriod12m,
 			InclusiveDays: 365,
 			PriorPhrase:   "prior 12 months",
 		}
-	case "30d", "":
+	case StatsPeriod30d, "":
 		return statsPeriodConfig{
-			Period:        "30d",
+			Period:        StatsPeriod30d,
 			InclusiveDays: 30,
 			PriorPhrase:   "prior 30 days",
 		}
 	default:
 		return statsPeriodConfig{
-			Period:        "30d",
+			Period:        StatsPeriod30d,
 			InclusiveDays: 30,
 			PriorPhrase:   "prior 30 days",
 		}

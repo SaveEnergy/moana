@@ -192,7 +192,7 @@ func TestEditTransaction(t *testing.T) {
 		t.Fatalf("list: %v", err)
 	}
 	id := txs[0].ID
-	editURL := srv.URL + handlers.TransactionEditURLPath(id) + "?next=" + url.QueryEscape(handlers.HistoryPath)
+	editURL := srv.URL + handlers.TransactionEditURLPath(id) + "?" + handlers.TransactionNextQueryParam + "=" + url.QueryEscape(handlers.HistoryPath)
 	resp, err = client.Get(editURL)
 	if err != nil {
 		t.Fatal(err)
@@ -207,12 +207,12 @@ func TestEditTransaction(t *testing.T) {
 		t.Fatal("expected edit form")
 	}
 	resp2, err := client.PostForm(srv.URL+handlers.TransactionURLPath(id), url.Values{
-		"next":        {handlers.HistoryPath},
-		"amount":      {"20.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"coffee fixed"},
-		"category_id": {""},
+		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
+		"amount":                           {"20.00"},
+		"kind":                             {"expense"},
+		"occurred_on":                      {day},
+		"description":                      {"coffee fixed"},
+		"category_id":                      {""},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -262,7 +262,7 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.Get(srv.URL + handlers.TransactionEditURLPath(id) + "?next=" + url.QueryEscape(handlers.CategoriesPath))
+	resp2, err := client.Get(srv.URL + handlers.TransactionEditURLPath(id) + "?" + handlers.TransactionNextQueryParam + "=" + url.QueryEscape(handlers.CategoriesPath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -270,7 +270,8 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	body, _ := io.ReadAll(resp2.Body)
 	s := string(body)
 	wantNext := `value="` + handlers.CategoriesPath + `"`
-	if !strings.Contains(s, `name="next"`) || !strings.Contains(s, wantNext) {
+	nameNext := `name="` + handlers.TransactionNextQueryParam + `"`
+	if !strings.Contains(s, nameNext) || !strings.Contains(s, wantNext) {
 		t.Fatalf("expected hidden next=%s, got: %s", handlers.CategoriesPath, s[:min(600, len(s))])
 	}
 }
@@ -304,7 +305,7 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.Get(srv.URL + handlers.TransactionEditURLPath(id) + "?next=//evil.com/foo")
+	resp2, err := client.Get(srv.URL + handlers.TransactionEditURLPath(id) + "?" + handlers.TransactionNextQueryParam + "=//evil.com/foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -314,7 +315,7 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	if strings.Contains(s, "evil.com") {
 		t.Fatalf("unsafe next host leaked into HTML")
 	}
-	idx := strings.Index(s, `name="next"`)
+	idx := strings.Index(s, `name="`+handlers.TransactionNextQueryParam+`"`)
 	if idx < 0 {
 		t.Fatal("missing hidden next field")
 	}
@@ -397,11 +398,11 @@ func TestTransactionUpdate_invalidPathIDReturns404(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "bad-id-post@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath+"/not-a-number", url.Values{
-		"next":        {handlers.HistoryPath},
-		"amount":      {"1.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"x"},
+		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
+		"amount":                           {"1.00"},
+		"kind":                             {"expense"},
+		"occurred_on":                      {day},
+		"description":                      {"x"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -442,12 +443,12 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	id := txs[0].ID
 
 	resp2, err := client.PostForm(srv.URL+handlers.TransactionURLPath(id), url.Values{
-		"next":        {handlers.HistoryPath},
-		"amount":      {"not-a-number"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"x"},
-		"category_id": {""},
+		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
+		"amount":                           {"not-a-number"},
+		"kind":                             {"expense"},
+		"occurred_on":                      {day},
+		"description":                      {"x"},
+		"category_id":                      {""},
 	})
 	if err != nil {
 		t.Fatal(err)

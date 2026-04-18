@@ -14,12 +14,12 @@ func TestParseStatsPeriod(t *testing.T) {
 		in   string
 		want statsPeriodConfig
 	}{
-		{"", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
-		{"30d", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
-		{"12m", statsPeriodConfig{Period: "12m", InclusiveDays: 365, PriorPhrase: "prior 12 months"}},
-		{"garbage", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+		{"", statsPeriodConfig{Period: StatsPeriod30d, InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+		{StatsPeriod30d, statsPeriodConfig{Period: StatsPeriod30d, InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+		{StatsPeriod12m, statsPeriodConfig{Period: StatsPeriod12m, InclusiveDays: 365, PriorPhrase: "prior 12 months"}},
+		{"garbage", statsPeriodConfig{Period: StatsPeriod30d, InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
 		// No trim: not exactly "12m", so treat like unknown (matches ?period= + accidental spaces in URL).
-		{" 12m ", statsPeriodConfig{Period: "30d", InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
+		{" 12m ", statsPeriodConfig{Period: StatsPeriod30d, InclusiveDays: 30, PriorPhrase: "prior 30 days"}},
 	}
 	for _, tc := range cases {
 		got := parseStatsPeriod(tc.in)

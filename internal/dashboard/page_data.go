@@ -33,7 +33,7 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	var budgetCapCents int64
 	var budgetMeta string
 	switch cfg.Period {
-	case "12m":
+	case StatsPeriod12m:
 		budgetCapCents = DefaultMonthlyExpenseBudgetCents * 12
 		budgetMeta = fmt.Sprintf("of %s annual budget (12× monthly) used", money.FormatEUR(budgetCapCents))
 	default:

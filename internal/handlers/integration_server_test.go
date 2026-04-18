@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"moana/internal/dashboard"
 	"moana/internal/handlers"
 	"moana/internal/server"
 	"moana/internal/testutil"
@@ -176,7 +177,7 @@ func TestDashboardWithPeriodQuery(t *testing.T) {
 	testutil.MustCreateUser(t, app, "period@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "period@integration.test", "pw")
-	resp, err := client.Get(srv.URL + handlers.DashboardPath + "?" + handlers.DashboardPeriodQueryParam + "=12m")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath + "?" + dashboard.PeriodQueryParam + "=" + dashboard.StatsPeriod12m)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +198,7 @@ func TestDashboardWithUnknownPeriodQuery(t *testing.T) {
 	testutil.MustCreateUser(t, app, "period-unknown@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "period-unknown@integration.test", "pw")
-	resp, err := client.Get(srv.URL + handlers.DashboardPath + "?" + handlers.DashboardPeriodQueryParam + "=weekly")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath + "?" + dashboard.PeriodQueryParam + "=weekly")
 	if err != nil {
 		t.Fatal(err)
 	}
