@@ -23,6 +23,19 @@ test('dashboard period links set period query', async ({ page }) => {
   await expect(page).toHaveURL(/[?&]period=30d(?:&|$)/)
 })
 
+test('sidebar main nav links reach primary routes', async ({ page }) => {
+  await page.goto('/')
+  const nav = page.locator('#app-sidebar-nav')
+  await nav.getByRole('link', { name: 'Transactions' }).click()
+  await expect(page).toHaveURL(/\/transactions/)
+  await nav.getByRole('link', { name: 'History' }).click()
+  await expect(page).toHaveURL(/\/history/)
+  await nav.getByRole('link', { name: 'Categories' }).click()
+  await expect(page).toHaveURL(/\/categories/)
+  await nav.getByRole('link', { name: 'Dashboard' }).click()
+  await expect(page).toHaveURL(/\/$/)
+})
+
 test('global search control is in shell', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('search')).toBeVisible()
