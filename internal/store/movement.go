@@ -18,8 +18,8 @@ func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int
 		return nil, err
 	}
 	defer rows.Close()
-	// At most one entry per calendar day in range (~366 for rolling year heatmap).
-	out := make(map[string]int64, 400)
+	// At most one entry per local calendar day overlapping [fromUTC, toUTC].
+	out := make(map[string]int64, approxLocalDayMapCap(fromUTC, toUTC))
 	for rows.Next() {
 		var occ string
 		var cents int64
@@ -33,8 +33,24 @@ func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int
 		if cents < 0 {
 			cents = -cents
 		}
-		day := t.In(loc).Format("2006-01-02")
+		day := timeutil.LocalCalendarDateKey(t, loc)
 		out[day] += cents
 	}
 	return out, rows.Err()
+}
+
+// approxLocalDayMapCap is a coarse upper bound on distinct local dates for bucketing a UTC interval.
+func approxLocalDayMapCap(fromUTC, toUTC time.Time) int {
+	if toUTC.Before(fromUTC) {
+		fromUTC, toUTC = toUTC, fromUTC
+	}
+	span := toUTC.Sub(fromUTC)
+	n := int(span/(24*time.Hour)) + 3
+	if n < 8 {
+		n = 8
+	}
+	if n > 500 {
+		n = 500
+	}
+	return n
 }

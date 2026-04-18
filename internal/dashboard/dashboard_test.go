@@ -125,6 +125,31 @@ func TestMergeCategoryTopN_invalidLimitReturnsRows(t *testing.T) {
 }
 
 // TestMergeCategoryTopN_limitOneRollsAllIntoOther documents limit=1: no named top rows, single "Other" bucket.
+func TestMergeCategoryTopN_sumConservedWhenMerging(t *testing.T) {
+	t.Parallel()
+	rows := []store.CategoryAmount{
+		{Name: "a", AmountCents: 100},
+		{Name: "b", AmountCents: 200},
+		{Name: "c", AmountCents: 300},
+		{Name: "d", AmountCents: 400},
+	}
+	var total int64
+	for _, r := range rows {
+		total += r.AmountCents
+	}
+	out := MergeCategoryTopN(rows, 3)
+	var got int64
+	for _, r := range out {
+		got += r.AmountCents
+	}
+	if got != total {
+		t.Fatalf("sum %d want %d (out=%+v)", got, total, out)
+	}
+	if len(out) != 3 || out[2].Name != "Other" || out[2].AmountCents != 700 {
+		t.Fatalf("got %+v", out)
+	}
+}
+
 func TestMergeCategoryTopN_limitOneRollsAllIntoOther(t *testing.T) {
 	t.Parallel()
 	rows := []store.CategoryAmount{
