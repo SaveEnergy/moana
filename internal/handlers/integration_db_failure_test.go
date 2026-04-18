@@ -75,3 +75,46 @@ func TestLoginPage_okWhenDatabaseClosedWithoutSession(t *testing.T) {
 		t.Fatalf("expected login page HTML")
 	}
 }
+
+func TestAuthenticatedRoute_redirectsWhenSessionRoleMismatchWithDB(t *testing.T) {
+	t.Parallel()
+	app, db, cleanup := testutil.NewAppWithDB(t)
+	defer cleanup()
+	srv := testutil.NewServer(t, app)
+	defer srv.Close()
+
+	const email = "role-mismatch@moana.test"
+	testutil.MustCreateUser(t, app, email, "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, email, "pw")
+
+	client.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	respDash, err := client.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = io.Copy(io.Discard, respDash.Body)
+	_ = respDash.Body.Close()
+	if respDash.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard before role change: status %d want 200", respDash.StatusCode)
+	}
+
+	if _, err := db.Exec(`UPDATE users SET role = 'admin' WHERE email = ?`, email); err != nil {
+		t.Fatal(err)
+	}
+
+	respAfter, err := client.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer respAfter.Body.Close()
+	if respAfter.StatusCode != http.StatusSeeOther {
+		t.Fatalf("after DB role change: status %d want 303", respAfter.StatusCode)
+	}
+	loc := respAfter.Header.Get("Location")
+	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+		t.Fatalf("after DB role change: Location %q want /login?...error=1...", loc)
+	}
+}
