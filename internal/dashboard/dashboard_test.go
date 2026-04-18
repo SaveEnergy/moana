@@ -27,6 +27,28 @@ func TestParseStatsPeriod(t *testing.T) {
 	}
 }
 
+func TestPctChangeVsPrior_matchesExportedWrappers(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		cur, prev int64
+	}{
+		{150, 100},
+		{0, 0},
+		{10, 0},
+		{0, 10},
+		{100, -50},
+		{0, -10},
+	} {
+		got := pctChangeVsPrior(tc.cur, tc.prev)
+		if n := NetPctChange(tc.cur, tc.prev); got != n {
+			t.Fatalf("cur=%d prev=%d: helper=%v NetPctChange=%v", tc.cur, tc.prev, got, n)
+		}
+		if p := PctChangePositive(tc.cur, tc.prev); got != p {
+			t.Fatalf("cur=%d prev=%d: helper=%v PctChangePositive=%v", tc.cur, tc.prev, got, p)
+		}
+	}
+}
+
 func TestNetPctChange(t *testing.T) {
 	t.Parallel()
 	if v := NetPctChange(150, 100); v < 49.9 || v > 50.1 {
