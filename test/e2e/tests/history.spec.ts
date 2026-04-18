@@ -18,3 +18,18 @@ test('history search submits q on GET', async ({ page }) => {
   await page.locator('#history-q').press('Enter')
   await expect(page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(q)}`))
 })
+
+test('history kind tabs preserve query and switch kind', async ({ page }) => {
+  await signInAsTestUser(page)
+  const q = 'e2e-kind-nav'
+  await page.goto(`/history?q=${encodeURIComponent(q)}`)
+  await page.getByRole('tab', { name: 'Expenses' }).click()
+  await expect(page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(q)}`))
+  await expect(page).toHaveURL(/[?&]kind=expense(?:&|$)/)
+  await page.getByRole('tab', { name: 'Income' }).click()
+  await expect(page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(q)}`))
+  await expect(page).toHaveURL(/[?&]kind=income(?:&|$)/)
+  await page.getByRole('tab', { name: 'All' }).click()
+  await expect(page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(q)}`))
+  await expect(page).toHaveURL(/[?&]kind=all(?:&|$)/)
+})
