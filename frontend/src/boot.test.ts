@@ -29,4 +29,31 @@ describe('bootApp', () => {
     expect(stubs.initSettingsMemberDialog).toHaveBeenCalledTimes(1)
     expect(stubs.initCategoryModal).toHaveBeenCalledTimes(1)
   })
+
+  it('runs initializers in a stable order', () => {
+    const order: string[] = []
+    stubs.setBrowserTimezoneCookie.mockImplementation(() => {
+      order.push('timezone')
+    })
+    stubs.applyLocalTimeElements.mockImplementation(() => {
+      order.push('localTime')
+    })
+    stubs.initShellSidebar.mockImplementation(() => {
+      order.push('shell')
+    })
+    stubs.initSettingsMemberDialog.mockImplementation(() => {
+      order.push('settingsDialog')
+    })
+    stubs.initCategoryModal.mockImplementation(() => {
+      order.push('categoryModal')
+    })
+    bootApp()
+    expect(order).toEqual([
+      'timezone',
+      'localTime',
+      'shell',
+      'settingsDialog',
+      'categoryModal',
+    ])
+  })
 })
