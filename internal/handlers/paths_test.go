@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -59,6 +60,19 @@ func TestTransactionPathPatterns_useStdlibWildcardSegment(t *testing.T) {
 	}
 	if got, want := TransactionEditPathPattern, TransactionsPath+"/{id}/edit"; got != want {
 		t.Fatalf("TransactionEditPathPattern=%q want %q", got, want)
+	}
+}
+
+func TestTransactionURLPath_matchesPatternSubstitution(t *testing.T) {
+	t.Parallel()
+	for _, id := range []int64{1, 42, 9223372036854775807} {
+		s := strconv.FormatInt(id, 10)
+		if got, want := TransactionURLPath(id), strings.Replace(TransactionPathPattern, "{id}", s, 1); got != want {
+			t.Fatalf("TransactionURLPath(%d)=%q want %q", id, got, want)
+		}
+		if got, want := TransactionEditURLPath(id), strings.Replace(TransactionEditPathPattern, "{id}", s, 1); got != want {
+			t.Fatalf("TransactionEditURLPath(%d)=%q want %q", id, got, want)
+		}
 	}
 }
 

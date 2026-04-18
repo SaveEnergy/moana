@@ -1,5 +1,7 @@
 package handlers
 
+import "strconv"
+
 // HTTP route paths for redirects and [net/http.ServeMux] registrations.
 // Keep in sync with routes_*.go; exported for integration tests and external call sites.
 const (
@@ -35,3 +37,15 @@ const (
 	DashboardPeriodQueryParam = "period"
 	NotificationsPath         = "/notifications"
 )
+
+// TransactionURLPath returns the concrete URL path for one transaction (POST target, etc.).
+// It matches [TransactionPathPattern] with this id substituted for {id}.
+func TransactionURLPath(id int64) string {
+	return TransactionsPath + "/" + strconv.FormatInt(id, 10)
+}
+
+// TransactionEditURLPath returns the concrete path for the edit form.
+// It matches [TransactionEditPathPattern] with this id substituted for {id}.
+func TransactionEditURLPath(id int64) string {
+	return TransactionURLPath(id) + "/edit"
+}

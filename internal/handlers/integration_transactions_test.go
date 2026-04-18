@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -193,7 +192,7 @@ func TestEditTransaction(t *testing.T) {
 		t.Fatalf("list: %v", err)
 	}
 	id := txs[0].ID
-	editURL := fmt.Sprintf("%s%s/%d/edit?next=%s", srv.URL, handlers.TransactionsPath, id, handlers.HistoryPath)
+	editURL := srv.URL + handlers.TransactionEditURLPath(id) + "?next=" + url.QueryEscape(handlers.HistoryPath)
 	resp, err = client.Get(editURL)
 	if err != nil {
 		t.Fatal(err)
@@ -207,7 +206,7 @@ func TestEditTransaction(t *testing.T) {
 	if !strings.Contains(b, "Edit entry") || !strings.Contains(b, "10.00") {
 		t.Fatal("expected edit form")
 	}
-	resp2, err := client.PostForm(fmt.Sprintf("%s%s/%d", srv.URL, handlers.TransactionsPath, id), url.Values{
+	resp2, err := client.PostForm(srv.URL+handlers.TransactionURLPath(id), url.Values{
 		"next":        {handlers.HistoryPath},
 		"amount":      {"20.00"},
 		"kind":        {"expense"},
@@ -263,7 +262,7 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.Get(fmt.Sprintf("%s%s/%d/edit?next=%s", srv.URL, handlers.TransactionsPath, id, handlers.CategoriesPath))
+	resp2, err := client.Get(srv.URL + handlers.TransactionEditURLPath(id) + "?next=" + url.QueryEscape(handlers.CategoriesPath))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -305,7 +304,7 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.Get(fmt.Sprintf("%s%s/%d/edit?next=//evil.com/foo", srv.URL, handlers.TransactionsPath, id))
+	resp2, err := client.Get(srv.URL + handlers.TransactionEditURLPath(id) + "?next=//evil.com/foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -362,7 +361,7 @@ func TestTransactionEditNotFound(t *testing.T) {
 	testutil.MustCreateUser(t, app, "nf@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "nf@moana.test", "pw")
-	resp, err := client.Get(srv.URL + handlers.TransactionsPath + "/999999999/edit")
+	resp, err := client.Get(srv.URL + handlers.TransactionEditURLPath(999999999))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -442,7 +441,7 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.PostForm(fmt.Sprintf("%s%s/%d", srv.URL, handlers.TransactionsPath, id), url.Values{
+	resp2, err := client.PostForm(srv.URL+handlers.TransactionURLPath(id), url.Values{
 		"next":        {handlers.HistoryPath},
 		"amount":      {"not-a-number"},
 		"kind":        {"expense"},
