@@ -1,8 +1,14 @@
-/** Format ISO datetime for inline display (matches previous main.ts behavior). */
+/** Reused across rows so hydrating many `<time>` nodes does not allocate a formatter per call. */
+const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  hour: 'numeric',
+  minute: '2-digit',
+})
+
+/** Format ISO datetime for inline display (matches previous `toLocaleTimeString` behavior). */
 export function formatLocalTimeLabel(iso: string): string | null {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return null
-  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+  return localTimeFormatter.format(d)
 }
 
 /** Fill all `time.js-local-time[datetime]` elements in `root`. */
