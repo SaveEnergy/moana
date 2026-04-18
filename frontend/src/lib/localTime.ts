@@ -7,7 +7,11 @@ export function formatLocalTimeLabel(iso: string): string | null {
 
 /** Fill all `time.js-local-time[datetime]` elements in `root`. */
 export function applyLocalTimeElements(root: ParentNode = document): void {
-  for (const el of root.querySelectorAll<HTMLTimeElement>('time.js-local-time[datetime]')) {
+  const nodes = root.querySelectorAll<HTMLTimeElement>('time.js-local-time[datetime]')
+  if (nodes.length === 0) {
+    return
+  }
+  for (const el of nodes) {
     const iso = el.getAttribute('datetime')
     if (!iso) continue
     const label = formatLocalTimeLabel(iso)

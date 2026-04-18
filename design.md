@@ -12,7 +12,7 @@ Moana’s UI is a **server-rendered, CSS-first “editorial shell”**: warm **c
 |--------|------|
 | **HTML** | Go `html/template` files under `internal/assets/templates/` (e.g. `layout.html`). |
 | **CSS** | **Entry:** `frontend/src/app.css` `@import`s ordered partials under `frontend/src/styles/` (`01-tokens.css` … `07-reduced-motion.css`). **Build:** Vite concatenates/minifies to **one** `internal/assets/static/css/app.css` (single network request, unchanged URL). |
-| **JS** | `frontend/src/main.ts` composes `frontend/src/lib/*` (timezone cookie, local time labels, sidebar; dialogs and category modal **only when their DOM nodes exist**) → `internal/assets/static/js/app.js`. |
+| **JS** | `frontend/src/main.ts` composes `frontend/src/lib/*` (timezone cookie, local time labels, sidebar only if `#app-shell` exists; dialogs and category modal **only when their DOM nodes exist**) → `internal/assets/static/js/app.js`. |
 | **Icons** | Embedded Lucide-derived SVG via Go (`internal/icons/`), classes `.moana-icon` and size modifiers. |
 
 Templates load `/static/css/app.css` and Google Fonts in `<head>`; **`app.js` is loaded at the end of `<body>`** (parses markup before running TS). The login template also includes `app.js` so the **timezone cookie** is set before the first authenticated request.
@@ -198,9 +198,10 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 
 ## 14. Tests
 
+- **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
 - **Unit:** `npm run test:unit` — Vitest (`vitest.config.ts`), tests for `frontend/src/lib` (e.g. local time formatting).  
-- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/`): sign-in, dashboard shell, design tokens, notifications link, mobile sidebar, history page.  
-- **Gate:** `npm run test:frontend` — runs unit tests then production Vite build (CI-friendly).
+- **E2E:** `npm run test:e2e` — Playwright: sign-in, dashboard shell, tokens, notifications, mobile sidebar, history, plus route smoke (categories, new transaction, settings).  
+- **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.
 
 ## 15. Risk snapshot
 

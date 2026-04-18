@@ -14,36 +14,46 @@ export function initCategoryModal(): void {
     return
   }
 
+  /* Narrow once for nested functions (TS does not always narrow captured consts in closures). */
+  const modal = dialog
+  const catForm = form
+  const catId = idInput
+  const catTitle = titleEl
+  const catSubmit = submitBtn
+  const catPreview = preview
+  const catIconWrap = iconWrap
+  const catName = nameInput
+
   function syncCatModalPreview() {
-    const cr = form.querySelector<HTMLInputElement>('input[name="color"]:checked')
+    const cr = catForm.querySelector<HTMLInputElement>('input[name="color"]:checked')
     let bg = 'color-mix(in srgb, var(--primary) 12%, #fff8f0)'
     if (cr?.value === 'custom') {
-      const nat = form.querySelector<HTMLInputElement>('#cat-modal-color-native')
+      const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
       bg = nat?.value?.trim() || '#818cf8'
     } else if (cr?.value) {
       bg = cr.value
     }
-    preview.style.background = bg
+    catPreview.style.background = bg
 
-    const ir = form.querySelector<HTMLInputElement>('input[name="icon"]:checked')
-    iconWrap.innerHTML = ''
+    const ir = catForm.querySelector<HTMLInputElement>('input[name="icon"]:checked')
+    catIconWrap.innerHTML = ''
     if (!ir?.value) {
-      iconWrap.classList.add('cat-modal-preview-icon--auto')
-      iconWrap.textContent = 'A'
+      catIconWrap.classList.add('cat-modal-preview-icon--auto')
+      catIconWrap.textContent = 'A'
       return
     }
-    iconWrap.classList.remove('cat-modal-preview-icon--auto')
+    catIconWrap.classList.remove('cat-modal-preview-icon--auto')
     const label = ir.closest('label')
     const svg = label?.querySelector('svg.moana-icon')
     if (svg) {
       const clone = svg.cloneNode(true) as SVGElement
       clone.classList.add('moana-icon--cat-preview')
-      iconWrap.appendChild(clone)
+      catIconWrap.appendChild(clone)
     }
   }
 
   function wireColorNative() {
-    form.querySelectorAll('.cat-color-native').forEach((pc) => {
+    catForm.querySelectorAll('.cat-color-native').forEach((pc) => {
       pc.addEventListener('input', () => {
         const wrap = (pc as HTMLElement).closest('.cat-color-swatch--custom')
         const r = wrap?.querySelector<HTMLInputElement>('input[type="radio"][value="custom"]')
@@ -55,74 +65,74 @@ export function initCategoryModal(): void {
     })
   }
 
-  form.querySelectorAll('input[name="color"], input[name="icon"]').forEach((el) => {
+  catForm.querySelectorAll('input[name="color"], input[name="icon"]').forEach((el) => {
     el.addEventListener('change', () => syncCatModalPreview())
   })
   wireColorNative()
 
   function openCreateModal() {
-    form.action = '/categories'
-    idInput.value = ''
-    titleEl.textContent = 'New category'
-    submitBtn.textContent = 'Create category'
-    form.reset()
-    form.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
-    form.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
-    const nat = form.querySelector<HTMLInputElement>('#cat-modal-color-native')
+    catForm.action = '/categories'
+    catId.value = ''
+    catTitle.textContent = 'New category'
+    catSubmit.textContent = 'Create category'
+    catForm.reset()
+    catForm.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
+    catForm.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
+    const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
     if (nat) nat.value = '#818cf8'
     syncCatModalPreview()
-    nameInput.focus()
-    dialog.showModal()
+    catName.focus()
+    modal.showModal()
   }
 
   function openEditModal(btn: HTMLElement) {
     const id = btn.dataset.id
     if (!id) return
-    form.action = '/categories/update'
-    idInput.value = id
-    titleEl.textContent = 'Edit category'
-    submitBtn.textContent = 'Save changes'
+    catForm.action = '/categories/update'
+    catId.value = id
+    catTitle.textContent = 'Edit category'
+    catSubmit.textContent = 'Save changes'
 
-    nameInput.value = btn.dataset.name ?? ''
+    catName.value = btn.dataset.name ?? ''
 
     const rawColor = (btn.dataset.color ?? '').trim()
     const isCustom = btn.dataset.custom === '1'
     const customHex = (btn.dataset.customHex ?? '#818cf8').trim()
 
     if (!rawColor) {
-      form.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
+      catForm.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
     } else if (isCustom) {
-      form.querySelector<HTMLInputElement>('input[name="color"][value="custom"]')!.checked = true
-      const nat = form.querySelector<HTMLInputElement>('#cat-modal-color-native')
+      catForm.querySelector<HTMLInputElement>('input[name="color"][value="custom"]')!.checked = true
+      const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
       if (nat) nat.value = /^#[0-9a-fA-F]{6}$/.test(customHex) ? customHex : '#818cf8'
     } else {
-      const preset = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="color"]')).find(
+      const preset = Array.from(catForm.querySelectorAll<HTMLInputElement>('input[name="color"]')).find(
         (r) => r.value === rawColor,
       )
       if (preset) {
         preset.checked = true
       } else {
-        form.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
+        catForm.querySelector<HTMLInputElement>('input[name="color"][value=""]')!.checked = true
       }
     }
 
     const iconVal = (btn.dataset.icon ?? '').trim()
     if (!iconVal) {
-      form.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
+      catForm.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
     } else {
-      const iconRadio = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="icon"]')).find(
+      const iconRadio = Array.from(catForm.querySelectorAll<HTMLInputElement>('input[name="icon"]')).find(
         (r) => r.value === iconVal,
       )
       if (iconRadio) {
         iconRadio.checked = true
       } else {
-        form.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
+        catForm.querySelector<HTMLInputElement>('input[name="icon"][value=""]')!.checked = true
       }
     }
 
     syncCatModalPreview()
-    nameInput.focus()
-    dialog.showModal()
+    catName.focus()
+    modal.showModal()
   }
 
   addCategoryBtn?.addEventListener('click', () => openCreateModal())
@@ -130,10 +140,10 @@ export function initCategoryModal(): void {
     b.addEventListener('click', () => openEditModal(b as HTMLElement))
   })
 
-  closeBtn?.addEventListener('click', () => dialog.close())
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) {
-      dialog.close()
+  closeBtn?.addEventListener('click', () => modal.close())
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.close()
     }
   })
 }
