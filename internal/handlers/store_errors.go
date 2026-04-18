@@ -10,6 +10,9 @@ import (
 // userFacingStoreMessage maps store errors to short UI copy.
 // Unknown errors use [httperr.InternalMessage] so driver/SQL text never reaches the HTML alert.
 func userFacingStoreMessage(err error) string {
+	if err == nil {
+		return httperr.InternalMessage
+	}
 	for _, row := range storeUserMessages {
 		if errors.Is(err, row.sentinel) {
 			return row.msg

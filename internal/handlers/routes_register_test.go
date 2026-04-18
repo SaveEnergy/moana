@@ -31,7 +31,7 @@ func newRegisterRoutesTestMux(t *testing.T) (*http.ServeMux, func()) {
 	return mux, func() { db.Close() }
 }
 
-// assertSeeOtherToLogin checks 303 to /login; wantError1 requires query error=1 (WithAuth redirects).
+// assertSeeOtherToLogin checks 303 to /login; wantError1 requires LoginErrorQueryParam=1 (WithAuth redirects).
 func assertSeeOtherToLogin(t *testing.T, mux http.Handler, method, path string, body io.Reader, wantError1 bool) {
 	t.Helper()
 	rec := httptest.NewRecorder()
@@ -47,8 +47,8 @@ func assertSeeOtherToLogin(t *testing.T, mux http.Handler, method, path string, 
 	if !strings.Contains(loc, handlers.LoginPath) {
 		t.Fatalf("%s %s: Location %q want %s", method, path, loc, handlers.LoginPath)
 	}
-	if wantError1 && !strings.Contains(loc, "error=1") {
-		t.Fatalf("%s %s: Location %q want ...error=1...", method, path, loc)
+	if wantError1 && !strings.Contains(loc, handlers.LoginErrorQueryParam+"=1") {
+		t.Fatalf("%s %s: Location %q want ...%s=1...", method, path, loc, handlers.LoginErrorQueryParam)
 	}
 }
 
@@ -103,7 +103,7 @@ func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 	paths := []string{
 		handlers.DashboardPath, // GET /{$}
 		handlers.TransactionsPath,
-		handlers.TransactionsPath + "/42/edit", // path param (GET /transactions/{id}/edit)
+		strings.Replace(handlers.TransactionEditPathPattern, "{id}", "42", 1),
 		handlers.HistoryPath,
 		handlers.CategoriesPath,
 		handlers.SettingsPath,
@@ -142,7 +142,7 @@ func TestRegisterRoutes_protectedPOST_redirectsAnonymous(t *testing.T) {
 		method, path string
 	}{
 		{http.MethodPost, handlers.TransactionsPath},
-		{http.MethodPost, handlers.TransactionsPath + "/42"},
+		{http.MethodPost, strings.Replace(handlers.TransactionPathPattern, "{id}", "42", 1)},
 		{http.MethodPost, handlers.CategoriesPath},
 		{http.MethodPost, handlers.CategoriesUpdatePath},
 		{http.MethodPost, handlers.CategoriesDeletePath},

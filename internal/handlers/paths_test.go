@@ -18,7 +18,7 @@ func TestDashboardRootPattern_exactRootServeMuxString(t *testing.T) {
 
 func TestLoginRedirectAuth_matchesLoginPathWithErrorQuery(t *testing.T) {
 	t.Parallel()
-	if want := LoginPath + "?error=1"; LoginRedirectAuth != want {
+	if want := LoginPath + "?" + LoginErrorQueryParam + "=1"; LoginRedirectAuth != want {
 		t.Fatalf("LoginRedirectAuth=%q want %q (middleware WithAuth must match [routes_auth] GET %s)",
 			LoginRedirectAuth, want, LoginPath)
 	}
@@ -34,10 +34,12 @@ func TestHistoryPath_matchesSafepathDefault(t *testing.T) {
 
 func TestTransactionPathPatterns_useStdlibWildcardSegment(t *testing.T) {
 	t.Parallel()
-	for _, p := range []string{TransactionPathPattern, TransactionEditPathPattern} {
-		if !strings.Contains(p, "{id}") {
-			t.Fatalf("%q must contain {id} (Go 1.22+ ServeMux named wildcard)", p)
-		}
+	// Keep in sync with routes_ledger.go registrations (derived from TransactionsPath + segment).
+	if got, want := TransactionPathPattern, TransactionsPath+"/{id}"; got != want {
+		t.Fatalf("TransactionPathPattern=%q want %q", got, want)
+	}
+	if got, want := TransactionEditPathPattern, TransactionsPath+"/{id}/edit"; got != want {
+		t.Fatalf("TransactionEditPathPattern=%q want %q", got, want)
 	}
 }
 
