@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { APP_USER_MENU_OPEN_SELECTOR } from './domSelectors'
 import {
   eventPathIncludesOpenDetails,
   eventPathIncludesOpenDialog,
@@ -57,7 +58,7 @@ describe('shouldDeferMobileShellEscape', () => {
 
   it('defers when details.app-user-menu[open] exists', () => {
     vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === 'details.app-user-menu[open]' ? ({} as Element) : null),
+      querySelector: (sel: string) => (sel === APP_USER_MENU_OPEN_SELECTOR ? ({} as Element) : null),
     })
     const e = { composedPath: () => [] } as unknown as KeyboardEvent
     expect(shouldDeferMobileShellEscape(e)).toBe(true)

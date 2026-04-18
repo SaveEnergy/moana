@@ -1,3 +1,5 @@
+import { APP_USER_MENU_OPEN_SELECTOR } from './domSelectors'
+
 function readTagOpen(n: unknown): { tag: string; open: boolean } | null {
   if (!n || typeof n !== 'object' || !('tagName' in n)) {
     return null
@@ -41,7 +43,7 @@ export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
 
 /** Topbar account menu (`layout.html`); DOM query because the mobile drawer can cover the bar while `[open]` stays true. */
 export function isAppUserMenuDetailsOpen(): boolean {
-  return document.querySelector('details.app-user-menu[open]') !== null
+  return document.querySelector(APP_USER_MENU_OPEN_SELECTOR) !== null
 }
 
 /** Single guard for `shellSidebar` Escape: open `dialog` in path or open account `<details>`. */
