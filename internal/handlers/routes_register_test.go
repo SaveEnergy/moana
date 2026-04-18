@@ -141,15 +141,15 @@ func TestRegisterRoutes_protectedPOST_redirectsAnonymous(t *testing.T) {
 	cases := []struct {
 		method, path string
 	}{
-		{http.MethodPost, "/transactions"},
-		{http.MethodPost, "/transactions/42"},
-		{http.MethodPost, "/categories"},
-		{http.MethodPost, "/categories/update"},
-		{http.MethodPost, "/categories/delete"},
-		{http.MethodPost, "/settings/profile"},
-		{http.MethodPost, "/settings/household"},
-		{http.MethodPost, "/settings/household/members"},
-		{http.MethodPost, "/settings/household/members/remove"},
+		{http.MethodPost, handlers.TransactionsPath},
+		{http.MethodPost, handlers.TransactionsPath + "/42"},
+		{http.MethodPost, handlers.CategoriesPath},
+		{http.MethodPost, handlers.CategoriesUpdatePath},
+		{http.MethodPost, handlers.CategoriesDeletePath},
+		{http.MethodPost, handlers.SettingsProfilePath},
+		{http.MethodPost, handlers.SettingsHouseholdPath},
+		{http.MethodPost, handlers.SettingsHouseholdMembersPath},
+		{http.MethodPost, handlers.SettingsHouseholdMembersRemovePath},
 	}
 	for _, tc := range cases {
 		t.Run(tc.method+" "+tc.path, func(t *testing.T) {

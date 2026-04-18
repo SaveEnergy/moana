@@ -20,7 +20,7 @@ type HeatmapCell struct {
 // BuildHeatmapCellsRolling365 builds a GitHub-style column-major grid (7 rows × N weeks) for the
 // last 365 local calendar days ending on endDay (inclusive). The last cell is always endDay (today).
 // Leading empty cells align the first day to the correct weekday row; no trailing padding.
-// A nil loc is treated as UTC ([time.Date] panics if loc is nil).
+// A nil loc is normalized with [timeutil.OrUTC] before [time.Date] (which requires a non-nil *Location).
 func BuildHeatmapCellsRolling365(endDay time.Time, loc *time.Location, byDay map[string]int64) []HeatmapCell {
 	loc = timeutil.OrUTC(loc)
 	endDay = time.Date(endDay.Year(), endDay.Month(), endDay.Day(), 0, 0, 0, 0, loc)

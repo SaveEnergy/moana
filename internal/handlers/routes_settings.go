@@ -3,9 +3,9 @@ package handlers
 import "net/http"
 
 func registerSettingsRoutes(mux *http.ServeMux, app *App) {
-	mux.Handle("GET /settings", app.WithAuth(app.Settings))
-	mux.Handle("POST /settings/profile", app.WithAuth(app.SettingsProfileUpdate))
-	mux.Handle("POST /settings/household", app.WithAuth(app.SettingsHouseholdUpdate))
-	mux.Handle("POST /settings/household/members", app.WithAuth(app.SettingsHouseholdMemberAdd))
-	mux.Handle("POST /settings/household/members/remove", app.WithAuth(app.SettingsHouseholdMemberRemove))
+	mux.Handle(http.MethodGet+" "+SettingsPath, app.WithAuth(app.Settings))
+	mux.Handle(http.MethodPost+" "+SettingsProfilePath, app.WithAuth(app.SettingsProfileUpdate))
+	mux.Handle(http.MethodPost+" "+SettingsHouseholdPath, app.WithAuth(app.SettingsHouseholdUpdate))
+	mux.Handle(http.MethodPost+" "+SettingsHouseholdMembersPath, app.WithAuth(app.SettingsHouseholdMemberAdd))
+	mux.Handle(http.MethodPost+" "+SettingsHouseholdMembersRemovePath, app.WithAuth(app.SettingsHouseholdMemberRemove))
 }

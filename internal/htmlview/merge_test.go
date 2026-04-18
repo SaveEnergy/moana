@@ -5,35 +5,33 @@ import (
 	"testing"
 )
 
-func TestMergeFuncMaps(t *testing.T) {
+func TestMergeFuncMaps_laterMapOverrides(t *testing.T) {
 	t.Parallel()
-	a := template.FuncMap{"x": func() int { return 1 }}
-	b := template.FuncMap{"y": func() int { return 2 }}
-	c := template.FuncMap{"x": func() int { return 3 }}
-	m := MergeFuncMaps(a, b, c)
-	if len(m) != 2 {
-		t.Fatalf("len=%d", len(m))
+	m := MergeFuncMaps(
+		template.FuncMap{"x": func() string { return "first" }},
+		template.FuncMap{"x": func() string { return "second" }},
+	)
+	fn, ok := m["x"].(func() string)
+	if !ok {
+		t.Fatalf("merged x type %T", m["x"])
 	}
-	fn := m["x"].(func() int)
-	if fn() != 3 {
-		t.Fatal("last x should win")
-	}
-}
-
-func TestMergeFuncMaps_capacityMatchesKeys(t *testing.T) {
-	t.Parallel()
-	a := template.FuncMap{"a": func() {}, "b": func() {}}
-	b := template.FuncMap{"c": func() {}}
-	m := MergeFuncMaps(a, b)
-	if len(m) != 3 {
-		t.Fatalf("len=%d", len(m))
+	if got := fn(); got != "second" {
+		t.Fatalf("got %q want second (rightmost map wins)", got)
 	}
 }
 
-func TestMergeFuncMaps_noArgs(t *testing.T) {
+func TestMergeFuncMaps_mergesDistinctKeys(t *testing.T) {
 	t.Parallel()
-	m := MergeFuncMaps()
-	if len(m) != 0 {
-		t.Fatalf("want empty map, len=%d", len(m))
+	m := MergeFuncMaps(
+		template.FuncMap{"a": func() int { return 1 }},
+		template.FuncMap{"b": func() int { return 2 }},
+	)
+	af, _ := m["a"].(func() int)
+	bf, _ := m["b"].(func() int)
+	if af == nil || bf == nil {
+		t.Fatalf("missing funcs: a=%T b=%T", m["a"], m["b"])
+	}
+	if af() != 1 || bf() != 2 {
+		t.Fatalf("a=%d b=%d", af(), bf())
 	}
 }

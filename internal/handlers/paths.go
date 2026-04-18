@@ -9,8 +9,15 @@ const (
 	LoginRedirectAuth = "/login?error=1"
 	LogoutPath        = "/logout"
 	SettingsPath      = "/settings"
-	HistoryPath       = "/history" // must match [safepath.Default] (see paths_test).
-	CategoriesPath    = "/categories"
-	TransactionsPath  = "/transactions"
-	NotificationsPath = "/notifications"
+	// Settings POST targets (prefix SettingsPath).
+	SettingsProfilePath                = "/settings/profile"
+	SettingsHouseholdPath              = "/settings/household"
+	SettingsHouseholdMembersPath       = "/settings/household/members"
+	SettingsHouseholdMembersRemovePath = "/settings/household/members/remove"
+	HistoryPath                        = "/history" // must match [safepath.Default] (see paths_test).
+	CategoriesPath                     = "/categories"
+	CategoriesUpdatePath               = "/categories/update"
+	CategoriesDeletePath               = "/categories/delete"
+	TransactionsPath                   = "/transactions"
+	NotificationsPath                  = "/notifications"
 )
