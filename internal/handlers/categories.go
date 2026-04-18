@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"moana/internal/category"
@@ -46,8 +45,8 @@ func (a *App) CategoryDelete(w http.ResponseWriter, r *http.Request, u *store.Us
 	if !requireParseForm(w, r) {
 		return
 	}
-	id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
-	if err != nil || id <= 0 {
+	id, ok := formPositiveInt64(r, "id")
+	if !ok {
 		http.Redirect(w, r, "/categories", http.StatusSeeOther)
 		return
 	}
@@ -64,8 +63,8 @@ func (a *App) CategoryUpdate(w http.ResponseWriter, r *http.Request, u *store.Us
 	if !requireParseForm(w, r) {
 		return
 	}
-	id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
-	if err != nil || id <= 0 {
+	id, ok := formPositiveInt64(r, "id")
+	if !ok {
 		a.categoriesWithError(w, r, u, "Invalid category.")
 		return
 	}
