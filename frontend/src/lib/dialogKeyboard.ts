@@ -1,3 +1,11 @@
+function readTagOpen(n: unknown): { tag: string; open: boolean } | null {
+  if (!n || typeof n !== 'object' || !('tagName' in n)) {
+    return null
+  }
+  const el = n as { tagName: string; open?: boolean }
+  return { tag: el.tagName, open: el.open === true }
+}
+
 /**
  * True when an event path includes a native `dialog` element that is currently open
  * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
@@ -6,11 +14,21 @@
  */
 export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
   for (const n of path) {
-    if (!n || typeof n !== 'object' || !('tagName' in n)) {
-      continue
+    const r = readTagOpen(n)
+    if (r?.tag === 'DIALOG' && r.open) {
+      return true
     }
-    const el = n as { tagName: string; open?: boolean }
-    if (el.tagName === 'DIALOG' && el.open === true) {
+  }
+  return false
+}
+
+/**
+ * True when the path includes an open `<details>` (e.g. focus inside the disclosure). See also {@link isAppUserMenuDetailsOpen}.
+ */
+export function eventPathIncludesOpenDetails(path: readonly unknown[]): boolean {
+  for (const n of path) {
+    const r = readTagOpen(n)
+    if (r?.tag === 'DETAILS' && r.open) {
       return true
     }
   }
@@ -19,4 +37,9 @@ export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
 
 export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
   return eventPathIncludesOpenDialog(e.composedPath())
+}
+
+/** Topbar account menu (`layout.html`); DOM query because the mobile drawer can cover the bar while `[open]` stays true. */
+export function isAppUserMenuDetailsOpen(): boolean {
+  return document.querySelector('details.app-user-menu[open]') !== null
 }

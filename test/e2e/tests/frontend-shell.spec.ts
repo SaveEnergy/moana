@@ -47,3 +47,17 @@ test('mobile sidebar toggles', async ({ page }) => {
   await page.keyboard.press('Escape')
   await expect(shell).not.toHaveClass(/sidebar-open/)
 })
+
+test('mobile: Escape does not collapse drawer while account menu is open', async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 })
+  await page.goto('/')
+  const shell = page.locator('#app-shell')
+  const menu = page.locator('details.app-user-menu')
+  await page.locator('details.app-user-menu summary.app-user-menu-btn').click()
+  await expect(menu).toHaveAttribute('open', '')
+  await page.getByRole('button', { name: 'Open navigation menu' }).click()
+  await expect(shell).toHaveClass(/sidebar-open/)
+  await page.keyboard.press('Escape')
+  /* Drawer must stay up while account details[open] is observed (native menu may not dismiss on Esc here). */
+  await expect(shell).toHaveClass(/sidebar-open/)
+})
