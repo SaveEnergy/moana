@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-import { signInAsTestUser } from '../helpers/auth'
+import { E2E_USER_EMAIL, signInAsTestUser } from '../helpers/auth'
 import { todayLocalISODate } from '../helpers/dates'
 
 test('categories page renders', async ({ page }) => {
@@ -31,6 +31,7 @@ test('settings profile loads', async ({ page }) => {
   await page.goto('/settings')
   await expect(page).toHaveURL(/\/settings/)
   await expect(page.getByRole('heading', { name: 'Personal' })).toBeVisible()
+  await expect(page.locator('#settings-email')).toHaveValue(E2E_USER_EMAIL)
 })
 
 test('transaction edit loads from history and save returns to history', async ({ page }) => {
