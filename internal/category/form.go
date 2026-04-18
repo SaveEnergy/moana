@@ -7,9 +7,9 @@ import (
 
 // ParseColorFromForm reads color / color_custom from a POST form (category create/update modal).
 func ParseColorFromForm(r *http.Request) string {
-	c := strings.TrimSpace(r.FormValue("color"))
-	if c == "custom" {
-		return NormalizeColor(r.FormValue("color_custom"))
+	c := strings.TrimSpace(r.FormValue(FieldColor))
+	if c == ColorPickCustom {
+		return NormalizeColor(r.FormValue(FieldColorCustom))
 	}
 	return NormalizeColor(c)
 }

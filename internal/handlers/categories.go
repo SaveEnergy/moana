@@ -25,12 +25,12 @@ func (a *App) CategoryCreate(w http.ResponseWriter, r *http.Request, u *store.Us
 	if !requireParseForm(w, r) {
 		return
 	}
-	name := strings.TrimSpace(r.FormValue("name"))
+	name := strings.TrimSpace(r.FormValue(category.FieldName))
 	if name == "" {
 		a.categoriesWithError(w, r, u, "Name is required.")
 		return
 	}
-	icon := category.NormalizeStoredIcon(r.FormValue("icon"))
+	icon := category.NormalizeStoredIcon(r.FormValue(category.FieldIcon))
 	color := category.ParseColorFromForm(r)
 	ctx := r.Context()
 	if _, err := a.Store.CreateCategory(ctx, u.HouseholdID, name, icon, color); err != nil {
@@ -45,7 +45,7 @@ func (a *App) CategoryDelete(w http.ResponseWriter, r *http.Request, u *store.Us
 	if !requireParseForm(w, r) {
 		return
 	}
-	id, ok := formPositiveInt64(r, "id")
+	id, ok := formPositiveInt64(r, category.FieldID)
 	if !ok {
 		http.Redirect(w, r, CategoriesPath, http.StatusSeeOther)
 		return
@@ -63,17 +63,17 @@ func (a *App) CategoryUpdate(w http.ResponseWriter, r *http.Request, u *store.Us
 	if !requireParseForm(w, r) {
 		return
 	}
-	id, ok := formPositiveInt64(r, "id")
+	id, ok := formPositiveInt64(r, category.FieldID)
 	if !ok {
 		a.categoriesWithError(w, r, u, "Invalid category.")
 		return
 	}
-	name := strings.TrimSpace(r.FormValue("name"))
+	name := strings.TrimSpace(r.FormValue(category.FieldName))
 	if name == "" {
 		a.categoriesWithError(w, r, u, "Name is required.")
 		return
 	}
-	icon := category.NormalizeStoredIcon(r.FormValue("icon"))
+	icon := category.NormalizeStoredIcon(r.FormValue(category.FieldIcon))
 	color := category.ParseColorFromForm(r)
 	ctx := r.Context()
 	if err := a.Store.UpdateCategory(ctx, u.HouseholdID, id, name, icon, color); err != nil {
