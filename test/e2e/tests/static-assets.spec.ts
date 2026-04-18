@@ -31,6 +31,8 @@ const authenticatedShellModulePreload = [
   ['categories', '/categories'],
   ['history', '/history'],
   ['new transaction', '/transactions'],
+  ['notifications', '/notifications'],
+  ['settings', '/settings'],
 ] as const
 
 for (const [label, path] of authenticatedShellModulePreload) {
