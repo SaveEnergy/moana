@@ -1,4 +1,4 @@
-import { sanitizeCategoryCustomHex } from './categoryColor'
+import { CATEGORY_MODAL_DEFAULT_PREVIEW_BG, sanitizeCategoryCustomHex } from './categoryColor'
 
 export function initCategoryModal(): void {
   const dialog = document.getElementById('cat-modal') as HTMLDialogElement | null
@@ -32,7 +32,7 @@ export function initCategoryModal(): void {
 
   function syncCatModalPreview() {
     const cr = catForm.querySelector<HTMLInputElement>('input[name="color"]:checked')
-    let bg = 'color-mix(in srgb, var(--primary) 12%, #fff8f0)'
+    let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
     if (cr?.value === 'custom') {
       const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
       bg = nat?.value?.trim() || '#818cf8'

@@ -1,4 +1,4 @@
-import { MOBILE_SHELL_MEDIA_QUERY } from './shellBreakpoints'
+import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
 export function initShellSidebar(): void {
@@ -53,7 +53,7 @@ export function initShellSidebar(): void {
     closeMobileSidebar()
   })
 
-  mqMobile.addEventListener('change', () => {
+  onMediaQueryChange(mqMobile, () => {
     if (!mqMobile.matches) {
       closeMobileSidebar()
     }
