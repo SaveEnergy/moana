@@ -1,15 +1,9 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-async function signIn(page: Page) {
-  await page.goto('/login')
-  await page.locator('input[name="email"]').fill('e2e@moana.test')
-  await page.locator('input[name="password"]').fill('password123')
-  await page.getByRole('button', { name: /sign in/i }).click()
-  await expect(page).toHaveURL(/\/$/)
-}
+import { signInAsTestUser } from '../helpers/auth'
 
 test.beforeEach(async ({ page }) => {
-  await signIn(page)
+  await signInAsTestUser(page)
 })
 
 test('dashboard loads design tokens and overview', async ({ page }) => {
@@ -19,6 +13,12 @@ test('dashboard loads design tokens and overview', async ({ page }) => {
   )
   expect(primary.toLowerCase()).toBe('#306369')
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+})
+
+test('global search control is in shell', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('search')).toBeVisible()
+  await expect(page.getByPlaceholder('Search')).toBeVisible()
 })
 
 test('notifications link is reachable', async ({ page }) => {

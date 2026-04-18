@@ -1,10 +1,8 @@
 import { test, expect } from '@playwright/test'
 
+import { signInAsTestUser } from '../helpers/auth'
+
 test('sign in and see overview', async ({ page }) => {
-  await page.goto('/login')
-  await page.locator('input[name="email"]').fill('e2e@moana.test')
-  await page.locator('input[name="password"]').fill('password123')
-  await page.getByRole('button', { name: /sign in/i }).click()
-  await expect(page).toHaveURL(/\/$/)
+  await signInAsTestUser(page)
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
 })

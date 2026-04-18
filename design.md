@@ -200,7 +200,7 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 
 - **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
 - **Unit:** `npm run test:unit` — Vitest (`vitest.config.ts`), tests for `frontend/src/lib` (e.g. local time formatting).  
-- **E2E:** `npm run test:e2e` — Playwright: sign-in, dashboard shell, tokens, notifications link + inbox page, mobile sidebar, history, route smoke (categories, new transaction, settings).  
+- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings).  
 - **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.
 
 ## 15. Risk snapshot
