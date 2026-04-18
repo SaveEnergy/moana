@@ -177,7 +177,8 @@ Native `<dialog>`: `.admin-add-dialog` (settings add member), `.cat-modal` (cate
 - **`.sr-only`** for visually hidden labels  
 - **Landmarks:** `<main>`, `<nav>` with `aria-label`, `aria-current` where used  
 - **`<details>`/`<summary>`** for user menu  
-- **`:focus-visible`** on some controls (e.g. sidebar brand)
+- **`:focus-visible`** on some controls (e.g. sidebar brand)  
+- **Mobile shell Escape:** `shellSidebar.ts` uses a **capture-phase** document listener and skips closing the drawer when **`composedPath()`** includes an **`HTMLDialogElement` with `.open`**, so category/settings modals are not fighting the sidebar on the same key.
 
 Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on future audit scope.
 
@@ -200,7 +201,7 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 
 - **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
 - **Unit:** `npm run test:unit` — Vitest, config **merged into `frontend/vite.config.ts`** (`test` block). Covers `frontend/src/lib/*`, **`bootApp()` wiring** (`boot.test.ts`), timezone cookie segment + **`parseMoanaTimezoneCookie`**, `formatLocalTimeLabel` / `applyLocalTimeElements`, category custom hex sanitization (`categoryColor.test.ts`), **`onMediaQueryChange`** (`shellBreakpoints.test.ts`).  
-- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers **`/health`**, sign-in, dashboard shell (tokens, **global search** `role="search"`, **topbar search** → `/history` with `q`), **user menu → Settings** link, notifications link + inbox, mobile sidebar, history (**GET** search `q=` from the history page form), route smoke (categories, new transaction, settings), **categories modal** (open/close, **Escape**), **settings add-member dialog** (open/cancel, **Escape**), **`time.js-local-time` hydration** after saving a transaction (→ `/history`), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies), **`modulepreload`** for `app.js` on login and dashboard.  
+- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers **`/health`**, sign-in, dashboard shell (tokens, **global search** `role="search"`, **topbar search** → `/history` with `q`), **user menu → Settings** link, notifications link + inbox, mobile sidebar, history (**GET** search `q=` from the history page form), route smoke (categories, new transaction, settings), **categories modal** (open/close, **Escape**, mobile **Escape** with drawer + `dialog` open — sidebar stays open; **showModal** in test harness when backdrop blocks UI), **settings add-member dialog** (open/cancel, **Escape**), **`time.js-local-time` hydration** after saving a transaction (→ `/history`), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies), **`modulepreload`** for `app.js` on login and dashboard.  
 - **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.  
 - **Full repo check:** `npm run verify` — runs `test:frontend`, Playwright E2E (including **`GET /health`**), then `go test -race ./...`.
 

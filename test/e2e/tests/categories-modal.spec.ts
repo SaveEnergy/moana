@@ -22,3 +22,20 @@ test('category modal closes on Escape', async ({ page }) => {
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
 })
+
+test('mobile: first Escape closes modal with sidebar left open', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.setViewportSize({ width: 600, height: 800 })
+  await page.goto('/categories')
+  const shell = page.locator('#app-shell')
+  await page.getByRole('button', { name: 'Open navigation menu' }).click()
+  await expect(shell).toHaveClass(/sidebar-open/)
+  /* Drawer backdrop blocks “Add category”; opening the dialog via showModal() matches the Escape / shell interaction under test. */
+  await page.evaluate(() => {
+    document.getElementById('cat-modal')?.showModal()
+  })
+  await expect(page.locator('#cat-modal')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('#cat-modal')).toBeHidden()
+  await expect(shell).toHaveClass(/sidebar-open/)
+})

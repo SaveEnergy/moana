@@ -59,9 +59,22 @@ export function initShellSidebar(): void {
     }
   })
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && mqMobile.matches) {
+  function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
+    return e.composedPath().some((n) => n instanceof HTMLDialogElement && n.open)
+  }
+
+  /* Capture phase: decide before bubble so we still see `dialog.open` during the same Escape. */
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key !== 'Escape' || !mqMobile.matches) {
+        return
+      }
+      if (keyEventInvolvesOpenDialog(e)) {
+        return
+      }
       closeMobileSidebar()
-    }
-  })
+    },
+    { capture: true },
+  )
 }
