@@ -31,6 +31,17 @@ func TestMergeFuncMaps_emptyIsNonNil(t *testing.T) {
 	}
 }
 
+func TestMergeFuncMaps_singleInputIsCloned(t *testing.T) {
+	t.Parallel()
+	orig := template.FuncMap{"n": func() int { return 1 }}
+	m := MergeFuncMaps(orig)
+	m["n"] = func() int { return 99 }
+	f, _ := orig["n"].(func() int)
+	if f == nil || f() != 1 {
+		t.Fatalf("mutating merge result must not change source FuncMap")
+	}
+}
+
 func TestMergeFuncMaps_mergesDistinctKeys(t *testing.T) {
 	t.Parallel()
 	m := MergeFuncMaps(
