@@ -26,6 +26,16 @@ test('new transaction kind pills switch income and expense', async ({ page }) =>
   await expect(page.locator('input[name="kind"][value="income"]')).toBeChecked()
 })
 
+test('new transaction shows alert for zero amount', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/transactions')
+  await page.locator('input[name="amount"]').fill('0.00')
+  await page.locator('input[name="occurred_on"]').fill(todayLocalISODate())
+  await page.getByRole('button', { name: 'Save entry' }).click()
+  await expect(page).toHaveURL(/\/transactions/)
+  await expect(page.getByRole('alert')).toContainText('Amount must be greater than zero.')
+})
+
 test('settings profile loads', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/settings')
