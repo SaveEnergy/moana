@@ -96,7 +96,7 @@ func TestHTTPHandler_servesStaticCSS(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/static/css/app.css", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, server.StaticURLPrefix+"css/app.css", nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}

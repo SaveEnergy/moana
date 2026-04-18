@@ -110,7 +110,7 @@ func TestStatic_cssServed(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	resp, err := http.Get(srv.URL + "/static/css/app.css")
+	resp, err := http.Get(srv.URL + server.StaticURLPrefix + "css/app.css")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestStatic_unknownFileReturns404(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	resp, err := http.Get(srv.URL + "/static/moana-missing-asset-test-xyz.css")
+	resp, err := http.Get(srv.URL + server.StaticURLPrefix + "moana-missing-asset-test-xyz.css")
 	if err != nil {
 		t.Fatal(err)
 	}

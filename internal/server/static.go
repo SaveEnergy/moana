@@ -13,12 +13,15 @@ import (
 // benefit from a modest max-age.
 const staticCacheControl = "public, max-age=86400"
 
+// StaticURLPrefix is the path prefix for embedded assets ([registerStatic] strips it before file serving).
+const StaticURLPrefix = "/static/"
+
 func registerStatic(mux *http.ServeMux) {
 	staticFS, err := assets.StaticFS()
 	if err != nil {
 		panic(fmt.Errorf("server: embedded static assets: %w", err))
 	}
-	mux.Handle("GET /static/", http.StripPrefix("/static/", staticFileHandler(staticFS)))
+	mux.Handle(http.MethodGet+" "+StaticURLPrefix, http.StripPrefix(StaticURLPrefix, staticFileHandler(staticFS)))
 }
 
 func staticFileHandler(root fs.FS) http.Handler {
