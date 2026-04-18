@@ -5,6 +5,18 @@ import (
 	"testing"
 )
 
+func TestParseHistoryURLValues_matchesParseHistoryURL(t *testing.T) {
+	t.Parallel()
+	u, err := url.Parse("/history?kind=expense&from=2026-01-01&to=2026-01-31&q=rent")
+	if err != nil {
+		t.Fatal(err)
+	}
+	q := u.Query()
+	if parseHistoryURLValues(q) != ParseHistoryURL(u) {
+		t.Fatalf("parseHistoryURLValues vs ParseHistoryURL")
+	}
+}
+
 func TestParseHistoryURL_defaults(t *testing.T) {
 	t.Parallel()
 	u, err := url.Parse("/history")
