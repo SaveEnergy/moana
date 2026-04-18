@@ -4,6 +4,7 @@ export function initShellSidebar(): void {
   if (!shell) {
     return
   }
+  const appShell = shell
   const toggle = document.getElementById('app-sidebar-toggle')
   const closeBtn = document.getElementById('app-sidebar-close')
   const backdrop = document.getElementById('app-sidebar-backdrop')
@@ -16,19 +17,19 @@ export function initShellSidebar(): void {
   }
 
   function openMobileSidebar() {
-    shell?.classList.add('sidebar-open')
+    appShell.classList.add('sidebar-open')
     backdrop?.setAttribute('aria-hidden', 'false')
     setExpanded(true)
   }
 
   function closeMobileSidebar() {
-    shell?.classList.remove('sidebar-open')
+    appShell.classList.remove('sidebar-open')
     backdrop?.setAttribute('aria-hidden', 'true')
     setExpanded(false)
   }
 
   function toggleMobileSidebar() {
-    if (shell?.classList.contains('sidebar-open')) {
+    if (appShell.classList.contains('sidebar-open')) {
       closeMobileSidebar()
     } else {
       openMobileSidebar()
