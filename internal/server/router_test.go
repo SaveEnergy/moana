@@ -16,7 +16,7 @@ import (
 func TestServeMux_GET_rootExactMatch(t *testing.T) {
 	t.Parallel()
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(http.MethodGet+" "+handlers.DashboardRootPattern, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 	srv := httptest.NewServer(mux)

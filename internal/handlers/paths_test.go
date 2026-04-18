@@ -1,11 +1,20 @@
 package handlers
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 
 	"moana/internal/safepath"
 )
+
+func TestDashboardRootPattern_exactRootServeMuxString(t *testing.T) {
+	t.Parallel()
+	const want = "GET /{$}"
+	if got := http.MethodGet + " " + DashboardRootPattern; got != want {
+		t.Fatalf("dashboard mux pattern %q must stay %q (stdlib root exact-match)", got, want)
+	}
+}
 
 func TestLoginRedirectAuth_matchesLoginPathWithErrorQuery(t *testing.T) {
 	t.Parallel()
