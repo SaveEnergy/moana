@@ -13,25 +13,27 @@ const CookieName = "moana_tz"
 
 // CookieZone returns an IANA zone name from the cookie, or "UTC" if missing/invalid.
 func CookieZone(r *http.Request) string {
-	if r == nil {
-		return "UTC"
-	}
-	c, err := r.Cookie(CookieName)
-	if err != nil || c.Value == "" {
-		return "UTC"
-	}
-	v := strings.TrimSpace(c.Value)
-	if v == "" {
-		return "UTC"
-	}
-	if _, err := time.LoadLocation(v); err != nil {
-		return "UTC"
-	}
-	return v
+	return requestLocation(r).String()
 }
 
 // DisplayLocation is the browser time zone for this request, or UTC.
-// The result is never nil ([timeutil.OrUTC] defends against a nil *Location from the loader).
+// The result is never nil.
 func DisplayLocation(r *http.Request) *time.Location {
-	return timeutil.OrUTC(timeutil.LoadLocation(CookieZone(r)))
+	return requestLocation(r)
+}
+
+// requestLocation resolves moana_tz once per call ([timeutil.LoadLocation] maps invalid names to UTC).
+func requestLocation(r *http.Request) *time.Location {
+	if r == nil {
+		return time.UTC
+	}
+	c, err := r.Cookie(CookieName)
+	if err != nil || c.Value == "" {
+		return time.UTC
+	}
+	v := strings.TrimSpace(c.Value)
+	if v == "" {
+		return time.UTC
+	}
+	return timeutil.LoadLocation(v)
 }

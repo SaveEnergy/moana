@@ -30,6 +30,16 @@ func TestCookieZone_valid(t *testing.T) {
 	}
 }
 
+func TestCookieZone_matchesDisplayLocationString(t *testing.T) {
+	t.Parallel()
+	r := &http.Request{Header: http.Header{}}
+	r.AddCookie(&http.Cookie{Name: CookieName, Value: "Europe/Berlin"})
+	loc := DisplayLocation(r)
+	if got := CookieZone(r); got != loc.String() {
+		t.Fatalf("CookieZone=%q DisplayLocation.String()=%q", got, loc.String())
+	}
+}
+
 func TestCookieZone_invalidIANA(t *testing.T) {
 	t.Parallel()
 	r := &http.Request{Header: http.Header{}}
