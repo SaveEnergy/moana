@@ -36,7 +36,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.FormValue("email"))
 	password := r.FormValue("password")
 	if email == "" || password == "" {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, loginPath, http.StatusSeeOther)
 		return
 	}
 	ctx := r.Context()
@@ -66,7 +66,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 // Logout clears the session.
 func (a *App) Logout(w http.ResponseWriter, r *http.Request) {
 	auth.ClearSession(w, a.Config.SecureCookies)
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, loginPath, http.StatusSeeOther)
 }
 
 // loginTemplateData is passed to login.html (standalone, no app layout).

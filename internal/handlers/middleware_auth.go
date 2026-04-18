@@ -14,7 +14,7 @@ func (a *App) WithAuth(next func(http.ResponseWriter, *http.Request, *store.User
 		u, err := a.CurrentUser(r)
 		if err != nil {
 			if errors.Is(err, ErrAuthRequired) {
-				http.Redirect(w, r, "/login?error=1", http.StatusSeeOther)
+				http.Redirect(w, r, loginRedirectAuth, http.StatusSeeOther)
 				return
 			}
 			httperr.Internal(w, r, err)
