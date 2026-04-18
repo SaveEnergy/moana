@@ -1,5 +1,9 @@
 export function initCategoryModal(): void {
   const dialog = document.getElementById('cat-modal') as HTMLDialogElement | null
+  if (!dialog) {
+    return
+  }
+
   const form = document.getElementById('cat-modal-form') as HTMLFormElement | null
   const idInput = document.getElementById('cat-modal-id') as HTMLInputElement | null
   const titleEl = document.getElementById('cat-modal-title')
@@ -10,7 +14,7 @@ export function initCategoryModal(): void {
   const closeBtn = document.getElementById('cat-modal-close')
   const addCategoryBtn = document.getElementById('cat-modal-open-create')
 
-  if (!dialog || !form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
+  if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return
   }
 

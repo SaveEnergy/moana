@@ -9,9 +9,5 @@ import { initCategoryModal } from './lib/categoryModal'
 setBrowserTimezoneCookie()
 applyLocalTimeElements()
 initShellSidebar()
-if (document.getElementById('settings-add-member-dialog')) {
-  initSettingsMemberDialog()
-}
-if (document.getElementById('cat-modal')) {
-  initCategoryModal()
-}
+initSettingsMemberDialog()
+initCategoryModal()
