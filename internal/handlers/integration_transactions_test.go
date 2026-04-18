@@ -22,7 +22,7 @@ func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
 	testutil.MustCreateUser(t, app, "badamount@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "badamount@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"not-a-number"},
 		txform.FieldKind:        {"expense"},
@@ -48,7 +48,7 @@ func TestTransactionCreate_redirectsToHistory(t *testing.T) {
 	testutil.MustCreateUser(t, app, "redir-hist@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "redir-hist@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	noFollow := *client
 	noFollow.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
@@ -79,7 +79,7 @@ func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
 	testutil.MustCreateUser(t, app, "zero-amt@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "zero-amt@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"0.00"},
 		txform.FieldKind:        {"expense"},
@@ -134,7 +134,7 @@ func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 	testutil.MustCreateUser(t, app, "tx@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "tx@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"25.50"},
 		txform.FieldKind:        {"expense"},
@@ -176,7 +176,7 @@ func TestEditTransaction(t *testing.T) {
 	hid := u.HouseholdID
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "edit@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"10.00"},
 		txform.FieldKind:        {"expense"},
@@ -246,7 +246,7 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	}
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "next-safe@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"5.00"},
 		txform.FieldKind:        {"expense"},
@@ -289,7 +289,7 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	}
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "next-unsafe@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"5.00"},
 		txform.FieldKind:        {"expense"},
@@ -334,7 +334,7 @@ func TestTransactionCreate_invalidCategoryIDShowsMessage(t *testing.T) {
 	testutil.MustCreateUser(t, app, "badcat@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "badcat@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"10.00"},
 		txform.FieldKind:        {"expense"},
@@ -397,7 +397,7 @@ func TestTransactionUpdate_invalidPathIDReturns404(t *testing.T) {
 	testutil.MustCreateUser(t, app, "bad-id-post@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "bad-id-post@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath+"/not-a-number", url.Values{
 		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
 		txform.FieldAmount:                 {"1.00"},
@@ -426,7 +426,7 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	}
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "tx-upd-bad@moana.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		txform.FieldAmount:      {"10.00"},
 		txform.FieldKind:        {"expense"},
