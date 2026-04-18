@@ -9,6 +9,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
     cssMinify: true,
+    reportCompressedSize: false,
     outDir: resolve(__dirname, '../internal/assets/static'),
     emptyOutDir: false,
     rollupOptions: {
