@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
-import { APP_JS_MODULE_PRELOAD } from '../helpers/modulePreload'
+import {
+  APP_JS_MODULE_PRELOAD,
+  STATIC_APP_CSS_PATH,
+  STATIC_APP_JS_PATH,
+} from '../helpers/modulePreload'
 
 test('health endpoint responds OK', async ({ request }) => {
   const res = await request.get('/health')
@@ -9,14 +13,14 @@ test('health endpoint responds OK', async ({ request }) => {
 })
 
 test('static app.css is served with bytes', async ({ request }) => {
-  const res = await request.get('/static/css/app.css')
+  const res = await request.get(STATIC_APP_CSS_PATH)
   expect(res.ok()).toBeTruthy()
   const len = (await res.body()).length
   expect(len).toBeGreaterThan(500)
 })
 
 test('static app.js is served with bytes', async ({ request }) => {
-  const res = await request.get('/static/js/app.js')
+  const res = await request.get(STATIC_APP_JS_PATH)
   expect(res.ok()).toBeTruthy()
   const len = (await res.body()).length
   expect(len).toBeGreaterThan(100)
