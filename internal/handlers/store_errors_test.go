@@ -89,3 +89,20 @@ func TestUserFacingStoreMessage_nilError_mapsToInternal(t *testing.T) {
 		t.Fatalf("got %q want internal message", got)
 	}
 }
+
+func TestStoreUserMessages_tableIntegrity(t *testing.T) {
+	t.Parallel()
+	seen := make(map[error]struct{})
+	for i, row := range storeUserMessages {
+		if row.msg == "" {
+			t.Fatalf("row %d: empty message", i)
+		}
+		if row.sentinel == nil {
+			t.Fatalf("row %d: nil sentinel", i)
+		}
+		if _, dup := seen[row.sentinel]; dup {
+			t.Fatalf("row %d: duplicate sentinel %v", i, row.sentinel)
+		}
+		seen[row.sentinel] = struct{}{}
+	}
+}
