@@ -19,8 +19,10 @@ type HistoryURLParams struct {
 
 // ParseHistoryURL extracts normalized filters from a /history URL.
 func ParseHistoryURL(u *url.URL) HistoryURLParams {
-	q := strings.TrimSpace(u.Query().Get("q"))
-	kindParam := strings.TrimSpace(u.Query().Get("kind"))
+	// URL.Query parses RawQuery on each call; reuse one Values map for all params.
+	v := u.Query()
+	q := strings.TrimSpace(v.Get("q"))
+	kindParam := strings.TrimSpace(v.Get("kind"))
 	kind := "all"
 	filterKind := ""
 	switch kindParam {
@@ -34,14 +36,14 @@ func ParseHistoryURL(u *url.URL) HistoryURLParams {
 		kind = "all"
 		filterKind = ""
 	}
-	sortParam := strings.TrimSpace(u.Query().Get("sort"))
+	sortParam := strings.TrimSpace(v.Get("sort"))
 	oldestFirst := sortParam == "oldest"
 	sortLabel := "newest"
 	if oldestFirst {
 		sortLabel = "oldest"
 	}
-	from := strings.TrimSpace(u.Query().Get("from"))
-	to := strings.TrimSpace(u.Query().Get("to"))
+	from := strings.TrimSpace(v.Get("from"))
+	to := strings.TrimSpace(v.Get("to"))
 	filterActive := from != "" && to != ""
 	return HistoryURLParams{
 		kind:         kind,
