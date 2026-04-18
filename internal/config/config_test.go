@@ -113,7 +113,7 @@ func TestLoad_defaultRequestTimeout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.RequestTimeout != 60*time.Second {
+	if c.RequestTimeout != defaultRequestTimeoutSec*time.Second {
 		t.Fatalf("RequestTimeout %v want 60s", c.RequestTimeout)
 	}
 }
@@ -139,7 +139,7 @@ func TestLoad_invalidRequestTimeoutFallsBackToDefault(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.RequestTimeout != 60*time.Second {
+	if c.RequestTimeout != defaultRequestTimeoutSec*time.Second {
 		t.Fatalf("RequestTimeout %v want 60s fallback", c.RequestTimeout)
 	}
 }
@@ -155,7 +155,7 @@ func TestLoad_nonPositiveRequestTimeoutFallsBackToDefault(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if c.RequestTimeout != 60*time.Second {
+			if c.RequestTimeout != defaultRequestTimeoutSec*time.Second {
 				t.Fatalf("MOANA_REQUEST_TIMEOUT_SEC=%q: RequestTimeout %v want 60s", raw, c.RequestTimeout)
 			}
 		})
@@ -183,14 +183,14 @@ func TestLoad_invalidSessionMaxAgeFallsBackToDefault(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := 604800 * time.Second // 7d, matches Load default when Atoi fails or <= 0
+	want := defaultSessionMaxAgeSec * time.Second // 7d, matches Load default when Atoi fails or <= 0
 	if c.SessionMaxAge != want {
 		t.Fatalf("SessionMaxAge %v want %v", c.SessionMaxAge, want)
 	}
 }
 
 func TestLoad_nonPositiveSessionMaxAgeFallsBackToDefault(t *testing.T) {
-	want := 604800 * time.Second // 7d
+	want := defaultSessionMaxAgeSec * time.Second // 7d
 	// Sequential subtests: env is process-wide; avoid parallel Setenv races.
 	for _, raw := range []string{"0", "-1", "-999"} {
 		t.Run(raw, func(t *testing.T) {

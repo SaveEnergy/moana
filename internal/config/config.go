@@ -11,6 +11,11 @@ import (
 // MOANA_ENV=production (sufficient entropy for HMAC session signing).
 const minProductionSessionSecretLen = 32
 
+const (
+	defaultSessionMaxAgeSec   = 604800 // 7 days
+	defaultRequestTimeoutSec = 60
+)
+
 // Config holds runtime settings loaded from the environment.
 type Config struct {
 	Listen         string
@@ -45,13 +50,13 @@ func Load() (*Config, error) {
 		secret = []byte("dev-insecure-session-secret-change-me")
 	}
 
-	maxAgeSec, _ := strconv.Atoi(getenv("MOANA_SESSION_MAX_AGE_SEC", "604800"))
+	maxAgeSec, _ := strconv.Atoi(getenv("MOANA_SESSION_MAX_AGE_SEC", strconv.Itoa(defaultSessionMaxAgeSec)))
 	if maxAgeSec <= 0 {
-		maxAgeSec = 604800
+		maxAgeSec = defaultSessionMaxAgeSec
 	}
-	timeoutSec, _ := strconv.Atoi(getenv("MOANA_REQUEST_TIMEOUT_SEC", "60"))
+	timeoutSec, _ := strconv.Atoi(getenv("MOANA_REQUEST_TIMEOUT_SEC", strconv.Itoa(defaultRequestTimeoutSec)))
 	if timeoutSec <= 0 {
-		timeoutSec = 60
+		timeoutSec = defaultRequestTimeoutSec
 	}
 
 	repoURL := getenv("MOANA_REPO_URL", "https://github.com/SaveEnergy/moana")
