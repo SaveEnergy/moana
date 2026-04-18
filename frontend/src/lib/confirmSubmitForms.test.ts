@@ -1,6 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { attachConfirmBeforeSubmit } from './confirmSubmitForms'
+import { attachConfirmBeforeSubmit, readDataConfirmMessage } from './confirmSubmitForms'
+
+function elWithAttr(value: string | null): Element {
+  return { getAttribute: () => value } as unknown as Element
+}
+
+describe('readDataConfirmMessage', () => {
+  it('returns null when attribute is missing', () => {
+    expect(readDataConfirmMessage(elWithAttr(null))).toBeNull()
+  })
+
+  it('returns null when attribute is blank or whitespace-only', () => {
+    expect(readDataConfirmMessage(elWithAttr(''))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('   \t '))).toBeNull()
+  })
+
+  it('returns trimmed text', () => {
+    expect(readDataConfirmMessage(elWithAttr('  Remove this?  '))).toBe('Remove this?')
+  })
+})
 
 describe('attachConfirmBeforeSubmit', () => {
   afterEach(() => {
