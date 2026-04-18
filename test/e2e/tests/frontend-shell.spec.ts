@@ -36,6 +36,13 @@ test('sidebar main nav links reach primary routes', async ({ page }) => {
   await expect(page).toHaveURL(/\/$/)
 })
 
+test('sidebar FAB links to new transaction', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Add transaction' }).click()
+  await expect(page).toHaveURL(/\/transactions/)
+  await expect(page.getByRole('heading', { name: 'New entry' })).toBeVisible()
+})
+
 test('global search control is in shell', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('search')).toBeVisible()
