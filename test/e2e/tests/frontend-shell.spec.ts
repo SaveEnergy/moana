@@ -15,6 +15,14 @@ test('dashboard loads design tokens and overview', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
 })
 
+test('dashboard period links set period query', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: '12 months' }).click()
+  await expect(page).toHaveURL(/[?&]period=12m(?:&|$)/)
+  await page.getByRole('link', { name: '30 days' }).click()
+  await expect(page).toHaveURL(/[?&]period=30d(?:&|$)/)
+})
+
 test('global search control is in shell', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('search')).toBeVisible()
