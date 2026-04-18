@@ -18,16 +18,15 @@ func shellYear() int {
 
 // layoutShell builds standard authenticated shell metadata (title, nav highlight, footer year).
 func layoutShell(title, navKey string, u *store.User) LayoutData {
-	return LayoutData{
-		Title:  title,
-		User:   u,
-		Year:   shellYear(),
-		Active: navKey,
-	}
+	return layoutData(title, navKey, "", u)
 }
 
 // layoutShellMain is like layoutShell but sets MainClass (e.g. settings-shell on the main column).
 func layoutShellMain(title, navKey, mainClass string, u *store.User) LayoutData {
+	return layoutData(title, navKey, mainClass, u)
+}
+
+func layoutData(title, navKey, mainClass string, u *store.User) LayoutData {
 	return LayoutData{
 		Title:     title,
 		User:      u,
