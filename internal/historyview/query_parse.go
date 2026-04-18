@@ -25,8 +25,8 @@ func ParseHistoryURL(u *url.URL) HistoryURLParams {
 // parseHistoryURLValues normalizes filters from a url.Values produced by URL.Query.
 // BuildPage passes the same Values to this and to buildNavFromValues (one query parse per request).
 func parseHistoryURLValues(v url.Values) HistoryURLParams {
-	q := strings.TrimSpace(v.Get("q"))
-	kindParam := strings.TrimSpace(v.Get("kind"))
+	q := strings.TrimSpace(v.Get(QuerySearch))
+	kindParam := strings.TrimSpace(v.Get(QueryKind))
 	kind := "all"
 	filterKind := ""
 	switch kindParam {
@@ -41,13 +41,13 @@ func parseHistoryURLValues(v url.Values) HistoryURLParams {
 		filterKind = ""
 	}
 	sortParam := strings.TrimSpace(v.Get("sort"))
-	oldestFirst := sortParam == "oldest"
+	oldestFirst := sortParam == SortOldestValue
 	sortLabel := "newest"
 	if oldestFirst {
 		sortLabel = "oldest"
 	}
-	from := strings.TrimSpace(v.Get("from"))
-	to := strings.TrimSpace(v.Get("to"))
+	from := strings.TrimSpace(v.Get(QueryFrom))
+	to := strings.TrimSpace(v.Get(QueryTo))
 	filterActive := from != "" && to != ""
 	return HistoryURLParams{
 		kind:         kind,
@@ -63,7 +63,7 @@ func parseHistoryURLValues(v url.Values) HistoryURLParams {
 
 func historyReturnOrDefault(requestURI string) string {
 	if requestURI == "" {
-		return "/history"
+		return RoutePath
 	}
 	return requestURI
 }

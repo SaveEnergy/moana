@@ -18,25 +18,25 @@ func buildNavFromValues(q url.Values) Nav {
 		mut(v)
 		enc := v.Encode()
 		if enc == "" {
-			return "/history"
+			return RoutePath
 		}
-		return "/history?" + enc
+		return RoutePath + "?" + enc
 	}
 	return Nav{
 		LinkAll: with(func(v url.Values) {
-			v.Set("kind", "all")
+			v.Set(QueryKind, "all")
 		}),
 		LinkIncome: with(func(v url.Values) {
-			v.Set("kind", "income")
+			v.Set(QueryKind, "income")
 		}),
 		LinkExpense: with(func(v url.Values) {
-			v.Set("kind", "expense")
+			v.Set(QueryKind, "expense")
 		}),
 		SortNewest: with(func(v url.Values) {
-			v.Del("sort")
+			v.Del(QuerySort)
 		}),
 		SortOldest: with(func(v url.Values) {
-			v.Set("sort", "oldest")
+			v.Set(QuerySort, SortOldestValue)
 		}),
 	}
 }

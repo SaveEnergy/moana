@@ -8,7 +8,7 @@ import (
 
 func TestBuildNav(t *testing.T) {
 	t.Parallel()
-	u, _ := url.Parse("/history?kind=expense&q=a")
+	u, _ := url.Parse(RoutePath + "?kind=expense&q=a")
 	nav := BuildNav(u)
 	if nav.LinkAll == "" || nav.SortOldest == "" {
 		t.Fatal(nav)
@@ -17,7 +17,7 @@ func TestBuildNav(t *testing.T) {
 
 func TestBuildNav_matchesBuildNavFromValues(t *testing.T) {
 	t.Parallel()
-	raw := "/history?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest"
+	raw := RoutePath + "?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest"
 	u, err := url.Parse(raw)
 	if err != nil {
 		t.Fatal(err)
@@ -29,7 +29,7 @@ func TestBuildNav_matchesBuildNavFromValues(t *testing.T) {
 
 func TestBuildNav_preservesSearchAndDateFilters(t *testing.T) {
 	t.Parallel()
-	raw := "/history?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest"
+	raw := RoutePath + "?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest"
 	u, err := url.Parse(raw)
 	if err != nil {
 		t.Fatal(err)
@@ -41,33 +41,33 @@ func TestBuildNav_preservesSearchAndDateFilters(t *testing.T) {
 			t.Fatalf("parse %q: %v", link, err)
 		}
 		q := parsed.Query()
-		if got := q.Get("q"); got != "coffee" {
+		if got := q.Get(QuerySearch); got != "coffee" {
 			t.Fatalf("q: got %q want coffee (link=%s)", got, link)
 		}
-		if got := q.Get("from"); got != "2026-01-01" {
+		if got := q.Get(QueryFrom); got != "2026-01-01" {
 			t.Fatalf("from: got %q (link=%s)", got, link)
 		}
-		if got := q.Get("to"); got != "2026-01-31" {
+		if got := q.Get(QueryTo); got != "2026-01-31" {
 			t.Fatalf("to: got %q (link=%s)", got, link)
 		}
 	}
 	all, _ := url.Parse(nav.LinkAll)
-	if all.Query().Get("kind") != "all" {
+	if all.Query().Get(QueryKind) != "all" {
 		t.Fatalf("LinkAll kind: %s", nav.LinkAll)
 	}
 	inc, _ := url.Parse(nav.LinkIncome)
-	if inc.Query().Get("kind") != "income" {
+	if inc.Query().Get(QueryKind) != "income" {
 		t.Fatalf("LinkIncome kind: %s", nav.LinkIncome)
 	}
 	exp, _ := url.Parse(nav.LinkExpense)
-	if exp.Query().Get("kind") != "expense" {
+	if exp.Query().Get(QueryKind) != "expense" {
 		t.Fatalf("LinkExpense kind: %s", nav.LinkExpense)
 	}
 }
 
 func TestBuildNav_sortNewestDropsSortParamKeepsSearch(t *testing.T) {
 	t.Parallel()
-	u, err := url.Parse("/history?sort=oldest&q=rent")
+	u, err := url.Parse(RoutePath + "?sort=oldest&q=rent")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,11 +77,11 @@ func TestBuildNav_sortNewestDropsSortParamKeepsSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 	q := parsed.Query()
-	if q.Get("sort") != "" {
-		t.Fatalf("expected sort removed, got %q", q.Get("sort"))
+	if q.Get(QuerySort) != "" {
+		t.Fatalf("expected sort removed, got %q", q.Get(QuerySort))
 	}
-	if q.Get("q") != "rent" {
-		t.Fatalf("expected q preserved, got %q", q.Get("q"))
+	if q.Get(QuerySearch) != "rent" {
+		t.Fatalf("expected q preserved, got %q", q.Get(QuerySearch))
 	}
 }
 
@@ -97,7 +97,7 @@ func TestFormatDayLabel_today(t *testing.T) {
 }
 
 func BenchmarkBuildNav(b *testing.B) {
-	u, err := url.Parse("/history?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest")
+	u, err := url.Parse(RoutePath + "?kind=expense&q=coffee&from=2026-01-01&to=2026-01-31&sort=oldest")
 	if err != nil {
 		b.Fatal(err)
 	}
