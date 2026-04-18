@@ -19,6 +19,13 @@ test('history search submits q on GET', async ({ page }) => {
   await expect(page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(q)}`))
 })
 
+test('history sort select submits sort on change', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/history')
+  await page.locator('#history-sort').selectOption('oldest')
+  await expect(page).toHaveURL(/[?&]sort=oldest(?:&|$)/)
+})
+
 test('history kind tabs preserve query and switch kind', async ({ page }) => {
   await signInAsTestUser(page)
   const q = 'e2e-kind-nav'

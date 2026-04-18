@@ -14,11 +14,15 @@ vi.mock('./lib/shellSidebar', () => ({ initShellSidebar: stubs.initShellSidebar 
 vi.mock('./lib/settingsMemberDialog', () => ({ initSettingsMemberDialog: stubs.initSettingsMemberDialog }))
 vi.mock('./lib/categoryModal', () => ({ initCategoryModal: stubs.initCategoryModal }))
 
-import { bootApp } from './boot'
+import { BOOT_APP_INITIALIZERS, bootApp } from './boot'
 
 describe('bootApp', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it('BOOT_APP_INITIALIZERS lists one entry per boot step', () => {
+    expect(BOOT_APP_INITIALIZERS).toHaveLength(5)
   })
 
   it('invokes each initializer once', () => {

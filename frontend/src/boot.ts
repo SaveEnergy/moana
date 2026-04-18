@@ -5,14 +5,24 @@ import { initSettingsMemberDialog } from './lib/settingsMemberDialog'
 import { initCategoryModal } from './lib/categoryModal'
 
 /**
+ * Ordered client initializers (single source of truth for `bootApp` order).
+ * Each no-ops when its DOM is missing. Documented in `design.md`; see `boot.test.ts`.
+ */
+export const BOOT_APP_INITIALIZERS: ReadonlyArray<() => void> = [
+  setBrowserTimezoneCookie,
+  applyLocalTimeElements,
+  initShellSidebar,
+  initSettingsMemberDialog,
+  initCategoryModal,
+]
+
+/**
  * Wire all client behaviors; each initializer no-ops when its DOM is missing.
  * Order: timezone cookie → local time labels → shell (listeners) → settings dialog → category modal.
  * Cookie and time text run before interactive modules attach handlers.
  */
 export function bootApp(): void {
-  setBrowserTimezoneCookie()
-  applyLocalTimeElements()
-  initShellSidebar()
-  initSettingsMemberDialog()
-  initCategoryModal()
+  for (const init of BOOT_APP_INITIALIZERS) {
+    init()
+  }
 }
