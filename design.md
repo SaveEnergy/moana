@@ -199,8 +199,8 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 ## 14. Tests
 
 - **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
-- **Unit:** `npm run test:unit` — Vitest (`vitest.config.ts`), tests for `frontend/src/lib` (local time formatting, **timezone cookie string** shape).  
-- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`).  
+- **Unit:** `npm run test:unit` — Vitest, config **merged into `frontend/vite.config.ts`** (`test` block). Covers `frontend/src/lib/*`, **`bootApp()` wiring** (`boot.test.ts`), timezone cookie string, local time.  
+- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies).  
 - **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.
 
 ## 15. Risk snapshot
