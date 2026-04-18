@@ -22,37 +22,13 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 	historyReturn := historyReturnOrDefault(requestURI)
 
 	if partialDateFilter(p.from, p.to) {
-		return PageData{
-			Error:            "Invalid date range.",
-			Kind:             p.kind,
-			Search:           p.search,
-			Sort:             p.sortLabel,
-			FilterFrom:       p.from,
-			FilterTo:         p.to,
-			FilterActive:     true,
-			Nav:              BuildNav(u),
-			Groups:           nil,
-			HistoryReturnURL: historyReturn,
-			TruncationLimit:  defaultHistoryFetchLimit,
-		}, nil
+		return invalidDateRangePage(p, historyReturn, u), nil
 	}
 
 	if p.filterActive {
 		fu, tu, err := timeutil.DayRangeUTCFromLocalDates(loc, p.from, p.to)
 		if err != nil {
-			return PageData{
-				Error:            "Invalid date range.",
-				Kind:             p.kind,
-				Search:           p.search,
-				Sort:             p.sortLabel,
-				FilterFrom:       p.from,
-				FilterTo:         p.to,
-				FilterActive:     true,
-				Nav:              BuildNav(u),
-				Groups:           nil,
-				HistoryReturnURL: historyReturn,
-				TruncationLimit:  defaultHistoryFetchLimit,
-			}, nil
+			return invalidDateRangePage(p, historyReturn, u), nil
 		}
 		f.FromUTC = &fu
 		f.ToUTC = &tu
@@ -80,6 +56,23 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 		Truncated:        truncated,
 		TruncationLimit:  defaultHistoryFetchLimit,
 	}, nil
+}
+
+// invalidDateRangePage builds the standard /history payload when from/to cannot be applied.
+func invalidDateRangePage(p HistoryURLParams, historyReturn string, u *url.URL) PageData {
+	return PageData{
+		Error:            "Invalid date range.",
+		Kind:             p.kind,
+		Search:           p.search,
+		Sort:             p.sortLabel,
+		FilterFrom:       p.from,
+		FilterTo:         p.to,
+		FilterActive:     true,
+		Nav:              BuildNav(u),
+		Groups:           nil,
+		HistoryReturnURL: historyReturn,
+		TruncationLimit:  defaultHistoryFetchLimit,
+	}
 }
 
 // partialDateFilter is true when exactly one of from/to is set (both are required for filtering).

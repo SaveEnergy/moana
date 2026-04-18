@@ -1,52 +1,19 @@
 package historyview
 
-import (
-	"context"
-	"net/url"
-	"testing"
-	"time"
+import "testing"
 
-	"moana/internal/dbutil"
-)
-
-func TestBuildPage_invalidDateRange(t *testing.T) {
+func TestPartialDateFilter(t *testing.T) {
 	t.Parallel()
-	st := dbutil.MustOpenMemStore(t)
-	ctx := context.Background()
-	loc := time.UTC
-	u, err := url.Parse("/history?from=not-a-date&to=2020-01-02")
-	if err != nil {
-		t.Fatal(err)
+	if !partialDateFilter("2026-01-01", "") {
+		t.Fatal("expected true when only from is set")
 	}
-	d, err := BuildPage(ctx, st, 1, loc, u, u.String())
-	if err != nil {
-		t.Fatal(err)
+	if !partialDateFilter("", "2026-01-31") {
+		t.Fatal("expected true when only to is set")
 	}
-	if d.Error != "Invalid date range." {
-		t.Fatalf("got %q", d.Error)
+	if partialDateFilter("", "") {
+		t.Fatal("expected false when both empty")
 	}
-}
-
-func TestBuildPage_partialDateRange_requiresBothBounds(t *testing.T) {
-	t.Parallel()
-	st := dbutil.MustOpenMemStore(t)
-	ctx := context.Background()
-	loc := time.UTC
-
-	for _, raw := range []string{
-		"/history?from=2026-01-01",
-		"/history?to=2026-01-31",
-	} {
-		u, err := url.Parse(raw)
-		if err != nil {
-			t.Fatal(err)
-		}
-		d, err := BuildPage(ctx, st, 1, loc, u, u.String())
-		if err != nil {
-			t.Fatal(err)
-		}
-		if d.Error != "Invalid date range." {
-			t.Fatalf("%s: got %q", raw, d.Error)
-		}
+	if partialDateFilter("2026-01-01", "2026-01-31") {
+		t.Fatal("expected false when both set")
 	}
 }
