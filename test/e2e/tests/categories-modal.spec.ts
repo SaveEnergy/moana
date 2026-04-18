@@ -2,6 +2,10 @@ import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
 
+function uniqueCategoryName(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
 test('category modal opens and closes', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/categories')
@@ -52,4 +56,49 @@ test('mobile: first Escape closes modal with sidebar left open', async ({ page }
   await page.keyboard.press('Escape')
   await expect(page.locator('#cat-modal')).toBeHidden()
   await expect(shell).toHaveClass(/sidebar-open/)
+})
+
+test('category delete confirm dismiss keeps category', async ({ page }) => {
+  await signInAsTestUser(page)
+  const name = uniqueCategoryName('e2e-keep')
+  await page.goto('/categories')
+  await page.locator('#cat-modal-open-create').click()
+  await page.locator('#cat-modal-name').fill(name)
+  await page.locator('#cat-modal-submit').click()
+  await expect(page.getByText(name)).toBeVisible()
+
+  page.once('dialog', async (dialog) => {
+    expect(dialog.type()).toBe('confirm')
+    expect(dialog.message()).toMatch(/remove this category/i)
+    await dialog.dismiss()
+  })
+  await page
+    .locator('.cat-list-row')
+    .filter({ hasText: name })
+    .locator('form.cat-delete')
+    .getByRole('button', { name: 'Remove' })
+    .click()
+  await expect(page.getByText(name)).toBeVisible()
+})
+
+test('category delete confirm accept removes category', async ({ page }) => {
+  await signInAsTestUser(page)
+  const name = uniqueCategoryName('e2e-gone')
+  await page.goto('/categories')
+  await page.locator('#cat-modal-open-create').click()
+  await page.locator('#cat-modal-name').fill(name)
+  await page.locator('#cat-modal-submit').click()
+  await expect(page.getByText(name)).toBeVisible()
+
+  page.once('dialog', async (dialog) => {
+    expect(dialog.type()).toBe('confirm')
+    await dialog.accept()
+  })
+  await page
+    .locator('.cat-list-row')
+    .filter({ hasText: name })
+    .locator('form.cat-delete')
+    .getByRole('button', { name: 'Remove' })
+    .click()
+  await expect(page.getByText(name)).not.toBeVisible()
 })
