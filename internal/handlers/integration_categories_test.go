@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"moana/internal/handlers"
 	"moana/internal/testutil"
 )
 
@@ -28,7 +29,7 @@ func TestCategoryDelete_removesExisting(t *testing.T) {
 	}
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "catdelok@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories/delete", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesDeletePath, url.Values{
 		"id": {strconv.FormatInt(id, 10)},
 	})
 	if err != nil {
@@ -52,7 +53,7 @@ func TestCategoryDelete_notFoundShowsMessage(t *testing.T) {
 	testutil.MustCreateUser(t, app, "catdel@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "catdel@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories/delete", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesDeletePath, url.Values{
 		"id": {"99999999999999"},
 	})
 	if err != nil {
@@ -76,7 +77,7 @@ func TestCategoryCreate_successShowsOnPage(t *testing.T) {
 	testutil.MustCreateUser(t, app, "cat-ok@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "cat-ok@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesPath, url.Values{
 		"name":  {"FreshCategory"},
 		"icon":  {""},
 		"color": {""},
@@ -105,7 +106,7 @@ func TestCategoryCreate_emptyNameShowsError(t *testing.T) {
 	testutil.MustCreateUser(t, app, "cat-empty@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "cat-empty@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesPath, url.Values{
 		"name":  {"   "},
 		"icon":  {""},
 		"color": {""},
@@ -136,7 +137,7 @@ func TestCategoryCreate_duplicateNameShowsMessage(t *testing.T) {
 		"icon":  {""},
 		"color": {""},
 	}
-	resp, err := client.PostForm(srv.URL+"/categories", form)
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesPath, form)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +147,7 @@ func TestCategoryCreate_duplicateNameShowsMessage(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("first create final status %d want 200", resp.StatusCode)
 	}
-	resp2, err := client.PostForm(srv.URL+"/categories", form)
+	resp2, err := client.PostForm(srv.URL+handlers.CategoriesPath, form)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +178,7 @@ func TestCategoryUpdate_renamesCategory(t *testing.T) {
 	}
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "catupd@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories/update", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesUpdatePath, url.Values{
 		"id":    {strconv.FormatInt(id, 10)},
 		"name":  {"AfterName"},
 		"icon":  {""},
@@ -216,7 +217,7 @@ func TestCategoryUpdate_emptyNameShowsError(t *testing.T) {
 	}
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "cat-upd-empty@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories/update", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesUpdatePath, url.Values{
 		"id":    {strconv.FormatInt(id, 10)},
 		"name":  {"  "},
 		"icon":  {""},
@@ -243,7 +244,7 @@ func TestCategoryUpdate_invalidIDShowsMessage(t *testing.T) {
 	testutil.MustCreateUser(t, app, "catbadid@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "catbadid@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/categories/update", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.CategoriesUpdatePath, url.Values{
 		"id":    {"0"},
 		"name":  {"X"},
 		"icon":  {""},

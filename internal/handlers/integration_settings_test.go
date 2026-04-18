@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"moana/internal/handlers"
 	"moana/internal/passwordtest"
 	"moana/internal/testutil"
 )
@@ -21,7 +22,7 @@ func TestSettingsProfileUpdate_firstNameShowsSuccess(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "profile@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/profile", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
 		"first_name": {"Pat"},
 		"last_name":  {""},
 	})
@@ -50,7 +51,7 @@ func TestSettingsHouseholdUpdate_nameShowsSuccess(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "hhname@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdPath, url.Values{
 		"household_name": {"The Casa"},
 	})
 	if err != nil {
@@ -75,7 +76,7 @@ func TestSettingsPage_showsErrQueryMessage(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "settings-err@integration.test", "pw")
 	msg := "Something went wrong."
-	resp, err := client.Get(srv.URL + "/settings?err=" + url.QueryEscape(msg))
+	resp, err := client.Get(srv.URL + handlers.SettingsPath + "?err=" + url.QueryEscape(msg))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +100,7 @@ func TestSettingsHouseholdUpdate_emptyNameShowsError(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "hh-empty@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdPath, url.Values{
 		"household_name": {"  "},
 	})
 	if err != nil {
@@ -134,7 +135,7 @@ func TestSettingsHouseholdUpdate_memberCannotEditName(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "hh-member@integration.test", "mem-pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdPath, url.Values{
 		"household_name": {"Renamed by member"},
 	})
 	if err != nil {
@@ -160,7 +161,7 @@ func TestSettingsHouseholdMemberAdd_showsSuccess(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "owner-mem@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"newmember@integration.test"},
 		"password": {"member-initial-secret-99"},
 	})
@@ -186,7 +187,7 @@ func TestSettingsHouseholdMemberAdd_trimsEmailForNewMemberLogin(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "owner-trim-mem@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"  paddedmember@integration.test  "},
 		"password": {"member-initial-secret-99"},
 	})
@@ -225,7 +226,7 @@ func TestSettingsHouseholdMemberAdd_memberCannotAdd(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "plain-member@integration.test", "mem-pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"new@integration.test"},
 		"password": {"secret-initial-1"},
 	})
@@ -251,7 +252,7 @@ func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "dup-mem@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"dupmember@integration.test"},
 		"password": {"member-initial-secret-99"},
 	})
@@ -263,7 +264,7 @@ func TestSettingsHouseholdMemberAdd_duplicateEmailShowsError(t *testing.T) {
 		t.Fatalf("first add status %d", resp.StatusCode)
 	}
 
-	resp2, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	resp2, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"dupmember@integration.test"},
 		"password": {"member-initial-secret-99"},
 	})
@@ -290,7 +291,7 @@ func TestSettingsHouseholdMemberRemove_ownerRemovesMember(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "rem-owner@integration.test", "pw")
 
-	addResp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	addResp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"rem-member@integration.test"},
 		"password": {"rem-member-secret-9"},
 	})
@@ -308,7 +309,7 @@ func TestSettingsHouseholdMemberRemove_ownerRemovesMember(t *testing.T) {
 		t.Fatalf("member user: %+v err=%v", member, err)
 	}
 
-	rmResp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+	rmResp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
 		"user_id": {strconv.FormatInt(member.ID, 10)},
 	})
 	if err != nil {
@@ -333,7 +334,7 @@ func TestSettingsHouseholdMemberRemove_invalidUserIDShowsError(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "rem-invalid@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
 		"user_id": {"not-a-number"},
 	})
 	if err != nil {
@@ -369,7 +370,7 @@ func TestSettingsHouseholdMemberRemove_memberCannotRemoveOwner(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "rem-m@integration.test", "mem-pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
 		"user_id": {strconv.FormatInt(owner.ID, 10)},
 	})
 	if err != nil {
@@ -394,7 +395,7 @@ func TestSettingsHouseholdMemberRemove_ownerCannotLeaveWithOtherMembers(t *testi
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "leave-block@integration.test", "pw")
 
-	addResp, err := client.PostForm(srv.URL+"/settings/household/members", url.Values{
+	addResp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersPath, url.Values{
 		"email":    {"leave-block-mem@integration.test"},
 		"password": {"member-secret-1"},
 	})
@@ -412,7 +413,7 @@ func TestSettingsHouseholdMemberRemove_ownerCannotLeaveWithOtherMembers(t *testi
 		t.Fatalf("owner: %+v err=%v", owner, err)
 	}
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
 		"user_id": {strconv.FormatInt(owner.ID, 10)},
 	})
 	if err != nil {
@@ -442,7 +443,7 @@ func TestSettingsHouseholdMemberRemove_soleOwnerLeavesHousehold(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "leave-solo@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/household/members/remove", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsHouseholdMembersRemovePath, url.Values{
 		"user_id": {strconv.FormatInt(u.ID, 10)},
 	})
 	if err != nil {
@@ -467,7 +468,7 @@ func TestSettingsProfileUpdate_passwordChangeShowsSuccess(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "profile-pw@integration.test", "original-secret-1")
 
-	resp, err := client.PostForm(srv.URL+"/settings/profile", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
 		"first_name":           {"Pat"},
 		"last_name":            {""},
 		"current_password":     {"original-secret-1"},
@@ -502,7 +503,7 @@ func TestSettingsProfileUpdate_wrongCurrentPasswordShowsError(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "profile-badcur@integration.test", "good-secret-1")
 
-	resp, err := client.PostForm(srv.URL+"/settings/profile", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
 		"first_name":           {""},
 		"last_name":            {""},
 		"current_password":     {"wrong-password"},
@@ -531,7 +532,7 @@ func TestSettingsProfileUpdate_newPasswordWithoutCurrentShowsError(t *testing.T)
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "profile-nopw@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/settings/profile", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
 		"first_name":           {""},
 		"last_name":            {""},
 		"new_password":         {"new-secret-very-long-2"},
@@ -559,7 +560,7 @@ func TestSettingsProfileUpdate_newPasswordMismatchShowsError(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "profile-mismatch@integration.test", "good-secret-1")
 
-	resp, err := client.PostForm(srv.URL+"/settings/profile", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.SettingsProfilePath, url.Values{
 		"first_name":           {""},
 		"last_name":            {""},
 		"current_password":     {"good-secret-1"},

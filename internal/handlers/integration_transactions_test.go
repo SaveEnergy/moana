@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"moana/internal/handlers"
 	"moana/internal/store"
 	"moana/internal/testutil"
 )
@@ -22,7 +23,7 @@ func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "badamount@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"not-a-number"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -52,7 +53,7 @@ func TestTransactionCreate_redirectsToHistory(t *testing.T) {
 	noFollow.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
-	resp, err := noFollow.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := noFollow.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"7.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -66,8 +67,8 @@ func TestTransactionCreate_redirectsToHistory(t *testing.T) {
 		t.Fatalf("status %d want %d", resp.StatusCode, http.StatusSeeOther)
 	}
 	loc := resp.Header.Get("Location")
-	if !strings.Contains(loc, "/history") {
-		t.Fatalf("Location %q want redirect target /history", loc)
+	if !strings.Contains(loc, handlers.HistoryPath) {
+		t.Fatalf("Location %q want redirect target %s", loc, handlers.HistoryPath)
 	}
 }
 
@@ -79,7 +80,7 @@ func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "zero-amt@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"0.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -106,7 +107,7 @@ func TestTransactionCreate_emptyDateShowsMessage(t *testing.T) {
 	testutil.MustCreateUser(t, app, "nodate@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "nodate@moana.test", "pw")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"10.00"},
 		"kind":        {"expense"},
 		"occurred_on": {""},
@@ -134,7 +135,7 @@ func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "tx@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"25.50"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -147,7 +148,7 @@ func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusSeeOther {
 		t.Fatalf("post status %d", resp.StatusCode)
 	}
-	resp2, err := client.Get(srv.URL + "/history")
+	resp2, err := client.Get(srv.URL + handlers.HistoryPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,7 +177,7 @@ func TestEditTransaction(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "edit@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"10.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -192,7 +193,7 @@ func TestEditTransaction(t *testing.T) {
 		t.Fatalf("list: %v", err)
 	}
 	id := txs[0].ID
-	editURL := fmt.Sprintf("%s/transactions/%d/edit?next=/history", srv.URL, id)
+	editURL := fmt.Sprintf("%s%s/%d/edit?next=%s", srv.URL, handlers.TransactionsPath, id, handlers.HistoryPath)
 	resp, err = client.Get(editURL)
 	if err != nil {
 		t.Fatal(err)
@@ -206,8 +207,8 @@ func TestEditTransaction(t *testing.T) {
 	if !strings.Contains(b, "Edit entry") || !strings.Contains(b, "10.00") {
 		t.Fatal("expected edit form")
 	}
-	resp2, err := client.PostForm(fmt.Sprintf("%s/transactions/%d", srv.URL, id), url.Values{
-		"next":        {"/history"},
+	resp2, err := client.PostForm(fmt.Sprintf("%s%s/%d", srv.URL, handlers.TransactionsPath, id), url.Values{
+		"next":        {handlers.HistoryPath},
 		"amount":      {"20.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -246,7 +247,7 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "next-safe@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"5.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -262,15 +263,16 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.Get(fmt.Sprintf("%s/transactions/%d/edit?next=/categories", srv.URL, id))
+	resp2, err := client.Get(fmt.Sprintf("%s%s/%d/edit?next=%s", srv.URL, handlers.TransactionsPath, id, handlers.CategoriesPath))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer resp2.Body.Close()
 	body, _ := io.ReadAll(resp2.Body)
 	s := string(body)
-	if !strings.Contains(s, `name="next"`) || !strings.Contains(s, `value="/categories"`) {
-		t.Fatalf("expected hidden next=/categories, got: %s", s[:min(600, len(s))])
+	wantNext := `value="` + handlers.CategoriesPath + `"`
+	if !strings.Contains(s, `name="next"`) || !strings.Contains(s, wantNext) {
+		t.Fatalf("expected hidden next=%s, got: %s", handlers.CategoriesPath, s[:min(600, len(s))])
 	}
 }
 
@@ -287,7 +289,7 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "next-unsafe@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"5.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -303,7 +305,7 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.Get(fmt.Sprintf("%s/transactions/%d/edit?next=//evil.com/foo", srv.URL, id))
+	resp2, err := client.Get(fmt.Sprintf("%s%s/%d/edit?next=//evil.com/foo", srv.URL, handlers.TransactionsPath, id))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -318,8 +320,9 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 		t.Fatal("missing hidden next field")
 	}
 	snippet := s[idx:min(idx+120, len(s))]
-	if !strings.Contains(snippet, `value="/history"`) {
-		t.Fatalf("expected sanitized default /history in hidden next, snippet: %q", snippet)
+	wantNext := `value="` + handlers.HistoryPath + `"`
+	if !strings.Contains(snippet, wantNext) {
+		t.Fatalf("expected sanitized default %s in hidden next, snippet: %q", handlers.HistoryPath, snippet)
 	}
 }
 
@@ -331,7 +334,7 @@ func TestTransactionCreate_invalidCategoryIDShowsMessage(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "badcat@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"10.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -359,7 +362,7 @@ func TestTransactionEditNotFound(t *testing.T) {
 	testutil.MustCreateUser(t, app, "nf@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "nf@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/transactions/999999999/edit")
+	resp, err := client.Get(srv.URL + handlers.TransactionsPath + "/999999999/edit")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -376,7 +379,7 @@ func TestTransactionEdit_invalidPathIDReturns404(t *testing.T) {
 	testutil.MustCreateUser(t, app, "bad-id-get@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "bad-id-get@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/transactions/not-a-number/edit")
+	resp, err := client.Get(srv.URL + handlers.TransactionsPath + "/not-a-number/edit")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -394,8 +397,8 @@ func TestTransactionUpdate_invalidPathIDReturns404(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "bad-id-post@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions/not-a-number", url.Values{
-		"next":        {"/history"},
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath+"/not-a-number", url.Values{
+		"next":        {handlers.HistoryPath},
 		"amount":      {"1.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -423,7 +426,7 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "tx-upd-bad@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"10.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -439,8 +442,8 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	}
 	id := txs[0].ID
 
-	resp2, err := client.PostForm(fmt.Sprintf("%s/transactions/%d", srv.URL, id), url.Values{
-		"next":        {"/history"},
+	resp2, err := client.PostForm(fmt.Sprintf("%s%s/%d", srv.URL, handlers.TransactionsPath, id), url.Values{
+		"next":        {handlers.HistoryPath},
 		"amount":      {"not-a-number"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
