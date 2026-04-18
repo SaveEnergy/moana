@@ -40,7 +40,7 @@ func parseHistoryURLValues(v url.Values) HistoryURLParams {
 		kind = "all"
 		filterKind = ""
 	}
-	sortParam := strings.TrimSpace(v.Get("sort"))
+	sortParam := strings.TrimSpace(v.Get(QuerySort))
 	oldestFirst := sortParam == SortOldestValue
 	sortLabel := "newest"
 	if oldestFirst {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"moana/internal/historyview"
 	"moana/internal/safepath"
 )
 
@@ -31,6 +32,14 @@ func TestHistoryPath_matchesSafepathDefault(t *testing.T) {
 	if HistoryPath != safepath.Default {
 		t.Fatalf("HistoryPath=%q must equal safepath.Default (%q) so ledger redirects match safe internal paths",
 			HistoryPath, safepath.Default)
+	}
+}
+
+func TestHistoryPath_matchesHistoryviewRoutePath(t *testing.T) {
+	t.Parallel()
+	if HistoryPath != historyview.RoutePath {
+		t.Fatalf("HistoryPath=%q must equal historyview.RoutePath (%q) so nav and redirects share one path",
+			HistoryPath, historyview.RoutePath)
 	}
 }
 
