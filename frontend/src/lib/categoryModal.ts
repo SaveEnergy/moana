@@ -1,6 +1,7 @@
 import { CATEGORY_MODAL_DEFAULT_PREVIEW_BG, sanitizeCategoryCustomHex } from './categoryColor'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
+import { setRadioCheckedByValue } from './radioMap'
 
 export function initCategoryModal(): void {
   const dialog = document.getElementById('cat-modal') as HTMLDialogElement | null
@@ -33,7 +34,9 @@ export function initCategoryModal(): void {
 
   function radiosByValue(name: 'color' | 'icon'): Map<string, HTMLInputElement> {
     const m = new Map<string, HTMLInputElement>()
-    for (const r of catForm.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)) {
+    for (const r of catForm.querySelectorAll<HTMLInputElement>(
+      `input[type="radio"][name="${name}"]`,
+    )) {
       m.set(r.value, r)
     }
     return m
@@ -102,8 +105,8 @@ export function initCategoryModal(): void {
     catTitle.textContent = 'New category'
     catSubmit.textContent = 'Create category'
     catForm.reset()
-    colorRadioByValue.get('')!.checked = true
-    iconRadioByValue.get('')!.checked = true
+    setRadioCheckedByValue(colorRadioByValue, '', '')
+    setRadioCheckedByValue(iconRadioByValue, '', '')
     const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
     if (nat) nat.value = '#818cf8'
     syncCatModalPreview()
@@ -125,26 +128,16 @@ export function initCategoryModal(): void {
     const isCustom = btn.dataset.custom === '1'
     const customHex = (btn.dataset.customHex ?? '#818cf8').trim()
 
-    if (!rawColor) {
-      colorRadioByValue.get('')!.checked = true
-    } else if (isCustom) {
-      colorRadioByValue.get('custom')!.checked = true
+    if (isCustom) {
+      setRadioCheckedByValue(colorRadioByValue, 'custom', '')
       const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
       if (nat) nat.value = sanitizeCategoryCustomHex(customHex)
-    } else if (colorRadioByValue.has(rawColor)) {
-      colorRadioByValue.get(rawColor)!.checked = true
     } else {
-      colorRadioByValue.get('')!.checked = true
+      setRadioCheckedByValue(colorRadioByValue, rawColor, '')
     }
 
     const iconVal = (btn.dataset.icon ?? '').trim()
-    if (!iconVal) {
-      iconRadioByValue.get('')!.checked = true
-    } else if (iconRadioByValue.has(iconVal)) {
-      iconRadioByValue.get(iconVal)!.checked = true
-    } else {
-      iconRadioByValue.get('')!.checked = true
-    }
+    setRadioCheckedByValue(iconRadioByValue, iconVal, '')
 
     syncCatModalPreview()
     catName.focus()
