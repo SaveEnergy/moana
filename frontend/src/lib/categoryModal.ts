@@ -69,23 +69,31 @@ export function initCategoryModal(): void {
     }
   }
 
-  function wireColorNative() {
-    catForm.querySelectorAll('.cat-color-native').forEach((pc) => {
-      pc.addEventListener('input', () => {
-        const wrap = (pc as HTMLElement).closest('.cat-color-swatch--custom')
-        const r = wrap?.querySelector<HTMLInputElement>('input[type="radio"][value="custom"]')
-        if (r) {
-          r.checked = true
-          syncCatModalPreview()
-        }
-      })
+  function wireCategoryFormPreview() {
+    catForm.addEventListener('input', (e) => {
+      const t = e.target
+      if (!(t instanceof Element) || !t.classList.contains('cat-color-native')) {
+        return
+      }
+      const wrap = t.closest('.cat-color-swatch--custom')
+      const r = wrap?.querySelector<HTMLInputElement>('input[type="radio"][value="custom"]')
+      if (r) {
+        r.checked = true
+        syncCatModalPreview()
+      }
+    })
+    catForm.addEventListener('change', (e) => {
+      const t = e.target
+      if (!(t instanceof HTMLInputElement)) {
+        return
+      }
+      if (t.name === 'color' || t.name === 'icon') {
+        syncCatModalPreview()
+      }
     })
   }
 
-  catForm.querySelectorAll('input[name="color"], input[name="icon"]').forEach((el) => {
-    el.addEventListener('change', () => syncCatModalPreview())
-  })
-  wireColorNative()
+  wireCategoryFormPreview()
 
   function openCreateModal() {
     catForm.action = '/categories'
