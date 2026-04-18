@@ -43,6 +43,17 @@ test('sidebar FAB links to new transaction', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'New entry' })).toBeVisible()
 })
 
+test('site footer legal nav exposes MIT and repo links', async ({ page }) => {
+  await page.goto('/')
+  const nav = page.getByRole('navigation', { name: 'Legal and source' })
+  const mit = nav.getByRole('link', { name: 'MIT License' })
+  await expect(mit).toHaveAttribute('href', 'https://opensource.org/licenses/MIT')
+  await expect(mit).toHaveAttribute('target', '_blank')
+  const gh = nav.getByRole('link', { name: 'GitHub' })
+  await expect(gh).toHaveAttribute('href', /github\.com\//)
+  await expect(gh).toHaveAttribute('target', '_blank')
+})
+
 test('global search control is in shell', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('search')).toBeVisible()
