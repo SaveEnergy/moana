@@ -39,12 +39,12 @@ func NewCookieClient(t *testing.T) *http.Client {
 	return &http.Client{Jar: jar}
 }
 
-// MustLogin POSTs to baseURL/login with the given credentials. The HTTP client follows redirects;
+// MustLogin POSTs to baseURL + [handlers.LoginPath] with the given credentials. The HTTP client follows redirects;
 // the final response after a successful login is typically 200 from GET /.
 // baseURL must be the server root (no trailing slash), e.g. httptest.Server.URL.
 func MustLogin(t *testing.T, client *http.Client, baseURL, email, password string) {
 	t.Helper()
-	resp, err := client.PostForm(baseURL+"/login", url.Values{
+	resp, err := client.PostForm(baseURL+handlers.LoginPath, url.Values{
 		"email":    {email},
 		"password": {password},
 	})

@@ -11,7 +11,7 @@ func requireParseForm(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
-// requireParseFormSettings is like requireParseForm but redirects to /settings with an error message (settings flows).
+// requireParseFormSettings is like requireParseForm but redirects to [SettingsPath] with an error message (settings flows).
 func requireParseFormSettings(w http.ResponseWriter, r *http.Request) bool {
 	if err := r.ParseForm(); err != nil {
 		redirectSettingsErr(w, r, "Invalid form.")

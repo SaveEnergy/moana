@@ -44,8 +44,8 @@ func assertSeeOtherToLogin(t *testing.T, mux http.Handler, method, path string, 
 		t.Fatalf("%s %s: status %d want %d", method, path, rec.Code, http.StatusSeeOther)
 	}
 	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") {
-		t.Fatalf("%s %s: Location %q want /login", method, path, loc)
+	if !strings.Contains(loc, handlers.LoginPath) {
+		t.Fatalf("%s %s: Location %q want %s", method, path, loc, handlers.LoginPath)
 	}
 	if wantError1 && !strings.Contains(loc, "error=1") {
 		t.Fatalf("%s %s: Location %q want ...error=1...", method, path, loc)
@@ -119,7 +119,7 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 	t.Parallel()
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
-	assertSeeOtherToLogin(t, mux, http.MethodPost, "/logout", nil, false)
+	assertSeeOtherToLogin(t, mux, http.MethodPost, handlers.LogoutPath, nil, false)
 }
 
 // TestRegisterRoutes_unknownGET_404 verifies paths not matched by RegisterRoutes yield 404 (not the dashboard).

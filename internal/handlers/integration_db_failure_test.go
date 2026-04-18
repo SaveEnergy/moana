@@ -17,7 +17,7 @@ func TestCurrentUser_noSessionReturnsErrAuthRequired(t *testing.T) {
 	t.Parallel()
 	app, cleanup := testutil.NewApp(t)
 	defer cleanup()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, handlers.DashboardPath, nil)
 	_, err := app.CurrentUser(req)
 	if !errors.Is(err, handlers.ErrAuthRequired) {
 		t.Fatalf("got %v want %v", err, handlers.ErrAuthRequired)
@@ -39,7 +39,7 @@ func TestAuthenticatedRoute_returns500WhenDatabaseClosed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resp, err := client.Get(srv.URL + "/")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestLoginPage_okWhenDatabaseClosedWithoutSession(t *testing.T) {
 	if err := db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	resp, err := http.Get(srv.URL + "/login")
+	resp, err := http.Get(srv.URL + handlers.LoginPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestAuthenticatedRoute_redirectsWhenSessionRoleMismatchWithDB(t *testing.T)
 	client.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
-	respDash, err := client.Get(srv.URL + "/")
+	respDash, err := client.Get(srv.URL + handlers.DashboardPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestAuthenticatedRoute_redirectsWhenSessionRoleMismatchWithDB(t *testing.T)
 		t.Fatal(err)
 	}
 
-	respAfter, err := client.Get(srv.URL + "/")
+	respAfter, err := client.Get(srv.URL + handlers.DashboardPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestAuthenticatedRoute_redirectsWhenSessionRoleMismatchWithDB(t *testing.T)
 		t.Fatalf("after DB role change: status %d want 303", respAfter.StatusCode)
 	}
 	loc := respAfter.Header.Get("Location")
-	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
 		t.Fatalf("after DB role change: Location %q want /login?...error=1...", loc)
 	}
 }

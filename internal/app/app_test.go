@@ -8,6 +8,7 @@ import (
 
 	moanaapp "moana/internal/app"
 	"moana/internal/dbutil"
+	"moana/internal/handlers"
 	"moana/internal/testutil"
 )
 
@@ -118,7 +119,7 @@ func TestHTTPHandler_getLoginPage(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/login", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.LoginPath, nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
@@ -143,7 +144,7 @@ func TestHTTPHandler_loginPageWithErrorQueryShowsSessionBanner(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/login?error=1", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.LoginRedirectAuth, nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
@@ -164,12 +165,12 @@ func TestHTTPHandler_unauthenticatedRootRedirectsToLogin(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.DashboardPath, nil))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
 	}
 	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
 		t.Fatalf("Location %q", loc)
 	}
 }
@@ -186,12 +187,12 @@ func TestHTTPHandler_unauthenticatedNotificationsRedirectsToLogin(t *testing.T) 
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/notifications", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.NotificationsPath, nil))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("status %d want %d", rec.Code, http.StatusSeeOther)
 	}
 	loc := rec.Header().Get("Location")
-	if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
+	if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
 		t.Fatalf("Location %q", loc)
 	}
 }

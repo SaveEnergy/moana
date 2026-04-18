@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"moana/internal/handlers"
 	"moana/internal/testutil"
 )
 
@@ -16,7 +17,7 @@ func TestLoginSubmit_trimmedEmailAuthenticates(t *testing.T) {
 	defer cleanup()
 	testutil.MustCreateUser(t, app, "trimlogin@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
-	resp, err := client.PostForm(srv.URL+"/login", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.LoginPath, url.Values{
 		"email":    {"  trimlogin@integration.test  "},
 		"password": {"pw"},
 	})
@@ -41,7 +42,7 @@ func TestLoginPage_redirectsWhenAlreadyAuthenticated(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "logpage-redir@integration.test", "pw")
 
-	resp, err := client.Get(srv.URL + "/login")
+	resp, err := client.Get(srv.URL + handlers.LoginPath)
 	if err != nil {
 		t.Fatal(err)
 	}

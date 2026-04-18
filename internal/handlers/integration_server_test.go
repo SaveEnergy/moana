@@ -63,8 +63,8 @@ func TestUnauthenticatedProtectedRoutesRedirectToLogin(t *testing.T) {
 			t.Fatalf("%s: status %d want %d", path, resp.StatusCode, http.StatusSeeOther)
 		}
 		loc := resp.Header.Get("Location")
-		if !strings.Contains(loc, "/login") || !strings.Contains(loc, "error=1") {
-			t.Fatalf("%s: unexpected Location %q (want /login?error=1)", path, loc)
+		if !strings.Contains(loc, handlers.LoginPath) || !strings.Contains(loc, "error=1") {
+			t.Fatalf("%s: unexpected Location %q (want login+error=1)", path, loc)
 		}
 	}
 }
@@ -175,7 +175,7 @@ func TestDashboardWithPeriodQuery(t *testing.T) {
 	testutil.MustCreateUser(t, app, "period@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "period@integration.test", "pw")
-	resp, err := client.Get(srv.URL + "/?period=12m")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath + "?period=12m")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestDashboardWithUnknownPeriodQuery(t *testing.T) {
 	testutil.MustCreateUser(t, app, "period-unknown@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "period-unknown@integration.test", "pw")
-	resp, err := client.Get(srv.URL + "/?period=weekly")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath + "?period=weekly")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +218,7 @@ func TestDashboard_outflowShowsExpenseAfterCreate(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "dash-out@integration.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
-	resp, err := client.PostForm(srv.URL+"/transactions", url.Values{
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
 		"amount":      {"42.00"},
 		"kind":        {"expense"},
 		"occurred_on": {day},
@@ -231,7 +231,7 @@ func TestDashboard_outflowShowsExpenseAfterCreate(t *testing.T) {
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusSeeOther {
 		t.Fatalf("post status %d", resp.StatusCode)
 	}
-	resp, err = client.Get(srv.URL + "/")
+	resp, err = client.Get(srv.URL + handlers.DashboardPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +261,7 @@ func TestLoginAndOverview(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "user@integration.test", "correct-password")
 
-	resp, err := client.Get(srv.URL + "/")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +286,7 @@ func TestTransactionsPageOKForLoggedInUser(t *testing.T) {
 	testutil.MustCreateUser(t, app, "txpage@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "txpage@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/transactions")
+	resp, err := client.Get(srv.URL + handlers.TransactionsPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,7 +307,7 @@ func TestCategoriesPageOKForLoggedInUser(t *testing.T) {
 	testutil.MustCreateUser(t, app, "catpage@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "catpage@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/categories")
+	resp, err := client.Get(srv.URL + handlers.CategoriesPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -349,7 +349,7 @@ func TestHistoryPage_withQueryParams(t *testing.T) {
 	testutil.MustCreateUser(t, app, "histq@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "histq@moana.test", "pw")
-	u := srv.URL + "/history?kind=expense&q=coffee&sort=oldest&from=2026-01-01&to=2026-01-31"
+	u := srv.URL + handlers.HistoryPath + "?kind=expense&q=coffee&sort=oldest&from=2026-01-01&to=2026-01-31"
 	resp, err := client.Get(u)
 	if err != nil {
 		t.Fatal(err)
@@ -375,7 +375,7 @@ func TestHistoryPage_invalidDateRangeShowsBanner(t *testing.T) {
 	testutil.MustCreateUser(t, app, "histbad@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "histbad@moana.test", "pw")
-	u := srv.URL + "/history?from=not-a-date&to=2020-01-02"
+	u := srv.URL + handlers.HistoryPath + "?from=not-a-date&to=2020-01-02"
 	resp, err := client.Get(u)
 	if err != nil {
 		t.Fatal(err)
@@ -426,7 +426,7 @@ func TestNotificationsPageOKForLoggedInUser(t *testing.T) {
 	testutil.MustCreateUser(t, app, "notif@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "notif@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/notifications")
+	resp, err := client.Get(srv.URL + handlers.NotificationsPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -448,7 +448,7 @@ func TestSettingsPageOKForLoggedInUser(t *testing.T) {
 	testutil.MustCreateUser(t, app, "plain@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "plain@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/settings")
+	resp, err := client.Get(srv.URL + handlers.SettingsPath)
 	if err != nil {
 		t.Fatal(err)
 	}

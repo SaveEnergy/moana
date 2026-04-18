@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"moana/internal/handlers"
 	"moana/internal/testutil"
 )
 
@@ -18,7 +19,7 @@ func TestLogout_redirectsToLoginAndClearsSession(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "logout@integration.test", "pw")
 
-	resp, err := client.PostForm(srv.URL+"/logout", url.Values{})
+	resp, err := client.PostForm(srv.URL+handlers.LogoutPath, url.Values{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +32,7 @@ func TestLogout_redirectsToLoginAndClearsSession(t *testing.T) {
 		t.Fatal("expected login page after logout")
 	}
 
-	resp2, err := client.Get(srv.URL + "/")
+	resp2, err := client.Get(srv.URL + handlers.DashboardPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +52,7 @@ func TestLogout_withoutSessionRedirectsToLogin(t *testing.T) {
 			return http.ErrUseLastResponse
 		},
 	}
-	resp, err := client.PostForm(srv.URL+"/logout", url.Values{})
+	resp, err := client.PostForm(srv.URL+handlers.LogoutPath, url.Values{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +61,7 @@ func TestLogout_withoutSessionRedirectsToLogin(t *testing.T) {
 		t.Fatalf("status %d want %d", resp.StatusCode, http.StatusSeeOther)
 	}
 	loc := resp.Header.Get("Location")
-	if !strings.Contains(loc, "/login") {
+	if !strings.Contains(loc, handlers.LoginPath) {
 		t.Fatalf("unexpected Location %q", loc)
 	}
 }
