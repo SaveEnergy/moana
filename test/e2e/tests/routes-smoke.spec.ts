@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
+import { todayLocalISODate } from '../helpers/dates'
 
 test('categories page renders', async ({ page }) => {
   await signInAsTestUser(page)
@@ -30,4 +31,17 @@ test('settings profile loads', async ({ page }) => {
   await page.goto('/settings')
   await expect(page).toHaveURL(/\/settings/)
   await expect(page.getByRole('heading', { name: 'Personal' })).toBeVisible()
+})
+
+test('transaction edit page loads from history', async ({ page }) => {
+  await signInAsTestUser(page)
+  await page.goto('/transactions')
+  await page.locator('input[name="amount"]').fill('1.00')
+  await page.locator('input[name="occurred_on"]').fill(todayLocalISODate())
+  await page.getByRole('button', { name: 'Save entry' }).click()
+  await expect(page).toHaveURL(/\/history/)
+
+  await page.getByRole('link', { name: 'Edit' }).first().click()
+  await expect(page).toHaveURL(/\/transactions\/\d+\/edit/)
+  await expect(page.getByRole('heading', { name: 'Edit entry' })).toBeVisible()
 })

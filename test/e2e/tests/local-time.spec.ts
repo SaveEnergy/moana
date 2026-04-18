@@ -1,14 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
-
-function todayLocalISODate(): string {
-  const d = new Date()
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+import { todayLocalISODate } from '../helpers/dates'
 
 test('transaction create hydrates local time on history', async ({ page }) => {
   await signInAsTestUser(page)
