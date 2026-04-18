@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
 
+test('health endpoint responds OK', async ({ request }) => {
+  const res = await request.get('/health')
+  expect(res.ok()).toBeTruthy()
+})
+
 test('static app.css is served with bytes', async ({ request }) => {
   const res = await request.get('/static/css/app.css')
   expect(res.ok()).toBeTruthy()

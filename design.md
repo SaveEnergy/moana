@@ -200,8 +200,9 @@ Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on 
 
 - **Typecheck:** `npm run typecheck` — `tsc --project frontend/tsconfig.json`.  
 - **Unit:** `npm run test:unit` — Vitest, config **merged into `frontend/vite.config.ts`** (`test` block). Covers `frontend/src/lib/*`, **`bootApp()` wiring** (`boot.test.ts`), timezone cookie string, local time.  
-- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies), **`modulepreload`** for `app.js` on login and dashboard.  
-- **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.
+- **E2E:** `npm run test:e2e` — Playwright (`test/e2e/tests/`). Shared login: `test/e2e/helpers/auth.ts` (`signInAsTestUser`) matches the seeded user from `test/e2e/scripts/start-server.sh`. Covers **`/health`**, sign-in, dashboard shell (tokens, **global search** `role="search"`), notifications link + inbox, mobile sidebar, history, route smoke (categories, new transaction, settings), **logout** (user menu → `/login`), **auth gate** (anonymous `/` → `/login`), **static assets** (`/static/css/app.css`, `/static/js/app.js` non-trivial bodies), **`modulepreload`** for `app.js` on login and dashboard.  
+- **Gate:** `npm run test:frontend` — typecheck, unit tests, then production Vite build.  
+- **Full repo check:** `npm run verify` — runs `test:frontend`, Playwright E2E (including **`GET /health`**), then `go test -race ./...`.
 
 ## 15. Risk snapshot
 
