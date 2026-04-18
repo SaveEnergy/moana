@@ -22,7 +22,7 @@ func (a *App) SettingsProfileUpdate(w http.ResponseWriter, r *http.Request, u *s
 		return
 	}
 	if newPw != "" {
-		current := r.FormValue("current_password")
+		current := r.FormValue(SettingsFieldCurrentPassword)
 		if current == "" {
 			redirectSettingsErr(w, r, "Enter your current password to set a new one.")
 			return

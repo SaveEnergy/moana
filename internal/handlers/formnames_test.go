@@ -16,3 +16,11 @@ func TestFormFieldNameConstants_nonEmpty(t *testing.T) {
 		}
 	}
 }
+
+func TestFormFieldNameConstants_profilePasswordKeysDistinct(t *testing.T) {
+	t.Parallel()
+	a, b, c := SettingsFieldCurrentPassword, SettingsFieldNewPassword, SettingsFieldNewPasswordConfirm
+	if a == b || a == c || b == c {
+		t.Fatalf("profile password keys must be distinct, got %q %q %q", a, b, c)
+	}
+}
