@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"moana/internal/handlers"
+	"moana/internal/server"
 	"moana/internal/testutil"
 )
 
@@ -73,7 +74,7 @@ func TestHealth(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	resp, err := http.Get(srv.URL + "/health")
+	resp, err := http.Get(srv.URL + server.HealthPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +92,7 @@ func TestHealth_HEAD_returnsOK(t *testing.T) {
 	t.Parallel()
 	_, srv, cleanup := testutil.NewAppServer(t)
 	defer cleanup()
-	req, err := http.NewRequest(http.MethodHead, srv.URL+"/health", nil)
+	req, err := http.NewRequest(http.MethodHead, srv.URL+server.HealthPath, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +329,7 @@ func TestHistoryPageOKForLoggedInUser(t *testing.T) {
 	testutil.MustCreateUser(t, app, "hist@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "hist@moana.test", "pw")
-	resp, err := client.Get(srv.URL + "/history")
+	resp, err := client.Get(srv.URL + handlers.HistoryPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -399,7 +400,10 @@ func TestHistoryPage_partialDateRangeShowsBanner(t *testing.T) {
 	testutil.MustCreateUser(t, app, "hist-partial@moana.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "hist-partial@moana.test", "pw")
-	for _, path := range []string{"/history?from=2026-01-01", "/history?to=2026-01-31"} {
+	for _, path := range []string{
+		handlers.HistoryPath + "?from=2026-01-01",
+		handlers.HistoryPath + "?to=2026-01-31",
+	} {
 		resp, err := client.Get(srv.URL + path)
 		if err != nil {
 			t.Fatal(err)

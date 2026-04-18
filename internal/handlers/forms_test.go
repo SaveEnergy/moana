@@ -41,7 +41,7 @@ func TestRequireParseForm_bodyReadError(t *testing.T) {
 
 func TestRequireParseFormSettings_bodyReadError(t *testing.T) {
 	t.Parallel()
-	req := httptest.NewRequest(http.MethodPost, "/settings/profile", iotest.ErrReader(errors.New("read fail")))
+	req := httptest.NewRequest(http.MethodPost, SettingsProfilePath, iotest.ErrReader(errors.New("read fail")))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 	if requireParseFormSettings(rec, req) {

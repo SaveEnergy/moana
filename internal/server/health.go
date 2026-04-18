@@ -2,8 +2,11 @@ package server
 
 import "net/http"
 
+// HealthPath is the GET liveness path for [registerHealth].
+const HealthPath = "/health"
+
 func registerHealth(mux *http.ServeMux) {
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(http.MethodGet+" "+HealthPath, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))

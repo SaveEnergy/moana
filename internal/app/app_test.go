@@ -9,6 +9,7 @@ import (
 	moanaapp "moana/internal/app"
 	"moana/internal/dbutil"
 	"moana/internal/handlers"
+	"moana/internal/server"
 	"moana/internal/testutil"
 )
 
@@ -56,7 +57,7 @@ func TestHTTPHandler_servesHealth(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/health", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, server.HealthPath, nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
@@ -77,7 +78,7 @@ func TestHTTPHandler_healthHeadOK(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodHead, "/health", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodHead, server.HealthPath, nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
