@@ -8,10 +8,10 @@ import (
 func TestPathPositiveInt64(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name    string
-		value   string
-		wantID  int64
-		wantOK  bool
+		name   string
+		value  string
+		wantID int64
+		wantOK bool
 	}{
 		{"valid", "42", 42, true},
 		{"valid_max_reasonable", "9223372036854775807", 1<<63 - 1, true},
@@ -22,6 +22,7 @@ func TestPathPositiveInt64(t *testing.T) {
 		{"float", "3.14", 0, false},
 		// strconv.ParseInt accepts an optional leading + (same as a positive id).
 		{"leading_plus", "+5", 5, true},
+		{"padded", "  42  ", 42, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
