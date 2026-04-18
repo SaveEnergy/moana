@@ -12,6 +12,7 @@ import (
 	"moana/internal/handlers"
 	"moana/internal/store"
 	"moana/internal/testutil"
+	"moana/internal/txform"
 )
 
 func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
@@ -23,10 +24,10 @@ func TestTransactionCreateValidationErrorRendersForm(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "badamount@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"not-a-number"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"x"},
+		txform.FieldAmount:      {"not-a-number"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"x"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -53,10 +54,10 @@ func TestTransactionCreate_redirectsToHistory(t *testing.T) {
 		return http.ErrUseLastResponse
 	}
 	resp, err := noFollow.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"7.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"redirect check"},
+		txform.FieldAmount:      {"7.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"redirect check"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -80,10 +81,10 @@ func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "zero-amt@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"0.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"x"},
+		txform.FieldAmount:      {"0.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"x"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -107,10 +108,10 @@ func TestTransactionCreate_emptyDateShowsMessage(t *testing.T) {
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "nodate@moana.test", "pw")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"10.00"},
-		"kind":        {"expense"},
-		"occurred_on": {""},
-		"description": {"x"},
+		txform.FieldAmount:      {"10.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {""},
+		txform.FieldDescription: {"x"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -135,10 +136,10 @@ func TestCreateExpenseStoresNegativeCents(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "tx@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"25.50"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"test expense"},
+		txform.FieldAmount:      {"25.50"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"test expense"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -177,11 +178,11 @@ func TestEditTransaction(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "edit@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"10.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"coffee"},
-		"category_id": {""},
+		txform.FieldAmount:      {"10.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"coffee"},
+		txform.FieldCategoryID:  {""},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -208,11 +209,11 @@ func TestEditTransaction(t *testing.T) {
 	}
 	resp2, err := client.PostForm(srv.URL+handlers.TransactionURLPath(id), url.Values{
 		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
-		"amount":                           {"20.00"},
-		"kind":                             {"expense"},
-		"occurred_on":                      {day},
-		"description":                      {"coffee fixed"},
-		"category_id":                      {""},
+		txform.FieldAmount:                 {"20.00"},
+		txform.FieldKind:                   {"expense"},
+		txform.FieldOccurredOn:             {day},
+		txform.FieldDescription:            {"coffee fixed"},
+		txform.FieldCategoryID:             {""},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -247,10 +248,10 @@ func TestTransactionEdit_preservesSafeNextQuery(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "next-safe@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"5.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"n"},
+		txform.FieldAmount:      {"5.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"n"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -290,10 +291,10 @@ func TestTransactionEdit_unsafeNextQueryUsesDefaultInForm(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "next-unsafe@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"5.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"n"},
+		txform.FieldAmount:      {"5.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"n"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -335,11 +336,11 @@ func TestTransactionCreate_invalidCategoryIDShowsMessage(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "badcat@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"10.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"x"},
-		"category_id": {"99999999999999"},
+		txform.FieldAmount:      {"10.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"x"},
+		txform.FieldCategoryID:  {"99999999999999"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -399,10 +400,10 @@ func TestTransactionUpdate_invalidPathIDReturns404(t *testing.T) {
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath+"/not-a-number", url.Values{
 		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
-		"amount":                           {"1.00"},
-		"kind":                             {"expense"},
-		"occurred_on":                      {day},
-		"description":                      {"x"},
+		txform.FieldAmount:                 {"1.00"},
+		txform.FieldKind:                   {"expense"},
+		txform.FieldOccurredOn:             {day},
+		txform.FieldDescription:            {"x"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -427,10 +428,10 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 	testutil.MustLogin(t, client, srv.URL, "tx-upd-bad@moana.test", "pw")
 	day := time.Now().UTC().Format("2006-01-02")
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"10.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"seed"},
+		txform.FieldAmount:      {"10.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"seed"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -444,11 +445,11 @@ func TestTransactionUpdate_validationErrorRendersForm(t *testing.T) {
 
 	resp2, err := client.PostForm(srv.URL+handlers.TransactionURLPath(id), url.Values{
 		handlers.TransactionNextQueryParam: {handlers.HistoryPath},
-		"amount":                           {"not-a-number"},
-		"kind":                             {"expense"},
-		"occurred_on":                      {day},
-		"description":                      {"x"},
-		"category_id":                      {""},
+		txform.FieldAmount:                 {"not-a-number"},
+		txform.FieldKind:                   {"expense"},
+		txform.FieldOccurredOn:             {day},
+		txform.FieldDescription:            {"x"},
+		txform.FieldCategoryID:             {""},
 	})
 	if err != nil {
 		t.Fatal(err)

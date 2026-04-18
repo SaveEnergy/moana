@@ -31,7 +31,7 @@ func BuildHeatmapCellsRolling365(endDay time.Time, loc *time.Location, byDay map
 	centsSeq := make([]int64, 0, 366)
 	maxC := int64(1)
 	for d := startDay; !d.After(endDay); d = d.AddDate(0, 0, 1) {
-		key := d.Format("2006-01-02")
+		key := d.Format(time.DateOnly)
 		cents := byDay[key]
 		if cents > maxC {
 			maxC = cents

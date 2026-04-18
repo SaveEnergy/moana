@@ -6,9 +6,9 @@ import (
 	"moana/internal/timeutil"
 )
 
-// formatLocalCalendarDate returns YYYY-MM-DD for t in loc (nil → UTC; [time.Time.In] panics on nil *Location).
+// formatLocalCalendarDate returns YYYY-MM-DD for t in loc (nil → UTC; see [timeutil.LocalCalendarDateKey]).
 func formatLocalCalendarDate(t time.Time, loc *time.Location) string {
-	return t.In(timeutil.OrUTC(loc)).Format("2006-01-02")
+	return timeutil.LocalCalendarDateKey(t, loc)
 }
 
 // todayLocalCalendarDate returns today's calendar date in loc (nil → UTC).

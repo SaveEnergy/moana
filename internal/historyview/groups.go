@@ -18,7 +18,7 @@ func GroupByDay(txs []store.Transaction, loc *time.Location, newestDayFirst bool
 	loc = timeutil.OrUTC(loc)
 	byDay := make(map[string][]store.Transaction)
 	for _, tx := range txs {
-		k := tx.OccurredAt.In(loc).Format("2006-01-02")
+		k := timeutil.LocalCalendarDateKey(tx.OccurredAt, loc)
 		byDay[k] = append(byDay[k], tx)
 	}
 	keys := make([]string, 0, len(byDay))

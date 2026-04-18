@@ -12,6 +12,7 @@ import (
 	"moana/internal/handlers"
 	"moana/internal/server"
 	"moana/internal/testutil"
+	"moana/internal/txform"
 )
 
 func TestLoginPageOK(t *testing.T) {
@@ -219,12 +220,12 @@ func TestDashboard_outflowShowsExpenseAfterCreate(t *testing.T) {
 	testutil.MustCreateUser(t, app, "dash-out@integration.test", "pw", "user")
 	client := testutil.NewCookieClient(t)
 	testutil.MustLogin(t, client, srv.URL, "dash-out@integration.test", "pw")
-	day := time.Now().UTC().Format("2006-01-02")
+	day := testutil.UTCDateString(time.Now())
 	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
-		"amount":      {"42.00"},
-		"kind":        {"expense"},
-		"occurred_on": {day},
-		"description": {"dash outflow"},
+		txform.FieldAmount:      {"42.00"},
+		txform.FieldKind:        {"expense"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"dash outflow"},
 	})
 	if err != nil {
 		t.Fatal(err)

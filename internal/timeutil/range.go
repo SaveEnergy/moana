@@ -6,11 +6,11 @@ import "time"
 // A nil loc is treated as UTC ([time.ParseInLocation] panics if loc is nil).
 func DayRangeUTCFromLocalDates(loc *time.Location, fromDate, toDate string) (fromUTC, toUTC time.Time, err error) {
 	loc = OrUTC(loc)
-	from, err := time.ParseInLocation("2006-01-02", fromDate, loc)
+	from, err := time.ParseInLocation(time.DateOnly, fromDate, loc)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
-	to, err := time.ParseInLocation("2006-01-02", toDate, loc)
+	to, err := time.ParseInLocation(time.DateOnly, toDate, loc)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}

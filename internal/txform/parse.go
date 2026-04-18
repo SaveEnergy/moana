@@ -30,7 +30,7 @@ func Parse(amountStr, dateStr, desc, catStr, kind string, loc *time.Location) (P
 		return Parsed{}, "Date is required."
 	}
 	loc = timeutil.OrUTC(loc)
-	dayStart, err := time.ParseInLocation("2006-01-02", dateStr, loc)
+	dayStart, err := time.ParseInLocation(time.DateOnly, dateStr, loc)
 	if err != nil {
 		return Parsed{}, "Invalid date."
 	}
