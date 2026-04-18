@@ -33,13 +33,16 @@ func GroupByDay(txs []store.Transaction, loc *time.Location, newestDayFirst bool
 	})
 	out := make([]DayGroup, 0, len(keys))
 	for _, k := range keys {
-		day, err := time.ParseInLocation("2006-01-02", k, loc)
-		if err != nil {
+		items := byDay[k]
+		if len(items) == 0 {
 			continue
 		}
+		// One midnight per bucket: keys come from local YYYY-MM-DD of these rows.
+		t0 := items[0].OccurredAt.In(loc)
+		midnight := time.Date(t0.Year(), t0.Month(), t0.Day(), 0, 0, 0, 0, loc)
 		out = append(out, DayGroup{
-			Label: FormatDayLabel(day, loc),
-			Items: byDay[k],
+			Label: FormatDayLabel(midnight, loc),
+			Items: items,
 		})
 	}
 	return out

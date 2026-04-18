@@ -45,6 +45,28 @@ func TestGroupByDay_bucketsAndOrder(t *testing.T) {
 	}
 }
 
+func TestGroupByDay_nonUTCBucketsByLocalCalendarDay(t *testing.T) {
+	t.Parallel()
+	loc, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 2026-01-15 23:30 UTC → 2026-01-16 00:30 local; pairs with a noon UTC row same local day.
+	lateUTC := time.Date(2026, 1, 15, 23, 30, 0, 0, time.UTC)
+	noonUTC := time.Date(2026, 1, 16, 12, 0, 0, 0, time.UTC)
+	txs := []store.Transaction{
+		{OccurredAt: lateUTC, Description: "late"},
+		{OccurredAt: noonUTC, Description: "noon"},
+	}
+	g := GroupByDay(txs, loc, true)
+	if len(g) != 1 {
+		t.Fatalf("want 1 local day, got %d groups", len(g))
+	}
+	if len(g[0].Items) != 2 {
+		t.Fatalf("want 2 txs in bucket, got %d", len(g[0].Items))
+	}
+}
+
 func TestGroupByDay_nilLocationUsesUTC(t *testing.T) {
 	t.Parallel()
 	loc := time.UTC
