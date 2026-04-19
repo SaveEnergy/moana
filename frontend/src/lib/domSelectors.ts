@@ -43,6 +43,21 @@ export const SETTINGS_ADD_MEMBER_DISMISS_SELECTORS: readonly string[] = [
 export const CATEGORY_LIST_SECTION_SELECTOR = '.cat-list-section' as const
 export const CATEGORY_MODAL_OPEN_EDIT_SELECTOR = '.cat-modal-open-edit' as const
 
+/** Preview strip when icon = Auto (`categoryModal.ts` toggles on `#cat-modal-preview-icon`). */
+export const CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS = 'cat-modal-preview-icon--auto' as const
+
+/** Cloned Lucide glyph in the modal preview well. */
+export const MOANA_ICON_CAT_PREVIEW_CLASS = 'moana-icon--cat-preview' as const
+
+/** Lucide-derived SVG in templates (`design.md` Icons); category modal clones for preview. */
+export const MOANA_ICON_SVG_SELECTOR = 'svg.moana-icon' as const
+
+/** Native `<input type="color">` in the category form (`input` delegation). */
+export const CATEGORY_COLOR_NATIVE_CLASS = 'cat-color-native' as const
+
+/** Custom swatch row wrapping the native color input. */
+export const CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR = '.cat-color-swatch--custom' as const
+
 export const CATEGORY_MODAL_ELEMENT_ID = 'cat-modal' as const
 export const CATEGORY_MODAL_FORM_ELEMENT_ID = 'cat-modal-form' as const
 export const CATEGORY_MODAL_ID_INPUT_ELEMENT_ID = 'cat-modal-id' as const

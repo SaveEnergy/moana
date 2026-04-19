@@ -2,6 +2,8 @@ import { CATEGORY_MODAL_DEFAULT_PREVIEW_BG, sanitizeCategoryCustomHex } from './
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
 import {
+  CATEGORY_COLOR_NATIVE_CLASS,
+  CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR,
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
   CATEGORY_MODAL_DISMISS_SELECTORS,
@@ -12,9 +14,12 @@ import {
   CATEGORY_MODAL_OPEN_CREATE_ELEMENT_ID,
   CATEGORY_MODAL_OPEN_EDIT_SELECTOR,
   CATEGORY_MODAL_PREVIEW_ELEMENT_ID,
+  CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS,
   CATEGORY_MODAL_PREVIEW_ICON_ELEMENT_ID,
   CATEGORY_MODAL_SUBMIT_ELEMENT_ID,
   CATEGORY_MODAL_TITLE_ELEMENT_ID,
+  MOANA_ICON_CAT_PREVIEW_CLASS,
+  MOANA_ICON_SVG_SELECTOR,
 } from './domSelectors'
 import { setRadioCheckedByValue } from './radioMap'
 
@@ -91,10 +96,10 @@ export function initCategoryModal(): void {
   function wireCategoryFormPreview() {
     catForm.addEventListener('input', (e) => {
       const t = e.target
-      if (!(t instanceof Element) || !t.classList.contains('cat-color-native')) {
+      if (!(t instanceof Element) || !t.classList.contains(CATEGORY_COLOR_NATIVE_CLASS)) {
         return
       }
-      const wrap = t.closest('.cat-color-swatch--custom')
+      const wrap = t.closest(CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR)
       const r = wrap?.querySelector<HTMLInputElement>('input[type="radio"][value="custom"]')
       if (r) {
         r.checked = true
