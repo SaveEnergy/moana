@@ -4,6 +4,7 @@ import { APP_USER_MENU_OPEN_SELECTOR } from './domSelectors'
 import {
   eventPathIncludesOpenDetails,
   eventPathIncludesOpenDialog,
+  isAppUserMenuDetailsOpen,
   keyEventInvolvesOpenDialog,
   shouldDeferMobileShellEscape,
 } from './dialogKeyboard'
@@ -13,6 +14,7 @@ describe('eventPathIncludesOpenDialog', () => {
     expect(eventPathIncludesOpenDialog([])).toBe(false)
     expect(eventPathIncludesOpenDialog([{ tagName: 'DIV' }])).toBe(false)
     expect(eventPathIncludesOpenDialog([{ tagName: 'DIALOG', open: false }])).toBe(false)
+    expect(eventPathIncludesOpenDialog([{}])).toBe(false)
   })
 
   it('is true when an open DIALOG is in the path', () => {
@@ -24,6 +26,29 @@ describe('eventPathIncludesOpenDetails', () => {
   it('detects open DETAILS', () => {
     expect(eventPathIncludesOpenDetails([{ tagName: 'DETAILS', open: true }])).toBe(true)
     expect(eventPathIncludesOpenDetails([{ tagName: 'DETAILS', open: false }])).toBe(false)
+  })
+
+  it('is false for empty paths or nodes without a usable tagName', () => {
+    expect(eventPathIncludesOpenDetails([])).toBe(false)
+    expect(eventPathIncludesOpenDetails([{}])).toBe(false)
+  })
+})
+
+describe('isAppUserMenuDetailsOpen', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('is true when the open account menu selector matches', () => {
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => (sel === APP_USER_MENU_OPEN_SELECTOR ? ({} as Element) : null),
+    })
+    expect(isAppUserMenuDetailsOpen()).toBe(true)
+  })
+
+  it('is false when the menu is closed', () => {
+    vi.stubGlobal('document', { querySelector: () => null })
+    expect(isAppUserMenuDetailsOpen()).toBe(false)
   })
 })
 
