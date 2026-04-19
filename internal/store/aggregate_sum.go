@@ -42,17 +42,20 @@ func (s *Store) SumIncomeExpenseCentsInTwoRanges(ctx context.Context, householdI
 // [Store.SumAmountCents] with no date filter) plus income and expense totals for two closed intervals,
 // in a single scan. Used by the dashboard to avoid an extra round trip.
 func (s *Store) SumRunningTotalAndIncomeExpenseInTwoRanges(ctx context.Context, householdID int64, aFrom, aTo, bFrom, bTo time.Time) (running int64, aIncome, aExpense, bIncome, bExpense int64, err error) {
-	q := `SELECT
+	var b strings.Builder
+	b.Grow(768)
+	b.WriteString(`SELECT
   COALESCE(SUM(t.amount_cents), 0),
   COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
   COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0),
   COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
   COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0)
-` + sqlFromHouseholdTx
+`)
+	b.WriteString(sqlFromHouseholdTx)
 	aF, aT := timeutil.FormatSQLiteUTC(aFrom), timeutil.FormatSQLiteUTC(aTo)
 	bF, bT := timeutil.FormatSQLiteUTC(bFrom), timeutil.FormatSQLiteUTC(bTo)
 	args := []any{aF, aT, aF, aT, bF, bT, bF, bT, householdID}
-	err = s.DB.QueryRowContext(ctx, q, args...).Scan(&running, &aIncome, &aExpense, &bIncome, &bExpense)
+	err = s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&running, &aIncome, &aExpense, &bIncome, &bExpense)
 	return running, aIncome, aExpense, bIncome, bExpense, err
 }
 
