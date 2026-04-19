@@ -26,6 +26,16 @@ describe('setRadioCheckedByValue', () => {
     expect(auto.checked).toBe(true)
   })
 
+  it('uses a non-default fallback key when preferred is missing', () => {
+    const y = radio()
+    const map = new Map<string, HTMLInputElement>([
+      ['z', radio()],
+      ['y', y],
+    ])
+    expect(setRadioCheckedByValue(map, 'missing', 'y')).toBe(true)
+    expect(y.checked).toBe(true)
+  })
+
   it('returns false when neither preferred nor fallback exists', () => {
     const map = new Map<string, HTMLInputElement>()
     expect(setRadioCheckedByValue(map, 'x', '')).toBe(false)
