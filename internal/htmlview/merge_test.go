@@ -53,6 +53,23 @@ func TestMergeFuncMaps_twoNilMapsNonNilEmpty(t *testing.T) {
 	}
 }
 
+func TestMergeFuncMaps_fourMapsRightmostWins(t *testing.T) {
+	t.Parallel()
+	m := MergeFuncMaps(
+		template.FuncMap{"x": func() string { return "a" }},
+		template.FuncMap{"x": func() string { return "b" }},
+		template.FuncMap{"x": func() string { return "c" }},
+		template.FuncMap{"x": func() string { return "d" }},
+	)
+	fn, ok := m["x"].(func() string)
+	if !ok {
+		t.Fatalf("merged x type %T", m["x"])
+	}
+	if got := fn(); got != "d" {
+		t.Fatalf("got %q want d (rightmost map wins on generic path)", got)
+	}
+}
+
 func TestMergeFuncMaps_threeMapsRightmostWins(t *testing.T) {
 	t.Parallel()
 	m := MergeFuncMaps(
