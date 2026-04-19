@@ -1,6 +1,6 @@
 import {
   CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT,
-  CATEGORY_MODAL_DEFAULT_PREVIEW_BG,
+  resolveCategoryModalPreviewBackground,
   sanitizeCategoryCustomHex,
 } from './categoryColor'
 import { attachNativeDialogDismiss } from './dialogDismiss'
@@ -87,13 +87,10 @@ export function initCategoryModal(): void {
 
   function syncCatModalPreview() {
     const cr = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR)
-    let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
-    if (cr?.value === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
-      bg = colorNativeInput?.value?.trim() || CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
-    } else if (cr?.value) {
-      bg = cr.value
-    }
-    catPreview.style.background = bg
+    catPreview.style.background = resolveCategoryModalPreviewBackground(
+      cr?.value,
+      colorNativeInput?.value,
+    )
 
     const ir = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
     catIconWrap.innerHTML = ''
