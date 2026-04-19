@@ -40,6 +40,18 @@ describe('bootApp', () => {
     expect(stubs.initConfirmSubmitForms).toHaveBeenCalledTimes(1)
   })
 
+  it('invokes each initializer once per bootApp call (orchestrator is not implicitly single-run)', () => {
+    bootApp()
+    bootApp()
+    expect(stubs.setBrowserTimezoneCookie).toHaveBeenCalledTimes(2)
+    expect(stubs.applyLocalTimeElements).toHaveBeenCalledTimes(2)
+    expect(stubs.initShellSidebar).toHaveBeenCalledTimes(2)
+    expect(stubs.initSettingsMemberDialog).toHaveBeenCalledTimes(2)
+    expect(stubs.initCategoryModal).toHaveBeenCalledTimes(2)
+    expect(stubs.initHistoryControls).toHaveBeenCalledTimes(2)
+    expect(stubs.initConfirmSubmitForms).toHaveBeenCalledTimes(2)
+  })
+
   it('runs initializers in a stable order', () => {
     const order: string[] = []
     stubs.setBrowserTimezoneCookie.mockImplementation(() => {
