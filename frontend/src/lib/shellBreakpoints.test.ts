@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { onMediaQueryChange } from './shellBreakpoints'
+import { MOBILE_SHELL_MAX_WIDTH_PX, MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
+
+describe('mobile shell breakpoint constants', () => {
+  it('keeps media query aligned with max-width px (shellSidebar + CSS breakpoints)', () => {
+    expect(MOBILE_SHELL_MEDIA_QUERY).toBe(`(max-width: ${MOBILE_SHELL_MAX_WIDTH_PX}px)`)
+    expect(MOBILE_SHELL_MAX_WIDTH_PX).toBe(1023)
+  })
+})
 
 describe('onMediaQueryChange', () => {
   it('uses addEventListener/removeEventListener when available', () => {
