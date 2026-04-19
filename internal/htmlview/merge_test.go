@@ -138,3 +138,14 @@ func BenchmarkMergeFuncMaps_threeMaps(b *testing.B) {
 		_ = MergeFuncMaps(a, x, z)
 	}
 }
+
+func BenchmarkMergeFuncMaps_fiveMaps(b *testing.B) {
+	m := func(i int) template.FuncMap {
+		return template.FuncMap{string(rune('a' + i)): func() int { return i }}
+	}
+	a, c, d, e, f := m(0), m(1), m(2), m(3), m(4)
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		_ = MergeFuncMaps(a, c, d, e, f)
+	}
+}

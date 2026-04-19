@@ -21,6 +21,14 @@ describe('eventPathIncludesOpenDialog', () => {
     expect(eventPathIncludesOpenDialog([{ tagName: 'DIALOG', open: true }])).toBe(true)
   })
 
+  it('matches open dialog when tagName is lowercase', () => {
+    expect(eventPathIncludesOpenDialog([{ tagName: 'dialog', open: true }])).toBe(true)
+  })
+
+  it('ignores nodes whose tagName is not a string', () => {
+    expect(eventPathIncludesOpenDialog([{ tagName: 1, open: true }] as unknown[])).toBe(false)
+  })
+
   it('detects open DIALOG when it is not the first path node', () => {
     expect(
       eventPathIncludesOpenDialog([
@@ -35,6 +43,10 @@ describe('eventPathIncludesOpenDetails', () => {
   it('detects open DETAILS', () => {
     expect(eventPathIncludesOpenDetails([{ tagName: 'DETAILS', open: true }])).toBe(true)
     expect(eventPathIncludesOpenDetails([{ tagName: 'DETAILS', open: false }])).toBe(false)
+  })
+
+  it('matches open details when tagName is lowercase', () => {
+    expect(eventPathIncludesOpenDetails([{ tagName: 'details', open: true }])).toBe(true)
   })
 
   it('detects open DETAILS when not the first path node', () => {

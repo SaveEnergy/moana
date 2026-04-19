@@ -4,8 +4,12 @@ function readTagOpen(n: unknown): { tag: string; open: boolean } | null {
   if (!n || typeof n !== 'object' || !('tagName' in n)) {
     return null
   }
-  const el = n as { tagName: string; open?: boolean }
-  return { tag: el.tagName, open: el.open === true }
+  const el = n as { tagName: unknown; open?: boolean }
+  if (typeof el.tagName !== 'string') {
+    return null
+  }
+  /* HTML uses uppercase `tagName`; normalize so tests and odd paths still match. */
+  return { tag: el.tagName.toUpperCase(), open: el.open === true }
 }
 
 /** Uses `tagName` + `open` so tests can run without a full DOM `instanceof`. */

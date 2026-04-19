@@ -33,6 +33,15 @@ func MergeFuncMaps(inputs ...template.FuncMap) template.FuncMap {
 		maps.Copy(out, m2)
 		maps.Copy(out, m3)
 		return out
+	case 5:
+		m0, m1, m2, m3, m4 := inputs[0], inputs[1], inputs[2], inputs[3], inputs[4]
+		out := make(template.FuncMap, len(m0)+len(m1)+len(m2)+len(m3)+len(m4))
+		maps.Copy(out, m0)
+		maps.Copy(out, m1)
+		maps.Copy(out, m2)
+		maps.Copy(out, m3)
+		maps.Copy(out, m4)
+		return out
 	}
 	n := 0
 	for _, m := range inputs {

@@ -8,6 +8,7 @@ func TestEscapeSQLLikePattern_metachars(t *testing.T) {
 		in   string
 		want string
 	}{
+		{"", ""},
 		{"plain", "plain"},
 		{"a%b", "a!%b"},
 		{"a_b", "a!_b"},
