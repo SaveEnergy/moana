@@ -1,5 +1,8 @@
 import { clickEventTargetElement } from './clickTarget'
 
+/** One dismiss `click` listener per dialog (safe if `attachNativeDialogDismiss` runs twice). */
+const nativeDialogDismissWiredDialogs = new WeakSet<HTMLDialogElement>()
+
 /** Backdrop (`target === dialog`) or `closest()` any of the selectors (inner nodes included). */
 export function shouldCloseNativeDialogFromClick(
   e: MouseEvent,
@@ -21,6 +24,10 @@ export function attachNativeDialogDismiss(
   dialog: HTMLDialogElement,
   closeWithinSelectors: readonly string[],
 ): void {
+  if (nativeDialogDismissWiredDialogs.has(dialog)) {
+    return
+  }
+  nativeDialogDismissWiredDialogs.add(dialog)
   dialog.addEventListener('click', (e) => {
     if (shouldCloseNativeDialogFromClick(e, dialog, closeWithinSelectors)) {
       dialog.close()

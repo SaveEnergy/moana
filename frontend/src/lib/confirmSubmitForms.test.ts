@@ -130,4 +130,20 @@ describe('initConfirmSubmitForms', () => {
     })
     expect(() => initConfirmSubmitForms()).not.toThrow()
   })
+
+  it('does not attach a second submit listener when init runs twice', () => {
+    const form = {
+      getAttribute: (name: string) =>
+        name === DATA_CONFIRM_ATTRIBUTE ? 'Really delete?  ' : null,
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+
+    vi.stubGlobal('document', {
+      querySelectorAll: () => [form],
+    })
+
+    initConfirmSubmitForms()
+    initConfirmSubmitForms()
+    expect(form.addEventListener).toHaveBeenCalledTimes(1)
+  })
 })

@@ -36,6 +36,9 @@ import {
 } from './domSelectors'
 import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
 
+/** Full modal wiring once per `<dialog>` (duplicate `bootApp` must not stack listeners). */
+const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
+
 export function initCategoryModal(): void {
   const dialog = document.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
   if (!dialog) {
@@ -54,6 +57,10 @@ export function initCategoryModal(): void {
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return
   }
+  if (categoryModalInitialized.has(dialog)) {
+    return
+  }
+  categoryModalInitialized.add(dialog)
 
   /* Narrow once for nested functions (TS does not always narrow captured consts in closures). */
   const modal = dialog

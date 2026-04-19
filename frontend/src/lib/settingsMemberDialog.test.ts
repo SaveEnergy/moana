@@ -79,4 +79,31 @@ describe('initSettingsMemberDialog', () => {
 
     expect(addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
   })
+
+  it('does not stack listeners when init runs twice', () => {
+    const showModal = vi.fn()
+    const dialogAdd = vi.fn()
+    const dialog = { showModal, addEventListener: dialogAdd } as unknown as HTMLDialogElement
+
+    const openAddEventListener = vi.fn()
+    const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
+
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => {
+        if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) {
+          return dialog
+        }
+        if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) {
+          return openBtn
+        }
+        return null
+      },
+    })
+
+    initSettingsMemberDialog()
+    initSettingsMemberDialog()
+
+    expect(openAddEventListener).toHaveBeenCalledTimes(1)
+    expect(dialogAdd).toHaveBeenCalledTimes(1)
+  })
 })

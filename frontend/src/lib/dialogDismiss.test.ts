@@ -61,4 +61,14 @@ describe('attachNativeDialogDismiss', () => {
 
     expect(close).not.toHaveBeenCalled()
   })
+
+  it('does not register a second click listener when attach runs twice', () => {
+    const addEventListener = vi.fn()
+    const dialog = { close: vi.fn(), addEventListener, closest: () => null } as unknown as HTMLDialogElement
+
+    attachNativeDialogDismiss(dialog, ['#x'])
+    attachNativeDialogDismiss(dialog, ['#x'])
+
+    expect(addEventListener).toHaveBeenCalledTimes(1)
+  })
 })

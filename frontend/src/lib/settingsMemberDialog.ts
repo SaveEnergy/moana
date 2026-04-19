@@ -5,6 +5,9 @@ import {
   SETTINGS_ADD_MEMBER_OPEN_SELECTOR,
 } from './domSelectors'
 
+/** One init pass per dialog (`bootApp` may run more than once during tests or future SPA hooks). */
+const settingsMemberDialogInitialized = new WeakSet<HTMLDialogElement>()
+
 /** Resolve the add-member `<dialog>` from a root (usually `document`). */
 export function querySettingsAddMemberDialog(root: ParentNode): HTMLDialogElement | null {
   return root.querySelector<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
@@ -20,6 +23,10 @@ export function initSettingsMemberDialog(): void {
   if (!dialog) {
     return
   }
+  if (settingsMemberDialogInitialized.has(dialog)) {
+    return
+  }
+  settingsMemberDialogInitialized.add(dialog)
 
   const openBtn = querySettingsAddMemberOpenButton(document)
 

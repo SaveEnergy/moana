@@ -1,5 +1,8 @@
 import { HISTORY_SORT_SELECTOR } from './domSelectors'
 
+/** Avoid duplicate `change` → `requestSubmit` if history wiring runs twice. */
+const historySortWiredSelects = new WeakSet<HTMLSelectElement>()
+
 /**
  * Resolve the history sort `<select>` from a root (usually `document`).
  * Uses {@link HISTORY_SORT_SELECTOR} so the id string lives only in `domSelectors.ts`.
@@ -15,10 +18,14 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
   if (!select) {
     return
   }
+  if (historySortWiredSelects.has(select)) {
+    return
+  }
   const form = select.form
   if (!form) {
     return
   }
+  historySortWiredSelects.add(select)
   select.addEventListener('change', () => {
     form.requestSubmit()
   })

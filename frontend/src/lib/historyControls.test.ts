@@ -40,6 +40,16 @@ describe('wireHistorySortAutoSubmit', () => {
     wireHistorySortAutoSubmit(select)
     expect(addEventListener).not.toHaveBeenCalled()
   })
+
+  it('does not subscribe twice when wiring runs twice on the same select', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+    wireHistorySortAutoSubmit(select)
+    wireHistorySortAutoSubmit(select)
+    expect(addEventListener).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('initHistoryControls', () => {

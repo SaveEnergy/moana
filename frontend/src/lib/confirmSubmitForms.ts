@@ -41,9 +41,16 @@ export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormEl
   return out
 }
 
-/** Wire all matching `form[data-confirm]` in `document`. Idempotent only on first boot (one listener per form). */
+/** Forms that already have a capture/bubble `submit` guard (safe if `bootApp` runs twice). */
+const confirmSubmitWiredForms = new WeakSet<HTMLFormElement>()
+
+/** Wire all matching `form[data-confirm]` in `document`. Skips forms already wired in this session. */
 export function initConfirmSubmitForms(): void {
   for (const { form, message } of findDataConfirmForms(document)) {
+    if (confirmSubmitWiredForms.has(form)) {
+      continue
+    }
+    confirmSubmitWiredForms.add(form)
     attachConfirmBeforeSubmit(form, message)
   }
 }
