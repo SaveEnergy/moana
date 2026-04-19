@@ -103,6 +103,18 @@ func TestParseHistoryURL_trimsDateFields(t *testing.T) {
 	}
 }
 
+func TestParseHistoryURL_trimsKindAndSortParams(t *testing.T) {
+	t.Parallel()
+	u, err := url.Parse(RoutePath + "?kind=%20income%20&sort=%20oldest%20")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := ParseHistoryURL(u)
+	if p.kind != KindIncome || p.filterKind != KindIncome || p.sortLabel != SortOldestValue || !p.oldestFirst {
+		t.Fatalf("%+v", p)
+	}
+}
+
 func TestHistoryReturnOrDefault(t *testing.T) {
 	t.Parallel()
 	if historyReturnOrDefault("") != RoutePath {
