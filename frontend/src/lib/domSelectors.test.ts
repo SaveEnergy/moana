@@ -8,6 +8,10 @@ import {
   CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR,
   CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
+  DATA_CONFIRM_ATTRIBUTE,
+  FORM_DATA_CONFIRM_SELECTOR,
+  LOCAL_TIME_ELEMENTS_SELECTOR,
+  TIME_DATETIME_ATTRIBUTE,
 } from './domSelectors'
 
 /**
@@ -37,5 +41,17 @@ describe('domSelectors category modal radios', () => {
 
   it('keeps custom color radio value in sync with template', () => {
     expect(CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM).toBe('custom')
+  })
+})
+
+describe('domSelectors data-confirm forms', () => {
+  it('builds the form query from the data-confirm attribute name', () => {
+    expect(FORM_DATA_CONFIRM_SELECTOR).toBe(`form[${DATA_CONFIRM_ATTRIBUTE}]`)
+  })
+})
+
+describe('domSelectors local time', () => {
+  it('targets js-local-time elements with the datetime attribute', () => {
+    expect(LOCAL_TIME_ELEMENTS_SELECTOR).toBe(`time.js-local-time[${TIME_DATETIME_ATTRIBUTE}]`)
   })
 })
