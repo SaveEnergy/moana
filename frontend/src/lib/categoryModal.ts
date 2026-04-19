@@ -56,6 +56,7 @@ export function initCategoryModal(): void {
   const iconWrap = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_ICON_SELECTOR)
   const nameInput = dialog.querySelector<HTMLInputElement>(CATEGORY_MODAL_NAME_SELECTOR)
   const intro = document.querySelector(CATEGORY_PAGE_INTRO_SECTION_SELECTOR)
+  const categoriesPageRoot = intro?.parentElement
   const addCategoryBtn =
     intro?.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR) ??
     document.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
@@ -175,8 +176,10 @@ export function initCategoryModal(): void {
 
   addCategoryBtn?.addEventListener('click', () => openCreateModal())
 
-  /** Scoped to the list card so topbar/sidebar clicks do not run this handler. */
-  const editDelegationRoot = document.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
+  /** Scoped to the list card so topbar/sidebar clicks do not run this handler (`categories.html`: list is sibling of intro under the same parent). */
+  const editDelegationRoot =
+    categoriesPageRoot?.querySelector(CATEGORY_LIST_SECTION_SELECTOR) ??
+    document.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
   if (editDelegationRoot) {
     editDelegationRoot.addEventListener('click', (e) => {
       const el = clickEventTargetElement(e as MouseEvent)

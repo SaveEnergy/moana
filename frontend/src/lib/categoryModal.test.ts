@@ -132,4 +132,68 @@ describe('initCategoryModal', () => {
 
     expect(addBtn.addEventListener).toHaveBeenCalledTimes(1)
   })
+
+  it('attaches Edit delegation to .cat-list-section under intro parent before document fallback', () => {
+    const formAdd = vi.fn()
+    const form = {
+      addEventListener: formAdd,
+      querySelector: vi.fn(() => null),
+      querySelectorAll: vi.fn(() => [] as unknown as NodeListOf<HTMLInputElement>),
+      action: '',
+      reset: vi.fn(),
+    }
+    const idInput = { value: '' }
+    const titleEl = { textContent: '' }
+    const submitBtn = { textContent: '' }
+    const preview = { style: {} }
+    const iconWrap = {
+      innerHTML: '',
+      textContent: '',
+      classList: { add: vi.fn(), remove: vi.fn() },
+    }
+    const nameInput = { value: '', focus: vi.fn() }
+    const addBtn = { addEventListener: vi.fn() }
+
+    const modalInnerBySelector: Record<string, unknown> = {
+      [CATEGORY_MODAL_FORM_SELECTOR]: form,
+      [CATEGORY_MODAL_ID_INPUT_SELECTOR]: idInput,
+      [CATEGORY_MODAL_TITLE_SELECTOR]: titleEl,
+      [CATEGORY_MODAL_SUBMIT_SELECTOR]: submitBtn,
+      [CATEGORY_MODAL_PREVIEW_SELECTOR]: preview,
+      [CATEGORY_MODAL_PREVIEW_ICON_SELECTOR]: iconWrap,
+      [CATEGORY_MODAL_NAME_SELECTOR]: nameInput,
+    }
+
+    const dialog = {
+      addEventListener: vi.fn(),
+      closest: () => null,
+      querySelector: vi.fn((sel: string) => modalInnerBySelector[sel] ?? null),
+    }
+
+    const listSectionScoped = { addEventListener: vi.fn() }
+    const listSectionDocumentFallback = { addEventListener: vi.fn() }
+    const pageRootQuerySelector = vi.fn((sel: string) =>
+      sel === CATEGORY_LIST_SECTION_SELECTOR ? listSectionScoped : null,
+    )
+    const pageRoot = { querySelector: pageRootQuerySelector }
+    const introQuerySelector = vi.fn((sel: string) =>
+      sel === CATEGORY_MODAL_OPEN_CREATE_SELECTOR ? addBtn : null,
+    )
+    const intro = { querySelector: introQuerySelector, parentElement: pageRoot }
+
+    const docQuerySelector = vi.fn((sel: string) => {
+      if (sel === CATEGORY_MODAL_SELECTOR) return dialog
+      if (sel === CATEGORY_PAGE_INTRO_SECTION_SELECTOR) return intro
+      if (sel === CATEGORY_LIST_SECTION_SELECTOR) return listSectionDocumentFallback
+      return null
+    })
+
+    vi.stubGlobal('document', { querySelector: docQuerySelector })
+
+    initCategoryModal()
+
+    expect(pageRootQuerySelector).toHaveBeenCalledWith(CATEGORY_LIST_SECTION_SELECTOR)
+    expect(listSectionScoped.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
+    expect(listSectionDocumentFallback.addEventListener).not.toHaveBeenCalled()
+  })
 })
