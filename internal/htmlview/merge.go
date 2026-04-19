@@ -35,6 +35,22 @@ func MergeFuncMaps(inputs ...template.FuncMap) template.FuncMap {
 			out[k] = v
 		}
 		return out
+	case 4:
+		m0, m1, m2, m3 := inputs[0], inputs[1], inputs[2], inputs[3]
+		out := make(template.FuncMap, len(m0)+len(m1)+len(m2)+len(m3))
+		for k, v := range m0 {
+			out[k] = v
+		}
+		for k, v := range m1 {
+			out[k] = v
+		}
+		for k, v := range m2 {
+			out[k] = v
+		}
+		for k, v := range m3 {
+			out[k] = v
+		}
+		return out
 	}
 	n := 0
 	for _, m := range inputs {
