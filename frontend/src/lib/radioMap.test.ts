@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
+import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } from './radioMap'
 
 function radio(checked = false): HTMLInputElement {
   return { checked } as HTMLInputElement
@@ -70,5 +70,32 @@ describe('setRadioCheckedByValue', () => {
     const map = new Map([['', empty]])
     expect(setRadioCheckedByValue(map, '', '')).toBe(true)
     expect(empty.checked).toBe(true)
+  })
+})
+
+describe('getFormRadioGroupValue', () => {
+  it('returns RadioNodeList.value when namedItem resolves a radio group', () => {
+    const form = {
+      elements: {
+        namedItem: () => ({ value: 'preset' } as RadioNodeList),
+      },
+    } as unknown as HTMLFormElement
+    expect(getFormRadioGroupValue(form, 'color')).toBe('preset')
+  })
+
+  it('returns empty string when no control matches the name', () => {
+    const form = {
+      elements: { namedItem: () => null },
+    } as unknown as HTMLFormElement
+    expect(getFormRadioGroupValue(form, 'color')).toBe('')
+  })
+
+  it('returns empty string when namedItem does not expose a string value', () => {
+    const form = {
+      elements: {
+        namedItem: () => ({}) as unknown as Element,
+      },
+    } as unknown as HTMLFormElement
+    expect(getFormRadioGroupValue(form, 'color')).toBe('')
   })
 })

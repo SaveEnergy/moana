@@ -11,7 +11,6 @@ import {
   CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR,
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
-  CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
   CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
@@ -34,7 +33,7 @@ import {
   MOANA_ICON_CAT_PREVIEW_CLASS,
   MOANA_ICON_SVG_SELECTOR,
 } from './domSelectors'
-import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
+import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } from './radioMap'
 
 /** Full modal wiring once per `<dialog>` (duplicate `bootApp` must not stack listeners). */
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
@@ -79,13 +78,16 @@ export function initCategoryModal(): void {
   const iconRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_ICON_RADIOS_SELECTOR)
 
   function syncCatModalPreview() {
-    const cr = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR)
+    const colorVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME)
     catPreview.style.background = resolveCategoryModalPreviewBackground(
-      cr?.value,
+      colorVal || undefined,
       colorNativeInput?.value,
     )
 
-    const ir = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
+    const iconVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_ICON_RADIO_GROUP_NAME)
+    const ir =
+      iconRadioByValue.get(iconVal) ??
+      catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
     catIconWrap.innerHTML = ''
     if (!ir?.value) {
       catIconWrap.classList.add(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS)

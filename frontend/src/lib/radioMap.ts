@@ -36,3 +36,18 @@ export function setRadioCheckedByValue(
   input.checked = true
   return true
 }
+
+/**
+ * Checked `value` for a radio group `name` inside `form` (empty string if none).
+ * Uses `HTMLFormElement.elements` instead of `:checked` `querySelector` on hot paths.
+ */
+export function getFormRadioGroupValue(form: HTMLFormElement, name: string): string {
+  const el = form.elements.namedItem(name)
+  if (!el) {
+    return ''
+  }
+  if ('value' in el && typeof (el as RadioNodeList).value === 'string') {
+    return (el as RadioNodeList).value
+  }
+  return ''
+}
