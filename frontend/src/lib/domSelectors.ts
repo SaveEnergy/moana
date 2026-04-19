@@ -65,6 +65,25 @@ export const CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM = 'custom' as const
 export const CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR =
   `input[type="radio"][value="${CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM}"]` as const
 
+/** Radio `name` on color presets + custom row (`categories.html`). */
+export const CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME = 'color' as const
+/** Radio `name` on icon grid (`categories.html`). */
+export const CATEGORY_MODAL_ICON_RADIO_GROUP_NAME = 'icon' as const
+
+/** All color radios in the modal form — `radioMap` index by preset (`categories.html`). */
+export const CATEGORY_MODAL_COLOR_RADIOS_SELECTOR =
+  `input[type="radio"][name="${CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME}"]` as const
+/** All icon radios in the modal form (`categories.html`). */
+export const CATEGORY_MODAL_ICON_RADIOS_SELECTOR =
+  `input[type="radio"][name="${CATEGORY_MODAL_ICON_RADIO_GROUP_NAME}"]` as const
+
+/** Currently selected color preset (`categoryModal.ts` preview). */
+export const CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR =
+  `input[type="radio"][name="${CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME}"]:checked` as const
+/** Currently selected icon (`categoryModal.ts` preview). */
+export const CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR =
+  `input[type="radio"][name="${CATEGORY_MODAL_ICON_RADIO_GROUP_NAME}"]:checked` as const
+
 export const CATEGORY_MODAL_ELEMENT_ID = 'cat-modal' as const
 export const CATEGORY_MODAL_FORM_ELEMENT_ID = 'cat-modal-form' as const
 export const CATEGORY_MODAL_ID_INPUT_ELEMENT_ID = 'cat-modal-id' as const

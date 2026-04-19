@@ -6,8 +6,14 @@ import {
   CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR,
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
+  CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR,
+  CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
+  CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM,
+  CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR,
+  CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
+  CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   CATEGORY_MODAL_DISMISS_SELECTORS,
   CATEGORY_MODAL_ELEMENT_ID,
   CATEGORY_MODAL_FORM_ELEMENT_ID,
@@ -54,10 +60,15 @@ export function initCategoryModal(): void {
   const catIconWrap = iconWrap
   const catName = nameInput
 
-  function radiosByValue(name: 'color' | 'icon'): Map<string, HTMLInputElement> {
+  const CATEGORY_MODAL_RADIO_GROUP_SELECTORS = {
+    color: CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
+    icon: CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
+  } as const
+
+  function radiosByValue(kind: keyof typeof CATEGORY_MODAL_RADIO_GROUP_SELECTORS): Map<string, HTMLInputElement> {
     const m = new Map<string, HTMLInputElement>()
     for (const r of catForm.querySelectorAll<HTMLInputElement>(
-      `input[type="radio"][name="${name}"]`,
+      CATEGORY_MODAL_RADIO_GROUP_SELECTORS[kind],
     )) {
       m.set(r.value, r)
     }
@@ -68,7 +79,7 @@ export function initCategoryModal(): void {
   const iconRadioByValue = radiosByValue('icon')
 
   function syncCatModalPreview() {
-    const cr = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="color"]:checked')
+    const cr = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR)
     let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
     if (cr?.value === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
       const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
@@ -78,7 +89,7 @@ export function initCategoryModal(): void {
     }
     catPreview.style.background = bg
 
-    const ir = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="icon"]:checked')
+    const ir = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
     catIconWrap.innerHTML = ''
     if (!ir?.value) {
       catIconWrap.classList.add(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS)
@@ -113,7 +124,7 @@ export function initCategoryModal(): void {
       if (!(t instanceof HTMLInputElement)) {
         return
       }
-      if (t.name === 'color' || t.name === 'icon') {
+      if (t.name === CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME || t.name === CATEGORY_MODAL_ICON_RADIO_GROUP_NAME) {
         syncCatModalPreview()
       }
     })
