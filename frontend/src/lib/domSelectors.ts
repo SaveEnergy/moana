@@ -65,3 +65,9 @@ export const DATA_CONFIRM_ATTRIBUTE = 'data-confirm' as const
 
 /** Forms that wire `confirm()` before submit; matches `[attribute]` across templates. */
 export const FORM_DATA_CONFIRM_SELECTOR = `form[${DATA_CONFIRM_ATTRIBUTE}]` as const
+
+/** `<time class="js-local-time">` with an instant (`history.html` and related rows; `localTime.ts`). */
+export const LOCAL_TIME_ELEMENTS_SELECTOR = 'time.js-local-time[datetime]' as const
+
+/** ISO timestamp on `<time>` — read by `applyLocalTimeElements`. */
+export const TIME_DATETIME_ATTRIBUTE = 'datetime' as const

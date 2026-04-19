@@ -1,3 +1,5 @@
+import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+
 /** Reused across rows so hydrating many `<time>` nodes does not allocate a formatter per call. */
 const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
   hour: 'numeric',
@@ -41,14 +43,14 @@ export function createLocalTimeLabelMemo(): (iso: string) => string | undefined 
 /** One memo for the page so repeat `applyLocalTimeElements` calls reuse parsed ISO labels. */
 const labelForIso = createLocalTimeLabelMemo()
 
-/** Fill all `time.js-local-time[datetime]` elements in `root`. */
+/** Fill local clock labels for every `<time>` matching `LOCAL_TIME_ELEMENTS_SELECTOR` in `root`. */
 export function applyLocalTimeElements(root: ParentNode = document): void {
-  const nodes = root.querySelectorAll<HTMLTimeElement>('time.js-local-time[datetime]')
+  const nodes = root.querySelectorAll<HTMLTimeElement>(LOCAL_TIME_ELEMENTS_SELECTOR)
   if (nodes.length === 0) {
     return
   }
   for (const el of nodes) {
-    const iso = el.getAttribute('datetime')
+    const iso = el.getAttribute(TIME_DATETIME_ATTRIBUTE)
     if (!iso) {
       continue
     }
