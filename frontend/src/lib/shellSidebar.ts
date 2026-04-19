@@ -1,16 +1,21 @@
 import { shouldDeferMobileShellEscape } from './dialogKeyboard'
+import {
+  APP_SHELL_ELEMENT_ID,
+  APP_SIDEBAR_BACKDROP_ELEMENT_ID,
+  APP_SIDEBAR_TOGGLE_ELEMENT_ID,
+} from './domSelectors'
 import { shouldCloseMobileSidebarFromShellClick } from './mobileShellDismiss'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
 export function initShellSidebar(): void {
-  const shell = document.getElementById('app-shell')
+  const shell = document.getElementById(APP_SHELL_ELEMENT_ID)
   if (!shell) {
     return
   }
   const appShell = shell
-  const toggle = document.getElementById('app-sidebar-toggle')
-  const backdrop = document.getElementById('app-sidebar-backdrop')
+  const toggle = document.getElementById(APP_SIDEBAR_TOGGLE_ELEMENT_ID)
+  const backdrop = document.getElementById(APP_SIDEBAR_BACKDROP_ELEMENT_ID)
 
   const mqMobile = window.matchMedia(MOBILE_SHELL_MEDIA_QUERY)
 
