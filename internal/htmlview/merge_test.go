@@ -42,6 +42,26 @@ func TestMergeFuncMaps_singleInputIsCloned(t *testing.T) {
 	}
 }
 
+func TestMergeFuncMaps_twoNilMapsNonNilEmpty(t *testing.T) {
+	t.Parallel()
+	m := MergeFuncMaps(nil, nil)
+	if m == nil {
+		t.Fatal("expected non-nil empty map")
+	}
+	if len(m) != 0 {
+		t.Fatalf("len %d", len(m))
+	}
+}
+
+func TestMergeFuncMaps_nilFirstSecondSuppliesKeys(t *testing.T) {
+	t.Parallel()
+	m := MergeFuncMaps(nil, template.FuncMap{"a": func() int { return 7 }})
+	af, _ := m["a"].(func() int)
+	if af == nil || af() != 7 {
+		t.Fatalf("got %T", m["a"])
+	}
+}
+
 func TestMergeFuncMaps_mergesDistinctKeys(t *testing.T) {
 	t.Parallel()
 	m := MergeFuncMaps(
