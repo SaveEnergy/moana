@@ -132,7 +132,7 @@ Pattern: **desktop-first shell** with a **1023px** cutoff for drawer navigation.
 - **Float pattern:** `.float-field`, `.float-label`, `.float-input` inside bordered surfaces; focus uses border + outer shadow
 - **Amount entry:** `.amount-input-wrap`, `.input-amount` — large Manrope numerics; wrap highlights with `--primary-container` on focus  
 - **Confirm-before POST:** `form[data-confirm="…"]` (**`FORM_DATA_CONFIRM_SELECTOR`**, **`DATA_CONFIRM_ATTRIBUTE`**, **`domSelectors.ts`**) — `window.confirm` on **`submit`** (`confirmSubmitForms.ts`; **`findDataConfirmForms`** applies **`readDataConfirmMessage`**, which trims the attribute and skips blank / whitespace-only values, then **`attachConfirmBeforeSubmit`** wires **`submit`**); avoid inline handlers  
-- **Bootstrap idempotency:** **`WeakSet`** guards in **`confirmSubmitForms`**, **`historyControls`**, **`dialogDismiss`** (`attachNativeDialogDismiss`), **`settingsMemberDialog`**, and **`categoryModal`** prevent stacking listeners when **`bootApp()`** runs more than once (tests or future hot reload)
+- **Bootstrap idempotency:** **`WeakSet`** guards in **`shellSidebar`** (`initShellSidebar`), **`confirmSubmitForms`**, **`historyControls`**, **`dialogDismiss`** (`attachNativeDialogDismiss`), **`settingsMemberDialog`**, and **`categoryModal`** prevent stacking listeners when **`bootApp()`** runs more than once (tests or future hot reload)
 
 ### Segmented controls
 
