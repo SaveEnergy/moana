@@ -1,4 +1,8 @@
-import { CATEGORY_MODAL_DEFAULT_PREVIEW_BG, sanitizeCategoryCustomHex } from './categoryColor'
+import {
+  CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT,
+  CATEGORY_MODAL_DEFAULT_PREVIEW_BG,
+  sanitizeCategoryCustomHex,
+} from './categoryColor'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
 import {
@@ -60,6 +64,9 @@ export function initCategoryModal(): void {
   const catIconWrap = iconWrap
   const catName = nameInput
 
+  /** Resolved once — avoids repeated `querySelector` on every preview sync (`input` / `change`). */
+  const colorNativeInput = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
+
   const CATEGORY_MODAL_RADIO_GROUP_SELECTORS = {
     color: CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
     icon: CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
@@ -82,8 +89,7 @@ export function initCategoryModal(): void {
     const cr = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR)
     let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
     if (cr?.value === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
-      const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
-      bg = nat?.value?.trim() || '#818cf8'
+      bg = colorNativeInput?.value?.trim() || CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
     } else if (cr?.value) {
       bg = cr.value
     }
@@ -140,8 +146,7 @@ export function initCategoryModal(): void {
     catForm.reset()
     setRadioCheckedByValue(colorRadioByValue, '', '')
     setRadioCheckedByValue(iconRadioByValue, '', '')
-    const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
-    if (nat) nat.value = '#818cf8'
+    if (colorNativeInput) colorNativeInput.value = CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
     syncCatModalPreview()
     catName.focus()
     modal.showModal()
@@ -159,12 +164,11 @@ export function initCategoryModal(): void {
 
     const rawColor = (btn.dataset.color ?? '').trim()
     const isCustom = btn.dataset.custom === '1'
-    const customHex = (btn.dataset.customHex ?? '#818cf8').trim()
+    const customHex = (btn.dataset.customHex ?? CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT).trim()
 
     if (isCustom) {
       setRadioCheckedByValue(colorRadioByValue, CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM, '')
-      const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
-      if (nat) nat.value = sanitizeCategoryCustomHex(customHex)
+      if (colorNativeInput) colorNativeInput.value = sanitizeCategoryCustomHex(customHex)
     } else {
       setRadioCheckedByValue(colorRadioByValue, rawColor, '')
     }
