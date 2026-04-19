@@ -1,22 +1,37 @@
 import { CATEGORY_MODAL_DEFAULT_PREVIEW_BG, sanitizeCategoryCustomHex } from './categoryColor'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
+import {
+  CATEGORY_LIST_SECTION_SELECTOR,
+  CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
+  CATEGORY_MODAL_DISMISS_SELECTORS,
+  CATEGORY_MODAL_ELEMENT_ID,
+  CATEGORY_MODAL_FORM_ELEMENT_ID,
+  CATEGORY_MODAL_ID_INPUT_ELEMENT_ID,
+  CATEGORY_MODAL_NAME_ELEMENT_ID,
+  CATEGORY_MODAL_OPEN_CREATE_ELEMENT_ID,
+  CATEGORY_MODAL_OPEN_EDIT_SELECTOR,
+  CATEGORY_MODAL_PREVIEW_ELEMENT_ID,
+  CATEGORY_MODAL_PREVIEW_ICON_ELEMENT_ID,
+  CATEGORY_MODAL_SUBMIT_ELEMENT_ID,
+  CATEGORY_MODAL_TITLE_ELEMENT_ID,
+} from './domSelectors'
 import { setRadioCheckedByValue } from './radioMap'
 
 export function initCategoryModal(): void {
-  const dialog = document.getElementById('cat-modal') as HTMLDialogElement | null
+  const dialog = document.getElementById(CATEGORY_MODAL_ELEMENT_ID) as HTMLDialogElement | null
   if (!dialog) {
     return
   }
 
-  const form = document.getElementById('cat-modal-form') as HTMLFormElement | null
-  const idInput = document.getElementById('cat-modal-id') as HTMLInputElement | null
-  const titleEl = document.getElementById('cat-modal-title')
-  const submitBtn = document.getElementById('cat-modal-submit')
-  const preview = document.getElementById('cat-modal-preview')
-  const iconWrap = document.getElementById('cat-modal-preview-icon')
-  const nameInput = document.getElementById('cat-modal-name') as HTMLInputElement | null
-  const addCategoryBtn = document.getElementById('cat-modal-open-create')
+  const form = document.getElementById(CATEGORY_MODAL_FORM_ELEMENT_ID) as HTMLFormElement | null
+  const idInput = document.getElementById(CATEGORY_MODAL_ID_INPUT_ELEMENT_ID) as HTMLInputElement | null
+  const titleEl = document.getElementById(CATEGORY_MODAL_TITLE_ELEMENT_ID)
+  const submitBtn = document.getElementById(CATEGORY_MODAL_SUBMIT_ELEMENT_ID)
+  const preview = document.getElementById(CATEGORY_MODAL_PREVIEW_ELEMENT_ID)
+  const iconWrap = document.getElementById(CATEGORY_MODAL_PREVIEW_ICON_ELEMENT_ID)
+  const nameInput = document.getElementById(CATEGORY_MODAL_NAME_ELEMENT_ID) as HTMLInputElement | null
+  const addCategoryBtn = document.getElementById(CATEGORY_MODAL_OPEN_CREATE_ELEMENT_ID)
 
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return
@@ -49,7 +64,7 @@ export function initCategoryModal(): void {
     const cr = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="color"]:checked')
     let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
     if (cr?.value === 'custom') {
-      const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
+      const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
       bg = nat?.value?.trim() || '#818cf8'
     } else if (cr?.value) {
       bg = cr.value
@@ -107,7 +122,7 @@ export function initCategoryModal(): void {
     catForm.reset()
     setRadioCheckedByValue(colorRadioByValue, '', '')
     setRadioCheckedByValue(iconRadioByValue, '', '')
-    const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
+    const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
     if (nat) nat.value = '#818cf8'
     syncCatModalPreview()
     catName.focus()
@@ -130,7 +145,7 @@ export function initCategoryModal(): void {
 
     if (isCustom) {
       setRadioCheckedByValue(colorRadioByValue, 'custom', '')
-      const nat = catForm.querySelector<HTMLInputElement>('#cat-modal-color-native')
+      const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
       if (nat) nat.value = sanitizeCategoryCustomHex(customHex)
     } else {
       setRadioCheckedByValue(colorRadioByValue, rawColor, '')
@@ -147,14 +162,14 @@ export function initCategoryModal(): void {
   addCategoryBtn?.addEventListener('click', () => openCreateModal())
 
   /** Scoped to the list card so topbar/sidebar clicks do not run this handler. */
-  const editDelegationRoot = document.querySelector('.cat-list-section')
+  const editDelegationRoot = document.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
   if (editDelegationRoot) {
     editDelegationRoot.addEventListener('click', (e) => {
       const el = clickEventTargetElement(e as MouseEvent)
       if (!el) {
         return
       }
-      const btn = el.closest('.cat-modal-open-edit')
+      const btn = el.closest(CATEGORY_MODAL_OPEN_EDIT_SELECTOR)
       if (!btn) {
         return
       }
@@ -162,5 +177,5 @@ export function initCategoryModal(): void {
     })
   }
 
-  attachNativeDialogDismiss(modal, ['#cat-modal-close'])
+  attachNativeDialogDismiss(modal, CATEGORY_MODAL_DISMISS_SELECTORS)
 }

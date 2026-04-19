@@ -38,3 +38,24 @@ export const SETTINGS_ADD_MEMBER_DISMISS_SELECTORS: readonly string[] = [
   SETTINGS_ADD_MEMBER_CLOSE_SELECTOR,
   SETTINGS_ADD_MEMBER_CANCEL_SELECTOR,
 ]
+
+/** Categories list + modal (`categories.html`). */
+export const CATEGORY_LIST_SECTION_SELECTOR = '.cat-list-section' as const
+export const CATEGORY_MODAL_OPEN_EDIT_SELECTOR = '.cat-modal-open-edit' as const
+
+export const CATEGORY_MODAL_ELEMENT_ID = 'cat-modal' as const
+export const CATEGORY_MODAL_FORM_ELEMENT_ID = 'cat-modal-form' as const
+export const CATEGORY_MODAL_ID_INPUT_ELEMENT_ID = 'cat-modal-id' as const
+export const CATEGORY_MODAL_TITLE_ELEMENT_ID = 'cat-modal-title' as const
+export const CATEGORY_MODAL_SUBMIT_ELEMENT_ID = 'cat-modal-submit' as const
+export const CATEGORY_MODAL_PREVIEW_ELEMENT_ID = 'cat-modal-preview' as const
+export const CATEGORY_MODAL_PREVIEW_ICON_ELEMENT_ID = 'cat-modal-preview-icon' as const
+export const CATEGORY_MODAL_NAME_ELEMENT_ID = 'cat-modal-name' as const
+export const CATEGORY_MODAL_OPEN_CREATE_ELEMENT_ID = 'cat-modal-open-create' as const
+export const CATEGORY_MODAL_COLOR_NATIVE_ELEMENT_ID = 'cat-modal-color-native' as const
+export const CATEGORY_MODAL_CLOSE_ELEMENT_ID = 'cat-modal-close' as const
+
+export const CATEGORY_MODAL_COLOR_NATIVE_SELECTOR = `#${CATEGORY_MODAL_COLOR_NATIVE_ELEMENT_ID}` as const
+export const CATEGORY_MODAL_CLOSE_SELECTOR = `#${CATEGORY_MODAL_CLOSE_ELEMENT_ID}` as const
+
+export const CATEGORY_MODAL_DISMISS_SELECTORS: readonly string[] = [CATEGORY_MODAL_CLOSE_SELECTOR]
