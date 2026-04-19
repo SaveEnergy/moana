@@ -26,13 +26,24 @@ export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string
   })
 }
 
-/** Wire all `form[data-confirm]` in `document`. Idempotent only on first boot (one listener per form). */
-export function initConfirmSubmitForms(): void {
-  for (const form of document.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)) {
+/**
+ * Forms that opt in with `form[data-confirm]` and a non-blank message after trim.
+ * Single pass; used by `initConfirmSubmitForms` and unit tests (regression: skip empty messages).
+ */
+export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormElement; message: string }> {
+  const out: Array<{ form: HTMLFormElement; message: string }> = []
+  for (const form of root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)) {
     const msg = readDataConfirmMessage(form)
-    if (!msg) {
-      continue
+    if (msg !== null) {
+      out.push({ form, message: msg })
     }
-    attachConfirmBeforeSubmit(form, msg)
+  }
+  return out
+}
+
+/** Wire all matching `form[data-confirm]` in `document`. Idempotent only on first boot (one listener per form). */
+export function initConfirmSubmitForms(): void {
+  for (const { form, message } of findDataConfirmForms(document)) {
+    attachConfirmBeforeSubmit(form, message)
   }
 }

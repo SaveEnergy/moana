@@ -2,10 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   attachConfirmBeforeSubmit,
+  findDataConfirmForms,
   initConfirmSubmitForms,
   readDataConfirmMessage,
 } from './confirmSubmitForms'
-import { DATA_CONFIRM_ATTRIBUTE } from './domSelectors'
+import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
 
 function elWithAttr(value: string | null): Element {
   return {
@@ -25,6 +26,35 @@ describe('readDataConfirmMessage', () => {
 
   it('returns trimmed text', () => {
     expect(readDataConfirmMessage(elWithAttr('  Remove this?  '))).toBe('Remove this?')
+  })
+})
+
+describe('findDataConfirmForms', () => {
+  function formWithConfirm(value: string | null): HTMLFormElement {
+    return {
+      getAttribute: (name: string) => (name === DATA_CONFIRM_ATTRIBUTE ? value : null),
+    } as unknown as HTMLFormElement
+  }
+
+  it('returns only forms with a non-blank trimmed message, with message attached', () => {
+    const a = formWithConfirm('  Really?  ')
+    const b = formWithConfirm(' \t ')
+    const c = formWithConfirm(null)
+    const root = {
+      querySelectorAll: (sel: string) => {
+        expect(sel).toBe(FORM_DATA_CONFIRM_SELECTOR)
+        return [a, b, c]
+      },
+    } as unknown as ParentNode
+
+    expect(findDataConfirmForms(root)).toEqual([{ form: a, message: 'Really?' }])
+  })
+
+  it('returns empty array when selector matches nothing', () => {
+    const root = {
+      querySelectorAll: () => [],
+    } as unknown as ParentNode
+    expect(findDataConfirmForms(root)).toEqual([])
   })
 })
 

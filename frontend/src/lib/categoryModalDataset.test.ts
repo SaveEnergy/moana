@@ -32,4 +32,14 @@ describe('readCategoryEditRowDataset', () => {
     const ds = { id: '1', custom: '0' } as unknown as DOMStringMap
     expect(readCategoryEditRowDataset(ds)?.customHex).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
   })
+
+  it('accepts id "0" (only empty/whitespace id is rejected)', () => {
+    const ds = { id: '0', name: 'edge' } as unknown as DOMStringMap
+    expect(readCategoryEditRowDataset(ds)?.id).toBe('0')
+  })
+
+  it('sets isCustom only when custom is exactly "1"', () => {
+    const ds = { id: '1', custom: 'yes' } as unknown as DOMStringMap
+    expect(readCategoryEditRowDataset(ds)?.isCustom).toBe(false)
+  })
 })
