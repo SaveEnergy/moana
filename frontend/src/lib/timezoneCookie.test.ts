@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   TIMEZONE_COOKIE_NAME,
   parseMoanaTimezoneCookie,
+  setBrowserTimezoneCookie,
   timezoneCookieSegment,
 } from './timezoneCookie'
 
@@ -31,5 +32,77 @@ describe('parseMoanaTimezoneCookie', () => {
 
   it('returns null on invalid percent encoding', () => {
     expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}=%`)).toBeNull()
+  })
+})
+
+describe('setBrowserTimezoneCookie', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  function mockResolvedTimeZone(tz: string) {
+    vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockReturnValue({
+      calendar: 'gregory',
+      locale: 'en-US',
+      numberingSystem: 'latn',
+      timeZone: tz,
+    } as Intl.ResolvedDateTimeFormatOptions)
+  }
+
+  it('writes moana_tz when missing or different from the browser zone', () => {
+    mockResolvedTimeZone('Pacific/Auckland')
+    let jar = ''
+    vi.stubGlobal('document', {
+      get cookie() {
+        return jar
+      },
+      set cookie(v: string) {
+        jar = v
+      },
+    })
+
+    setBrowserTimezoneCookie()
+
+    expect(jar).toContain(`${TIMEZONE_COOKIE_NAME}=`)
+    expect(jar).toContain(encodeURIComponent('Pacific/Auckland'))
+  })
+
+  it('does not overwrite document.cookie when moana_tz already matches', () => {
+    mockResolvedTimeZone('Europe/Berlin')
+    const existing = `${TIMEZONE_COOKIE_NAME}=${encodeURIComponent('Europe/Berlin')}`
+    let jar = existing
+    let sets = 0
+    vi.stubGlobal('document', {
+      get cookie() {
+        return jar
+      },
+      set cookie(v: string) {
+        sets += 1
+        jar = v
+      },
+    })
+
+    setBrowserTimezoneCookie()
+
+    expect(sets).toBe(0)
+    expect(jar).toBe(existing)
+  })
+
+  it('no-ops when the runtime reports an empty time zone', () => {
+    mockResolvedTimeZone('')
+    let sets = 0
+    vi.stubGlobal('document', {
+      get cookie() {
+        return ''
+      },
+      set cookie(_v: string) {
+        sets += 1
+      },
+    })
+
+    setBrowserTimezoneCookie()
+
+    expect(sets).toBe(0)
   })
 })
