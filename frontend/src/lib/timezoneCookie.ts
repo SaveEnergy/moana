@@ -20,7 +20,8 @@ export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
       try {
         return decodeURIComponent(raw)
       } catch {
-        return null
+        // Malformed segment — try another `moana_tz=` later in the header.
+        continue
       }
     }
   }

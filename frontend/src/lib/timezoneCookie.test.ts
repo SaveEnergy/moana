@@ -33,6 +33,20 @@ describe('parseMoanaTimezoneCookie', () => {
   it('returns null on invalid percent encoding', () => {
     expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}=%`)).toBeNull()
   })
+
+  it('returns the first decodable moana_tz when the name is repeated', () => {
+    expect(
+      parseMoanaTimezoneCookie(
+        `${TIMEZONE_COOKIE_NAME}=Europe%2FBerlin; ${TIMEZONE_COOKIE_NAME}=America%2FNew_York`,
+      ),
+    ).toBe('Europe/Berlin')
+  })
+
+  it('skips an undecodable segment and uses a later valid moana_tz', () => {
+    expect(
+      parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}=%; ${TIMEZONE_COOKIE_NAME}=Europe%2FBerlin`),
+    ).toBe('Europe/Berlin')
+  })
 })
 
 describe('setBrowserTimezoneCookie', () => {
