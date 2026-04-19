@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { attachConfirmBeforeSubmit, readDataConfirmMessage } from './confirmSubmitForms'
+import { DATA_CONFIRM_ATTRIBUTE } from './domSelectors'
 
 function elWithAttr(value: string | null): Element {
-  return { getAttribute: () => value } as unknown as Element
+  return {
+    getAttribute: (name: string) => (name === DATA_CONFIRM_ATTRIBUTE ? value : null),
+  } as unknown as Element
 }
 
 describe('readDataConfirmMessage', () => {

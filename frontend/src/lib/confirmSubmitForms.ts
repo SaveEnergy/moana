@@ -1,9 +1,11 @@
+import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
+
 /**
  * Returns trimmed `data-confirm` or `null` if missing or whitespace-only.
  * Skips wiring so templates cannot accidentally show an empty `confirm()` dialog.
  */
 export function readDataConfirmMessage(form: Element): string | null {
-  const raw = form.getAttribute('data-confirm')
+  const raw = form.getAttribute(DATA_CONFIRM_ATTRIBUTE)
   if (raw == null) {
     return null
   }
@@ -26,7 +28,7 @@ export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string
 
 /** Wire all `form[data-confirm]` in `document`. Idempotent only on first boot (one listener per form). */
 export function initConfirmSubmitForms(): void {
-  for (const form of document.querySelectorAll<HTMLFormElement>('form[data-confirm]')) {
+  for (const form of document.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)) {
     const msg = readDataConfirmMessage(form)
     if (!msg) {
       continue

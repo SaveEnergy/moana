@@ -59,3 +59,9 @@ export const CATEGORY_MODAL_COLOR_NATIVE_SELECTOR = `#${CATEGORY_MODAL_COLOR_NAT
 export const CATEGORY_MODAL_CLOSE_SELECTOR = `#${CATEGORY_MODAL_CLOSE_ELEMENT_ID}` as const
 
 export const CATEGORY_MODAL_DISMISS_SELECTORS: readonly string[] = [CATEGORY_MODAL_CLOSE_SELECTOR]
+
+/** Destructive / irreversible POST forms opt in with this attribute (`confirmSubmitForms.ts`). */
+export const DATA_CONFIRM_ATTRIBUTE = 'data-confirm' as const
+
+/** Forms that wire `confirm()` before submit; matches `[attribute]` across templates. */
+export const FORM_DATA_CONFIRM_SELECTOR = `form[${DATA_CONFIRM_ATTRIBUTE}]` as const
