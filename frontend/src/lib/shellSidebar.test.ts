@@ -82,6 +82,14 @@ describe('initShellSidebar', () => {
     }
     matchMedia.mockReturnValue(mq)
 
+    const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
+    const backdrop = { setAttribute: vi.fn() }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
     const appShell = {
       classList: {
         add: vi.fn(),
@@ -89,14 +97,11 @@ describe('initShellSidebar', () => {
         contains: vi.fn(() => false),
       },
       addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
     }
-    const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
-    const backdrop = { setAttribute: vi.fn() }
 
     const querySelector = vi.fn((sel: string) => {
       if (sel === APP_SHELL_SELECTOR) return appShell
-      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
-      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
       return null
     })
 
@@ -110,6 +115,9 @@ describe('initShellSidebar', () => {
 
     initShellSidebar()
 
+    expect(shellQuerySelector).toHaveBeenCalledWith(APP_SIDEBAR_TOGGLE_SELECTOR)
+    expect(shellQuerySelector).toHaveBeenCalledWith(APP_SIDEBAR_BACKDROP_SELECTOR)
+    expect(shellQuerySelector).toHaveBeenCalledTimes(2)
     expect(matchMedia).toHaveBeenCalledWith(MOBILE_SHELL_MEDIA_QUERY)
     expect(toggle.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     expect(appShell.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
@@ -126,6 +134,14 @@ describe('initShellSidebar', () => {
     }
     matchMedia.mockReturnValue(mq)
 
+    const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
+    const backdrop = { setAttribute: vi.fn() }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
     const appShell = {
       classList: {
         add: vi.fn(),
@@ -133,14 +149,11 @@ describe('initShellSidebar', () => {
         contains: vi.fn(() => false),
       },
       addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
     }
-    const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
-    const backdrop = { setAttribute: vi.fn() }
 
     const querySelector = vi.fn((sel: string) => {
       if (sel === APP_SHELL_SELECTOR) return appShell
-      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
-      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
       return null
     })
 
@@ -155,6 +168,7 @@ describe('initShellSidebar', () => {
     initShellSidebar()
     initShellSidebar()
 
+    expect(shellQuerySelector).toHaveBeenCalledTimes(2)
     expect(matchMedia).toHaveBeenCalledTimes(1)
     expect(toggle.addEventListener).toHaveBeenCalledTimes(1)
     expect(appShell.addEventListener).toHaveBeenCalledTimes(1)

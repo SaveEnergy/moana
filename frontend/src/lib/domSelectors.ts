@@ -15,7 +15,7 @@ export const APP_SIDEBAR_TOGGLE_ELEMENT_ID = 'app-sidebar-toggle' as const
 /** Dimmed overlay behind the off-canvas drawer (`layout.html`). */
 export const APP_SIDEBAR_BACKDROP_ELEMENT_ID = 'app-sidebar-backdrop' as const
 
-/** `#` + shell / toggle / backdrop ids — `queryAppShell` / `querySidebarToggle` / `querySidebarBackdrop`. */
+/** `#` + shell / toggle / backdrop ids — `queryAppShell(document)` then `querySidebarToggle` / `querySidebarBackdrop` on `#app-shell` in `initShellSidebar`. */
 export const APP_SHELL_SELECTOR = `#${APP_SHELL_ELEMENT_ID}` as const
 export const APP_SIDEBAR_TOGGLE_SELECTOR = `#${APP_SIDEBAR_TOGGLE_ELEMENT_ID}` as const
 export const APP_SIDEBAR_BACKDROP_SELECTOR = `#${APP_SIDEBAR_BACKDROP_ELEMENT_ID}` as const

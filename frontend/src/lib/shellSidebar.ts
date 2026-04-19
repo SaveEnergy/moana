@@ -35,8 +35,9 @@ export function initShellSidebar(): void {
   }
   shellSidebarWiredShells.add(shell)
   const appShell = shell
-  const toggle = querySidebarToggle(document)
-  const backdrop = querySidebarBackdrop(document)
+  /* Toggle + backdrop are under `#app-shell` in `layout.html` — scope queries to the shell subtree. */
+  const toggle = querySidebarToggle(shell)
+  const backdrop = querySidebarBackdrop(shell)
 
   const mqMobile = window.matchMedia(MOBILE_SHELL_MEDIA_QUERY)
 
