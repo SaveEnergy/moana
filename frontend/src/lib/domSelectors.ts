@@ -58,6 +58,13 @@ export const CATEGORY_COLOR_NATIVE_CLASS = 'cat-color-native' as const
 /** Custom swatch row wrapping the native color input. */
 export const CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR = '.cat-color-swatch--custom' as const
 
+/** Color radio `value` that shows the native color picker (`categories.html`). */
+export const CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM = 'custom' as const
+
+/** Selects that radio when the native color input fires `input`. */
+export const CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR =
+  `input[type="radio"][value="${CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM}"]` as const
+
 export const CATEGORY_MODAL_ELEMENT_ID = 'cat-modal' as const
 export const CATEGORY_MODAL_FORM_ELEMENT_ID = 'cat-modal-form' as const
 export const CATEGORY_MODAL_ID_INPUT_ELEMENT_ID = 'cat-modal-id' as const

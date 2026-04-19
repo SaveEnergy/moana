@@ -6,6 +6,8 @@ import {
   CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR,
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
+  CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR,
+  CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM,
   CATEGORY_MODAL_DISMISS_SELECTORS,
   CATEGORY_MODAL_ELEMENT_ID,
   CATEGORY_MODAL_FORM_ELEMENT_ID,
@@ -68,7 +70,7 @@ export function initCategoryModal(): void {
   function syncCatModalPreview() {
     const cr = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="color"]:checked')
     let bg: string = CATEGORY_MODAL_DEFAULT_PREVIEW_BG
-    if (cr?.value === 'custom') {
+    if (cr?.value === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
       const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
       bg = nat?.value?.trim() || '#818cf8'
     } else if (cr?.value) {
@@ -100,7 +102,7 @@ export function initCategoryModal(): void {
         return
       }
       const wrap = t.closest(CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR)
-      const r = wrap?.querySelector<HTMLInputElement>('input[type="radio"][value="custom"]')
+      const r = wrap?.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR)
       if (r) {
         r.checked = true
         syncCatModalPreview()
@@ -149,7 +151,7 @@ export function initCategoryModal(): void {
     const customHex = (btn.dataset.customHex ?? '#818cf8').trim()
 
     if (isCustom) {
-      setRadioCheckedByValue(colorRadioByValue, 'custom', '')
+      setRadioCheckedByValue(colorRadioByValue, CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM, '')
       const nat = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
       if (nat) nat.value = sanitizeCategoryCustomHex(customHex)
     } else {
