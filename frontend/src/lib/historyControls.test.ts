@@ -1,7 +1,21 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { HISTORY_SORT_ELEMENT_ID } from './domSelectors'
-import { initHistoryControls, wireHistorySortAutoSubmit } from './historyControls'
+import { HISTORY_SORT_SELECTOR } from './domSelectors'
+import { initHistoryControls, queryHistorySortSelect, wireHistorySortAutoSubmit } from './historyControls'
+
+describe('queryHistorySortSelect', () => {
+  it('uses HISTORY_SORT_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    queryHistorySortSelect(root)
+    expect(seen).toBe(HISTORY_SORT_SELECTOR)
+  })
+})
 
 describe('wireHistorySortAutoSubmit', () => {
   it('no-ops on null', () => {
@@ -35,7 +49,7 @@ describe('initHistoryControls', () => {
 
   it('no-ops when #history-sort is absent', () => {
     vi.stubGlobal('document', {
-      getElementById: () => null,
+      querySelector: () => null,
     })
     expect(() => initHistoryControls()).not.toThrow()
   })
@@ -47,7 +61,7 @@ describe('initHistoryControls', () => {
     const select = { addEventListener, form } as unknown as HTMLSelectElement
 
     vi.stubGlobal('document', {
-      getElementById: (id: string) => (id === HISTORY_SORT_ELEMENT_ID ? select : null),
+      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
     })
 
     initHistoryControls()

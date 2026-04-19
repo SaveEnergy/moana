@@ -24,6 +24,9 @@ export const APP_SIDEBAR_CLOSE_SELECTOR = `#${APP_SIDEBAR_CLOSE_ELEMENT_ID}` as 
 /** History page sort `<select>` (`history.html`). */
 export const HISTORY_SORT_ELEMENT_ID = 'history-sort' as const
 
+/** `#` + {@link HISTORY_SORT_ELEMENT_ID} — `queryHistorySortSelect` / `querySelector`. */
+export const HISTORY_SORT_SELECTOR = `#${HISTORY_SORT_ELEMENT_ID}` as const
+
 /** Settings → add household member dialog (`settings.html`). */
 export const SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID = 'settings-add-member-dialog' as const
 export const SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID = 'settings-add-member-open' as const

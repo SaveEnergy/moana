@@ -1,8 +1,15 @@
-import { HISTORY_SORT_ELEMENT_ID } from './domSelectors'
+import { HISTORY_SORT_SELECTOR } from './domSelectors'
+
+/**
+ * Resolve the history sort `<select>` from a root (usually `document`).
+ * Uses {@link HISTORY_SORT_SELECTOR} so the id string lives only in `domSelectors.ts`.
+ */
+export function queryHistorySortSelect(root: ParentNode): HTMLSelectElement | null {
+  return root.querySelector<HTMLSelectElement>(HISTORY_SORT_SELECTOR)
+}
 
 /**
  * History page (GET `/history`): changing sort submits the form (replaces inline `onchange`).
- * Exported for unit tests; `initHistoryControls` is the boot entry.
  */
 export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): void {
   if (!select) {
@@ -18,5 +25,5 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
 }
 
 export function initHistoryControls(): void {
-  wireHistorySortAutoSubmit(document.getElementById(HISTORY_SORT_ELEMENT_ID) as HTMLSelectElement | null)
+  wireHistorySortAutoSubmit(queryHistorySortSelect(document))
 }

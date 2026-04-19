@@ -10,6 +10,8 @@ import {
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   DATA_CONFIRM_ATTRIBUTE,
   FORM_DATA_CONFIRM_SELECTOR,
+  HISTORY_SORT_ELEMENT_ID,
+  HISTORY_SORT_SELECTOR,
   LOCAL_TIME_ELEMENTS_SELECTOR,
   TIME_DATETIME_ATTRIBUTE,
 } from './domSelectors'
@@ -53,5 +55,11 @@ describe('domSelectors data-confirm forms', () => {
 describe('domSelectors local time', () => {
   it('targets js-local-time elements with the datetime attribute', () => {
     expect(LOCAL_TIME_ELEMENTS_SELECTOR).toBe(`time.js-local-time[${TIME_DATETIME_ATTRIBUTE}]`)
+  })
+})
+
+describe('domSelectors history sort', () => {
+  it('builds #id from HISTORY_SORT_ELEMENT_ID', () => {
+    expect(HISTORY_SORT_SELECTOR).toBe(`#${HISTORY_SORT_ELEMENT_ID}`)
   })
 })
