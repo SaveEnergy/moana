@@ -8,7 +8,7 @@ import { initConfirmSubmitForms } from './lib/confirmSubmitForms'
 
 /**
  * Ordered client initializers (single source of truth for `bootApp` order).
- * Each no-ops when its DOM is missing. Documented in `design.md`; see `boot.test.ts`.
+ * Each no-ops when its DOM is missing. Documented in `design.md`; see `boot.test.ts` / `bootInitializers.test.ts`.
  */
 export const BOOT_APP_INITIALIZERS: ReadonlyArray<() => void> = [
   setBrowserTimezoneCookie,
