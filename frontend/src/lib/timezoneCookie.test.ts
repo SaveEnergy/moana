@@ -89,6 +89,28 @@ describe('setBrowserTimezoneCookie', () => {
     expect(jar).toBe(existing)
   })
 
+  it('does not write twice when run twice and moana_tz already matches', () => {
+    mockResolvedTimeZone('Europe/Berlin')
+    const existing = `${TIMEZONE_COOKIE_NAME}=${encodeURIComponent('Europe/Berlin')}`
+    let jar = existing
+    let sets = 0
+    vi.stubGlobal('document', {
+      get cookie() {
+        return jar
+      },
+      set cookie(v: string) {
+        sets += 1
+        jar = v
+      },
+    })
+
+    setBrowserTimezoneCookie()
+    setBrowserTimezoneCookie()
+
+    expect(sets).toBe(0)
+    expect(jar).toBe(existing)
+  })
+
   it('no-ops when the runtime reports an empty time zone', () => {
     mockResolvedTimeZone('')
     let sets = 0

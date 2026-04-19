@@ -35,6 +35,25 @@ describe('applyLocalTimeElements', () => {
     expect(el.textContent).toBe(expected)
   })
 
+  it('is stable when apply runs twice on the same nodes (double bootApp)', () => {
+    const iso = '2020-06-15T14:30:00.000Z'
+    const expected = formatLocalTimeLabel(iso)
+    expect(expected).not.toBeNull()
+
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? iso : null),
+      textContent: '',
+    } as unknown as HTMLTimeElement
+    const root = {
+      querySelectorAll: () => [el],
+    } as unknown as ParentNode
+
+    applyLocalTimeElements(root)
+    applyLocalTimeElements(root)
+
+    expect(el.textContent).toBe(expected)
+  })
+
   it('no-ops when the selector matches nothing', () => {
     const root = { querySelectorAll: () => [] } as unknown as ParentNode
     expect(() => applyLocalTimeElements(root)).not.toThrow()
