@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 import { applyLocalTimeElements, createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
 
 describe('formatLocalTimeLabel', () => {
@@ -38,6 +38,28 @@ describe('applyLocalTimeElements', () => {
   it('no-ops when the selector matches nothing', () => {
     const root = { querySelectorAll: () => [] } as unknown as ParentNode
     expect(() => applyLocalTimeElements(root)).not.toThrow()
+  })
+
+  it('queries LOCAL_TIME_ELEMENTS_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelectorAll: (sel: string) => {
+        seen = sel
+        return []
+      },
+    } as unknown as ParentNode
+    applyLocalTimeElements(root)
+    expect(seen).toBe(LOCAL_TIME_ELEMENTS_SELECTOR)
+  })
+
+  it('does not overwrite text when datetime is invalid', () => {
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? 'not-a-date' : null),
+      textContent: 'keep',
+    } as unknown as HTMLTimeElement
+    const root = { querySelectorAll: () => [el] } as unknown as ParentNode
+    applyLocalTimeElements(root)
+    expect(el.textContent).toBe('keep')
   })
 
   it('skips nodes with a missing datetime attribute', () => {

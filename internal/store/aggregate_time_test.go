@@ -13,9 +13,11 @@ func TestAppendOccurredAtRange(t *testing.T) {
 
 	t.Run("neither", func(t *testing.T) {
 		t.Parallel()
-		q, args := appendOccurredAtRange("SELECT 1", []any{42}, nil, nil)
-		if q != "SELECT 1" {
-			t.Fatalf("q %q", q)
+		var b strings.Builder
+		b.WriteString("SELECT 1")
+		args := appendOccurredAtRange(&b, []any{42}, nil, nil)
+		if b.String() != "SELECT 1" {
+			t.Fatalf("q %q", b.String())
 		}
 		if len(args) != 1 || args[0] != 42 {
 			t.Fatalf("args %v", args)
@@ -24,9 +26,11 @@ func TestAppendOccurredAtRange(t *testing.T) {
 
 	t.Run("from_only", func(t *testing.T) {
 		t.Parallel()
-		q, args := appendOccurredAtRange("SELECT 1", []any{1}, &from, nil)
-		if !strings.Contains(q, "t.occurred_at >=") || strings.Contains(q, "t.occurred_at <=") {
-			t.Fatalf("q %q", q)
+		var b strings.Builder
+		b.WriteString("SELECT 1")
+		args := appendOccurredAtRange(&b, []any{1}, &from, nil)
+		if !strings.Contains(b.String(), "t.occurred_at >=") || strings.Contains(b.String(), "t.occurred_at <=") {
+			t.Fatalf("q %q", b.String())
 		}
 		if len(args) != 2 {
 			t.Fatalf("args %v", args)
@@ -35,9 +39,11 @@ func TestAppendOccurredAtRange(t *testing.T) {
 
 	t.Run("to_only", func(t *testing.T) {
 		t.Parallel()
-		q, args := appendOccurredAtRange("SELECT 1", []any{1}, nil, &to)
-		if !strings.Contains(q, "t.occurred_at <=") || strings.Contains(q, "t.occurred_at >=") {
-			t.Fatalf("q %q", q)
+		var b strings.Builder
+		b.WriteString("SELECT 1")
+		args := appendOccurredAtRange(&b, []any{1}, nil, &to)
+		if !strings.Contains(b.String(), "t.occurred_at <=") || strings.Contains(b.String(), "t.occurred_at >=") {
+			t.Fatalf("q %q", b.String())
 		}
 		if len(args) != 2 {
 			t.Fatalf("args %v", args)
@@ -46,9 +52,11 @@ func TestAppendOccurredAtRange(t *testing.T) {
 
 	t.Run("both", func(t *testing.T) {
 		t.Parallel()
-		q, args := appendOccurredAtRange("SELECT 1", []any{1}, &from, &to)
-		if !strings.Contains(q, "t.occurred_at >=") || !strings.Contains(q, "t.occurred_at <=") {
-			t.Fatalf("q %q", q)
+		var b strings.Builder
+		b.WriteString("SELECT 1")
+		args := appendOccurredAtRange(&b, []any{1}, &from, &to)
+		if !strings.Contains(b.String(), "t.occurred_at >=") || !strings.Contains(b.String(), "t.occurred_at <=") {
+			t.Fatalf("q %q", b.String())
 		}
 		if len(args) != 3 {
 			t.Fatalf("args %v", args)

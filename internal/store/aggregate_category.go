@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -22,16 +23,20 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	if limit < 1 {
 		limit = 5
 	}
-	q := `SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
-` + sqlAggregateFromHouseholdTx + ` AND t.amount_cents < 0`
+	var b strings.Builder
+	b.Grow(512)
+	b.WriteString(`SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
+`)
+	b.WriteString(sqlAggregateFromHouseholdTx)
+	b.WriteString(` AND t.amount_cents < 0`)
 	// cap: household + optional from/to + limit.
 	args := make([]any, 0, 4)
 	args = append(args, householdID)
-	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
-	q += ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
+	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
+	b.WriteString(` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`)
 	args = append(args, limit)
 
-	rows, err := s.DB.QueryContext(ctx, q, args...)
+	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,25 +67,28 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 	if kind != "income" && kind != "expense" {
 		return nil, ErrInvalidCategoryAmountKind
 	}
-	q := `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
-` + sqlAggregateFromHouseholdTx
+	var b strings.Builder
+	b.Grow(768)
+	b.WriteString(`SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
+`)
+	b.WriteString(sqlAggregateFromHouseholdTx)
 	// cap: household + optional from/to.
 	args := make([]any, 0, 3)
 	args = append(args, householdID)
-	q, args = appendOccurredAtRange(q, args, fromUTC, toUTC)
+	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
 	if kind == "income" {
-		q += ` AND t.amount_cents > 0`
+		b.WriteString(` AND t.amount_cents > 0`)
 	} else {
-		q += ` AND t.amount_cents < 0`
+		b.WriteString(` AND t.amount_cents < 0`)
 	}
-	q += ` GROUP BY t.category_id`
+	b.WriteString(` GROUP BY t.category_id`)
 	if kind == "income" {
-		q += ` ORDER BY SUM(t.amount_cents) DESC`
+		b.WriteString(` ORDER BY SUM(t.amount_cents) DESC`)
 	} else {
-		q += ` ORDER BY SUM(t.amount_cents) ASC`
+		b.WriteString(` ORDER BY SUM(t.amount_cents) ASC`)
 	}
 
-	rows, err := s.DB.QueryContext(ctx, q, args...)
+	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
 	}

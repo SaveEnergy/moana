@@ -10,6 +10,11 @@ describe('clickEventTargetElement', () => {
     expect(clickEventTargetElement({ target: div } as unknown as MouseEvent)).toBe(div)
   })
 
+  it('returns the target when it has closest() but is not an Element (legacy / partial DOM)', () => {
+    const fake = { closest: () => null as Element | null }
+    expect(clickEventTargetElement({ target: fake } as unknown as MouseEvent)).toBe(fake)
+  })
+
   it('returns parentElement when target has no closest (e.g. text-like node)', () => {
     const parent = {
       closest: (sel: string) => (sel === '.btn' ? parent : null),
