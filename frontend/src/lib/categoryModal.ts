@@ -20,36 +20,36 @@ import {
   CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   CATEGORY_MODAL_DISMISS_SELECTORS,
-  CATEGORY_MODAL_ELEMENT_ID,
-  CATEGORY_MODAL_FORM_ELEMENT_ID,
-  CATEGORY_MODAL_ID_INPUT_ELEMENT_ID,
-  CATEGORY_MODAL_NAME_ELEMENT_ID,
-  CATEGORY_MODAL_OPEN_CREATE_ELEMENT_ID,
+  CATEGORY_MODAL_FORM_SELECTOR,
+  CATEGORY_MODAL_ID_INPUT_SELECTOR,
+  CATEGORY_MODAL_NAME_SELECTOR,
+  CATEGORY_MODAL_OPEN_CREATE_SELECTOR,
   CATEGORY_MODAL_OPEN_EDIT_SELECTOR,
-  CATEGORY_MODAL_PREVIEW_ELEMENT_ID,
   CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS,
-  CATEGORY_MODAL_PREVIEW_ICON_ELEMENT_ID,
-  CATEGORY_MODAL_SUBMIT_ELEMENT_ID,
-  CATEGORY_MODAL_TITLE_ELEMENT_ID,
+  CATEGORY_MODAL_PREVIEW_ICON_SELECTOR,
+  CATEGORY_MODAL_PREVIEW_SELECTOR,
+  CATEGORY_MODAL_SELECTOR,
+  CATEGORY_MODAL_SUBMIT_SELECTOR,
+  CATEGORY_MODAL_TITLE_SELECTOR,
   MOANA_ICON_CAT_PREVIEW_CLASS,
   MOANA_ICON_SVG_SELECTOR,
 } from './domSelectors'
 import { setRadioCheckedByValue } from './radioMap'
 
 export function initCategoryModal(): void {
-  const dialog = document.getElementById(CATEGORY_MODAL_ELEMENT_ID) as HTMLDialogElement | null
+  const dialog = document.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
   if (!dialog) {
     return
   }
 
-  const form = document.getElementById(CATEGORY_MODAL_FORM_ELEMENT_ID) as HTMLFormElement | null
-  const idInput = document.getElementById(CATEGORY_MODAL_ID_INPUT_ELEMENT_ID) as HTMLInputElement | null
-  const titleEl = document.getElementById(CATEGORY_MODAL_TITLE_ELEMENT_ID)
-  const submitBtn = document.getElementById(CATEGORY_MODAL_SUBMIT_ELEMENT_ID)
-  const preview = document.getElementById(CATEGORY_MODAL_PREVIEW_ELEMENT_ID)
-  const iconWrap = document.getElementById(CATEGORY_MODAL_PREVIEW_ICON_ELEMENT_ID)
-  const nameInput = document.getElementById(CATEGORY_MODAL_NAME_ELEMENT_ID) as HTMLInputElement | null
-  const addCategoryBtn = document.getElementById(CATEGORY_MODAL_OPEN_CREATE_ELEMENT_ID)
+  const form = document.querySelector<HTMLFormElement>(CATEGORY_MODAL_FORM_SELECTOR)
+  const idInput = document.querySelector<HTMLInputElement>(CATEGORY_MODAL_ID_INPUT_SELECTOR)
+  const titleEl = document.querySelector<HTMLElement>(CATEGORY_MODAL_TITLE_SELECTOR)
+  const submitBtn = document.querySelector<HTMLElement>(CATEGORY_MODAL_SUBMIT_SELECTOR)
+  const preview = document.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_SELECTOR)
+  const iconWrap = document.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_ICON_SELECTOR)
+  const nameInput = document.querySelector<HTMLInputElement>(CATEGORY_MODAL_NAME_SELECTOR)
+  const addCategoryBtn = document.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
 
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return
