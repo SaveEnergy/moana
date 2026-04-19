@@ -43,20 +43,20 @@ export function initCategoryModal(): void {
   if (!dialog) {
     return
   }
+  if (categoryModalInitialized.has(dialog)) {
+    return
+  }
 
-  const form = document.querySelector<HTMLFormElement>(CATEGORY_MODAL_FORM_SELECTOR)
-  const idInput = document.querySelector<HTMLInputElement>(CATEGORY_MODAL_ID_INPUT_SELECTOR)
-  const titleEl = document.querySelector<HTMLElement>(CATEGORY_MODAL_TITLE_SELECTOR)
-  const submitBtn = document.querySelector<HTMLElement>(CATEGORY_MODAL_SUBMIT_SELECTOR)
-  const preview = document.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_SELECTOR)
-  const iconWrap = document.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_ICON_SELECTOR)
-  const nameInput = document.querySelector<HTMLInputElement>(CATEGORY_MODAL_NAME_SELECTOR)
+  const form = dialog.querySelector<HTMLFormElement>(CATEGORY_MODAL_FORM_SELECTOR)
+  const idInput = dialog.querySelector<HTMLInputElement>(CATEGORY_MODAL_ID_INPUT_SELECTOR)
+  const titleEl = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_TITLE_SELECTOR)
+  const submitBtn = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_SUBMIT_SELECTOR)
+  const preview = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_SELECTOR)
+  const iconWrap = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_ICON_SELECTOR)
+  const nameInput = dialog.querySelector<HTMLInputElement>(CATEGORY_MODAL_NAME_SELECTOR)
   const addCategoryBtn = document.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
 
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
-    return
-  }
-  if (categoryModalInitialized.has(dialog)) {
     return
   }
   categoryModalInitialized.add(dialog)
