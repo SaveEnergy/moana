@@ -1,10 +1,34 @@
 import { describe, expect, it } from 'vitest'
 
-import { setRadioCheckedByValue } from './radioMap'
+import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
 
 function radio(checked = false): HTMLInputElement {
   return { checked } as HTMLInputElement
 }
+
+describe('buildRadioMapByValue', () => {
+  it('indexes radios by value for the given selector', () => {
+    const a = { value: 'x' } as HTMLInputElement
+    const b = { value: '' } as HTMLInputElement
+    const scope = {
+      querySelectorAll: () => [a, b] as unknown as NodeListOf<HTMLInputElement>,
+    } as unknown as ParentNode
+    const m = buildRadioMapByValue(scope, 'input[type="radio"]')
+    expect(m.get('x')).toBe(a)
+    expect(m.get('')).toBe(b)
+    expect(m.size).toBe(2)
+  })
+
+  it('last duplicate value wins', () => {
+    const first = { value: 'dup' } as HTMLInputElement
+    const second = { value: 'dup' } as HTMLInputElement
+    const scope = {
+      querySelectorAll: () => [first, second] as unknown as NodeListOf<HTMLInputElement>,
+    } as unknown as ParentNode
+    const m = buildRadioMapByValue(scope, 'input[type="radio"]')
+    expect(m.get('dup')).toBe(second)
+  })
+})
 
 describe('setRadioCheckedByValue', () => {
   it('checks preferred when the key exists', () => {

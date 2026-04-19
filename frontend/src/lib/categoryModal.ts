@@ -34,7 +34,7 @@ import {
   MOANA_ICON_CAT_PREVIEW_CLASS,
   MOANA_ICON_SVG_SELECTOR,
 } from './domSelectors'
-import { setRadioCheckedByValue } from './radioMap'
+import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
 
 export function initCategoryModal(): void {
   const dialog = document.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
@@ -68,23 +68,8 @@ export function initCategoryModal(): void {
   /** Resolved once — avoids repeated `querySelector` on every preview sync (`input` / `change`). */
   const colorNativeInput = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_NATIVE_SELECTOR)
 
-  const CATEGORY_MODAL_RADIO_GROUP_SELECTORS = {
-    color: CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
-    icon: CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
-  } as const
-
-  function radiosByValue(kind: keyof typeof CATEGORY_MODAL_RADIO_GROUP_SELECTORS): Map<string, HTMLInputElement> {
-    const m = new Map<string, HTMLInputElement>()
-    for (const r of catForm.querySelectorAll<HTMLInputElement>(
-      CATEGORY_MODAL_RADIO_GROUP_SELECTORS[kind],
-    )) {
-      m.set(r.value, r)
-    }
-    return m
-  }
-
-  const colorRadioByValue = radiosByValue('color')
-  const iconRadioByValue = radiosByValue('icon')
+  const colorRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_COLOR_RADIOS_SELECTOR)
+  const iconRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_ICON_RADIOS_SELECTOR)
 
   function syncCatModalPreview() {
     const cr = catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CHECKED_SELECTOR)

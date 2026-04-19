@@ -4,6 +4,21 @@
  */
 
 /**
+ * Build a map of `HTMLInputElement.value` → input for radios under `scope` matching `radiosSelector`.
+ * Later duplicates overwrite earlier entries (same as `querySelectorAll` iteration order).
+ */
+export function buildRadioMapByValue(
+  scope: ParentNode,
+  radiosSelector: string,
+): Map<string, HTMLInputElement> {
+  const m = new Map<string, HTMLInputElement>()
+  for (const r of scope.querySelectorAll<HTMLInputElement>(radiosSelector)) {
+    m.set(r.value, r)
+  }
+  return m
+}
+
+/**
  * Select a radio from a map keyed by `HTMLInputElement.value`.
  * If `preferred` is not a key, selects `fallbackKey` (default `""` for auto/unset radios).
  * @returns whether a matching input existed and was checked.
