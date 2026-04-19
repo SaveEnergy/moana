@@ -14,41 +14,43 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	if limit < 0 {
 		limit = 0
 	}
-	q := sqlTransactionSelectFromHousehold + `
-WHERE owner.household_id = ?`
+	var b strings.Builder
+	b.Grow(512)
+	b.WriteString(sqlTransactionSelectFromHousehold)
+	b.WriteString("\nWHERE owner.household_id = ?")
 	// At most: household, from, to, 2×search, limit.
 	args := make([]any, 0, 6)
 	args = append(args, householdID)
 	if f.FromUTC != nil {
-		q += ` AND t.occurred_at >= ?`
+		b.WriteString(` AND t.occurred_at >= ?`)
 		args = append(args, timeutil.FormatSQLiteUTC(*f.FromUTC))
 	}
 	if f.ToUTC != nil {
-		q += ` AND t.occurred_at <= ?`
+		b.WriteString(` AND t.occurred_at <= ?`)
 		args = append(args, timeutil.FormatSQLiteUTC(*f.ToUTC))
 	}
 	switch strings.TrimSpace(f.Kind) {
 	case "income":
-		q += ` AND t.amount_cents > 0`
+		b.WriteString(` AND t.amount_cents > 0`)
 	case "expense":
-		q += ` AND t.amount_cents < 0`
+		b.WriteString(` AND t.amount_cents < 0`)
 	}
 	if search := strings.TrimSpace(f.Search); search != "" {
 		term := "%" + escapeSQLLikePattern(search) + "%"
-		q += ` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`
+		b.WriteString(` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`)
 		args = append(args, term, term)
 	}
 	if f.OldestFirst {
-		q += ` ORDER BY t.occurred_at ASC, t.id ASC`
+		b.WriteString(` ORDER BY t.occurred_at ASC, t.id ASC`)
 	} else {
-		q += ` ORDER BY t.occurred_at DESC, t.id DESC`
+		b.WriteString(` ORDER BY t.occurred_at DESC, t.id DESC`)
 	}
 	if limit > 0 {
-		q += ` LIMIT ?`
+		b.WriteString(` LIMIT ?`)
 		args = append(args, limit)
 	}
 
-	rows, err := s.DB.QueryContext(ctx, q, args...)
+	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
 	}
