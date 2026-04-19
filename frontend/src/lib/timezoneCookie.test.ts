@@ -30,6 +30,10 @@ describe('parseMoanaTimezoneCookie', () => {
     ).toBe('America/New_York')
   })
 
+  it('handles a leading semicolon segment (empty first chunk)', () => {
+    expect(parseMoanaTimezoneCookie(`; ${TIMEZONE_COOKIE_NAME}=Europe%2FBerlin`)).toBe('Europe/Berlin')
+  })
+
   it('returns null on invalid percent encoding', () => {
     expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}=%`)).toBeNull()
   })

@@ -10,20 +10,27 @@ export function timezoneCookieSegment(tz: string): string {
 /**
  * Read `moana_tz` from a `document.cookie`-style string (testable without JSDOM).
  * Returns null if missing or not decodable.
+ * Scans semicolon-separated segments without `split` so large `document.cookie` strings avoid an extra array allocation.
  */
 export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
   const prefix = `${TIMEZONE_COOKIE_NAME}=`
-  for (const part of cookieHeader.split(';')) {
-    const s = part.trim()
+  let pos = 0
+  while (pos < cookieHeader.length) {
+    const semi = cookieHeader.indexOf(';', pos)
+    const end = semi === -1 ? cookieHeader.length : semi
+    const s = cookieHeader.slice(pos, end).trim()
     if (s.startsWith(prefix)) {
       const raw = s.slice(prefix.length)
       try {
         return decodeURIComponent(raw)
       } catch {
         // Malformed segment — try another `moana_tz=` later in the header.
-        continue
       }
     }
+    if (semi === -1) {
+      break
+    }
+    pos = semi + 1
   }
   return null
 }
