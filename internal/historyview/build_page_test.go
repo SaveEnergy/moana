@@ -21,7 +21,7 @@ func TestBuildPage_invalidDateRange_returnsErrorPayload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if data.Error != "Invalid date range." {
+	if data.Error != InvalidDateRangeMessage {
 		t.Fatalf("Error=%q want invalid date message", data.Error)
 	}
 	if !data.FilterActive {
@@ -44,7 +44,7 @@ func TestBuildPage_partialDateOnly_returnsErrorPayload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if data.Error != "Invalid date range." {
+	if data.Error != InvalidDateRangeMessage {
 		t.Fatalf("Error=%q", data.Error)
 	}
 }

@@ -10,6 +10,7 @@ import (
 
 	"moana/internal/dashboard"
 	"moana/internal/handlers"
+	"moana/internal/historyview"
 	"moana/internal/server"
 	"moana/internal/testutil"
 	"moana/internal/txform"
@@ -389,7 +390,7 @@ func TestHistoryPage_invalidDateRangeShowsBanner(t *testing.T) {
 	}
 	body, _ := io.ReadAll(resp.Body)
 	s := string(body)
-	if !strings.Contains(s, "Invalid date range.") {
+	if !strings.Contains(s, historyview.InvalidDateRangeMessage) {
 		t.Fatalf("expected date validation banner, got: %s", s[:min(600, len(s))])
 	}
 	assertBodyHasErrorAlert(t, s)
@@ -417,7 +418,7 @@ func TestHistoryPage_partialDateRangeShowsBanner(t *testing.T) {
 			}
 			body, _ := io.ReadAll(resp.Body)
 			s := string(body)
-			if !strings.Contains(s, "Invalid date range.") {
+			if !strings.Contains(s, historyview.InvalidDateRangeMessage) {
 				t.Fatalf("GET %s: expected date validation copy, got: %s", path, s[:min(600, len(s))])
 			}
 			assertBodyHasErrorAlert(t, s)

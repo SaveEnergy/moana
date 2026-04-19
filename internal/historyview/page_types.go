@@ -2,6 +2,9 @@ package historyview
 
 import "moana/internal/store"
 
+// InvalidDateRangeMessage is shown when [BuildPage] cannot apply date filters (partial from/to or unparseable dates).
+const InvalidDateRangeMessage = "Invalid date range."
+
 // Nav holds sidebar link targets for the history filter/sort controls.
 type Nav struct {
 	LinkAll     string

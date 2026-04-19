@@ -62,7 +62,7 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 // invalidDateRangePage builds the standard /history payload when from/to cannot be applied.
 func invalidDateRangePage(p HistoryURLParams, historyReturn string, q url.Values) PageData {
 	return PageData{
-		Error:            "Invalid date range.",
+		Error:            InvalidDateRangeMessage,
 		Kind:             p.kind,
 		Search:           p.search,
 		Sort:             p.sortLabel,
