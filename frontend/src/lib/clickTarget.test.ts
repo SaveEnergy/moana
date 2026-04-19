@@ -23,6 +23,11 @@ describe('clickEventTargetElement', () => {
     expect(clickEventTargetElement({ target: text } as unknown as MouseEvent)).toBe(parent)
   })
 
+  it('returns null when text-like node has no parentElement', () => {
+    const text = { parentElement: null }
+    expect(clickEventTargetElement({ target: text } as unknown as MouseEvent)).toBeNull()
+  })
+
   it('returns null for null target', () => {
     expect(clickEventTargetElement({ target: null } as unknown as MouseEvent)).toBeNull()
   })
