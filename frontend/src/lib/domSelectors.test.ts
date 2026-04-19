@@ -23,6 +23,7 @@ import {
   CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
   CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM,
+  CATEGORY_PAGE_INTRO_SECTION_SELECTOR,
   CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR,
   CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
@@ -71,6 +72,12 @@ describe('domSelectors category modal radios', () => {
 
   it('keeps custom color radio value in sync with template', () => {
     expect(CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM).toBe('custom')
+  })
+})
+
+describe('domSelectors categories page', () => {
+  it('keeps intro section class aligned with categories.html', () => {
+    expect(CATEGORY_PAGE_INTRO_SECTION_SELECTOR).toBe('.cat-page-intro')
   })
 })
 

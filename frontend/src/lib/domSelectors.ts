@@ -51,7 +51,9 @@ export const SETTINGS_ADD_MEMBER_DISMISS_SELECTORS: readonly string[] = [
   SETTINGS_ADD_MEMBER_CANCEL_SELECTOR,
 ]
 
-/** Categories list + modal (`categories.html`). */
+/** Intro block with Add category (`categories.html`); `initCategoryModal` resolves the open control here first. */
+export const CATEGORY_PAGE_INTRO_SECTION_SELECTOR = '.cat-page-intro' as const
+/** Categories list (`categories.html`). */
 export const CATEGORY_LIST_SECTION_SELECTOR = '.cat-list-section' as const
 export const CATEGORY_MODAL_OPEN_EDIT_SELECTOR = '.cat-modal-open-edit' as const
 

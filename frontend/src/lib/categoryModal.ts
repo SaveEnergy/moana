@@ -10,6 +10,7 @@ import {
   CATEGORY_COLOR_NATIVE_CLASS,
   CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR,
   CATEGORY_LIST_SECTION_SELECTOR,
+  CATEGORY_PAGE_INTRO_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
@@ -54,7 +55,10 @@ export function initCategoryModal(): void {
   const preview = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_SELECTOR)
   const iconWrap = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_ICON_SELECTOR)
   const nameInput = dialog.querySelector<HTMLInputElement>(CATEGORY_MODAL_NAME_SELECTOR)
-  const addCategoryBtn = document.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
+  const intro = document.querySelector(CATEGORY_PAGE_INTRO_SECTION_SELECTOR)
+  const addCategoryBtn =
+    intro?.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR) ??
+    document.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
 
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return

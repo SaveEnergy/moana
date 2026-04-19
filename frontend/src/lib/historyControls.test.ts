@@ -97,4 +97,21 @@ describe('initHistoryControls', () => {
 
     expect(addEventListener).toHaveBeenCalledTimes(1)
   })
+
+  it('does not re-wire when wireHistorySortAutoSubmit ran before init', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+    })
+
+    wireHistorySortAutoSubmit(select)
+    addEventListener.mockClear()
+    initHistoryControls()
+
+    expect(addEventListener).not.toHaveBeenCalled()
+  })
 })
