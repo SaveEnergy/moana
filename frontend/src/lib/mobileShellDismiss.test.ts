@@ -26,4 +26,14 @@ describe('shouldCloseMobileSidebarFromShellClick', () => {
     const e = { target: link } as unknown as MouseEvent
     expect(shouldCloseMobileSidebarFromShellClick(e, backdrop)).toBe(false)
   })
+
+  it('returns false when clickEventTargetElement resolves null (missing or opaque target)', () => {
+    expect(shouldCloseMobileSidebarFromShellClick({ target: null } as unknown as MouseEvent, null)).toBe(
+      false,
+    )
+    expect(shouldCloseMobileSidebarFromShellClick({ target: undefined } as unknown as MouseEvent, null)).toBe(
+      false,
+    )
+    expect(shouldCloseMobileSidebarFromShellClick({ target: 0 } as unknown as MouseEvent, null)).toBe(false)
+  })
 })
