@@ -13,17 +13,25 @@ export function readDataConfirmMessage(form: Element): string | null {
   return msg === '' ? null : msg
 }
 
+/** Forms that already have a `submit` guard (`attachConfirmBeforeSubmit` is safe to call more than once). */
+const confirmSubmitWiredForms = new WeakSet<HTMLFormElement>()
+
 /**
  * Destructive or irreversible POST forms: confirm in the capture/bubble submit path.
  * Templates use `data-confirm="message"` instead of inline `onsubmit="return confirm(...)"`.
+ * No-ops if `form` is already wired (same `WeakSet` as `initConfirmSubmitForms`).
  */
 export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string): void {
+  if (confirmSubmitWiredForms.has(form)) {
+    return
+  }
   form.addEventListener('submit', (e) => {
     /* global `confirm` — Vitest stubs via `globalThis` / `stubGlobal`; avoid `window` (Node tests). */
     if (!confirm(message)) {
       e.preventDefault()
     }
   })
+  confirmSubmitWiredForms.add(form)
 }
 
 /**
@@ -41,16 +49,9 @@ export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormEl
   return out
 }
 
-/** Forms that already have a capture/bubble `submit` guard (safe if `bootApp` runs twice). */
-const confirmSubmitWiredForms = new WeakSet<HTMLFormElement>()
-
-/** Wire all matching `form[data-confirm]` in `document`. Skips forms already wired in this session; `WeakSet` marks after `attachConfirmBeforeSubmit`. */
+/** Wire all matching `form[data-confirm]` in `document`. Idempotent via `attachConfirmBeforeSubmit`. */
 export function initConfirmSubmitForms(): void {
   for (const { form, message } of findDataConfirmForms(document)) {
-    if (confirmSubmitWiredForms.has(form)) {
-      continue
-    }
     attachConfirmBeforeSubmit(form, message)
-    confirmSubmitWiredForms.add(form)
   }
 }

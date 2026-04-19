@@ -95,6 +95,14 @@ describe('attachConfirmBeforeSubmit', () => {
     onSubmit!(e)
     expect(e.preventDefault).not.toHaveBeenCalled()
   })
+
+  it('does not stack submit listeners when attach runs twice on the same form', () => {
+    const addEventListener = vi.fn()
+    const form = { addEventListener } as unknown as HTMLFormElement
+    attachConfirmBeforeSubmit(form, 'Once')
+    attachConfirmBeforeSubmit(form, 'Twice')
+    expect(addEventListener).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('initConfirmSubmitForms', () => {
