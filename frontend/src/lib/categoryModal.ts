@@ -3,6 +3,7 @@ import {
   resolveCategoryModalPreviewBackground,
   sanitizeCategoryCustomHex,
 } from './categoryColor'
+import { readCategoryEditRowDataset } from './categoryModalDataset'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
 import {
@@ -150,28 +151,25 @@ export function initCategoryModal(): void {
   }
 
   function openEditModal(btn: HTMLElement) {
-    const id = btn.dataset.id
-    if (!id) return
+    const row = readCategoryEditRowDataset(btn.dataset)
+    if (!row) {
+      return
+    }
     catForm.action = '/categories/update'
-    catId.value = id
+    catId.value = row.id
     catTitle.textContent = 'Edit category'
     catSubmit.textContent = 'Save changes'
 
-    catName.value = btn.dataset.name ?? ''
+    catName.value = row.name
 
-    const rawColor = (btn.dataset.color ?? '').trim()
-    const isCustom = btn.dataset.custom === '1'
-    const customHex = (btn.dataset.customHex ?? CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT).trim()
-
-    if (isCustom) {
+    if (row.isCustom) {
       setRadioCheckedByValue(colorRadioByValue, CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM, '')
-      if (colorNativeInput) colorNativeInput.value = sanitizeCategoryCustomHex(customHex)
+      if (colorNativeInput) colorNativeInput.value = sanitizeCategoryCustomHex(row.customHex)
     } else {
-      setRadioCheckedByValue(colorRadioByValue, rawColor, '')
+      setRadioCheckedByValue(colorRadioByValue, row.rawColor, '')
     }
 
-    const iconVal = (btn.dataset.icon ?? '').trim()
-    setRadioCheckedByValue(iconRadioByValue, iconVal, '')
+    setRadioCheckedByValue(iconRadioByValue, row.iconVal, '')
 
     syncCatModalPreview()
     catName.focus()
