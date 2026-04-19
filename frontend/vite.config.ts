@@ -6,10 +6,12 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: __dirname,
   esbuild: {
     legalComments: 'none',
+    /* Production bundle: smaller parse + no stray debugger pauses in shipped `app.js`. */
+    ...(mode === 'production' ? { drop: ['console', 'debugger'] as const } : {}),
   },
   build: {
     target: 'es2022',
@@ -37,4 +39,4 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     passWithNoTests: false,
   },
-})
+}))
