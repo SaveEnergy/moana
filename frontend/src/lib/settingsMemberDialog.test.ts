@@ -50,24 +50,49 @@ describe('initSettingsMemberDialog', () => {
     expect(() => initSettingsMemberDialog()).not.toThrow()
   })
 
-  it('wires open button to dialog.showModal and attaches dismiss click handler', () => {
+  it('resolves open button from document when dialog has no parent', () => {
     const showModal = vi.fn()
-    const addEventListener = vi.fn()
-    const dialog = { showModal, addEventListener } as unknown as HTMLDialogElement
-
+    const dialogAdd = vi.fn()
     const openAddEventListener = vi.fn()
     const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
 
+    const dialog = {
+      showModal,
+      addEventListener: dialogAdd,
+      parentElement: null,
+    } as unknown as HTMLDialogElement
+
     vi.stubGlobal('document', {
       querySelector: (sel: string) => {
-        if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) {
-          return dialog
-        }
-        if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) {
-          return openBtn
-        }
+        if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) return dialog
+        if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) return openBtn
         return null
       },
+    })
+
+    initSettingsMemberDialog()
+
+    expect(openAddEventListener).toHaveBeenCalledTimes(1)
+  })
+
+  it('wires open button to dialog.showModal and attaches dismiss click handler', () => {
+    const showModal = vi.fn()
+    const addEventListener = vi.fn()
+    const openAddEventListener = vi.fn()
+    const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
+
+    const parent = {
+      querySelector: (sel: string) => (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR ? openBtn : null),
+    } as unknown as ParentNode
+    const dialog = {
+      showModal,
+      addEventListener,
+      parentElement: parent,
+    } as unknown as HTMLDialogElement
+
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) =>
+        sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
     })
 
     initSettingsMemberDialog()
@@ -83,21 +108,21 @@ describe('initSettingsMemberDialog', () => {
   it('does not stack listeners when init runs twice', () => {
     const showModal = vi.fn()
     const dialogAdd = vi.fn()
-    const dialog = { showModal, addEventListener: dialogAdd } as unknown as HTMLDialogElement
-
     const openAddEventListener = vi.fn()
     const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
 
+    const parent = {
+      querySelector: (sel: string) => (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR ? openBtn : null),
+    } as unknown as ParentNode
+    const dialog = {
+      showModal,
+      addEventListener: dialogAdd,
+      parentElement: parent,
+    } as unknown as HTMLDialogElement
+
     vi.stubGlobal('document', {
-      querySelector: (sel: string) => {
-        if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) {
-          return dialog
-        }
-        if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) {
-          return openBtn
-        }
-        return null
-      },
+      querySelector: (sel: string) =>
+        sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
     })
 
     initSettingsMemberDialog()

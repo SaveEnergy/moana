@@ -28,7 +28,11 @@ export function initSettingsMemberDialog(): void {
   }
   settingsMemberDialogInitialized.add(dialog)
 
-  const openBtn = querySettingsAddMemberOpenButton(document)
+  /* Open control sits in `#settings-top` next to the dialog (`settings.html`); scope off parent when attached. */
+  const openRoot = dialog.parentElement
+  const openBtn = openRoot
+    ? querySettingsAddMemberOpenButton(openRoot)
+    : querySettingsAddMemberOpenButton(document)
 
   openBtn?.addEventListener('click', () => {
     dialog.showModal()
