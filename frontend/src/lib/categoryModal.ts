@@ -79,16 +79,16 @@ export function initCategoryModal(): void {
     const ir = catForm.querySelector<HTMLInputElement>('input[type="radio"][name="icon"]:checked')
     catIconWrap.innerHTML = ''
     if (!ir?.value) {
-      catIconWrap.classList.add('cat-modal-preview-icon--auto')
+      catIconWrap.classList.add(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS)
       catIconWrap.textContent = 'A'
       return
     }
-    catIconWrap.classList.remove('cat-modal-preview-icon--auto')
+    catIconWrap.classList.remove(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS)
     const label = ir.closest('label')
-    const svg = label?.querySelector('svg.moana-icon')
+    const svg = label?.querySelector(MOANA_ICON_SVG_SELECTOR)
     if (svg) {
       const clone = svg.cloneNode(true) as SVGElement
-      clone.classList.add('moana-icon--cat-preview')
+      clone.classList.add(MOANA_ICON_CAT_PREVIEW_CLASS)
       catIconWrap.appendChild(clone)
     }
   }
