@@ -93,4 +93,11 @@ describe('initConfirmSubmitForms', () => {
     expect(wired.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function))
     expect(skipped.addEventListener).not.toHaveBeenCalled()
   })
+
+  it('no-ops when no forms match the selector', () => {
+    vi.stubGlobal('document', {
+      querySelectorAll: () => [],
+    })
+    expect(() => initConfirmSubmitForms()).not.toThrow()
+  })
 })

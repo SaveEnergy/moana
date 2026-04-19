@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest'
-import { createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
+import { describe, expect, it } from 'vitest'
+
+import { TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+import { applyLocalTimeElements, createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
 
 describe('formatLocalTimeLabel', () => {
   it('returns null for invalid ISO strings', () => {
@@ -11,6 +13,41 @@ describe('formatLocalTimeLabel', () => {
     const s = formatLocalTimeLabel('2020-06-15T14:30:00.000Z')
     expect(s).not.toBeNull()
     expect(s!.length).toBeGreaterThan(0)
+  })
+})
+
+describe('applyLocalTimeElements', () => {
+  it('sets textContent from datetime on matching time nodes', () => {
+    const iso = '2020-06-15T14:30:00.000Z'
+    const expected = formatLocalTimeLabel(iso)
+    expect(expected).not.toBeNull()
+
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? iso : null),
+      textContent: '',
+    } as unknown as HTMLTimeElement
+    const root = {
+      querySelectorAll: () => [el],
+    } as unknown as ParentNode
+
+    applyLocalTimeElements(root)
+
+    expect(el.textContent).toBe(expected)
+  })
+
+  it('no-ops when the selector matches nothing', () => {
+    const root = { querySelectorAll: () => [] } as unknown as ParentNode
+    expect(() => applyLocalTimeElements(root)).not.toThrow()
+  })
+
+  it('skips nodes with a missing datetime attribute', () => {
+    const el = {
+      getAttribute: () => null,
+      textContent: 'keep',
+    } as unknown as HTMLTimeElement
+    const root = { querySelectorAll: () => [el] } as unknown as ParentNode
+    applyLocalTimeElements(root)
+    expect(el.textContent).toBe('keep')
   })
 })
 
