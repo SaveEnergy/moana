@@ -33,6 +33,10 @@ export const SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID = 'settings-add-member-open' as
 export const SETTINGS_ADD_MEMBER_CLOSE_ELEMENT_ID = 'settings-add-member-close' as const
 export const SETTINGS_ADD_MEMBER_CANCEL_ELEMENT_ID = 'settings-add-member-cancel' as const
 
+/** `#` + dialog / open button ids — `querySettingsAddMemberDialog` / `querySettingsAddMemberOpenButton`. */
+export const SETTINGS_ADD_MEMBER_DIALOG_SELECTOR = `#${SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID}` as const
+export const SETTINGS_ADD_MEMBER_OPEN_SELECTOR = `#${SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID}` as const
+
 export const SETTINGS_ADD_MEMBER_CLOSE_SELECTOR = `#${SETTINGS_ADD_MEMBER_CLOSE_ELEMENT_ID}` as const
 export const SETTINGS_ADD_MEMBER_CANCEL_SELECTOR = `#${SETTINGS_ADD_MEMBER_CANCEL_ELEMENT_ID}` as const
 

@@ -12,6 +12,10 @@ import {
   FORM_DATA_CONFIRM_SELECTOR,
   HISTORY_SORT_ELEMENT_ID,
   HISTORY_SORT_SELECTOR,
+  SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID,
+  SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID,
+  SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
+  SETTINGS_ADD_MEMBER_OPEN_SELECTOR,
   LOCAL_TIME_ELEMENTS_SELECTOR,
   TIME_DATETIME_ATTRIBUTE,
 } from './domSelectors'
@@ -61,5 +65,12 @@ describe('domSelectors local time', () => {
 describe('domSelectors history sort', () => {
   it('builds #id from HISTORY_SORT_ELEMENT_ID', () => {
     expect(HISTORY_SORT_SELECTOR).toBe(`#${HISTORY_SORT_ELEMENT_ID}`)
+  })
+})
+
+describe('domSelectors settings add-member', () => {
+  it('builds #id selectors for dialog and open control', () => {
+    expect(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR).toBe(`#${SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID}`)
+    expect(SETTINGS_ADD_MEMBER_OPEN_SELECTOR).toBe(`#${SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID}`)
   })
 })

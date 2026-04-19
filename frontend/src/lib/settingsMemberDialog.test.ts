@@ -1,10 +1,42 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { initSettingsMemberDialog } from './settingsMemberDialog'
 import {
-  SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID,
-  SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID,
+  SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
+  SETTINGS_ADD_MEMBER_OPEN_SELECTOR,
 } from './domSelectors'
+import {
+  initSettingsMemberDialog,
+  querySettingsAddMemberDialog,
+  querySettingsAddMemberOpenButton,
+} from './settingsMemberDialog'
+
+describe('querySettingsAddMemberDialog', () => {
+  it('uses SETTINGS_ADD_MEMBER_DIALOG_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    querySettingsAddMemberDialog(root)
+    expect(seen).toBe(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
+  })
+})
+
+describe('querySettingsAddMemberOpenButton', () => {
+  it('uses SETTINGS_ADD_MEMBER_OPEN_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    querySettingsAddMemberOpenButton(root)
+    expect(seen).toBe(SETTINGS_ADD_MEMBER_OPEN_SELECTOR)
+  })
+})
 
 describe('initSettingsMemberDialog', () => {
   afterEach(() => {
@@ -13,7 +45,7 @@ describe('initSettingsMemberDialog', () => {
 
   it('no-ops when the dialog is absent', () => {
     vi.stubGlobal('document', {
-      getElementById: () => null,
+      querySelector: () => null,
     })
     expect(() => initSettingsMemberDialog()).not.toThrow()
   })
@@ -27,11 +59,11 @@ describe('initSettingsMemberDialog', () => {
     const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
 
     vi.stubGlobal('document', {
-      getElementById: (id: string) => {
-        if (id === SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID) {
+      querySelector: (sel: string) => {
+        if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) {
           return dialog
         }
-        if (id === SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID) {
+        if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) {
           return openBtn
         }
         return null
