@@ -5,17 +5,10 @@ import { describe, expect, it } from 'vitest'
  * named `spy` and would hide accidental reorder in `BOOT_APP_INITIALIZERS`.
  */
 import { BOOT_APP_INITIALIZERS } from './boot'
+import { BOOT_INITIALIZER_NAMES } from './bootInitializerNames'
 
 describe('BOOT_APP_INITIALIZERS', () => {
   it('lists real initializers in the documented order (design.md)', () => {
-    expect(BOOT_APP_INITIALIZERS.map((fn) => fn.name)).toEqual([
-      'setBrowserTimezoneCookie',
-      'applyLocalTimeElements',
-      'initShellSidebar',
-      'initSettingsMemberDialog',
-      'initCategoryModal',
-      'initHistoryControls',
-      'initConfirmSubmitForms',
-    ])
+    expect(BOOT_APP_INITIALIZERS.map((fn) => fn.name)).toEqual([...BOOT_INITIALIZER_NAMES])
   })
 })

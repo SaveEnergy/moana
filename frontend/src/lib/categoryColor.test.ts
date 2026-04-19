@@ -53,6 +53,7 @@ describe('sanitizeCategoryCustomHex', () => {
 
   it('rejects invalid values and returns fallback', () => {
     expect(sanitizeCategoryCustomHex('', '#abc')).toBe('#abc')
+    expect(sanitizeCategoryCustomHex('   ', '#abc')).toBe('#abc')
     expect(sanitizeCategoryCustomHex('#fff', '#abc')).toBe('#abc')
     expect(sanitizeCategoryCustomHex('not-a-color')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
   })
