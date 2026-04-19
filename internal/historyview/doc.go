@@ -1,5 +1,5 @@
 // Package historyview builds the history ledger page: template types ([PageData], [Nav], [DayGroup]) in page_types.go;
-// filter nav URLs in nav.go ([BuildNav] clones query values then mutates kind/sort); kind/sort query names and [KindAll]/[KindIncome]/[KindExpense] in urlparams.go;
+// filter nav URLs in nav.go ([BuildNav] clones query values then mutates kind/sort; see nav_test.go); kind/sort query names and [KindAll]/[KindIncome]/[KindExpense] in urlparams.go;
 // day grouping in groups.go ([GroupByDay], groups_test.go); [BuildPage] in page.go (see build_page_test.go);
 // query normalization ([ParseHistoryURL], [HistoryURLParams]) in query_parse.go (from/to trimmed; both required if either is set);
 // bounded transaction fetch in limit.go.

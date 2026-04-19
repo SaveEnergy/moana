@@ -16,11 +16,7 @@ func buildNavFromValues(q url.Values) Nav {
 	with := func(mut func(v url.Values)) string {
 		v := maps.Clone(base)
 		mut(v)
-		enc := v.Encode()
-		if enc == "" {
-			return RoutePath
-		}
-		return RoutePath + "?" + enc
+		return pathWithQuery(v.Encode())
 	}
 	return Nav{
 		LinkAll: with(func(v url.Values) {
@@ -39,4 +35,12 @@ func buildNavFromValues(q url.Values) Nav {
 			v.Set(QuerySort, SortOldestValue)
 		}),
 	}
+}
+
+// pathWithQuery returns [RoutePath] alone or with a non-empty encoded query (?…).
+func pathWithQuery(encodedQuery string) string {
+	if encodedQuery == "" {
+		return RoutePath
+	}
+	return RoutePath + "?" + encodedQuery
 }
