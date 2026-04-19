@@ -20,12 +20,30 @@ describe('eventPathIncludesOpenDialog', () => {
   it('is true when an open DIALOG is in the path', () => {
     expect(eventPathIncludesOpenDialog([{ tagName: 'DIALOG', open: true }])).toBe(true)
   })
+
+  it('detects open DIALOG when it is not the first path node', () => {
+    expect(
+      eventPathIncludesOpenDialog([
+        { tagName: 'DIV' },
+        { tagName: 'DIALOG', open: true },
+      ]),
+    ).toBe(true)
+  })
 })
 
 describe('eventPathIncludesOpenDetails', () => {
   it('detects open DETAILS', () => {
     expect(eventPathIncludesOpenDetails([{ tagName: 'DETAILS', open: true }])).toBe(true)
     expect(eventPathIncludesOpenDetails([{ tagName: 'DETAILS', open: false }])).toBe(false)
+  })
+
+  it('detects open DETAILS when not the first path node', () => {
+    expect(
+      eventPathIncludesOpenDetails([
+        { tagName: 'DIV' },
+        { tagName: 'DETAILS', open: true },
+      ]),
+    ).toBe(true)
   })
 
   it('is false for empty paths or nodes without a usable tagName', () => {

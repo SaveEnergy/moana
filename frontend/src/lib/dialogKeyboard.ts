@@ -8,16 +8,11 @@ function readTagOpen(n: unknown): { tag: string; open: boolean } | null {
   return { tag: el.tagName, open: el.open === true }
 }
 
-/**
- * True when an event path includes a native `dialog` element that is currently open
- * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
- *
- * Uses `tagName === 'DIALOG'` + `open` so tests can run without a full DOM `instanceof`.
- */
-export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
+/** Uses `tagName` + `open` so tests can run without a full DOM `instanceof`. */
+function pathIncludesOpenTag(path: readonly unknown[], tag: 'DIALOG' | 'DETAILS'): boolean {
   for (const n of path) {
     const r = readTagOpen(n)
-    if (r?.tag === 'DIALOG' && r.open) {
+    if (r && r.tag === tag && r.open) {
       return true
     }
   }
@@ -25,16 +20,18 @@ export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
 }
 
 /**
+ * True when an event path includes a native `dialog` element that is currently open
+ * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
+ */
+export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
+  return pathIncludesOpenTag(path, 'DIALOG')
+}
+
+/**
  * True when the path includes an open `<details>` (e.g. focus inside the disclosure). See also {@link isAppUserMenuDetailsOpen}.
  */
 export function eventPathIncludesOpenDetails(path: readonly unknown[]): boolean {
-  for (const n of path) {
-    const r = readTagOpen(n)
-    if (r?.tag === 'DETAILS' && r.open) {
-      return true
-    }
-  }
-  return false
+  return pathIncludesOpenTag(path, 'DETAILS')
 }
 
 export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
