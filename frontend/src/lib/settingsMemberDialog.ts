@@ -26,7 +26,6 @@ export function initSettingsMemberDialog(): void {
   if (settingsMemberDialogInitialized.has(dialog)) {
     return
   }
-  settingsMemberDialogInitialized.add(dialog)
 
   /* Open control sits in `#settings-top` next to the dialog (`settings.html`); scope off parent when attached. */
   const openRoot = dialog.parentElement
@@ -39,4 +38,5 @@ export function initSettingsMemberDialog(): void {
   })
 
   attachNativeDialogDismiss(dialog, SETTINGS_ADD_MEMBER_DISMISS_SELECTORS)
+  settingsMemberDialogInitialized.add(dialog)
 }

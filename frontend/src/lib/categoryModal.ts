@@ -63,7 +63,6 @@ export function initCategoryModal(): void {
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return
   }
-  categoryModalInitialized.add(dialog)
 
   /* Narrow once for nested functions (TS does not always narrow captured consts in closures). */
   const modal = dialog
@@ -193,4 +192,5 @@ export function initCategoryModal(): void {
   }
 
   attachNativeDialogDismiss(modal, CATEGORY_MODAL_DISMISS_SELECTORS)
+  categoryModalInitialized.add(dialog)
 }

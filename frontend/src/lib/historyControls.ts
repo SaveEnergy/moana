@@ -25,10 +25,10 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
   if (!form) {
     return
   }
-  historySortWiredSelects.add(select)
   select.addEventListener('change', () => {
     form.requestSubmit()
   })
+  historySortWiredSelects.add(select)
 }
 
 /**

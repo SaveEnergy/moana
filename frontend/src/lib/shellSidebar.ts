@@ -33,7 +33,6 @@ export function initShellSidebar(): void {
   if (shellSidebarWiredShells.has(shell)) {
     return
   }
-  shellSidebarWiredShells.add(shell)
   const appShell = shell
   /* Toggle + backdrop are under `#app-shell` in `layout.html` — scope queries to the shell subtree. */
   const toggle = querySidebarToggle(shell)
@@ -103,4 +102,6 @@ export function initShellSidebar(): void {
     },
     { capture: true },
   )
+
+  shellSidebarWiredShells.add(shell)
 }
