@@ -7,6 +7,8 @@ import {
 import { shouldCloseMobileSidebarFromShellClick } from './mobileShellDismiss'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
+const shellSidebarWiredShells = new WeakSet<HTMLElement>()
+
 /** `#app-shell` — mobile drawer root (`layout.html`). */
 export function queryAppShell(root: ParentNode): HTMLElement | null {
   return root.querySelector<HTMLElement>(APP_SHELL_SELECTOR)
@@ -28,6 +30,10 @@ export function initShellSidebar(): void {
   if (!shell) {
     return
   }
+  if (shellSidebarWiredShells.has(shell)) {
+    return
+  }
+  shellSidebarWiredShells.add(shell)
   const appShell = shell
   const toggle = querySidebarToggle(document)
   const backdrop = querySidebarBackdrop(document)
