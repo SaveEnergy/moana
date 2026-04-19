@@ -181,7 +181,7 @@ Native `<dialog>`: `.admin-add-dialog` (settings add member), `.cat-modal` (cate
 - **Landmarks:** `<main>`, `<nav>` with `aria-label`, `aria-current` where used  
 - **`<details>`/`<summary>`** for user menu  
 - **`:focus-visible`** on some controls (e.g. sidebar brand)  
-- **Mobile shell Escape:** `shellSidebar.ts` uses a **capture-phase** document listener and defers when **`shouldDeferMobileShellEscape`** (`dialogKeyboard.ts`) is true.
+- **Mobile shell Escape:** `shellSidebar.ts` uses a **capture-phase** document listener and defers when **`shouldDeferMobileShellEscape`** (`dialogKeyboard.ts`) is true. **`dialogKeyboard`** uppercases **`tagName`** when scanning composed paths for open **`dialog`** / **`details`** (consistent with HTML’s uppercase `tagName`, tolerant in tests).
 
 Custom widgets (segmented groups, FAB-as-link) may need extra ARIA depending on future audit scope.
 
