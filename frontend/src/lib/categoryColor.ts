@@ -18,11 +18,12 @@ export function resolveCategoryModalPreviewBackground(
   checkedColorValue: string | undefined,
   nativeColorInputValue: string | undefined,
 ): string {
-  if (checkedColorValue === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
+  const checked = checkedColorValue?.trim()
+  if (checked === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
     return nativeColorInputValue?.trim() || CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
   }
-  if (checkedColorValue) {
-    return checkedColorValue
+  if (checked) {
+    return checked
   }
   return CATEGORY_MODAL_DEFAULT_PREVIEW_BG
 }

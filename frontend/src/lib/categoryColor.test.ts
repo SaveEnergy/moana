@@ -26,6 +26,17 @@ describe('resolveCategoryModalPreviewBackground', () => {
     expect(resolveCategoryModalPreviewBackground('#abc123', undefined)).toBe('#abc123')
   })
 
+  it('trims checked radio value for preset and custom branches', () => {
+    expect(resolveCategoryModalPreviewBackground('  #abc123  ', undefined)).toBe('#abc123')
+    expect(
+      resolveCategoryModalPreviewBackground(`  ${CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM}  `, '#abcdef'),
+    ).toBe('#abcdef')
+  })
+
+  it('uses auto gradient when checked value is whitespace-only', () => {
+    expect(resolveCategoryModalPreviewBackground('  \t  ', undefined)).toBe(CATEGORY_MODAL_DEFAULT_PREVIEW_BG)
+  })
+
   it('uses native color when custom radio is selected', () => {
     expect(
       resolveCategoryModalPreviewBackground(
