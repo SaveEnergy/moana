@@ -47,7 +47,19 @@ export function isAppUserMenuDetailsOpen(): boolean {
   return document.querySelector(APP_USER_MENU_OPEN_SELECTOR) !== null
 }
 
-/** Single guard for `shellSidebar` Escape: open `dialog` in path or open account `<details>`. */
+/** One pass over `composedPath()` — used by {@link shouldDeferMobileShellEscape} to avoid two scans + a query when the path already answers. */
+function pathIncludesOpenDialogOrDetails(path: readonly unknown[]): boolean {
+  for (const n of path) {
+    const r = readTagOpen(n)
+    if (r && r.open && (r.tag === 'DIALOG' || r.tag === 'DETAILS')) {
+      return true
+    }
+  }
+  return false
+}
+
+/** Single guard for `shellSidebar` Escape: open `dialog` or open `<details>` in path, else open account menu via DOM (drawer can cover the bar while `[open]` stays true). */
 export function shouldDeferMobileShellEscape(e: KeyboardEvent): boolean {
-  return keyEventInvolvesOpenDialog(e) || isAppUserMenuDetailsOpen()
+  const path = e.composedPath()
+  return pathIncludesOpenDialogOrDetails(path) || isAppUserMenuDetailsOpen()
 }

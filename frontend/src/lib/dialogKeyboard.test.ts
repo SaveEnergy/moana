@@ -90,7 +90,7 @@ describe('keyEventInvolvesOpenDialog', () => {
     expect(keyEventInvolvesOpenDialog(e)).toBe(true)
   })
 
-  it('is false for details-only path (use isAppUserMenuDetailsOpen in shell)', () => {
+  it('is false for details-only path (defer is handled in shouldDeferMobileShellEscape)', () => {
     const e = {
       composedPath: () => [{ tagName: 'DETAILS', open: true }],
     } as unknown as KeyboardEvent
@@ -103,12 +103,14 @@ describe('shouldDeferMobileShellEscape', () => {
     vi.unstubAllGlobals()
   })
 
-  it('defers for open dialog in path', () => {
-    vi.stubGlobal('document', { querySelector: () => null })
+  it('defers for open dialog in path without document.querySelector', () => {
+    const qs = vi.fn(() => null)
+    vi.stubGlobal('document', { querySelector: qs })
     const e = {
       composedPath: () => [{ tagName: 'DIALOG', open: true }],
     } as unknown as KeyboardEvent
     expect(shouldDeferMobileShellEscape(e)).toBe(true)
+    expect(qs).not.toHaveBeenCalled()
   })
 
   it('defers when details.app-user-menu[open] exists', () => {
@@ -117,6 +119,16 @@ describe('shouldDeferMobileShellEscape', () => {
     })
     const e = { composedPath: () => [] } as unknown as KeyboardEvent
     expect(shouldDeferMobileShellEscape(e)).toBe(true)
+  })
+
+  it('defers when open DETAILS is in composedPath without document.querySelector', () => {
+    const qs = vi.fn(() => null)
+    vi.stubGlobal('document', { querySelector: qs })
+    const e = {
+      composedPath: () => [{ tagName: 'DETAILS', open: true }],
+    } as unknown as KeyboardEvent
+    expect(shouldDeferMobileShellEscape(e)).toBe(true)
+    expect(qs).not.toHaveBeenCalled()
   })
 
   it('is false when neither applies', () => {
