@@ -1,3 +1,5 @@
+import { HISTORY_SORT_ELEMENT_ID } from './domSelectors'
+
 /**
  * History page (GET `/history`): changing sort submits the form (replaces inline `onchange`).
  * Exported for unit tests; `initHistoryControls` is the boot entry.
@@ -16,5 +18,5 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
 }
 
 export function initHistoryControls(): void {
-  wireHistorySortAutoSubmit(document.getElementById('history-sort') as HTMLSelectElement | null)
+  wireHistorySortAutoSubmit(document.getElementById(HISTORY_SORT_ELEMENT_ID) as HTMLSelectElement | null)
 }

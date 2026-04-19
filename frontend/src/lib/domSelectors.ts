@@ -20,3 +20,21 @@ export const APP_SIDEBAR_CLOSE_ELEMENT_ID = 'app-sidebar-close' as const
 
 /** `#` + {@link APP_SIDEBAR_CLOSE_ELEMENT_ID} — `mobileShellDismiss` uses `closest()`, not `getElementById`. */
 export const APP_SIDEBAR_CLOSE_SELECTOR = `#${APP_SIDEBAR_CLOSE_ELEMENT_ID}` as const
+
+/** History page sort `<select>` (`history.html`). */
+export const HISTORY_SORT_ELEMENT_ID = 'history-sort' as const
+
+/** Settings → add household member dialog (`settings.html`). */
+export const SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID = 'settings-add-member-dialog' as const
+export const SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID = 'settings-add-member-open' as const
+export const SETTINGS_ADD_MEMBER_CLOSE_ELEMENT_ID = 'settings-add-member-close' as const
+export const SETTINGS_ADD_MEMBER_CANCEL_ELEMENT_ID = 'settings-add-member-cancel' as const
+
+export const SETTINGS_ADD_MEMBER_CLOSE_SELECTOR = `#${SETTINGS_ADD_MEMBER_CLOSE_ELEMENT_ID}` as const
+export const SETTINGS_ADD_MEMBER_CANCEL_SELECTOR = `#${SETTINGS_ADD_MEMBER_CANCEL_ELEMENT_ID}` as const
+
+/** Arguments for `attachNativeDialogDismiss` on the add-member `dialog`. */
+export const SETTINGS_ADD_MEMBER_DISMISS_SELECTORS: readonly string[] = [
+  SETTINGS_ADD_MEMBER_CLOSE_SELECTOR,
+  SETTINGS_ADD_MEMBER_CANCEL_SELECTOR,
+]
