@@ -1,21 +1,36 @@
 import { shouldDeferMobileShellEscape } from './dialogKeyboard'
 import {
-  APP_SHELL_ELEMENT_ID,
-  APP_SIDEBAR_BACKDROP_ELEMENT_ID,
-  APP_SIDEBAR_TOGGLE_ELEMENT_ID,
+  APP_SHELL_SELECTOR,
+  APP_SIDEBAR_BACKDROP_SELECTOR,
+  APP_SIDEBAR_TOGGLE_SELECTOR,
 } from './domSelectors'
 import { shouldCloseMobileSidebarFromShellClick } from './mobileShellDismiss'
 import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints'
 
+/** `#app-shell` — mobile drawer root (`layout.html`). */
+export function queryAppShell(root: ParentNode): HTMLElement | null {
+  return root.querySelector<HTMLElement>(APP_SHELL_SELECTOR)
+}
+
+/** `#app-sidebar-toggle` — menu affordance (`layout.html`). */
+export function querySidebarToggle(root: ParentNode): HTMLElement | null {
+  return root.querySelector<HTMLElement>(APP_SIDEBAR_TOGGLE_SELECTOR)
+}
+
+/** `#app-sidebar-backdrop` — dimmed overlay (`layout.html`). */
+export function querySidebarBackdrop(root: ParentNode): HTMLElement | null {
+  return root.querySelector<HTMLElement>(APP_SIDEBAR_BACKDROP_SELECTOR)
+}
+
 /** Mobile drawer: open/close sidebar, sync aria and backdrop. */
 export function initShellSidebar(): void {
-  const shell = document.getElementById(APP_SHELL_ELEMENT_ID)
+  const shell = queryAppShell(document)
   if (!shell) {
     return
   }
   const appShell = shell
-  const toggle = document.getElementById(APP_SIDEBAR_TOGGLE_ELEMENT_ID)
-  const backdrop = document.getElementById(APP_SIDEBAR_BACKDROP_ELEMENT_ID)
+  const toggle = querySidebarToggle(document)
+  const backdrop = querySidebarBackdrop(document)
 
   const mqMobile = window.matchMedia(MOBILE_SHELL_MEDIA_QUERY)
 

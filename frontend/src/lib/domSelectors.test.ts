@@ -10,6 +10,12 @@ import {
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   DATA_CONFIRM_ATTRIBUTE,
   FORM_DATA_CONFIRM_SELECTOR,
+  APP_SHELL_ELEMENT_ID,
+  APP_SIDEBAR_BACKDROP_ELEMENT_ID,
+  APP_SIDEBAR_TOGGLE_ELEMENT_ID,
+  APP_SHELL_SELECTOR,
+  APP_SIDEBAR_BACKDROP_SELECTOR,
+  APP_SIDEBAR_TOGGLE_SELECTOR,
   HISTORY_SORT_ELEMENT_ID,
   HISTORY_SORT_SELECTOR,
   SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID,
@@ -59,6 +65,14 @@ describe('domSelectors data-confirm forms', () => {
 describe('domSelectors local time', () => {
   it('targets js-local-time elements with the datetime attribute', () => {
     expect(LOCAL_TIME_ELEMENTS_SELECTOR).toBe(`time.js-local-time[${TIME_DATETIME_ATTRIBUTE}]`)
+  })
+})
+
+describe('domSelectors app shell', () => {
+  it('builds #id selectors for shell, toggle, and backdrop', () => {
+    expect(APP_SHELL_SELECTOR).toBe(`#${APP_SHELL_ELEMENT_ID}`)
+    expect(APP_SIDEBAR_TOGGLE_SELECTOR).toBe(`#${APP_SIDEBAR_TOGGLE_ELEMENT_ID}`)
+    expect(APP_SIDEBAR_BACKDROP_SELECTOR).toBe(`#${APP_SIDEBAR_BACKDROP_ELEMENT_ID}`)
   })
 })
 

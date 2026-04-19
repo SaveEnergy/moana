@@ -1,12 +1,59 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  APP_SHELL_ELEMENT_ID,
-  APP_SIDEBAR_BACKDROP_ELEMENT_ID,
-  APP_SIDEBAR_TOGGLE_ELEMENT_ID,
+  APP_SHELL_SELECTOR,
+  APP_SIDEBAR_BACKDROP_SELECTOR,
+  APP_SIDEBAR_TOGGLE_SELECTOR,
 } from './domSelectors'
-import { initShellSidebar } from './shellSidebar'
+import {
+  initShellSidebar,
+  queryAppShell,
+  querySidebarBackdrop,
+  querySidebarToggle,
+} from './shellSidebar'
 import { MOBILE_SHELL_MEDIA_QUERY } from './shellBreakpoints'
+
+describe('queryAppShell', () => {
+  it('uses APP_SHELL_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    queryAppShell(root)
+    expect(seen).toBe(APP_SHELL_SELECTOR)
+  })
+})
+
+describe('querySidebarToggle', () => {
+  it('uses APP_SIDEBAR_TOGGLE_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    querySidebarToggle(root)
+    expect(seen).toBe(APP_SIDEBAR_TOGGLE_SELECTOR)
+  })
+})
+
+describe('querySidebarBackdrop', () => {
+  it('uses APP_SIDEBAR_BACKDROP_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    querySidebarBackdrop(root)
+    expect(seen).toBe(APP_SIDEBAR_BACKDROP_SELECTOR)
+  })
+})
 
 describe('initShellSidebar', () => {
   afterEach(() => {
@@ -15,14 +62,14 @@ describe('initShellSidebar', () => {
   })
 
   it('returns early when #app-shell is missing', () => {
-    const getElementById = vi.fn(() => null)
+    const querySelector = vi.fn(() => null)
     const addEventListener = vi.fn()
-    vi.stubGlobal('document', { getElementById, addEventListener, querySelector: vi.fn() })
+    vi.stubGlobal('document', { querySelector, addEventListener })
     vi.stubGlobal('window', { matchMedia: vi.fn() })
 
     initShellSidebar()
 
-    expect(getElementById).toHaveBeenCalledWith(APP_SHELL_ELEMENT_ID)
+    expect(querySelector).toHaveBeenCalledWith(APP_SHELL_SELECTOR)
     expect(addEventListener).not.toHaveBeenCalled()
   })
 
@@ -46,17 +93,16 @@ describe('initShellSidebar', () => {
     const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
     const backdrop = { setAttribute: vi.fn() }
 
-    const getElementById = vi.fn((id: string) => {
-      if (id === APP_SHELL_ELEMENT_ID) return appShell
-      if (id === APP_SIDEBAR_TOGGLE_ELEMENT_ID) return toggle
-      if (id === APP_SIDEBAR_BACKDROP_ELEMENT_ID) return backdrop
+    const querySelector = vi.fn((sel: string) => {
+      if (sel === APP_SHELL_SELECTOR) return appShell
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
       return null
     })
 
     const doc = {
-      getElementById,
+      querySelector,
       addEventListener: vi.fn(),
-      querySelector: vi.fn(() => null),
     }
 
     vi.stubGlobal('document', doc)
