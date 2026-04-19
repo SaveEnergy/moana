@@ -19,7 +19,10 @@ export function shouldCloseNativeDialogFromClick(
   return closeWithinSelectors.some((sel) => el.closest(sel) !== null)
 }
 
-/** One `click` listener: backdrop + close/cancel controls identified by `closest()`. */
+/**
+ * One `click` listener: backdrop + close/cancel controls identified by `closest()`.
+ * The dialog is recorded **after** `addEventListener` so a failed registration does not block a later retry.
+ */
 export function attachNativeDialogDismiss(
   dialog: HTMLDialogElement,
   closeWithinSelectors: readonly string[],
@@ -27,10 +30,10 @@ export function attachNativeDialogDismiss(
   if (nativeDialogDismissWiredDialogs.has(dialog)) {
     return
   }
-  nativeDialogDismissWiredDialogs.add(dialog)
   dialog.addEventListener('click', (e) => {
     if (shouldCloseNativeDialogFromClick(e, dialog, closeWithinSelectors)) {
       dialog.close()
     }
   })
+  nativeDialogDismissWiredDialogs.add(dialog)
 }
