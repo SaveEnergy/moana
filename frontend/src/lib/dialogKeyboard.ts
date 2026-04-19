@@ -12,11 +12,19 @@ function readTagOpen(n: unknown): { tag: string; open: boolean } | null {
   return { tag: el.tagName.toUpperCase(), open: el.open === true }
 }
 
+/** Reused on Escape / path scans — no per-call `Set` allocation. */
+const PATH_OPEN_DIALOG = new Set<'DIALOG' | 'DETAILS'>(['DIALOG'])
+const PATH_OPEN_DETAILS = new Set<'DIALOG' | 'DETAILS'>(['DETAILS'])
+const PATH_OPEN_DIALOG_OR_DETAILS = new Set<'DIALOG' | 'DETAILS'>(['DIALOG', 'DETAILS'])
+
 /** Uses `tagName` + `open` so tests can run without a full DOM `instanceof`. */
-function pathIncludesOpenTag(path: readonly unknown[], tag: 'DIALOG' | 'DETAILS'): boolean {
+function pathIncludesOpenAnyTag(
+  path: readonly unknown[],
+  tags: ReadonlySet<'DIALOG' | 'DETAILS'>,
+): boolean {
   for (const n of path) {
     const r = readTagOpen(n)
-    if (r && r.tag === tag && r.open) {
+    if (r && r.open && tags.has(r.tag as 'DIALOG' | 'DETAILS')) {
       return true
     }
   }
@@ -28,14 +36,14 @@ function pathIncludesOpenTag(path: readonly unknown[], tag: 'DIALOG' | 'DETAILS'
  * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
  */
 export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
-  return pathIncludesOpenTag(path, 'DIALOG')
+  return pathIncludesOpenAnyTag(path, PATH_OPEN_DIALOG)
 }
 
 /**
  * True when the path includes an open `<details>` (e.g. focus inside the disclosure). See also {@link isAppUserMenuDetailsOpen}.
  */
 export function eventPathIncludesOpenDetails(path: readonly unknown[]): boolean {
-  return pathIncludesOpenTag(path, 'DETAILS')
+  return pathIncludesOpenAnyTag(path, PATH_OPEN_DETAILS)
 }
 
 export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
@@ -49,13 +57,7 @@ export function isAppUserMenuDetailsOpen(): boolean {
 
 /** One pass over `composedPath()` — used by {@link shouldDeferMobileShellEscape} to avoid two scans + a query when the path already answers. */
 function pathIncludesOpenDialogOrDetails(path: readonly unknown[]): boolean {
-  for (const n of path) {
-    const r = readTagOpen(n)
-    if (r && r.open && (r.tag === 'DIALOG' || r.tag === 'DETAILS')) {
-      return true
-    }
-  }
-  return false
+  return pathIncludesOpenAnyTag(path, PATH_OPEN_DIALOG_OR_DETAILS)
 }
 
 /** Single guard for `shellSidebar` Escape: open `dialog` or open `<details>` in path, else open account menu via DOM (drawer can cover the bar while `[open]` stays true). */
