@@ -56,7 +56,7 @@ func TestBuildNav_preservesSearchAndDateFilters(t *testing.T) {
 		t.Fatalf("LinkAll kind: %s", nav.LinkAll)
 	}
 	inc, _ := url.Parse(nav.LinkIncome)
-	if inc.Query().Get(QueryKind) != "income" {
+	if inc.Query().Get(QueryKind) != KindIncome {
 		t.Fatalf("LinkIncome kind: %s", nav.LinkIncome)
 	}
 	exp, _ := url.Parse(nav.LinkExpense)
