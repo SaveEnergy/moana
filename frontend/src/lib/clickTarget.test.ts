@@ -21,4 +21,16 @@ describe('clickEventTargetElement', () => {
   it('returns null for null target', () => {
     expect(clickEventTargetElement({ target: null } as unknown as MouseEvent)).toBeNull()
   })
+
+  it('returns null when target is undefined', () => {
+    expect(clickEventTargetElement({ target: undefined } as unknown as MouseEvent)).toBeNull()
+  })
+
+  it('returns null for non-object targets', () => {
+    expect(clickEventTargetElement({ target: 0 } as unknown as MouseEvent)).toBeNull()
+  })
+
+  it('returns null when object has neither closest nor parentElement', () => {
+    expect(clickEventTargetElement({ target: {} } as unknown as MouseEvent)).toBeNull()
+  })
 })
