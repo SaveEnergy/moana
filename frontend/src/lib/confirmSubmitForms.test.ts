@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { attachConfirmBeforeSubmit, readDataConfirmMessage } from './confirmSubmitForms'
+import {
+  attachConfirmBeforeSubmit,
+  initConfirmSubmitForms,
+  readDataConfirmMessage,
+} from './confirmSubmitForms'
 import { DATA_CONFIRM_ATTRIBUTE } from './domSelectors'
 
 function elWithAttr(value: string | null): Element {
@@ -60,5 +64,33 @@ describe('attachConfirmBeforeSubmit', () => {
     const e = { preventDefault: vi.fn() } as unknown as SubmitEvent
     onSubmit!(e)
     expect(e.preventDefault).not.toHaveBeenCalled()
+  })
+})
+
+describe('initConfirmSubmitForms', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('wires submit only for forms whose data-confirm is non-blank after trim', () => {
+    const wired = {
+      getAttribute: (name: string) =>
+        name === DATA_CONFIRM_ATTRIBUTE ? '  Really delete?  ' : null,
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+
+    const skipped = {
+      getAttribute: (name: string) => (name === DATA_CONFIRM_ATTRIBUTE ? ' \n\t ' : null),
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+
+    vi.stubGlobal('document', {
+      querySelectorAll: () => [wired, skipped],
+    })
+
+    initConfirmSubmitForms()
+
+    expect(wired.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function))
+    expect(skipped.addEventListener).not.toHaveBeenCalled()
   })
 })
