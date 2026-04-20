@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"math"
 	"strings"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 )
 
 // DailyAbsMovementByLocalDate returns total absolute cents moved per calendar day in loc (sum of |amount_cents| per day) for the household.
+// Per-day totals use overflow-checked addition; if the sum exceeds int64, the bucket saturates at [math.MaxInt64].
 func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int64, fromUTC, toUTC time.Time, loc *time.Location) (map[string]int64, error) {
 	loc = timeutil.OrUTC(loc)
 	var b strings.Builder
@@ -38,7 +40,13 @@ func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int
 		}
 		cents = money.AbsCents(cents)
 		day := timeutil.LocalCalendarDateKey(t, loc)
-		out[day] += cents
+		prev := out[day]
+		next, ok := money.AddCents(prev, cents)
+		if !ok {
+			out[day] = math.MaxInt64
+		} else {
+			out[day] = next
+		}
 	}
 	return out, rows.Err()
 }

@@ -122,3 +122,36 @@ func TestDailyAbsMovementByLocalDate_minInt64AmountUsesAbsCents(t *testing.T) {
 		t.Fatalf("abs movement for MinInt64 row: got %d want MaxInt64", got)
 	}
 }
+
+func TestDailyAbsMovementByLocalDate_sameDayAbsSumSaturatesOnOverflow(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "pw-movement-day-overflow")
+	uid, err := st.CreateUser(ctx, "movement-day-overflow@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByEmail(ctx, "movement-day-overflow@example.com")
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	occ := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, occ, "a", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, occ, "b", nil); err != nil {
+		t.Fatal(err)
+	}
+	fromUTC := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	toUTC := time.Date(2026, 1, 31, 23, 59, 59, 999999999, time.UTC)
+	byDay, err := st.DailyAbsMovementByLocalDate(ctx, hid, fromUTC, toUTC, time.UTC)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// MaxInt64 + MaxInt64 wraps without [money.AddCents]; heatmap must saturate.
+	if got := byDay["2026-01-15"]; got != math.MaxInt64 {
+		t.Fatalf("same-day sum: got %d want MaxInt64", got)
+	}
+}
