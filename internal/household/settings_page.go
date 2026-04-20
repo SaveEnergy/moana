@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"golang.org/x/sync/errgroup"
+
 	"moana/internal/store"
 )
 
@@ -22,17 +24,28 @@ type SettingsPageData struct {
 }
 
 // LoadSettingsPage loads household rows and permission flags for the settings UI.
+// GetHousehold and ListHouseholdMembers run concurrently (independent reads on the same DB).
 func LoadSettingsPage(ctx context.Context, st *store.Store, u *store.User, errMsg, successMsg string) (SettingsPageData, error) {
-	hh, err := st.GetHousehold(ctx, u.HouseholdID)
-	if err != nil {
+	var (
+		hh      *store.Household
+		members []store.HouseholdMember
+	)
+	g, gctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		hh, err = st.GetHousehold(gctx, u.HouseholdID)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		members, err = st.ListHouseholdMembers(gctx, u.HouseholdID)
+		return err
+	})
+	if err := g.Wait(); err != nil {
 		return SettingsPageData{}, err
 	}
 	if hh == nil {
 		return SettingsPageData{}, ErrHouseholdMissing
-	}
-	members, err := st.ListHouseholdMembers(ctx, u.HouseholdID)
-	if err != nil {
-		return SettingsPageData{}, err
 	}
 	// MemberCount matches the list length (same as COUNT(*) for this household) without a second query.
 	n := int64(len(members))

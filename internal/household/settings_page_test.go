@@ -2,7 +2,9 @@ package household
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 
 	"moana/internal/dbutil"
 	"moana/internal/passwordtest"
@@ -41,5 +43,29 @@ func TestLoadSettingsPage_memberCountMatchesMemberList(t *testing.T) {
 	}
 	if data2.MemberCount != 2 || len(data2.Members) != 2 {
 		t.Fatalf("two members: MemberCount=%d len=%d", data2.MemberCount, len(data2.Members))
+	}
+}
+
+func TestLoadSettingsPage_expiredContext(t *testing.T) {
+	t.Parallel()
+	st := dbutil.MustOpenMemStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "settings-expired@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner, err := st.GetUserByID(ctx, uid)
+	if err != nil || owner == nil {
+		t.Fatal(err)
+	}
+	deadlineCtx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Hour))
+	defer cancel()
+	_, err = LoadSettingsPage(deadlineCtx, st, owner, "", "")
+	if err == nil {
+		t.Fatal("expected error from expired context")
+	}
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("want context.DeadlineExceeded, got %v", err)
 	}
 }
