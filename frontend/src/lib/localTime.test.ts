@@ -97,6 +97,16 @@ describe('applyLocalTimeElements', () => {
     applyLocalTimeElements(root)
     expect(el.textContent).toBe('keep')
   })
+
+  it('skips nodes when datetime attribute is empty string', () => {
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? '' : null),
+      textContent: 'keep',
+    } as unknown as HTMLTimeElement
+    const root = { querySelectorAll: () => [el] } as unknown as ParentNode
+    applyLocalTimeElements(root)
+    expect(el.textContent).toBe('keep')
+  })
 })
 
 describe('applyLocalTimeElements default document root', () => {
