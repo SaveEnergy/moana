@@ -34,6 +34,19 @@ func TestListUsers(t *testing.T) {
 	}
 }
 
+func TestListUsers_empty(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	users, err := st.ListUsers(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(users) != 0 {
+		t.Fatalf("len=%d want 0", len(users))
+	}
+}
+
 func TestHouseholdMembersSeeSameTransactions(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
