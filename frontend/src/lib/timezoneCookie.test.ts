@@ -106,6 +106,27 @@ describe('setBrowserTimezoneCookie', () => {
     expect(jar).toContain(encodeURIComponent('Pacific/Auckland'))
   })
 
+  it('overwrites when moana_tz is present but empty (does not match browser zone)', () => {
+    mockResolvedTimeZone('Europe/Berlin')
+    const stale = `${TIMEZONE_COOKIE_NAME}=`
+    let jar = stale
+    let sets = 0
+    vi.stubGlobal('document', {
+      get cookie() {
+        return jar
+      },
+      set cookie(v: string) {
+        sets += 1
+        jar = v
+      },
+    })
+
+    setBrowserTimezoneCookie()
+
+    expect(sets).toBe(1)
+    expect(jar).toContain(encodeURIComponent('Europe/Berlin'))
+  })
+
   it('does not overwrite document.cookie when moana_tz already matches', () => {
     mockResolvedTimeZone('Europe/Berlin')
     const existing = `${TIMEZONE_COOKIE_NAME}=${encodeURIComponent('Europe/Berlin')}`
