@@ -14,6 +14,10 @@ export function timezoneCookieSegment(tz: string): string {
  */
 export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
   const prefix = `${TIMEZONE_COOKIE_NAME}=`
+  /* One linear scan — skip segment walk when the name never appears (common on first visit / unrelated cookies). */
+  if (!cookieHeader.includes(prefix)) {
+    return null
+  }
   let pos = 0
   while (pos < cookieHeader.length) {
     const semi = cookieHeader.indexOf(';', pos)

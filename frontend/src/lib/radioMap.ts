@@ -28,8 +28,7 @@ export function setRadioCheckedByValue(
   preferred: string,
   fallbackKey = '',
 ): boolean {
-  const key = map.has(preferred) ? preferred : fallbackKey
-  const input = map.get(key)
+  const input = map.get(preferred) ?? map.get(fallbackKey)
   if (!input) {
     return false
   }

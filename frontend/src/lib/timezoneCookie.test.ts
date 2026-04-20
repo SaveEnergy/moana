@@ -57,6 +57,15 @@ describe('parseMoanaTimezoneCookie', () => {
     const tail = `${TIMEZONE_COOKIE_NAME}=Europe%2FBerlin`
     expect(parseMoanaTimezoneCookie(`${junk}; ${tail}`)).toBe('Europe/Berlin')
   })
+
+  it('returns null for long unrelated jars without moana_tz= (prefix fast path)', () => {
+    const junk = Array.from({ length: 40 }, (_, i) => `k${i}=v`).join('; ')
+    expect(parseMoanaTimezoneCookie(junk)).toBeNull()
+  })
+
+  it('does not treat xmoana_tz as moana_tz', () => {
+    expect(parseMoanaTimezoneCookie('xmoana_tz=1')).toBeNull()
+  })
 })
 
 describe('setBrowserTimezoneCookie', () => {
