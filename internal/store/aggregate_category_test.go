@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"strconv"
 	"testing"
 	"time"
 
@@ -153,5 +154,92 @@ func TestListCategoryAmountsInRange_expenseMinInt64SumUsesAbsCents(t *testing.T)
 	}
 	if rows[0].AmountCents != math.MaxInt64 {
 		t.Fatalf("got %d want MaxInt64 (negating MinInt64 overflows)", rows[0].AmountCents)
+	}
+}
+
+func TestListTopExpenseCategories_mostNegativeFirst(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "top-exp@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	food, err := st.CreateCategory(ctx, hid, "Food", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	side, err := st.CreateCategory(ctx, hid, "Side", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 4, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -10000, day, "groceries", &food); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -5000, day, "misc", &side); err != nil {
+		t.Fatal(err)
+	}
+	from := day.Add(-time.Hour)
+	to := day.Add(time.Hour)
+	rows, err := st.ListTopExpenseCategories(ctx, hid, &from, &to, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("len=%d %+v", len(rows), rows)
+	}
+	if rows[0].TotalCents != -10000 || rows[0].CategoryName != "Food" {
+		t.Fatalf("row0 %+v", rows[0])
+	}
+	if rows[1].TotalCents != -5000 || rows[1].CategoryName != "Side" {
+		t.Fatalf("row1 %+v", rows[1])
+	}
+}
+
+func TestListTopExpenseCategories_limitBelowOneDefaultsToFive(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "top-exp-limit@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 4, 2, 12, 0, 0, 0, time.UTC)
+	for i := range 6 {
+		name := "C" + strconv.Itoa(i)
+		cid, err := st.CreateCategory(ctx, hid, name, "", "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		amt := int64(-1000 * (i + 1))
+		if _, err := st.CreateTransaction(ctx, uid, hid, amt, day, "x", &cid); err != nil {
+			t.Fatal(err)
+		}
+	}
+	from := day.Add(-time.Hour)
+	to := day.Add(time.Hour)
+	rows, err := st.ListTopExpenseCategories(ctx, hid, &from, &to, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 5 {
+		t.Fatalf("limit<1 must default to 5 rows, got %d %+v", len(rows), rows)
+	}
+	// Most negative sums first: -6000 … -2000.
+	if rows[0].TotalCents != -6000 || rows[4].TotalCents != -2000 {
+		t.Fatalf("order or truncation: %+v", rows)
 	}
 }
