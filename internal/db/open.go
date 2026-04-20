@@ -45,8 +45,8 @@ func Open(path string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	d.SetMaxOpenConns(1)
-	d.SetMaxIdleConns(1)
+	d.SetMaxOpenConns(sqliteMaxOpenConns)
+	d.SetMaxIdleConns(sqliteMaxOpenConns)
 
 	if path != ":memory:" {
 		if _, err := d.ExecContext(context.Background(), `PRAGMA journal_mode = WAL;`); err != nil {
