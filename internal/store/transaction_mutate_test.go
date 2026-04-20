@@ -253,3 +253,44 @@ func TestUpdateTransaction_householdMemberCanUpdateOtherMembersTransaction(t *te
 		t.Fatalf("got %+v", got)
 	}
 }
+
+func TestCreateTransaction_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-exec-create@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 3, 1, 12, 0, 0, 0, time.UTC)
+	_, err = st.CreateTransaction(alreadyCancelledContext(t), uid, u.HouseholdID, -500, day, "x", nil)
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestUpdateTransaction_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-exec-upd@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 4, 1, 12, 0, 0, 0, time.UTC)
+	tid, err := st.CreateTransaction(ctx, uid, hid, -100, day, "x", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = st.UpdateTransaction(alreadyCancelledContext(t), hid, uid, tid, -200, day, "y", nil)
+	assertErrIsContextCanceled(t, err)
+}
