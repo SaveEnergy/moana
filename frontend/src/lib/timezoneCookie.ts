@@ -9,7 +9,7 @@ export function timezoneCookieSegment(tz: string): string {
 
 /**
  * Read `moana_tz` from a `document.cookie`-style string (testable without JSDOM).
- * Returns null if missing or not decodable.
+ * Returns null if missing or not decodable; an empty value after `=` yields `""` (valid `decodeURIComponent`).
  * Scans semicolon-separated segments without `split` so large `document.cookie` strings avoid an extra array allocation.
  */
 export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
