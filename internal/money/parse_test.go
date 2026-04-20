@@ -2,6 +2,7 @@ package money
 
 import (
 	"errors"
+	"math"
 	"testing"
 )
 
@@ -53,6 +54,9 @@ func TestAbsCents(t *testing.T) {
 	t.Parallel()
 	if AbsCents(-5) != 5 || AbsCents(5) != 5 || AbsCents(0) != 0 {
 		t.Fatal()
+	}
+	if got := AbsCents(math.MinInt64); got != math.MaxInt64 {
+		t.Fatalf("AbsCents(MinInt64) = %d, want MaxInt64 (true magnitude does not fit int64)", got)
 	}
 }
 

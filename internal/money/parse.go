@@ -68,10 +68,24 @@ func ParseEURToCents(s string) (int64, error) {
 	return out, nil
 }
 
-// AbsCents returns the absolute value of an amount in cents.
-func AbsCents(c int64) int64 {
-	if c < 0 {
-		return -c
+// absCentsUint64 returns the magnitude of c in cents. For [math.MinInt64], the true magnitude
+// does not fit in int64; the result is uint64(math.MaxInt64)+1.
+func absCentsUint64(c int64) uint64 {
+	if c >= 0 {
+		return uint64(c)
 	}
-	return c
+	if c == math.MinInt64 {
+		return uint64(math.MaxInt64) + 1
+	}
+	return uint64(-c)
+}
+
+// AbsCents returns the absolute value of an amount in cents. If the magnitude does not fit in
+// int64 (only possible for [math.MinInt64]), it returns [math.MaxInt64] (saturation).
+func AbsCents(c int64) int64 {
+	u := absCentsUint64(c)
+	if u > math.MaxInt64 {
+		return math.MaxInt64
+	}
+	return int64(u)
 }
