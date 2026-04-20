@@ -22,6 +22,7 @@ export function buildRadioMapByValue(
 /**
  * Select a radio from a map keyed by `HTMLInputElement.value`.
  * If `preferred` is not a key, selects `fallbackKey` (default `""` for auto/unset radios).
+ * Skips assigning **`checked`** when that input is already selected (no redundant DOM writes / events).
  * @returns whether a matching input existed and was checked.
  */
 export function setRadioCheckedByValue(
@@ -33,7 +34,9 @@ export function setRadioCheckedByValue(
   if (!input) {
     return false
   }
-  input.checked = true
+  if (!input.checked) {
+    input.checked = true
+  }
   return true
 }
 

@@ -101,6 +101,24 @@ describe('setRadioCheckedByValue', () => {
     expect(setRadioCheckedByValue(map, '  preset  ', '  other  ')).toBe(true)
     expect(target.checked).toBe(true)
   })
+
+  it('does not assign checked when the resolved input is already selected', () => {
+    let checkedSets = 0
+    let c = true
+    const input = {
+      get checked() {
+        return c
+      },
+      set checked(v: boolean) {
+        checkedSets++
+        c = v
+      },
+    } as unknown as HTMLInputElement
+    const map = new Map([['x', input]])
+    expect(setRadioCheckedByValue(map, 'x', '')).toBe(true)
+    expect(checkedSets).toBe(0)
+    expect(input.checked).toBe(true)
+  })
 })
 
 describe('getFormRadioGroupValue', () => {
