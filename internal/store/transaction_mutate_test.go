@@ -51,6 +51,42 @@ func TestCreateTransaction_rejectsOtherHouseholdCategory(t *testing.T) {
 	}
 }
 
+func TestCreateTransaction_rejectsUserNotInHousehold(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "pw-mutate-hh-create")
+
+	_, err := st.CreateUser(ctx, "cth-a@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uA, err := st.GetUserByEmail(ctx, "cth-a@example.com")
+	if err != nil || uA == nil {
+		t.Fatal(err)
+	}
+	uidB, err := st.CreateUser(ctx, "cth-b@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uB, err := st.GetUserByEmail(ctx, "cth-b@example.com")
+	if err != nil || uB == nil {
+		t.Fatal(err)
+	}
+	if uA.HouseholdID == uB.HouseholdID {
+		t.Fatal("expected distinct households")
+	}
+
+	day := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	_, err = st.CreateTransaction(ctx, uidB, uA.HouseholdID, -100, day, "wrong household", nil)
+	if err == nil {
+		t.Fatal("expected ErrUserNotInHousehold")
+	}
+	if !errors.Is(err, ErrUserNotInHousehold) {
+		t.Fatalf("got %v want %v", err, ErrUserNotInHousehold)
+	}
+}
+
 func TestUpdateTransaction_rejectsOtherHouseholdCategory(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

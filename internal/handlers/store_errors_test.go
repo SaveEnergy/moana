@@ -18,6 +18,25 @@ func TestUserFacingStoreMessage_invalidCategory(t *testing.T) {
 	}
 }
 
+func TestUserFacingStoreMessage_userNotInHousehold(t *testing.T) {
+	t.Parallel()
+	got := userFacingStoreMessage(store.ErrUserNotInHousehold)
+	const want = "That account cannot record transactions in this household."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestUserFacingStoreMessage_wrappedUserNotInHousehold(t *testing.T) {
+	t.Parallel()
+	err := fmt.Errorf("create: %w", store.ErrUserNotInHousehold)
+	got := userFacingStoreMessage(err)
+	const want = "That account cannot record transactions in this household."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
 func TestUserFacingStoreMessage_wrappedInvalidCategory(t *testing.T) {
 	t.Parallel()
 	err := fmt.Errorf("update: %w", store.ErrInvalidCategory)

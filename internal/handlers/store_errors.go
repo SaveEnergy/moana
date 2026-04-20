@@ -27,6 +27,7 @@ var storeUserMessages = []struct {
 	msg      string
 }{
 	{store.ErrInvalidCategory, "That category is not valid for this household."},
+	{store.ErrUserNotInHousehold, "That account cannot record transactions in this household."},
 	{store.ErrCategoryNotFound, "That category could not be found."},
 	{store.ErrDuplicateCategoryName, "A category with that name already exists."},
 	{store.ErrDuplicateUserEmail, "A user with that email already exists."},

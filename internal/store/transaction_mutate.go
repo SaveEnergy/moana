@@ -12,7 +12,11 @@ import (
 // ErrInvalidCategory is returned when a category id does not exist in the household.
 var ErrInvalidCategory = errors.New("invalid category")
 
+// ErrUserNotInHousehold is returned when userID does not belong to householdID (CreateTransaction only).
+var ErrUserNotInHousehold = errors.New("user not in household")
+
 // CreateTransaction inserts a transaction. occurredAt must be UTC.
+// userID must belong to householdID; the insert is conditional on that (no orphan rows for mismatched ids).
 func (s *Store) CreateTransaction(ctx context.Context, userID, householdID int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) (int64, error) {
 	if err := s.validateCategoryOwnership(ctx, householdID, categoryID); err != nil {
 		return 0, err
@@ -22,9 +26,18 @@ func (s *Store) CreateTransaction(ctx context.Context, userID, householdID int64
 	cat := sqlNullCategoryID(categoryID)
 	res, err := s.DB.ExecContext(ctx, `
 INSERT INTO transactions (user_id, amount_cents, occurred_at, description, category_id, created_at)
-VALUES (?, ?, ?, ?, ?, ?)`, userID, amountCents, occ, description, cat, now)
+SELECT ?, ?, ?, ?, ?, ?
+WHERE EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
+		userID, amountCents, occ, description, cat, now, userID, householdID)
 	if err != nil {
 		return 0, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if n == 0 {
+		return 0, ErrUserNotInHousehold
 	}
 	return res.LastInsertId()
 }
