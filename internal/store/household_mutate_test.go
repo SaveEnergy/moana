@@ -46,6 +46,17 @@ func TestUpdateHouseholdName_noSuchHousehold(t *testing.T) {
 	}
 }
 
+func TestCreateHouseholdMember_unknownHouseholdID(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	_, err := st.CreateHouseholdMember(ctx, 999999999999, "orphan@example.com", hash)
+	if err == nil {
+		t.Fatal("expected error when household_id does not exist (FK)")
+	}
+}
+
 func TestDetachUserToSoloHousehold_noSuchUser(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
