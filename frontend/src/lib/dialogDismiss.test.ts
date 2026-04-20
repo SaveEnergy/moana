@@ -52,6 +52,14 @@ describe('shouldCloseNativeDialogFromClick', () => {
       shouldCloseNativeDialogFromClick(stubClickTargetEvent(inner), dialog, ['', '   ', '#close']),
     ).toBe(true)
   })
+
+  it('does not call closest when every dismiss selector is blank', () => {
+    const dialog = {} as unknown as HTMLDialogElement
+    const closest = vi.fn(() => null)
+    const inner = { closest } as unknown as Element
+    expect(shouldCloseNativeDialogFromClick(stubClickTargetEvent(inner), dialog, ['', '\t  '])).toBe(false)
+    expect(closest).not.toHaveBeenCalled()
+  })
 })
 
 describe('attachNativeDialogDismiss', () => {
@@ -91,5 +99,21 @@ describe('attachNativeDialogDismiss', () => {
     attachNativeDialogDismiss(dialog, ['#x'])
 
     expect(addEventListener).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not close inner clicks when every dismiss selector was blank (filtered at attach)', () => {
+    const close = vi.fn()
+    const addEventListener = vi.fn()
+    const dialog = { close, addEventListener } as unknown as HTMLDialogElement
+    const closest = vi.fn(() => null)
+    const inner = { closest } as unknown as Element
+
+    attachNativeDialogDismiss(dialog, ['', '\t'])
+
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(inner))
+
+    expect(close).not.toHaveBeenCalled()
+    expect(closest).not.toHaveBeenCalled()
   })
 })
