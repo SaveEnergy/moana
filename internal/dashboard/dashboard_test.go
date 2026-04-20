@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -70,6 +71,27 @@ func TestNetPctChange_negativePreviousUsesAbsInDenominator(t *testing.T) {
 	v := NetPctChange(100, -50)
 	if v < 299.9 || v > 300.1 {
 		t.Fatalf("got %v want ~300", v)
+	}
+}
+
+func TestNetPctChange_extremePriorMinInt64_noInt64SubtractionWrap(t *testing.T) {
+	t.Parallel()
+	// int64(100 - MinInt64) wraps to a negative value; the % must use float difference (~+100%).
+	v := NetPctChange(100, math.MinInt64)
+	if v < 99 || v > 101 {
+		t.Fatalf("got %v want ~100 (wrapped int64 diff would yield ~-100)", v)
+	}
+}
+
+func TestNetPctChange_maxVsMinInt64_nearTwoHundredPercent(t *testing.T) {
+	t.Parallel()
+	v := NetPctChange(math.MaxInt64, math.MinInt64)
+	if math.IsNaN(v) || math.IsInf(v, 0) {
+		t.Fatalf("got %v", v)
+	}
+	// (Max−Min) / |Min| ≈ 2 → ~200% (int64 subtraction wraps to −1 and would be nonsense).
+	if v < 199 || v > 201 {
+		t.Fatalf("got %v want ~200", v)
 	}
 }
 

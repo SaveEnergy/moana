@@ -6,6 +6,7 @@ import (
 )
 
 // pctChangeVsPrior is period-over-period % change: (current−previous) / |previous| × 100, with prior=0 handled as 0% or 100%.
+// The difference uses float64 so current−previous does not wrap when it exceeds int64 range.
 func pctChangeVsPrior(current, previous int64) float64 {
 	if previous == 0 {
 		if current == 0 {
@@ -13,7 +14,9 @@ func pctChangeVsPrior(current, previous int64) float64 {
 		}
 		return 100
 	}
-	return float64(current-previous) / float64(money.AbsCents(previous)) * 100
+	denom := float64(money.AbsCents(previous))
+	numer := float64(current) - float64(previous)
+	return numer / denom * 100
 }
 
 // NetPctChange is period-over-period % change for signed net (current vs previous period of same length).
