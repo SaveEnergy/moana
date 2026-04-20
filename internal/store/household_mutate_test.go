@@ -162,3 +162,16 @@ func TestDetachUserToSoloHousehold(t *testing.T) {
 		t.Fatalf("new household members %d want 1", nSolo)
 	}
 }
+
+func TestDetachUserToSoloHousehold_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-detach@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = st.DetachUserToSoloHousehold(alreadyCancelledContext(t), uid)
+	assertErrIsContextCanceled(t, err)
+}
