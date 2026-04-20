@@ -25,6 +25,26 @@ describe('readCategoryEditRowDataset', () => {
     )
   })
 
+  it('strips Cf from color, customHex, and icon (not name)', () => {
+    expect(
+      readCategoryEditRowDataset({
+        id: '1',
+        name: '  Books  ',
+        color: '\u200b#aaBBcc\u200b',
+        custom: '0',
+        customHex: '\u200b#112233\u200b',
+        icon: '\u200bstar\u200b',
+      } as unknown as DOMStringMap),
+    ).toEqual({
+      id: '1',
+      name: '  Books  ',
+      rawColor: '#aaBBcc',
+      isCustom: false,
+      customHex: '#112233',
+      iconVal: 'star',
+    })
+  })
+
   it('parses edit row fields and trims strings', () => {
     const ds = {
       id: '  42  ',
@@ -57,6 +77,9 @@ describe('readCategoryEditRowDataset', () => {
   it('sets isCustom when trimmed data-custom is exactly "1"', () => {
     const ds = { id: '1', custom: 'yes' } as unknown as DOMStringMap
     expect(readCategoryEditRowDataset(ds)?.isCustom).toBe(false)
+    expect(readCategoryEditRowDataset({ id: '1', custom: '\u200b1\u200b' } as unknown as DOMStringMap)?.isCustom).toBe(
+      true,
+    )
     expect(readCategoryEditRowDataset({ id: '1', custom: ' 1 ' } as unknown as DOMStringMap)?.isCustom).toBe(
       true,
     )
