@@ -179,3 +179,12 @@ func TestSumRunningTotalAndIncomeExpenseInTwoRanges_cancelledContext(t *testing.
 	_, _, _, _, _, err := st.SumRunningTotalAndIncomeExpenseInTwoRanges(alreadyCancelledContext(t), 1, aFrom, aTo, bFrom, bTo)
 	assertErrIsContextCanceled(t, err)
 }
+
+func TestSumIncomeExpenseCentsInRange_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
+	_, _, err := st.SumIncomeExpenseCentsInRange(alreadyCancelledContext(t), 1, &from, &to)
+	assertErrIsContextCanceled(t, err)
+}

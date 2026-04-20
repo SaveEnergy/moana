@@ -45,3 +45,10 @@ func TestListHouseholdMembers_orderAndRoles(t *testing.T) {
 		t.Fatalf("roles %+v %+v", members[0].HouseholdRole, members[1].HouseholdRole)
 	}
 }
+
+func TestListHouseholdMembers_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListHouseholdMembers(alreadyCancelledContext(t), 1)
+	assertErrIsContextCanceled(t, err)
+}

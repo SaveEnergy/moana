@@ -100,3 +100,10 @@ func TestListCategories_cancelledContext(t *testing.T) {
 	_, err := st.ListCategories(alreadyCancelledContext(t), 1)
 	assertErrIsContextCanceled(t, err)
 }
+
+func TestGetCategoryByID_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.GetCategoryByID(alreadyCancelledContext(t), 1, 1)
+	assertErrIsContextCanceled(t, err)
+}
