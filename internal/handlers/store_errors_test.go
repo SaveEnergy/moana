@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"testing"
@@ -53,6 +54,25 @@ func TestUserFacingStoreMessage_unknownDoesNotPassthroughRawError(t *testing.T) 
 	got := userFacingStoreMessage(err)
 	if got != httperr.InternalMessage {
 		t.Fatalf("got %q want %q", got, httperr.InternalMessage)
+	}
+}
+
+func TestUserFacingStoreMessage_sqlErrNoRows(t *testing.T) {
+	t.Parallel()
+	got := userFacingStoreMessage(sql.ErrNoRows)
+	const want = "That record could not be found."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestUserFacingStoreMessage_wrappedSqlErrNoRows(t *testing.T) {
+	t.Parallel()
+	err := fmt.Errorf("update: %w", sql.ErrNoRows)
+	got := userFacingStoreMessage(err)
+	const want = "That record could not be found."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
 	}
 }
 

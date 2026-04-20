@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 
 	"moana/internal/httperr"
@@ -12,6 +13,9 @@ import (
 func userFacingStoreMessage(err error) string {
 	if err == nil {
 		return httperr.InternalMessage
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		return "That record could not be found."
 	}
 	for _, row := range storeUserMessages {
 		if errors.Is(err, row.sentinel) {

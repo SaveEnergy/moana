@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"strings"
-
-	"moana/internal/timeutil"
 )
 
 // ListTransactions returns transactions for the household, ordered by occurred_at (and id).
@@ -21,16 +19,10 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	// At most: household, from, to, 2×search, limit.
 	args := make([]any, 0, 6)
 	args = append(args, householdID)
-	if f.FromUTC != nil {
-		b.WriteString(` AND t.occurred_at >= ?`)
-		args = append(args, timeutil.FormatSQLiteUTC(*f.FromUTC))
-	}
-	if f.ToUTC != nil {
-		b.WriteString(` AND t.occurred_at <= ?`)
-		args = append(args, timeutil.FormatSQLiteUTC(*f.ToUTC))
-	}
+	args = appendOccurredAtRange(&b, args, f.FromUTC, f.ToUTC)
 	// Only "income" / "expense" add a sign filter; unknown kind strings are ignored (same as Kind "").
-	switch strings.TrimSpace(f.Kind) {
+	kind := strings.TrimSpace(f.Kind)
+	switch kind {
 	case "income":
 		b.WriteString(` AND t.amount_cents > 0`)
 	case "expense":
