@@ -31,6 +31,23 @@ describe('shouldCloseNativeDialogFromClick', () => {
       shouldCloseNativeDialogFromClick({ target: content } as unknown as MouseEvent, dialog, ['#close']),
     ).toBe(false)
   })
+
+  it('still closes on backdrop when dismiss selector list is empty', () => {
+    const dialog = { closest: () => null } as unknown as HTMLDialogElement
+    expect(shouldCloseNativeDialogFromClick({ target: dialog } as unknown as MouseEvent, dialog, [])).toBe(
+      true,
+    )
+  })
+
+  it('does not close on inner content when dismiss selector list is empty', () => {
+    const dialog = {} as unknown as HTMLDialogElement
+    const inner = {
+      closest: () => null,
+    } as unknown as Element
+    expect(shouldCloseNativeDialogFromClick({ target: inner } as unknown as MouseEvent, dialog, [])).toBe(
+      false,
+    )
+  })
 })
 
 describe('attachNativeDialogDismiss', () => {

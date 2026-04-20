@@ -42,4 +42,9 @@ describe('readCategoryEditRowDataset', () => {
     const ds = { id: '1', custom: 'yes' } as unknown as DOMStringMap
     expect(readCategoryEditRowDataset(ds)?.isCustom).toBe(false)
   })
+
+  it('keeps empty string customHex when attribute is present but blank (dataset key exists)', () => {
+    const ds = { id: '1', customHex: '' } as unknown as DOMStringMap
+    expect(readCategoryEditRowDataset(ds)?.customHex).toBe('')
+  })
 })

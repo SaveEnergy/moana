@@ -16,7 +16,12 @@ export function shouldCloseNativeDialogFromClick(
   if (el === dialog) {
     return true
   }
-  return closeWithinSelectors.some((sel) => el.closest(sel) !== null)
+  for (const sel of closeWithinSelectors) {
+    if (el.closest(sel) !== null) {
+      return true
+    }
+  }
+  return false
 }
 
 /**
