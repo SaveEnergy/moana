@@ -134,6 +134,29 @@ describe('initSettingsMemberDialog', () => {
     expect(dialogAdd).toHaveBeenCalledTimes(1)
   })
 
+  it('still attaches native dismiss when the open button is missing', () => {
+    const dialogAdd = vi.fn()
+    const parent = {
+      querySelector: () => null,
+    } as unknown as ParentNode
+    const dialog = {
+      addEventListener: dialogAdd,
+      parentElement: parent,
+    } as unknown as HTMLDialogElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) =>
+          sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
+      }),
+    )
+
+    expect(() => initSettingsMemberDialog()).not.toThrow()
+    expect(dialogAdd).toHaveBeenCalledTimes(1)
+    expect(dialogAdd).toHaveBeenCalledWith('click', expect.any(Function))
+  })
+
   it('resolves dialog under main.app-main when the landmark exists', () => {
     const showModal = vi.fn()
     const dialogAdd = vi.fn()
