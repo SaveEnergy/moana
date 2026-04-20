@@ -36,8 +36,9 @@ func NewRouterWithRouterOptions(opts *RouterOptions, app *handlers.App) http.Han
 	handlers.RegisterRoutes(mux, app)
 
 	var inner http.Handler = mux
+	inner = WithMaxRequestBodyBytes(defaultMaxRequestBodyBytes)(inner)
 	if d := requestTimeout(opts, app); d > 0 {
-		inner = WithRequestTimeout(d)(mux)
+		inner = WithRequestTimeout(d)(inner)
 	}
 	var h http.Handler = inner
 	if opts == nil || !opts.DisableRequestLogging {
