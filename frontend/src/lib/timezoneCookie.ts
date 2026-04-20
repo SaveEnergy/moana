@@ -1,3 +1,5 @@
+import { trimEdgesIfNeeded } from './trimEdges'
+
 export const TIMEZONE_COOKIE_NAME = 'moana_tz'
 
 const TZ_MAX_AGE_SEC = 365 * 24 * 60 * 60
@@ -22,12 +24,12 @@ export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
   while (pos < cookieHeader.length) {
     const semi = cookieHeader.indexOf(';', pos)
     const end = semi === -1 ? cookieHeader.length : semi
-    const s = cookieHeader.slice(pos, end).trim()
+    const s = trimEdgesIfNeeded(cookieHeader.slice(pos, end))
     const eq = s.indexOf('=')
     if (eq !== -1) {
-      const segName = s.slice(0, eq).trim()
+      const segName = trimEdgesIfNeeded(s.slice(0, eq))
       if (segName === TIMEZONE_COOKIE_NAME) {
-        const raw = s.slice(eq + 1).trim()
+        const raw = trimEdgesIfNeeded(s.slice(eq + 1))
         try {
           return decodeURIComponent(raw)
         } catch {
