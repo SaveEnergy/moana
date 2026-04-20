@@ -160,6 +160,29 @@ describe('initConfirmSubmitForms', () => {
     expect(() => initConfirmSubmitForms()).not.toThrow()
   })
 
+  it('does not wire submit when every matching form has a blank trimmed data-confirm', () => {
+    const a = {
+      getAttribute: (name: string) => (name === DATA_CONFIRM_ATTRIBUTE ? ' \n\t ' : null),
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+    const b = {
+      getAttribute: (name: string) => (name === DATA_CONFIRM_ATTRIBUTE ? '' : null),
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelectorAll: ((_sel: string) => [a, b]) as unknown as Document['querySelectorAll'],
+      }),
+    )
+
+    initConfirmSubmitForms()
+
+    expect(a.addEventListener).not.toHaveBeenCalled()
+    expect(b.addEventListener).not.toHaveBeenCalled()
+  })
+
   it('does not attach a second submit listener when init runs twice', () => {
     const form = {
       getAttribute: (name: string) =>
