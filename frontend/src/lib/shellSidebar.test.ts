@@ -125,6 +125,55 @@ describe('initShellSidebar', () => {
     expect(doc.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), { capture: true })
   })
 
+  it('wires shell click + capture keydown when toggle is absent but backdrop exists', () => {
+    const matchMedia = vi.fn()
+    const mq = {
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }
+    matchMedia.mockReturnValue(mq)
+
+    const backdrop = { setAttribute: vi.fn() }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return null
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
+    const appShell = {
+      classList: {
+        add: vi.fn(),
+        remove: vi.fn(),
+        contains: vi.fn(() => false),
+      },
+      addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
+    }
+
+    const querySelector = vi.fn((sel: string) => {
+      if (sel === APP_SHELL_SELECTOR) return appShell
+      return null
+    })
+
+    const doc = {
+      querySelector,
+      addEventListener: vi.fn(),
+    }
+
+    vi.stubGlobal('document', doc)
+    vi.stubGlobal('window', { matchMedia })
+
+    expect(() => initShellSidebar()).not.toThrow()
+
+    expect(shellQuerySelector).toHaveBeenCalledWith(APP_SIDEBAR_TOGGLE_SELECTOR)
+    expect(shellQuerySelector).toHaveBeenCalledWith(APP_SIDEBAR_BACKDROP_SELECTOR)
+    expect(matchMedia).toHaveBeenCalledWith(MOBILE_SHELL_MEDIA_QUERY)
+    expect(appShell.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
+    expect(mq.addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    expect(doc.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), { capture: true })
+  })
+
   it('does not stack listeners when initShellSidebar runs twice', () => {
     const matchMedia = vi.fn()
     const mq = {
