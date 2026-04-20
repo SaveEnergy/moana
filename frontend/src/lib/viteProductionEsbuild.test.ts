@@ -2,26 +2,26 @@ import { describe, expect, it } from 'vitest'
 
 import viteConfig from '../../vite.config'
 
-describe('vite.config production esbuild', () => {
-  function resolveConfig(mode: 'production' | 'development') {
-    if (typeof viteConfig !== 'function') {
-      throw new Error('expected defineConfig callback export')
-    }
-    return viteConfig({ command: 'build', mode, isSsrBuild: false })
+function resolveViteConfig(mode: 'production' | 'development') {
+  if (typeof viteConfig !== 'function') {
+    throw new Error('expected defineConfig callback export')
   }
+  return viteConfig({ command: 'build', mode, isSsrBuild: false })
+}
 
+describe('vite.config production esbuild', () => {
   it('drops console and debugger only in production', () => {
-    const prod = resolveConfig('production')
+    const prod = resolveViteConfig('production')
     expect(prod.esbuild).toMatchObject({
       legalComments: 'none',
       drop: ['console', 'debugger'],
     })
-    const dev = resolveConfig('development')
+    const dev = resolveViteConfig('development')
     expect(dev.esbuild).toEqual({ legalComments: 'none' })
   })
 
   it('keeps es2022 target, css minify, and non-destructive static outDir (design.md build section)', () => {
-    const prod = resolveConfig('production')
+    const prod = resolveViteConfig('production')
     expect(prod.build?.target).toBe('es2022')
     expect(prod.build?.cssMinify).toBe(true)
     expect(prod.build?.emptyOutDir).toBe(false)
@@ -30,7 +30,7 @@ describe('vite.config production esbuild', () => {
   })
 
   it('resolves main.ts input and fixed js/app.js + css/app.css output names', () => {
-    const prod = resolveConfig('production')
+    const prod = resolveViteConfig('production')
     expect(String(prod.build?.rollupOptions?.input)).toMatch(/main\.ts$/)
     const output = prod.build?.rollupOptions?.output
     const out = Array.isArray(output) ? output[0] : output
@@ -43,5 +43,17 @@ describe('vite.config production esbuild', () => {
     expect(fn({ names: ['app.css'] })).toBe('css/app.css')
     expect(fn({ name: 'app.css' })).toBe('css/app.css')
     expect(fn({ name: 'other.png' })).toBe('assets/[name][extname]')
+  })
+})
+
+describe('vite.config vitest block', () => {
+  it('runs unit tests from frontend root in node without allowing empty suites', () => {
+    const cfg = resolveViteConfig('development')
+    expect(cfg.test).toMatchObject({
+      environment: 'node',
+      include: ['src/**/*.test.ts'],
+      passWithNoTests: false,
+    })
+    expect(String(cfg.test?.root).replace(/\\/g, '/')).toMatch(/\/frontend$/)
   })
 })
