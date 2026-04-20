@@ -2,6 +2,7 @@ import {
   CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT,
   resolveCategoryModalPreviewBackground,
   sanitizeCategoryCustomHex,
+  shouldUpdateCategoryModalPreviewBackground,
 } from './categoryColor'
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
@@ -88,12 +89,19 @@ export function initCategoryModal(): void {
   /** Last icon radio `value` we painted into `#cat-modal-preview-icon` (reset each open). */
   let lastPaintedIconGroupValue: string | undefined
 
+  /** Last `resolveCategoryModalPreviewBackground` string applied to `#cat-modal-preview` (reset each open). */
+  let lastResolvedPreviewBackground: string | undefined
+
   function syncCatModalPreview() {
     const colorVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME)
-    catPreview.style.background = resolveCategoryModalPreviewBackground(
+    const nextBg = resolveCategoryModalPreviewBackground(
       colorVal || undefined,
       colorNativeInput?.value,
     )
+    if (shouldUpdateCategoryModalPreviewBackground(lastResolvedPreviewBackground, nextBg)) {
+      catPreview.style.background = nextBg
+      lastResolvedPreviewBackground = nextBg
+    }
 
     const iconVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_ICON_RADIO_GROUP_NAME)
     if (!shouldRepaintCategoryModalIconPreview(lastPaintedIconGroupValue, iconVal)) {
@@ -150,6 +158,8 @@ export function initCategoryModal(): void {
 
   function openCreateModal() {
     scheduleCatModalPreview.cancelPending()
+    lastPaintedIconGroupValue = undefined
+    lastResolvedPreviewBackground = undefined
     catForm.action = '/categories'
     catId.value = ''
     catTitle.textContent = 'New category'
@@ -166,6 +176,7 @@ export function initCategoryModal(): void {
   function openEditModal(btn: HTMLElement) {
     scheduleCatModalPreview.cancelPending()
     lastPaintedIconGroupValue = undefined
+    lastResolvedPreviewBackground = undefined
     const row = readCategoryEditRowDataset(btn.dataset)
     if (!row) {
       return

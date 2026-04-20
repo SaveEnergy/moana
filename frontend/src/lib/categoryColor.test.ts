@@ -5,12 +5,33 @@ import {
   CATEGORY_MODAL_DEFAULT_PREVIEW_BG,
   resolveCategoryModalPreviewBackground,
   sanitizeCategoryCustomHex,
+  shouldUpdateCategoryModalPreviewBackground,
 } from './categoryColor'
 import { CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM } from './domSelectors'
 
 describe('category modal custom color default', () => {
   it('matches categories.html native color input initial value', () => {
     expect(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT).toBe('#818cf8')
+  })
+})
+
+describe('shouldUpdateCategoryModalPreviewBackground', () => {
+  it('updates when nothing was painted yet', () => {
+    expect(shouldUpdateCategoryModalPreviewBackground(undefined, '#ffffff')).toBe(true)
+  })
+
+  it('skips when the resolved background is unchanged', () => {
+    expect(shouldUpdateCategoryModalPreviewBackground('#abc123', '#abc123')).toBe(false)
+    expect(
+      shouldUpdateCategoryModalPreviewBackground(
+        CATEGORY_MODAL_DEFAULT_PREVIEW_BG,
+        CATEGORY_MODAL_DEFAULT_PREVIEW_BG,
+      ),
+    ).toBe(false)
+  })
+
+  it('updates when the resolved background differs', () => {
+    expect(shouldUpdateCategoryModalPreviewBackground('#111111', '#222222')).toBe(true)
   })
 })
 

@@ -28,6 +28,17 @@ export function resolveCategoryModalPreviewBackground(
   return CATEGORY_MODAL_DEFAULT_PREVIEW_BG
 }
 
+/**
+ * Whether {@link resolveCategoryModalPreviewBackground} produced a different string than last paint —
+ * `categoryModal.ts` uses this to skip redundant `style.background` writes on the preview strip.
+ */
+export function shouldUpdateCategoryModalPreviewBackground(
+  lastResolved: string | undefined,
+  nextResolved: string,
+): boolean {
+  return lastResolved !== nextResolved
+}
+
 /** Sanitize custom hex from data attributes for the category modal native color input. */
 export function sanitizeCategoryCustomHex(
   hex: string,
