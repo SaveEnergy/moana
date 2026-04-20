@@ -25,6 +25,7 @@ describe('readDataConfirmMessage', () => {
     expect(readDataConfirmMessage(elWithAttr('   \t '))).toBeNull()
     expect(readDataConfirmMessage(elWithAttr('\n\r'))).toBeNull()
     expect(readDataConfirmMessage(elWithAttr('\u2028\u2029'))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('\u00a0'))).toBeNull()
   })
 
   it('returns trimmed text', () => {
