@@ -26,6 +26,7 @@ func New(cfg *config.Config, st *store.Store) (*handlers.App, error) {
 }
 
 // HTTPHandler returns the production HTTP handler (parsed templates + routes + logging).
+// It passes [config.Config.MaxRequestBodyBytes] into [server.RouterOptions] so env-driven limits apply; see [server.NewRouterWithRouterOptions] for the full middleware chain.
 // Tests that need a bare [handlers.App] should use [New] and [server.NewRouter] directly.
 func HTTPHandler(cfg *config.Config, st *store.Store) (http.Handler, error) {
 	a, err := New(cfg, st)
