@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"moana/internal/money"
 	"moana/internal/timeutil"
 )
 
@@ -35,9 +36,7 @@ func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int
 		if err != nil {
 			return nil, err
 		}
-		if cents < 0 {
-			cents = -cents
-		}
+		cents = money.AbsCents(cents)
 		day := timeutil.LocalCalendarDateKey(t, loc)
 		out[day] += cents
 	}

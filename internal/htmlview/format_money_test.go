@@ -1,6 +1,7 @@
 package htmlview
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -11,6 +12,15 @@ func TestFormatEURAbs_negative(t *testing.T) {
 	t.Parallel()
 	got := FormatEURAbs(-12345)
 	want := money.FormatEUR(12345)
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestFormatEURAbs_minInt64(t *testing.T) {
+	t.Parallel()
+	got := FormatEURAbs(math.MinInt64)
+	want := money.FormatEUR(money.AbsCents(math.MinInt64))
 	if got != want {
 		t.Fatalf("got %q want %q", got, want)
 	}
@@ -41,5 +51,13 @@ func TestFormatCompactEUR_negativeLarge_preservesSign(t *testing.T) {
 	}
 	if !strings.Contains(got, "€") {
 		t.Fatalf("got %q", got)
+	}
+}
+
+func TestFormatCompactEUR_minInt64LargeAbbreviatesWithMinus(t *testing.T) {
+	t.Parallel()
+	got := FormatCompactEUR(math.MinInt64)
+	if !strings.HasPrefix(got, "-") || !strings.Contains(got, "k") {
+		t.Fatalf("expected abbreviated negative €…k, got %q", got)
 	}
 }

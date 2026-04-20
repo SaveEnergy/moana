@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"math"
 	"testing"
 	"time"
 
@@ -89,5 +90,35 @@ func TestDailyAbsMovementByLocalDate_nilLocationMatchesUTC(t *testing.T) {
 		if mUTC[k] != v {
 			t.Fatalf("key %q nil=%d utc=%d", k, v, mUTC[k])
 		}
+	}
+}
+
+func TestDailyAbsMovementByLocalDate_minInt64AmountUsesAbsCents(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "pw-movement-min64")
+	uid, err := st.CreateUser(ctx, "movement-min64@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByEmail(ctx, "movement-min64@example.com")
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	occ := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, occ, "edge", nil); err != nil {
+		t.Fatal(err)
+	}
+	fromUTC := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	toUTC := time.Date(2026, 1, 31, 23, 59, 59, 999999999, time.UTC)
+	byDay, err := st.DailyAbsMovementByLocalDate(ctx, hid, fromUTC, toUTC, time.UTC)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Raw -MinInt64 overflows; magnitude must match [money.AbsCents].
+	if got := byDay["2026-01-15"]; got != math.MaxInt64 {
+		t.Fatalf("abs movement for MinInt64 row: got %d want MaxInt64", got)
 	}
 }

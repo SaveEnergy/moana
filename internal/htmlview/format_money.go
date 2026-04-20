@@ -13,19 +13,13 @@ func FormatEUR(cents int64) string {
 
 // FormatEURAbs renders absolute cents as EUR.
 func FormatEURAbs(cents int64) string {
-	if cents < 0 {
-		cents = -cents
-	}
-	return money.FormatEUR(cents)
+	return money.FormatEUR(money.AbsCents(cents))
 }
 
 // FormatCompactEUR abbreviates large EUR amounts (e.g. €12.5k).
 func FormatCompactEUR(cents int64) string {
 	neg := cents < 0
-	x := cents
-	if neg {
-		x = -x
-	}
+	x := money.AbsCents(cents)
 	if x < 100_000 {
 		return money.FormatEUR(cents)
 	}
