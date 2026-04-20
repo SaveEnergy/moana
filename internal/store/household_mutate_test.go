@@ -46,6 +46,27 @@ func TestUpdateHouseholdName_noSuchHousehold(t *testing.T) {
 	}
 }
 
+func TestDetachUserToSoloHousehold_noSuchUser(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	var before int64
+	if err := st.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM households`).Scan(&before); err != nil {
+		t.Fatal(err)
+	}
+	err := st.DetachUserToSoloHousehold(ctx, 999999999999)
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
+	}
+	var after int64
+	if err := st.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM households`).Scan(&after); err != nil {
+		t.Fatal(err)
+	}
+	if after != before {
+		t.Fatalf("household count %d want %d (failed detach must roll back new household row)", after, before)
+	}
+}
+
 func TestDetachUserToSoloHousehold(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

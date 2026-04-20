@@ -48,6 +48,7 @@ func (s *Store) CreateHouseholdMember(ctx context.Context, householdID int64, em
 }
 
 // DetachUserToSoloHousehold moves a user into a new household as owner (remove from shared household).
+// If no user row matches userID, it returns [sql.ErrNoRows] and rolls back the new household insert.
 func (s *Store) DetachUserToSoloHousehold(ctx context.Context, userID int64) error {
 	now := timeutil.NowSQLiteUTC()
 	tx, err := s.DB.BeginTx(ctx, nil)
@@ -63,10 +64,17 @@ func (s *Store) DetachUserToSoloHousehold(ctx context.Context, userID int64) err
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, `
+	res2, err := tx.ExecContext(ctx, `
 UPDATE users SET household_id = ?, household_role = 'owner' WHERE id = ?`, hid, userID)
 	if err != nil {
 		return err
+	}
+	n, err := res2.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sql.ErrNoRows
 	}
 	return tx.Commit()
 }
