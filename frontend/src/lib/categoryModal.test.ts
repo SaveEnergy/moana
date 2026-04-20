@@ -15,6 +15,7 @@ import {
   CATEGORY_MODAL_TITLE_SELECTOR,
 } from './domSelectors'
 import { initCategoryModal } from './categoryModal'
+import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
 
 describe('initCategoryModal', () => {
   afterEach(() => {
@@ -182,9 +183,10 @@ describe('initCategoryModal', () => {
       if (sel === CATEGORY_LIST_SECTION_SELECTOR) return null
       return null
     })
-    const main = { querySelector: mainQuerySelector }
+    const main = { querySelector: mainQuerySelector } as unknown as ParentNode
 
-    const docQuerySelector = vi.fn((sel: string) => (sel === APP_MAIN_SELECTOR ? main : null))
+    const baseDoc = stubDocumentMainLandmark(main)
+    const docQuerySelector = vi.fn((sel: string) => baseDoc.querySelector(sel))
 
     vi.stubGlobal('document', { querySelector: docQuerySelector })
 

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { APP_MAIN_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
+import { HISTORY_SORT_SELECTOR } from './domSelectors'
 import { initHistoryControls, queryHistorySortSelect, wireHistorySortAutoSubmit } from './historyControls'
+import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
 
 describe('queryHistorySortSelect', () => {
   it('uses HISTORY_SORT_SELECTOR on root', () => {
@@ -107,9 +108,7 @@ describe('initHistoryControls', () => {
       querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
     } as unknown as ParentNode
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
-    })
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
 
     initHistoryControls()
 

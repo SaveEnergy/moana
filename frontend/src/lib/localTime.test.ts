@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { APP_MAIN_SELECTOR, LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 import { applyLocalTimeElements, createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
+import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
 
 describe('formatLocalTimeLabel', () => {
   it('returns null for invalid ISO strings', () => {
@@ -113,10 +114,7 @@ describe('applyLocalTimeElements default document root', () => {
         return sel === LOCAL_TIME_ELEMENTS_SELECTOR ? [el] : []
       },
     } as unknown as ParentNode
-    const doc = {
-      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
-    } as unknown as Document
-    vi.stubGlobal('document', doc)
+    vi.stubGlobal('document', stubDocumentMainLandmark(main) as unknown as Document)
 
     applyLocalTimeElements()
 

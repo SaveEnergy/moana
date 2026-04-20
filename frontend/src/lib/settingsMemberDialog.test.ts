@@ -1,10 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  APP_MAIN_SELECTOR,
-  SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
-  SETTINGS_ADD_MEMBER_OPEN_SELECTOR,
-} from './domSelectors'
+import { SETTINGS_ADD_MEMBER_DIALOG_SELECTOR, SETTINGS_ADD_MEMBER_OPEN_SELECTOR } from './domSelectors'
+import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
 import {
   initSettingsMemberDialog,
   querySettingsAddMemberDialog,
@@ -151,9 +148,7 @@ describe('initSettingsMemberDialog', () => {
         sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
     } as unknown as ParentNode
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
-    })
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
 
     initSettingsMemberDialog()
 

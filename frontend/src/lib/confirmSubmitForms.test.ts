@@ -6,7 +6,8 @@ import {
   initConfirmSubmitForms,
   readDataConfirmMessage,
 } from './confirmSubmitForms'
-import { APP_MAIN_SELECTOR, DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
+import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
+import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
 
 function elWithAttr(value: string | null): Element {
   return {
@@ -172,9 +173,7 @@ describe('initConfirmSubmitForms', () => {
       },
     } as unknown as ParentNode
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
-    })
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
 
     initConfirmSubmitForms()
 
