@@ -29,6 +29,7 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 		b.WriteString(` AND t.occurred_at <= ?`)
 		args = append(args, timeutil.FormatSQLiteUTC(*f.ToUTC))
 	}
+	// Only "income" / "expense" add a sign filter; unknown kind strings are ignored (same as Kind "").
 	switch strings.TrimSpace(f.Kind) {
 	case "income":
 		b.WriteString(` AND t.amount_cents > 0`)

@@ -231,3 +231,33 @@ func TestListTransactions_kindExpenseOnlyNegativeAmounts(t *testing.T) {
 		t.Fatalf("want 1 expense row, got %+v", txs)
 	}
 }
+
+func TestListTransactions_unknownKindDoesNotFilterBySign(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "kind-unknown@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "in", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -50, day, "out", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Kind: "not-a-valid-kind"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 2 {
+		t.Fatalf("unknown kind must not apply income/expense SQL filter: want 2 rows, got %d", len(txs))
+	}
+}
