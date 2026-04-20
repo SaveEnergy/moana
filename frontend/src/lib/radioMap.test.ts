@@ -7,6 +7,18 @@ function radio(checked = false): HTMLInputElement {
 }
 
 describe('buildRadioMapByValue', () => {
+  it('forwards radiosSelector to querySelectorAll on scope', () => {
+    let seen = ''
+    const scope = {
+      querySelectorAll: (sel: string) => {
+        seen = sel
+        return [] as unknown as NodeListOf<HTMLInputElement>
+      },
+    } as unknown as ParentNode
+    buildRadioMapByValue(scope, 'input[type="radio"][name="color"]')
+    expect(seen).toBe('input[type="radio"][name="color"]')
+  })
+
   it('indexes radios by value for the given selector', () => {
     const a = { value: 'x' } as HTMLInputElement
     const b = { value: '' } as HTMLInputElement
