@@ -32,12 +32,8 @@ WHERE EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
 	if err != nil {
 		return 0, err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
+	if err := execExactlyOneRow(res, ErrUserNotInHousehold); err != nil {
 		return 0, err
-	}
-	if n == 0 {
-		return 0, ErrUserNotInHousehold
 	}
 	return res.LastInsertId()
 }
@@ -58,14 +54,7 @@ AND EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
 	if err != nil {
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return sql.ErrNoRows
-	}
-	return nil
+	return execExactlyOneRow(res, sql.ErrNoRows)
 }
 
 func (s *Store) validateCategoryOwnership(ctx context.Context, householdID int64, categoryID *int64) error {

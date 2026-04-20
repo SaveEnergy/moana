@@ -51,14 +51,7 @@ func (s *Store) UpdateUserPassword(ctx context.Context, userID int64, passwordHa
 	if err != nil {
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return sql.ErrNoRows
-	}
-	return nil
+	return execExactlyOneRow(res, sql.ErrNoRows)
 }
 
 // UpdateUserProfile updates name for the signed-in user.
@@ -68,12 +61,5 @@ UPDATE users SET first_name = ?, last_name = ? WHERE id = ?`, firstName, lastNam
 	if err != nil {
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return sql.ErrNoRows
-	}
-	return nil
+	return execExactlyOneRow(res, sql.ErrNoRows)
 }

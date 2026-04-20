@@ -34,14 +34,7 @@ UPDATE categories SET name = ?, icon = ?, color = ? WHERE id = ? AND household_i
 		}
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return ErrCategoryNotFound
-	}
-	return nil
+	return execExactlyOneRow(res, ErrCategoryNotFound)
 }
 
 // DeleteCategory removes a category if it belongs to the household.
@@ -51,12 +44,5 @@ DELETE FROM categories WHERE id = ? AND household_id = ?`, categoryID, household
 	if err != nil {
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return ErrCategoryNotFound
-	}
-	return nil
+	return execExactlyOneRow(res, ErrCategoryNotFound)
 }

@@ -20,14 +20,7 @@ func (s *Store) UpdateHouseholdName(ctx context.Context, householdID int64, name
 	if err != nil {
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return sql.ErrNoRows
-	}
-	return nil
+	return execExactlyOneRow(res, sql.ErrNoRows)
 }
 
 // CreateHouseholdMember adds a user with role member to an existing household.
@@ -69,12 +62,8 @@ UPDATE users SET household_id = ?, household_role = 'owner' WHERE id = ?`, hid, 
 	if err != nil {
 		return err
 	}
-	n, err := res2.RowsAffected()
-	if err != nil {
+	if err := execExactlyOneRow(res2, sql.ErrNoRows); err != nil {
 		return err
-	}
-	if n == 0 {
-		return sql.ErrNoRows
 	}
 	return tx.Commit()
 }
