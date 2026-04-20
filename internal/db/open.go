@@ -11,10 +11,11 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// sqliteMaxOpenConns caps the [database/sql] pool. Under WAL, SQLite allows concurrent readers
-// while writes remain serialized; a single connection forces strictly sequential queries and
-// wastes overlapping read work (e.g. dashboard section loads).
-const sqliteMaxOpenConns = 8
+// MaxOpenConns is the [database/sql] pool size for SQLite opened by [Open]. Under WAL, readers can
+// overlap while writes stay serialized; a pool of one would serialize concurrent read workloads
+// (e.g. [moana/internal/dashboard.BuildPageData] overlapping aggregate + heatmap + recent queries).
+// Keep this greater than 1 so those reads can run concurrently.
+const MaxOpenConns = 8
 
 var memoryDBSeq atomic.Uint64
 
@@ -45,8 +46,8 @@ func Open(path string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	d.SetMaxOpenConns(sqliteMaxOpenConns)
-	d.SetMaxIdleConns(sqliteMaxOpenConns)
+	d.SetMaxOpenConns(MaxOpenConns)
+	d.SetMaxIdleConns(MaxOpenConns)
 
 	if path != ":memory:" {
 		if _, err := d.ExecContext(context.Background(), `PRAGMA journal_mode = WAL;`); err != nil {

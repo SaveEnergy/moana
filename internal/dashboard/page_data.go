@@ -15,8 +15,9 @@ import (
 
 // BuildPageData loads aggregates and layout data for the dashboard (no HTTP).
 // The running-total / period aggregate query runs concurrently with the heatmap and recent-transaction
-// reads (independent work; [database/sql] pool allows overlapping reads under WAL). Outflow breakdown
-// runs after aggregates complete because it needs periodExpense from the aggregate scan.
+// reads (independent work; [moana/internal/db.MaxOpenConns] must stay >1 so the pool can overlap
+// those reads under WAL). Outflow breakdown runs after aggregates complete because it needs
+// periodExpense from the aggregate scan.
 func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, now time.Time, periodQuery string) (PageData, error) {
 	cfg := parseStatsPeriod(periodQuery)
 
