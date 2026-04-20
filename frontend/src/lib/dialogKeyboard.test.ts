@@ -13,6 +13,7 @@ describe('eventPathIncludesOpenDialog', () => {
   it('is false for empty or irrelevant paths', () => {
     expect(eventPathIncludesOpenDialog([])).toBe(false)
     expect(eventPathIncludesOpenDialog([{ tagName: 'DIV' }])).toBe(false)
+    expect(eventPathIncludesOpenDialog([{ tagName: 'DIV', open: true }])).toBe(false)
     expect(eventPathIncludesOpenDialog([{ tagName: 'DIALOG', open: false }])).toBe(false)
     expect(eventPathIncludesOpenDialog([{}])).toBe(false)
   })
@@ -150,5 +151,15 @@ describe('shouldDeferMobileShellEscape', () => {
     expect(shouldDeferMobileShellEscape(e)).toBe(false)
     expect(qs).toHaveBeenCalledTimes(1)
     expect(qs).toHaveBeenCalledWith(APP_USER_MENU_OPEN_SELECTOR)
+  })
+
+  it('does not defer when only a non-dialog node reports open: true (falls through to menu query)', () => {
+    const qs = vi.fn(() => null)
+    vi.stubGlobal('document', { querySelector: qs })
+    const e = {
+      composedPath: () => [{ tagName: 'DIV', open: true }],
+    } as unknown as KeyboardEvent
+    expect(shouldDeferMobileShellEscape(e)).toBe(false)
+    expect(qs).toHaveBeenCalledTimes(1)
   })
 })

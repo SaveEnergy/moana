@@ -27,8 +27,8 @@ function pathIncludesOpenAnyTag(
     if (!r?.open) {
       continue
     }
-    const tag = r.tag
-    if ((tag === 'DIALOG' || tag === 'DETAILS') && tags.has(tag)) {
+    /* `tags` is only DIALOG and/or DETAILS — `has` is sufficient (ignore odd `open` on other tag names). */
+    if (tags.has(r.tag as 'DIALOG' | 'DETAILS')) {
       return true
     }
   }
