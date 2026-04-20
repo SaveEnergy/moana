@@ -23,6 +23,8 @@ describe('readDataConfirmMessage', () => {
   it('returns null when attribute is blank or whitespace-only', () => {
     expect(readDataConfirmMessage(elWithAttr(''))).toBeNull()
     expect(readDataConfirmMessage(elWithAttr('   \t '))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('\n\r'))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('\u2028\u2029'))).toBeNull()
   })
 
   it('returns trimmed text', () => {
