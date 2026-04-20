@@ -113,12 +113,13 @@ describe('shouldDeferMobileShellEscape', () => {
     expect(qs).not.toHaveBeenCalled()
   })
 
-  it('defers when details.app-user-menu[open] exists', () => {
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === APP_USER_MENU_OPEN_SELECTOR ? ({} as Element) : null),
-    })
+  it('defers when details.app-user-menu[open] exists (DOM query after path scan)', () => {
+    const qs = vi.fn((sel: string) => (sel === APP_USER_MENU_OPEN_SELECTOR ? ({} as Element) : null))
+    vi.stubGlobal('document', { querySelector: qs })
     const e = { composedPath: () => [] } as unknown as KeyboardEvent
     expect(shouldDeferMobileShellEscape(e)).toBe(true)
+    expect(qs).toHaveBeenCalledTimes(1)
+    expect(qs).toHaveBeenCalledWith(APP_USER_MENU_OPEN_SELECTOR)
   })
 
   it('defers when open DETAILS is in composedPath without document.querySelector', () => {
@@ -131,9 +132,23 @@ describe('shouldDeferMobileShellEscape', () => {
     expect(qs).not.toHaveBeenCalled()
   })
 
-  it('is false when neither applies', () => {
-    vi.stubGlobal('document', { querySelector: () => null })
+  it('is false when neither applies after one menu-selector query', () => {
+    const qs = vi.fn(() => null)
+    vi.stubGlobal('document', { querySelector: qs })
     const e = { composedPath: () => [] } as unknown as KeyboardEvent
     expect(shouldDeferMobileShellEscape(e)).toBe(false)
+    expect(qs).toHaveBeenCalledTimes(1)
+    expect(qs).toHaveBeenCalledWith(APP_USER_MENU_OPEN_SELECTOR)
+  })
+
+  it('queries the menu selector when path has nodes but none defer', () => {
+    const qs = vi.fn(() => null)
+    vi.stubGlobal('document', { querySelector: qs })
+    const e = {
+      composedPath: () => [{ tagName: 'DIV' }, { tagName: 'BUTTON' }],
+    } as unknown as KeyboardEvent
+    expect(shouldDeferMobileShellEscape(e)).toBe(false)
+    expect(qs).toHaveBeenCalledTimes(1)
+    expect(qs).toHaveBeenCalledWith(APP_USER_MENU_OPEN_SELECTOR)
   })
 })
