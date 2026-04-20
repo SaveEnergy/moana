@@ -8,7 +8,7 @@ const contentRootMemo = new WeakMap<Document, ParentNode>()
  * so scans skip shell chrome. Falls back to `document` when the landmark is absent (e.g. `login.html`).
  * Returns `parent` unchanged when it is not the global `document` (tests, explicit subtrees) or when `document` is undefined (Node).
  *
- * Used by `applyLocalTimeElements`, `initConfirmSubmitForms`, `initCategoryModal`, `initHistoryControls`, and `initSettingsMemberDialog`.
+ * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses the same when given the global `document`, else passes an explicit subtree. Other boot features: **`initConfirmSubmitForms`**, **`initCategoryModal`**, **`initHistoryControls`**, **`initSettingsMemberDialog`**.
  */
 export function resolveContentQueryRoot(parent: ParentNode): ParentNode {
   if (typeof document === 'undefined') {
