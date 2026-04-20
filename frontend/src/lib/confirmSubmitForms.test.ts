@@ -6,7 +6,7 @@ import {
   initConfirmSubmitForms,
   readDataConfirmMessage,
 } from './confirmSubmitForms'
-import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
+import { APP_MAIN_SELECTOR, DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
 
 function elWithAttr(value: string | null): Element {
   return {
@@ -123,6 +123,7 @@ describe('initConfirmSubmitForms', () => {
     } as unknown as HTMLFormElement
 
     vi.stubGlobal('document', {
+      querySelector: () => null,
       querySelectorAll: () => [wired, skipped],
     })
 
@@ -134,6 +135,7 @@ describe('initConfirmSubmitForms', () => {
 
   it('no-ops when no forms match the selector', () => {
     vi.stubGlobal('document', {
+      querySelector: () => null,
       querySelectorAll: () => [],
     })
     expect(() => initConfirmSubmitForms()).not.toThrow()
@@ -147,11 +149,35 @@ describe('initConfirmSubmitForms', () => {
     } as unknown as HTMLFormElement
 
     vi.stubGlobal('document', {
+      querySelector: () => null,
       querySelectorAll: () => [form],
     })
 
     initConfirmSubmitForms()
     initConfirmSubmitForms()
     expect(form.addEventListener).toHaveBeenCalledTimes(1)
+  })
+
+  it('queries forms under main.app-main when that landmark exists', () => {
+    const form = {
+      getAttribute: (name: string) =>
+        name === DATA_CONFIRM_ATTRIBUTE ? 'Really delete?  ' : null,
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+
+    const main = {
+      querySelectorAll: (sel: string) => {
+        expect(sel).toBe(FORM_DATA_CONFIRM_SELECTOR)
+        return [form]
+      },
+    } as unknown as ParentNode
+
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
+    })
+
+    initConfirmSubmitForms()
+
+    expect(form.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function))
   })
 })

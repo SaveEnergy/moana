@@ -1,4 +1,5 @@
-import { APP_MAIN_SELECTOR, LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+import { resolveContentQueryRoot } from './contentRoot'
+import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 
 /** Reused across rows so hydrating many `<time>` nodes does not allocate a formatter per call. */
 const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -45,13 +46,10 @@ const labelForIso = createLocalTimeLabelMemo()
 
 /**
  * Fill local clock labels for every `<time>` matching `LOCAL_TIME_ELEMENTS_SELECTOR` in `root`.
- * When `root` is the default `document`, prefers `main.app-main` (`layout.html`) so `querySelectorAll` skips sidebar/topbar/footer.
+ * When `root` is `document`, uses {@link resolveContentQueryRoot} so `querySelectorAll` skips shell chrome when `<main.app-main>` exists.
  */
 export function applyLocalTimeElements(root: ParentNode = document): void {
-  const scope: ParentNode =
-    typeof document !== 'undefined' && root === document
-      ? document.querySelector(APP_MAIN_SELECTOR) ?? document
-      : root
+  const scope = resolveContentQueryRoot(root)
   const nodes = scope.querySelectorAll<HTMLTimeElement>(LOCAL_TIME_ELEMENTS_SELECTOR)
   if (nodes.length === 0) {
     return
