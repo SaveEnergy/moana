@@ -5,8 +5,8 @@ export const MOBILE_SHELL_MAX_WIDTH_PX = 1023 as const
 export const MOBILE_SHELL_MEDIA_QUERY = `(max-width: ${MOBILE_SHELL_MAX_WIDTH_PX}px)` as const
 
 /**
- * Subscribe to media query changes with `addEventListener` when available,
- * else `addListener` (legacy WebKit). Returns unsubscribe for tests and symmetry.
+ * Subscribe to media query changes with `addEventListener` when it is a function,
+ * else `addListener` (legacy WebKit / odd environments). Returns unsubscribe for tests and symmetry.
  */
 export function onMediaQueryChange(
   mq: MediaQueryList,

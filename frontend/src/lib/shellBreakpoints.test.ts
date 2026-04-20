@@ -38,4 +38,19 @@ describe('onMediaQueryChange', () => {
     unsub()
     expect(mq.removeListener).toHaveBeenCalledWith(fn)
   })
+
+  it('falls back to addListener when addEventListener is present but not a function', () => {
+    const fn = vi.fn()
+    const mq = {
+      addEventListener: true,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    } as unknown as MediaQueryList
+
+    const unsub = onMediaQueryChange(mq, fn as (this: MediaQueryList, ev: MediaQueryListEvent) => void)
+    expect(mq.addListener).toHaveBeenCalledWith(fn)
+
+    unsub()
+    expect(mq.removeListener).toHaveBeenCalledWith(fn)
+  })
 })
