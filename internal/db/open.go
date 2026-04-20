@@ -52,6 +52,19 @@ func Open(path string) (*sql.DB, error) {
 		return nil, fmt.Errorf("synchronous: %w", err)
 	}
 
+	if path != ":memory:" {
+		// Single-connection app: larger cache + mmap reduce read I/O vs SQLite defaults (small cache, no mmap).
+		if _, err := d.ExecContext(context.Background(), `PRAGMA cache_size = -16000;`); err != nil {
+			_ = d.Close()
+			return nil, fmt.Errorf("cache_size: %w", err)
+		}
+		const mmapBytes = 64 << 20 // 64 MiB upper bound for memory-mapped reads
+		if _, err := d.ExecContext(context.Background(), fmt.Sprintf("PRAGMA mmap_size = %d", mmapBytes)); err != nil {
+			_ = d.Close()
+			return nil, fmt.Errorf("mmap_size: %w", err)
+		}
+	}
+
 	if err := migrate(d); err != nil {
 		_ = d.Close()
 		return nil, err
