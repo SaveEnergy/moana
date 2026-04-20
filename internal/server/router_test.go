@@ -72,3 +72,20 @@ func TestRequestTimeout_zeroWhenNoConfig(t *testing.T) {
 		t.Fatalf("got %v", got)
 	}
 }
+
+func TestMaxRequestBodyBytes_resolution(t *testing.T) {
+	t.Parallel()
+	if got := maxRequestBodyBytes(nil); got != defaultMaxRequestBodyBytes {
+		t.Fatalf("nil opts: got %d", got)
+	}
+	if got := maxRequestBodyBytes(&RouterOptions{}); got != defaultMaxRequestBodyBytes {
+		t.Fatalf("zero field: got %d", got)
+	}
+	const custom = int64(4096)
+	if got := maxRequestBodyBytes(&RouterOptions{MaxRequestBodyBytes: custom}); got != custom {
+		t.Fatalf("override: got %d want %d", got, custom)
+	}
+	if got := maxRequestBodyBytes(&RouterOptions{MaxRequestBodyBytes: -1}); got != 0 {
+		t.Fatalf("negative disables cap: got %d want 0", got)
+	}
+}

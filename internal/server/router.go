@@ -12,6 +12,10 @@ type RouterOptions struct {
 	DisableRequestLogging bool
 	// RequestTimeout, if positive, overrides [handlers.App.Config.RequestTimeout] for the request-context deadline.
 	RequestTimeout time.Duration
+	// MaxRequestBodyBytes, if positive, overrides [defaultMaxRequestBodyBytes] for [WithMaxRequestBodyBytes].
+	// If negative, request body size is not capped (for tests; not recommended for production).
+	// Zero uses the default 1 MiB cap.
+	MaxRequestBodyBytes int64
 }
 
 func requestTimeout(opts *RouterOptions, app *handlers.App) time.Duration {
@@ -22,6 +26,16 @@ func requestTimeout(opts *RouterOptions, app *handlers.App) time.Duration {
 		return app.Config.RequestTimeout
 	}
 	return 0
+}
+
+func maxRequestBodyBytes(opts *RouterOptions) int64 {
+	if opts == nil || opts.MaxRequestBodyBytes == 0 {
+		return defaultMaxRequestBodyBytes
+	}
+	if opts.MaxRequestBodyBytes < 0 {
+		return 0
+	}
+	return opts.MaxRequestBodyBytes
 }
 
 // NewRouter registers all production routes on mux.
@@ -36,7 +50,7 @@ func NewRouterWithRouterOptions(opts *RouterOptions, app *handlers.App) http.Han
 	handlers.RegisterRoutes(mux, app)
 
 	var inner http.Handler = mux
-	inner = WithMaxRequestBodyBytes(defaultMaxRequestBodyBytes)(inner)
+	inner = WithMaxRequestBodyBytes(maxRequestBodyBytes(opts))(inner)
 	if d := requestTimeout(opts, app); d > 0 {
 		inner = WithRequestTimeout(d)(inner)
 	}
