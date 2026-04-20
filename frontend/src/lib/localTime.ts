@@ -7,9 +7,20 @@ const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
-/** Format ISO datetime for inline display (matches previous `toLocaleTimeString` behavior); trims first. */
+const ISO_DATETIME_NEEDS_TRIM = /^\s|\s$/u
+
+/**
+ * Normalize `datetime` attribute text for parsing / memo keys — **`trim`** only when edges are whitespace.
+ * (Server-rendered ISO values are usually already tight; avoids an allocation on hot paths.)
+ */
+export function normalizeIsoDatetimeAttr(iso: string): string | null {
+  const t = ISO_DATETIME_NEEDS_TRIM.test(iso) ? iso.trim() : iso
+  return t ? t : null
+}
+
+/** Format ISO datetime for inline display (matches previous `toLocaleTimeString` behavior). */
 export function formatLocalTimeLabel(iso: string): string | null {
-  const t = iso.trim()
+  const t = normalizeIsoDatetimeAttr(iso)
   if (!t) return null
   const d = new Date(t)
   if (Number.isNaN(d.getTime())) return null
@@ -24,7 +35,7 @@ export function createLocalTimeLabelMemo(): (iso: string) => string | undefined 
   const ok = new Map<string, string>()
   const bad = new Set<string>()
   return (iso: string) => {
-    const key = iso.trim()
+    const key = normalizeIsoDatetimeAttr(iso)
     if (!key) {
       return undefined
     }

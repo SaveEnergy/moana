@@ -1,8 +1,30 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
-import { applyLocalTimeElements, createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
+import {
+  applyLocalTimeElements,
+  createLocalTimeLabelMemo,
+  formatLocalTimeLabel,
+  normalizeIsoDatetimeAttr,
+} from './localTime'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
+
+describe('normalizeIsoDatetimeAttr', () => {
+  it('returns null for empty or whitespace-only', () => {
+    expect(normalizeIsoDatetimeAttr('')).toBeNull()
+    expect(normalizeIsoDatetimeAttr('  \t  ')).toBeNull()
+  })
+
+  it('returns the same string when no leading or trailing whitespace', () => {
+    const iso = '2020-06-15T14:30:00.000Z'
+    expect(normalizeIsoDatetimeAttr(iso)).toBe(iso)
+  })
+
+  it('trims when edges are whitespace', () => {
+    const inner = '2020-06-15T14:30:00.000Z'
+    expect(normalizeIsoDatetimeAttr(`  ${inner}  `)).toBe(inner)
+  })
+})
 
 describe('formatLocalTimeLabel', () => {
   it('returns null for invalid ISO strings', () => {

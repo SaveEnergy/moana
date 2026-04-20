@@ -1,15 +1,25 @@
 import { APP_USER_MENU_OPEN_SELECTOR } from './domSelectors'
 
-function readTagOpen(n: unknown): { tag: string; open: boolean } | null {
+/**
+ * When **`open === true`**, returns normalized tag ( **`DIALOG` / `DETAILS`** via cheap string compare, else **`toUpperCase`** ).
+ * When not open, returns **`null`** — skips tag work on typical composed-path nodes.
+ */
+function readOpenTagNameIfOpen(n: unknown): string | null {
   if (!n || typeof n !== 'object' || !('tagName' in n)) {
     return null
   }
   const el = n as { tagName: unknown; open?: boolean }
-  if (typeof el.tagName !== 'string') {
+  if (el.open !== true || typeof el.tagName !== 'string') {
     return null
   }
-  /* HTML uses uppercase `tagName`; normalize so tests and odd paths still match. */
-  return { tag: el.tagName.toUpperCase(), open: el.open === true }
+  const raw = el.tagName
+  if (raw === 'DIALOG' || raw === 'dialog') {
+    return 'DIALOG'
+  }
+  if (raw === 'DETAILS' || raw === 'details') {
+    return 'DETAILS'
+  }
+  return raw.toUpperCase()
 }
 
 /** Reused on Escape / path scans — no per-call `Set` allocation. */
@@ -23,12 +33,11 @@ function pathIncludesOpenAnyTag(
   tags: ReadonlySet<'DIALOG' | 'DETAILS'>,
 ): boolean {
   for (const n of path) {
-    const r = readTagOpen(n)
-    if (!r?.open) {
+    const tag = readOpenTagNameIfOpen(n)
+    if (!tag) {
       continue
     }
-    /* `tags` is only DIALOG and/or DETAILS — `has` is sufficient (ignore odd `open` on other tag names). */
-    if (tags.has(r.tag as 'DIALOG' | 'DETAILS')) {
+    if (tags.has(tag as 'DIALOG' | 'DETAILS')) {
       return true
     }
   }

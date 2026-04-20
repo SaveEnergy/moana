@@ -26,6 +26,10 @@ describe('eventPathIncludesOpenDialog', () => {
     expect(eventPathIncludesOpenDialog([{ tagName: 'dialog', open: true }])).toBe(true)
   })
 
+  it('matches open dialog when tagName is mixed case (HTMLDocument tagName normalization edge)', () => {
+    expect(eventPathIncludesOpenDialog([{ tagName: 'Dialog', open: true }])).toBe(true)
+  })
+
   it('ignores nodes whose tagName is not a string', () => {
     expect(eventPathIncludesOpenDialog([{ tagName: 1, open: true }] as unknown[])).toBe(false)
   })
