@@ -33,6 +33,7 @@ describe('parseMoanaTimezoneCookie', () => {
   it('accepts RFC-style spaces around the equals sign in the segment', () => {
     expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME} = Europe%2FBerlin`)).toBe('Europe/Berlin')
     expect(parseMoanaTimezoneCookie(`a=1; ${TIMEZONE_COOKIE_NAME} =America%2FNew_York`)).toBe('America/New_York')
+    expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}\t=\tEurope%2FBerlin`)).toBe('Europe/Berlin')
   })
 
   it('returns empty string when the value is empty after equals', () => {
@@ -68,13 +69,18 @@ describe('parseMoanaTimezoneCookie', () => {
     expect(parseMoanaTimezoneCookie(`${junk}; ${tail}`)).toBe('Europe/Berlin')
   })
 
-  it('returns null for long unrelated jars without moana_tz= (prefix fast path)', () => {
+  it('returns null for long unrelated jars without the moana_tz substring (fast path)', () => {
     const junk = Array.from({ length: 40 }, (_, i) => `k${i}=v`).join('; ')
     expect(parseMoanaTimezoneCookie(junk)).toBeNull()
   })
 
   it('does not treat xmoana_tz as moana_tz', () => {
     expect(parseMoanaTimezoneCookie('xmoana_tz=1')).toBeNull()
+  })
+
+  it('does not treat notmoana_tz as moana_tz (substring in another cookie name)', () => {
+    expect(parseMoanaTimezoneCookie('notmoana_tz=Europe%2FBerlin')).toBeNull()
+    expect(parseMoanaTimezoneCookie('a=1; notmoana_tz=x; b=2')).toBeNull()
   })
 })
 
