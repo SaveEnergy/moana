@@ -160,4 +160,22 @@ describe('setBrowserTimezoneCookie', () => {
 
     expect(sets).toBe(0)
   })
+
+  it('no-ops when resolvedOptions throws (try/catch in setBrowserTimezoneCookie)', () => {
+    vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockImplementation(() => {
+      throw new Error('unavailable')
+    })
+    let sets = 0
+    vi.stubGlobal('document', {
+      get cookie() {
+        return ''
+      },
+      set cookie(_v: string) {
+        sets += 1
+      },
+    })
+
+    expect(() => setBrowserTimezoneCookie()).not.toThrow()
+    expect(sets).toBe(0)
+  })
 })
