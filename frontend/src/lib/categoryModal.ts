@@ -36,6 +36,7 @@ import {
   MOANA_ICON_SVG_SELECTOR,
 } from './domSelectors'
 import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } from './radioMap'
+import { createRafScheduler } from './scheduleAnimationFrame'
 
 /** Full modal wiring once per `<dialog>` (duplicate `bootApp` must not stack listeners). */
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
@@ -110,6 +111,8 @@ export function initCategoryModal(): void {
     }
   }
 
+  const scheduleCatModalPreview = createRafScheduler(syncCatModalPreview)
+
   function wireCategoryFormPreview() {
     catForm.addEventListener('input', (e) => {
       const t = e.target
@@ -120,7 +123,7 @@ export function initCategoryModal(): void {
       const r = wrap?.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR)
       if (r) {
         r.checked = true
-        syncCatModalPreview()
+        scheduleCatModalPreview.schedule()
       }
     })
     catForm.addEventListener('change', (e) => {
@@ -137,6 +140,7 @@ export function initCategoryModal(): void {
   wireCategoryFormPreview()
 
   function openCreateModal() {
+    scheduleCatModalPreview.cancelPending()
     catForm.action = '/categories'
     catId.value = ''
     catTitle.textContent = 'New category'
@@ -151,6 +155,7 @@ export function initCategoryModal(): void {
   }
 
   function openEditModal(btn: HTMLElement) {
+    scheduleCatModalPreview.cancelPending()
     const row = readCategoryEditRowDataset(btn.dataset)
     if (!row) {
       return
