@@ -28,6 +28,15 @@ describe('readDataConfirmMessage', () => {
   it('returns trimmed text', () => {
     expect(readDataConfirmMessage(elWithAttr('  Remove this?  '))).toBe('Remove this?')
   })
+
+  it('returns null when the message is only Unicode format chars (e.g. ZWSP) that trim() keeps', () => {
+    expect(readDataConfirmMessage(elWithAttr('\u200b'))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('\u200b \u200c\t'))).toBeNull()
+  })
+
+  it('strips Cf characters so confirm text is visible', () => {
+    expect(readDataConfirmMessage(elWithAttr('\u200bReally?\u200b'))).toBe('Really?')
+  })
 })
 
 describe('findDataConfirmForms', () => {

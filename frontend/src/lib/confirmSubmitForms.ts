@@ -1,16 +1,19 @@
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
 
+/** Unicode Format (Cf) — ZWSP, ZWNJ, BOM-as-format, etc. `String.prototype.trim()` does not remove these. */
+const DATA_CONFIRM_STRIP_CF = /\p{Cf}/gu
+
 /**
- * Returns trimmed `data-confirm` or `null` if missing or whitespace-only.
- * Skips wiring so templates cannot accidentally show an empty `confirm()` dialog.
+ * Returns `data-confirm` text or `null` if missing or visually blank after normalizing.
+ * Strips Unicode **Cf** characters, then trims; skips wiring so templates cannot show an empty `confirm()` dialog.
  */
 export function readDataConfirmMessage(form: Element): string | null {
   const raw = form.getAttribute(DATA_CONFIRM_ATTRIBUTE)
   if (raw == null) {
     return null
   }
-  const msg = raw.trim()
+  const msg = raw.replace(DATA_CONFIRM_STRIP_CF, '').trim()
   return msg === '' ? null : msg
 }
 
@@ -35,7 +38,7 @@ export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string
   confirmSubmitWiredForms.add(form)
 }
 
-/** One `querySelectorAll` + trim filter — boot wires without building an intermediate list. */
+/** One `querySelectorAll` + Cf strip / trim filter — boot wires without building an intermediate list. */
 function forEachConfirmableForm(
   root: ParentNode,
   fn: (form: HTMLFormElement, message: string) => void,
@@ -49,7 +52,7 @@ function forEachConfirmableForm(
 }
 
 /**
- * Forms that opt in with `form[data-confirm]` and a non-blank message after trim.
+ * Forms that opt in with `form[data-confirm]` and a non-blank message after Cf strip + trim.
  * Uses the same discovery path as `initConfirmSubmitForms` (regression: skip empty messages).
  */
 export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormElement; message: string }> {
