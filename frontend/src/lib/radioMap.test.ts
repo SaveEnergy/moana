@@ -40,6 +40,17 @@ describe('buildRadioMapByValue', () => {
     const m = buildRadioMapByValue(scope, 'input[type="radio"]')
     expect(m.get('dup')).toBe(second)
   })
+
+  it('indexes by trimmed value so spaced duplicates collapse (last wins)', () => {
+    const first = { value: '  x  ' } as HTMLInputElement
+    const second = { value: 'x' } as HTMLInputElement
+    const scope = {
+      querySelectorAll: () => [first, second] as unknown as NodeListOf<HTMLInputElement>,
+    } as unknown as ParentNode
+    const m = buildRadioMapByValue(scope, 'input[type="radio"]')
+    expect(m.get('x')).toBe(second)
+    expect(m.size).toBe(1)
+  })
 })
 
 describe('setRadioCheckedByValue', () => {
@@ -82,6 +93,13 @@ describe('setRadioCheckedByValue', () => {
     const map = new Map([['', empty]])
     expect(setRadioCheckedByValue(map, '', '')).toBe(true)
     expect(empty.checked).toBe(true)
+  })
+
+  it('trims preferred and fallback keys when resolving map entries', () => {
+    const target = radio()
+    const map = new Map([['preset', target]])
+    expect(setRadioCheckedByValue(map, '  preset  ', '  other  ')).toBe(true)
+    expect(target.checked).toBe(true)
   })
 })
 

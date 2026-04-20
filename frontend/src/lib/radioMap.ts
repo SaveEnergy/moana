@@ -4,7 +4,8 @@
  */
 
 /**
- * Build a map of `HTMLInputElement.value` → input for radios under `scope` matching `radiosSelector`.
+ * Build a map of trimmed `HTMLInputElement.value` → input for radios under `scope` matching `radiosSelector`.
+ * Keys use **`value.trim()`** so {@link getFormRadioGroupValue} and {@link setRadioCheckedByValue} stay consistent.
  * Later duplicates overwrite earlier entries (same as `querySelectorAll` iteration order).
  */
 export function buildRadioMapByValue(
@@ -13,7 +14,7 @@ export function buildRadioMapByValue(
 ): Map<string, HTMLInputElement> {
   const m = new Map<string, HTMLInputElement>()
   for (const r of scope.querySelectorAll<HTMLInputElement>(radiosSelector)) {
-    m.set(r.value, r)
+    m.set(typeof r.value === 'string' ? r.value.trim() : '', r)
   }
   return m
 }
@@ -28,7 +29,7 @@ export function setRadioCheckedByValue(
   preferred: string,
   fallbackKey = '',
 ): boolean {
-  const input = map.get(preferred) ?? map.get(fallbackKey)
+  const input = map.get(preferred.trim()) ?? map.get(fallbackKey.trim())
   if (!input) {
     return false
   }
