@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"moana/internal/timeutil"
@@ -15,8 +16,18 @@ var ErrInvalidUserEmail = errors.New("invalid user email")
 
 // UpdateHouseholdName sets the display name for a household.
 func (s *Store) UpdateHouseholdName(ctx context.Context, householdID int64, name string) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE households SET name = ? WHERE id = ?`, name, householdID)
-	return err
+	res, err := s.DB.ExecContext(ctx, `UPDATE households SET name = ? WHERE id = ?`, name, householdID)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // CreateHouseholdMember adds a user with role member to an existing household.

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 
 	"moana/internal/timeutil"
 )
@@ -46,13 +47,33 @@ func (s *Store) CreateUser(ctx context.Context, email string, passwordHash []byt
 
 // UpdateUserPassword sets a new password hash.
 func (s *Store) UpdateUserPassword(ctx context.Context, userID int64, passwordHash []byte) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE users SET password_hash = ? WHERE id = ?`, passwordHash, userID)
-	return err
+	res, err := s.DB.ExecContext(ctx, `UPDATE users SET password_hash = ? WHERE id = ?`, passwordHash, userID)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // UpdateUserProfile updates name for the signed-in user.
 func (s *Store) UpdateUserProfile(ctx context.Context, userID int64, firstName, lastName string) error {
-	_, err := s.DB.ExecContext(ctx, `
+	res, err := s.DB.ExecContext(ctx, `
 UPDATE users SET first_name = ?, last_name = ? WHERE id = ?`, firstName, lastName, userID)
-	return err
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }

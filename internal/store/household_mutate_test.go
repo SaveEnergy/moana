@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"testing"
 
 	"moana/internal/passwordtest"
@@ -31,6 +33,16 @@ func TestUpdateHouseholdName(t *testing.T) {
 	}
 	if h == nil || h.Name != "Renamed Household" {
 		t.Fatalf("household %+v", h)
+	}
+}
+
+func TestUpdateHouseholdName_noSuchHousehold(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	err := st.UpdateHouseholdName(ctx, 999999999999, "x")
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
 	}
 }
 

@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"testing"
 
 	"moana/internal/auth"
@@ -48,5 +50,25 @@ func TestUpdateUserPassword_roundTrip(t *testing.T) {
 	}
 	if err := auth.CheckPassword(u.PasswordHash, "new-secret-long"); err != nil {
 		t.Fatalf("check password: %v", err)
+	}
+}
+
+func TestUpdateUserProfile_noSuchUser(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	err := st.UpdateUserProfile(ctx, 999999999999, "a", "b")
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
+	}
+}
+
+func TestUpdateUserPassword_noSuchUser(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	err := st.UpdateUserPassword(ctx, 999999999999, []byte("irrelevant"))
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
 	}
 }
