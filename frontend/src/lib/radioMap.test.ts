@@ -107,4 +107,13 @@ describe('getFormRadioGroupValue', () => {
     } as unknown as HTMLFormElement
     expect(getFormRadioGroupValue(form, 'color')).toBe('one-off')
   })
+
+  it('returns empty string when value is present but not a string', () => {
+    const form = {
+      elements: {
+        namedItem: () => ({ value: 42 }) as unknown as Element,
+      },
+    } as unknown as HTMLFormElement
+    expect(getFormRadioGroupValue(form, 'color')).toBe('')
+  })
 })
