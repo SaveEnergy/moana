@@ -15,4 +15,9 @@ describe('stripUnicodeFormatChars', () => {
   it('leaves strings without Cf unchanged', () => {
     expect(stripUnicodeFormatChars('  ok  ')).toBe('  ok  ')
   })
+
+  it('returns the same instance when there is nothing to strip', () => {
+    const s = 'plain'
+    expect(stripUnicodeFormatChars(s)).toBe(s)
+  })
 })
