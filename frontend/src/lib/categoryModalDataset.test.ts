@@ -8,6 +8,21 @@ describe('readCategoryEditRowDataset', () => {
     expect(readCategoryEditRowDataset({} as DOMStringMap)).toBeNull()
     expect(readCategoryEditRowDataset({ id: '  \t  ' } as unknown as DOMStringMap)).toBeNull()
     expect(readCategoryEditRowDataset({ id: '\u00a0' } as unknown as DOMStringMap)).toBeNull()
+    expect(readCategoryEditRowDataset({ id: '\u200b\u200c' } as unknown as DOMStringMap)).toBeNull()
+  })
+
+  it('strips Unicode format characters from id before trim', () => {
+    expect(
+      readCategoryEditRowDataset({
+        id: '\u200b42\u200b',
+        name: 'x',
+      } as unknown as DOMStringMap),
+    ).toEqual(
+      expect.objectContaining({
+        id: '42',
+        name: 'x',
+      }),
+    )
   })
 
   it('parses edit row fields and trims strings', () => {
