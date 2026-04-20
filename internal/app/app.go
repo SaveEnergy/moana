@@ -32,5 +32,6 @@ func HTTPHandler(cfg *config.Config, st *store.Store) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return server.NewRouter(a), nil
+	opts := &server.RouterOptions{MaxRequestBodyBytes: cfg.MaxRequestBodyBytes}
+	return server.NewRouterWithRouterOptions(opts, a), nil
 }

@@ -275,3 +275,42 @@ func TestLoad_requestTimeoutHugeClampsToMaxDuration(t *testing.T) {
 		t.Fatalf("RequestTimeout %v want clamped %v", c.RequestTimeout, want)
 	}
 }
+
+func TestLoad_maxRequestBodyBytesFromEnv(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_MAX_REQUEST_BODY_BYTES", "2097152")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.MaxRequestBodyBytes != 2097152 {
+		t.Fatalf("MaxRequestBodyBytes %d want 2097152", c.MaxRequestBodyBytes)
+	}
+}
+
+func TestLoad_invalidMaxRequestBodyBytesFallsBackToZero(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_MAX_REQUEST_BODY_BYTES", "not-a-number")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.MaxRequestBodyBytes != 0 {
+		t.Fatalf("MaxRequestBodyBytes %d want 0 (server default cap)", c.MaxRequestBodyBytes)
+	}
+}
+
+func TestLoad_negativeMaxRequestBodyBytesFallsBackToZero(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_MAX_REQUEST_BODY_BYTES", "-1")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.MaxRequestBodyBytes != 0 {
+		t.Fatalf("MaxRequestBodyBytes %d want 0", c.MaxRequestBodyBytes)
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -26,6 +27,9 @@ type Config struct {
 	RequestTimeout time.Duration
 	// RepoURL is the public source repository (e.g. GitHub), shown in the app footer.
 	RepoURL string
+	// MaxRequestBodyBytes, if positive, caps HTTP POST body size (MOANA_MAX_REQUEST_BODY_BYTES).
+	// Zero means use the server's default limit (1 MiB in [moana/internal/server]).
+	MaxRequestBodyBytes int64
 }
 
 // Load reads configuration from the environment. MOANA_SESSION_SECRET is required
@@ -56,14 +60,28 @@ func Load() (*Config, error) {
 	repoURL := getenv("MOANA_REPO_URL", "https://github.com/SaveEnergy/moana")
 
 	return &Config{
-		Listen:         listen,
-		DBPath:         dbPath,
-		SessionSecret:  secret,
-		SecureCookies:  env == "production",
-		SessionMaxAge:  durationSecondsClamped(maxAgeSec),
-		RequestTimeout: durationSecondsClamped(timeoutSec),
-		RepoURL:        repoURL,
+		Listen:              listen,
+		DBPath:              dbPath,
+		SessionSecret:       secret,
+		SecureCookies:       env == "production",
+		SessionMaxAge:       durationSecondsClamped(maxAgeSec),
+		RequestTimeout:      durationSecondsClamped(timeoutSec),
+		RepoURL:             repoURL,
+		MaxRequestBodyBytes: parseMaxRequestBodyBytesEnv(),
 	}, nil
+}
+
+// parseMaxRequestBodyBytesEnv reads MOANA_MAX_REQUEST_BODY_BYTES; invalid or negative values yield 0 (server default cap).
+func parseMaxRequestBodyBytesEnv() int64 {
+	s := os.Getenv("MOANA_MAX_REQUEST_BODY_BYTES")
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || v < 0 {
+		return 0
+	}
+	return v
 }
 
 // durationSecondsClamped converts a positive second count to [time.Duration] without int64 overflow.
