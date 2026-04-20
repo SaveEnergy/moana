@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"strings"
 	"time"
 
@@ -75,13 +74,10 @@ func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fro
 	case "expense":
 		b.WriteString(` AND t.amount_cents < 0`)
 	}
-	var sum sql.NullInt64
+	var sum int64
 	err := s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&sum)
 	if err != nil {
 		return 0, err
 	}
-	if !sum.Valid {
-		return 0, nil
-	}
-	return sum.Int64, nil
+	return sum, nil
 }

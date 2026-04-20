@@ -201,3 +201,33 @@ func TestListTransactions_kindIgnoresSurroundingSpace(t *testing.T) {
 		t.Fatalf("want 1 income row, got %+v", txs)
 	}
 }
+
+func TestListTransactions_kindExpenseOnlyNegativeAmounts(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "kind-expense@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "in", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -50, day, "coffee", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Kind: "expense"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 1 || txs[0].AmountCents != -50 || txs[0].Description != "coffee" {
+		t.Fatalf("want 1 expense row, got %+v", txs)
+	}
+}
