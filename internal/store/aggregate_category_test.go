@@ -243,3 +243,21 @@ func TestListTopExpenseCategories_limitBelowOneDefaultsToFive(t *testing.T) {
 		t.Fatalf("order or truncation: %+v", rows)
 	}
 }
+
+func TestListCategoryAmountsInRange_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
+	_, err := st.ListCategoryAmountsInRange(alreadyCancelledContext(t), 1, &from, &to, "expense")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestListTopExpenseCategories_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
+	_, err := st.ListTopExpenseCategories(alreadyCancelledContext(t), 1, &from, &to, 5)
+	assertErrIsContextCanceled(t, err)
+}

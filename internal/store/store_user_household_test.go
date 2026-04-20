@@ -47,6 +47,13 @@ func TestListUsers_empty(t *testing.T) {
 	}
 }
 
+func TestListUsers_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListUsers(alreadyCancelledContext(t))
+	assertErrIsContextCanceled(t, err)
+}
+
 func TestHouseholdMembersSeeSameTransactions(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
