@@ -38,9 +38,18 @@ describe('readCategoryEditRowDataset', () => {
     expect(readCategoryEditRowDataset(ds)?.id).toBe('0')
   })
 
-  it('sets isCustom only when custom is exactly "1"', () => {
+  it('sets isCustom when trimmed data-custom is exactly "1"', () => {
     const ds = { id: '1', custom: 'yes' } as unknown as DOMStringMap
     expect(readCategoryEditRowDataset(ds)?.isCustom).toBe(false)
+    expect(readCategoryEditRowDataset({ id: '1', custom: ' 1 ' } as unknown as DOMStringMap)?.isCustom).toBe(
+      true,
+    )
+    expect(readCategoryEditRowDataset({ id: '1', custom: '1\t' } as unknown as DOMStringMap)?.isCustom).toBe(
+      true,
+    )
+    expect(readCategoryEditRowDataset({ id: '1', custom: '01' } as unknown as DOMStringMap)?.isCustom).toBe(
+      false,
+    )
   })
 
   it('keeps empty string customHex when attribute is present but blank (dataset key exists)', () => {

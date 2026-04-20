@@ -15,7 +15,7 @@ export type CategoryEditRowData = {
 
 /**
  * Parse `dataset` from `.cat-modal-open-edit` (or any element with the same attributes).
- * @returns `null` when `id` is missing or whitespace-only after trim.
+ * @returns `null` when `id` is missing or whitespace-only after trim. **`isCustom`** is true when **`data-custom`** trims to **`"1"`**.
  */
 export function readCategoryEditRowDataset(ds: DOMStringMap): CategoryEditRowData | null {
   const id = (ds.id ?? '').trim()
@@ -26,7 +26,7 @@ export function readCategoryEditRowDataset(ds: DOMStringMap): CategoryEditRowDat
     id,
     name: ds.name ?? '',
     rawColor: (ds.color ?? '').trim(),
-    isCustom: ds.custom === '1',
+    isCustom: (ds.custom ?? '').trim() === '1',
     customHex: (ds.customHex ?? CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT).trim(),
     iconVal: (ds.icon ?? '').trim(),
   }
