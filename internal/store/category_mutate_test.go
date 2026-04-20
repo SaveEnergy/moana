@@ -106,3 +106,62 @@ func TestUpdateCategory_duplicateRename(t *testing.T) {
 		t.Fatalf("got %v want %v", err, ErrDuplicateCategoryName)
 	}
 }
+
+func TestCreateCategory_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-cat-create@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	_, err = st.CreateCategory(alreadyCancelledContext(t), u.HouseholdID, "Food", "", "")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestUpdateCategory_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-cat-upd@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	cid, err := st.CreateCategory(ctx, u.HouseholdID, "Orig", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = st.UpdateCategory(alreadyCancelledContext(t), u.HouseholdID, cid, "New", "i", "#000000")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestDeleteCategory_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-cat-del@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	cid, err := st.CreateCategory(ctx, u.HouseholdID, "Tmp", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = st.DeleteCategory(alreadyCancelledContext(t), u.HouseholdID, cid)
+	assertErrIsContextCanceled(t, err)
+}

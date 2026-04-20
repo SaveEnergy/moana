@@ -7,4 +7,6 @@
 // SQLite TEXT timestamps use moana/internal/timeutil (ParseSQLiteTimestamp, FormatSQLiteUTC, NowSQLiteUTC).
 // Category type in category_types.go (household-scoped); reads in category_query.go (+ category_sql.go); writes in category_mutate.go.
 // Tests use store_test_helpers_test.go (shared in-memory store) and are split by concern (transactions, users/households, category flow).
+// Context deadlines and cancellation propagate to [database/sql]; tests use pre-cancelled contexts in store_test_helpers_test.go to lock in that contract on hot read and write paths.
+// Updates/deletes that must affect exactly one row use [execExactlyOneRow] (exec_result.go) instead of duplicating RowsAffected plumbing.
 package store
