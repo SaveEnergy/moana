@@ -20,10 +20,11 @@ export function shouldCloseNativeDialogFromClick(
   }
   for (const sel of closeWithinSelectors) {
     /* Invalid or empty selectors throw from `closest`; skip blanks so callers can pad lists safely. */
-    if (!sel.trim()) {
+    const t = trimEdgesIfNeeded(sel)
+    if (!t) {
       continue
     }
-    if (el.closest(sel) !== null) {
+    if (el.closest(t) !== null) {
       return true
     }
   }

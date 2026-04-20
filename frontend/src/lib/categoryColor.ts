@@ -58,6 +58,6 @@ export function sanitizeCategoryCustomHex(
   if (VALID_CATEGORY_CUSTOM_HEX.test(hex)) {
     return hex
   }
-  const t = hex.trim()
+  const t = trimEdgesIfNeeded(hex)
   return VALID_CATEGORY_CUSTOM_HEX.test(t) ? t : fallback
 }

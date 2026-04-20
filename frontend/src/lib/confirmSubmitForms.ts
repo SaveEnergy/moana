@@ -1,5 +1,6 @@
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
+import { trimEdgesIfNeeded } from './trimEdges'
 import { stripUnicodeFormatChars } from './unicodeCf'
 
 /**
@@ -11,7 +12,7 @@ export function readDataConfirmMessage(form: Element): string | null {
   if (raw == null) {
     return null
   }
-  const msg = stripUnicodeFormatChars(raw).trim()
+  const msg = trimEdgesIfNeeded(stripUnicodeFormatChars(raw))
   return msg === '' ? null : msg
 }
 

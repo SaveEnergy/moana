@@ -3,9 +3,11 @@
  * Avoids duplicate if/else + non-null assertions when selecting by dataset-driven values.
  */
 
+import { trimEdgesIfNeeded } from './trimEdges'
+
 /**
  * Build a map of trimmed `HTMLInputElement.value` → input for radios under `scope` matching `radiosSelector`.
- * Keys use **`value.trim()`** so {@link getFormRadioGroupValue} and {@link setRadioCheckedByValue} stay consistent.
+ * Keys use **`trimEdgesIfNeeded(value)`** so {@link getFormRadioGroupValue} and {@link setRadioCheckedByValue} stay consistent.
  * Later duplicates overwrite earlier entries (same as `querySelectorAll` iteration order).
  */
 export function buildRadioMapByValue(
@@ -14,7 +16,7 @@ export function buildRadioMapByValue(
 ): Map<string, HTMLInputElement> {
   const m = new Map<string, HTMLInputElement>()
   for (const r of scope.querySelectorAll<HTMLInputElement>(radiosSelector)) {
-    m.set(typeof r.value === 'string' ? r.value.trim() : '', r)
+    m.set(typeof r.value === 'string' ? trimEdgesIfNeeded(r.value) : '', r)
   }
   return m
 }
@@ -30,7 +32,7 @@ export function setRadioCheckedByValue(
   preferred: string,
   fallbackKey = '',
 ): boolean {
-  const input = map.get(preferred.trim()) ?? map.get(fallbackKey.trim())
+  const input = map.get(trimEdgesIfNeeded(preferred)) ?? map.get(trimEdgesIfNeeded(fallbackKey))
   if (!input) {
     return false
   }
@@ -43,7 +45,7 @@ export function setRadioCheckedByValue(
 /**
  * Checked `value` for a radio group `name` inside `form` (empty string if none or non-string).
  * Uses `HTMLFormElement.elements` / `RadioNodeList.value` instead of `:checked` `querySelector` on hot paths.
- * String values are **trimmed** so `buildRadioMapByValue` lookups stay aligned with browser quirks / odd markup.
+ * String values use **`trimEdgesIfNeeded`** so `buildRadioMapByValue` lookups stay aligned with browser quirks / odd markup.
  */
 export function getFormRadioGroupValue(form: HTMLFormElement, name: string): string {
   const el = form.elements.namedItem(name)
@@ -54,5 +56,5 @@ export function getFormRadioGroupValue(form: HTMLFormElement, name: string): str
   if (typeof v !== 'string') {
     return ''
   }
-  return v.trim()
+  return trimEdgesIfNeeded(v)
 }

@@ -1,8 +1,9 @@
 import { CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT } from './categoryColor'
+import { trimEdgesIfNeeded } from './trimEdges'
 import { stripUnicodeFormatChars } from './unicodeCf'
 
 function stripCfDatasetValue(s: string): string {
-  return stripUnicodeFormatChars(s).trim()
+  return trimEdgesIfNeeded(stripUnicodeFormatChars(s))
 }
 
 /**
