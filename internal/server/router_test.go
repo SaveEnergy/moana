@@ -110,3 +110,25 @@ func TestNewRouterWithRouterOptions_healthOKWithTimeoutAndMaxBodyStack(t *testin
 		t.Fatalf("Content-Type %q", ct)
 	}
 }
+
+func TestRouterMiddlewareComposition_matchesNewRouterWithRouterOptions(t *testing.T) {
+	t.Parallel()
+	// Mirrors [NewRouterWithRouterOptions] when timeout > 0 (without [RequestLogging]):
+	// inner := WithMaxRequestBodyBytes(...)(mux); inner := WithRequestTimeout(...)(inner).
+	var sawDeadline bool
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /probe", func(w http.ResponseWriter, r *http.Request) {
+		_, sawDeadline = r.Context().Deadline()
+		w.WriteHeader(http.StatusOK)
+	})
+	inner := WithMaxRequestBodyBytes(100)(mux)
+	inner = WithRequestTimeout(30 * time.Second)(inner)
+	rec := httptest.NewRecorder()
+	inner.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/probe", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("code %d", rec.Code)
+	}
+	if !sawDeadline {
+		t.Fatal("inner handler must see request context deadline (keep middleware order in sync with NewRouterWithRouterOptions)")
+	}
+}
