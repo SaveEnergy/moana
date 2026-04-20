@@ -44,3 +44,43 @@ func TestGetAndUpdateTransaction(t *testing.T) {
 		t.Fatalf("after: %+v", tx2)
 	}
 }
+
+func TestGetTransactionByID_wrongHouseholdReturnsNil(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uidA, err := st.CreateUser(ctx, "gtx-a@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uA, err := st.GetUserByID(ctx, uidA)
+	if err != nil || uA == nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 4, 1, 12, 0, 0, 0, time.UTC)
+	tid, err := st.CreateTransaction(ctx, uidA, uA.HouseholdID, -100, day, "solo", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	uidB, err := st.CreateUser(ctx, "gtx-b@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uB, err := st.GetUserByID(ctx, uidB)
+	if err != nil || uB == nil {
+		t.Fatal(err)
+	}
+	if uA.HouseholdID == uB.HouseholdID {
+		t.Fatal("expected distinct households")
+	}
+
+	got, err := st.GetTransactionByID(ctx, uB.HouseholdID, tid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != nil {
+		t.Fatalf("transaction from another household must not resolve: %+v", got)
+	}
+}
