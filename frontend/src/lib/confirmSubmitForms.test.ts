@@ -57,6 +57,20 @@ describe('findDataConfirmForms', () => {
     } as unknown as ParentNode
     expect(findDataConfirmForms(root)).toEqual([])
   })
+
+  it('preserves querySelectorAll document order (stable vs accidental reordering)', () => {
+    const first = formWithConfirm('One')
+    const second = formWithConfirm('Two')
+    const root = {
+      querySelectorAll: (sel: string) => {
+        expect(sel).toBe(FORM_DATA_CONFIRM_SELECTOR)
+        return [first, second]
+      },
+    } as unknown as ParentNode
+    const found = findDataConfirmForms(root)
+    expect(found.map((x) => x.form)).toEqual([first, second])
+    expect(found.map((x) => x.message)).toEqual(['One', 'Two'])
+  })
 })
 
 describe('attachConfirmBeforeSubmit', () => {
