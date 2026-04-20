@@ -77,7 +77,7 @@ func TestOpen_synchronousNormal(t *testing.T) {
 	}
 }
 
-func TestOpen_fileCacheAndMmapPragmas(t *testing.T) {
+func TestOpen_fileTuningPragmas(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	path := filepath.Join(dir, "pragma.db")
@@ -100,5 +100,13 @@ func TestOpen_fileCacheAndMmapPragmas(t *testing.T) {
 	}
 	if mmap != wantMmap {
 		t.Fatalf("PRAGMA mmap_size = %d want %d", mmap, wantMmap)
+	}
+	var tempStore int
+	if err := d.QueryRowContext(context.Background(), `PRAGMA temp_store`).Scan(&tempStore); err != nil {
+		t.Fatal(err)
+	}
+	// SQLite: 2 = MEMORY (see PRAGMA temp_store).
+	if tempStore != 2 {
+		t.Fatalf("PRAGMA temp_store = %d want 2 (MEMORY)", tempStore)
 	}
 }

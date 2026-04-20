@@ -63,6 +63,10 @@ func Open(path string) (*sql.DB, error) {
 			_ = d.Close()
 			return nil, fmt.Errorf("mmap_size: %w", err)
 		}
+		if _, err := d.ExecContext(context.Background(), `PRAGMA temp_store = MEMORY;`); err != nil {
+			_ = d.Close()
+			return nil, fmt.Errorf("temp_store: %w", err)
+		}
 	}
 
 	if err := migrate(d); err != nil {
