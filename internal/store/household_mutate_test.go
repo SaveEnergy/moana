@@ -46,6 +46,40 @@ func TestUpdateHouseholdName_noSuchHousehold(t *testing.T) {
 	}
 }
 
+func TestUpdateHouseholdName_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-hhname@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	err = st.UpdateHouseholdName(alreadyCancelledContext(t), u.HouseholdID, "Renamed")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestCreateHouseholdMember_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-hhm@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	_, err = st.CreateHouseholdMember(alreadyCancelledContext(t), u.HouseholdID, "member-ctx@example.com", hash)
+	assertErrIsContextCanceled(t, err)
+}
+
 func TestCreateHouseholdMember_unknownHouseholdID(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

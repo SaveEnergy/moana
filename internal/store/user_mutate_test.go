@@ -72,3 +72,38 @@ func TestUpdateUserPassword_noSuchUser(t *testing.T) {
 		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
 	}
 }
+
+func TestCreateUser_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	hash := passwordtest.MustHash(t, "x")
+	_, err := st.CreateUser(alreadyCancelledContext(t), "ctx-create-user@example.com", hash, "user")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestUpdateUserProfile_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-prof@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = st.UpdateUserProfile(alreadyCancelledContext(t), uid, "A", "B")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestUpdateUserPassword_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "ctx-pw@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	newHash := passwordtest.MustHash(t, "new-secret-long")
+	err = st.UpdateUserPassword(alreadyCancelledContext(t), uid, newHash)
+	assertErrIsContextCanceled(t, err)
+}
