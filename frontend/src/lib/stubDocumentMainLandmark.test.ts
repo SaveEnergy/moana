@@ -22,4 +22,13 @@ describe('stubDocumentWithoutMainLandmark', () => {
     doc.querySelectorAll!('form[x]')
     expect(qsa).toHaveBeenCalledWith('form[x]')
   })
+
+  it('uses a custom querySelector when only that override is provided', () => {
+    const hit = { _: 'hit' } as unknown as Element
+    const doc = stubDocumentWithoutMainLandmark({
+      querySelector: (sel: string) => (sel === '#stub-hit' ? hit : null),
+    })
+    expect(doc.querySelector('#stub-hit')).toBe(hit)
+    expect(doc.querySelector('#other')).toBeNull()
+  })
 })
