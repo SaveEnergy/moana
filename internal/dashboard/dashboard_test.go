@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"moana/internal/money"
 	"moana/internal/store"
 )
 
@@ -181,6 +182,25 @@ func TestMergeCategoryTopN_limitOneRollsAllIntoOther(t *testing.T) {
 	out := MergeCategoryTopN(rows, 1)
 	if len(out) != 1 || out[0].Name != "Other" || out[0].AmountCents != 300 {
 		t.Fatalf("got %+v", out)
+	}
+}
+
+func TestMergeCategoryTopN_otherSaturatesWhenSumOverflows(t *testing.T) {
+	t.Parallel()
+	rows := []store.CategoryAmount{
+		{Name: "top", AmountCents: 1},
+		{Name: "b", AmountCents: math.MaxInt64},
+		{Name: "c", AmountCents: math.MaxInt64},
+	}
+	out := MergeCategoryTopN(rows, 2)
+	if len(out) != 2 || out[1].Name != "Other" {
+		t.Fatalf("got %+v", out)
+	}
+	if out[1].AmountCents != math.MaxInt64 {
+		t.Fatalf("Other bucket want MaxInt64 when merge sum overflows int64, got %d", out[1].AmountCents)
+	}
+	if _, ok := money.AddCents(rows[1].AmountCents, rows[2].AmountCents); ok {
+		t.Fatal("test setup: expected raw sum to overflow")
 	}
 }
 

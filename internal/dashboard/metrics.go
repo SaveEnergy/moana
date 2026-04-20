@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"math"
+
 	"moana/internal/money"
 	"moana/internal/store"
 )
@@ -31,6 +33,7 @@ func PctChangePositive(current, previous int64) float64 {
 
 // MergeCategoryTopN keeps the top (limit-1) categories and merges the rest into "Other".
 // If limit is less than 1, rows are returned unchanged (defensive; production uses a fixed positive limit).
+// If merging the tail would overflow int64, "Other" uses [math.MaxInt64] cents (saturation).
 func MergeCategoryTopN(rows []store.CategoryAmount, limit int) []store.CategoryAmount {
 	if limit < 1 || len(rows) <= limit {
 		return rows
@@ -39,7 +42,12 @@ func MergeCategoryTopN(rows []store.CategoryAmount, limit int) []store.CategoryA
 	copy(out, rows[:limit-1])
 	var rest int64
 	for _, r := range rows[limit-1:] {
-		rest += r.AmountCents
+		var ok bool
+		rest, ok = money.AddCents(rest, r.AmountCents)
+		if !ok {
+			rest = math.MaxInt64
+			break
+		}
 	}
 	out[limit-1] = store.CategoryAmount{Name: "Other", AmountCents: rest}
 	return out
