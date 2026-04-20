@@ -5,6 +5,7 @@ import {
   APP_SIDEBAR_BACKDROP_SELECTOR,
   APP_SIDEBAR_TOGGLE_SELECTOR,
 } from './domSelectors'
+import * as dialogKeyboard from './dialogKeyboard'
 import {
   initShellSidebar,
   queryAppShell,
@@ -172,6 +173,76 @@ describe('initShellSidebar', () => {
     expect(appShell.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     expect(mq.addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
     expect(doc.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), { capture: true })
+  })
+
+  it('skips redundant backdrop and toggle ARIA writes when already closed', () => {
+    vi.spyOn(dialogKeyboard, 'shouldDeferMobileShellEscape').mockReturnValue(false)
+
+    const matchMedia = vi.fn()
+    const mq = {
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }
+    matchMedia.mockReturnValue(mq)
+
+    const toggleAttr: Record<string, string> = {
+      'aria-expanded': 'false',
+      'aria-label': 'Open navigation menu',
+    }
+    const toggle = {
+      addEventListener: vi.fn(),
+      getAttribute: vi.fn((n: string) => toggleAttr[n] ?? null),
+      setAttribute: vi.fn((n: string, v: string) => {
+        toggleAttr[n] = v
+      }),
+    }
+
+    let ariaHidden = 'true'
+    const backdrop = {
+      getAttribute: vi.fn((n: string) => (n === 'aria-hidden' ? ariaHidden : null)),
+      setAttribute: vi.fn((n: string, v: string) => {
+        if (n === 'aria-hidden') ariaHidden = v
+      }),
+    }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
+    const appShell = {
+      classList: {
+        add: vi.fn(),
+        remove: vi.fn(),
+        contains: vi.fn(() => false),
+      },
+      addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
+    }
+
+    const doc = {
+      querySelector: vi.fn((sel: string) => (sel === APP_SHELL_SELECTOR ? appShell : null)),
+      addEventListener: vi.fn(),
+    }
+
+    vi.stubGlobal('document', doc)
+    vi.stubGlobal('window', { matchMedia })
+
+    initShellSidebar()
+
+    const keydown = doc.addEventListener.mock.calls.find((c) => c[0] === 'keydown')?.[1] as (
+      e: KeyboardEvent,
+    ) => void
+    expect(keydown).toBeDefined()
+
+    backdrop.setAttribute.mockClear()
+    toggle.setAttribute.mockClear()
+
+    keydown!({ key: 'Escape', composedPath: () => [] } as unknown as KeyboardEvent)
+
+    expect(backdrop.setAttribute).not.toHaveBeenCalled()
+    expect(toggle.setAttribute).not.toHaveBeenCalled()
   })
 
   it('does not stack listeners when initShellSidebar runs twice', () => {

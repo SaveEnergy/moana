@@ -24,7 +24,10 @@ export function querySidebarBackdrop(root: ParentNode): HTMLElement | null {
   return root.querySelector<HTMLElement>(APP_SIDEBAR_BACKDROP_SELECTOR)
 }
 
-/** Mobile drawer: open/close sidebar, sync aria and backdrop. */
+/**
+ * Mobile drawer: open/close sidebar, sync aria and backdrop.
+ * **`setAttribute`** only when values differ — avoids redundant ARIA writes on repeated close (e.g. Escape).
+ */
 export function initShellSidebar(): void {
   const shell = queryAppShell(document)
   if (!shell) {
@@ -41,19 +44,32 @@ export function initShellSidebar(): void {
   const mqMobile = window.matchMedia(MOBILE_SHELL_MEDIA_QUERY)
 
   function setExpanded(open: boolean) {
-    toggle?.setAttribute('aria-expanded', open ? 'true' : 'false')
-    toggle?.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu')
+    if (!toggle) {
+      return
+    }
+    const expanded = open ? 'true' : 'false'
+    const label = open ? 'Close navigation menu' : 'Open navigation menu'
+    if (toggle.getAttribute('aria-expanded') !== expanded) {
+      toggle.setAttribute('aria-expanded', expanded)
+    }
+    if (toggle.getAttribute('aria-label') !== label) {
+      toggle.setAttribute('aria-label', label)
+    }
   }
 
   function openMobileSidebar() {
     appShell.classList.add('sidebar-open')
-    backdrop?.setAttribute('aria-hidden', 'false')
+    if (backdrop && backdrop.getAttribute('aria-hidden') !== 'false') {
+      backdrop.setAttribute('aria-hidden', 'false')
+    }
     setExpanded(true)
   }
 
   function closeMobileSidebar() {
     appShell.classList.remove('sidebar-open')
-    backdrop?.setAttribute('aria-hidden', 'true')
+    if (backdrop && backdrop.getAttribute('aria-hidden') !== 'true') {
+      backdrop.setAttribute('aria-hidden', 'true')
+    }
     setExpanded(false)
   }
 
