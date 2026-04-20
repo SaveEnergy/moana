@@ -11,7 +11,7 @@ Personal finance web app: transactions, categories, budgets, and dashboards back
 ## Prerequisites
 
 - Go **1.26+**
-- [Bun](https://bun.sh/) (used by `Makefile` for the frontend; see `frontend/package.json` if you prefer another package manager)
+- [Bun](https://bun.sh/) (install + `bun run` for `package.json` scripts — same commands as `Makefile`; npm is not required for the JS toolchain)
 
 ## Build and run (local)
 

@@ -6,10 +6,10 @@
     "build": "vite build --config frontend/vite.config.ts",
     "dev:frontend": "vite build --config frontend/vite.config.ts --watch",
     "test:go": "go test -race ./...",
-    "verify": "npm run test:frontend && npm run test:e2e && npm run test:go",
+    "verify": "bun run test:frontend && bun run test:e2e && bun run test:go",
     "test:e2e": "playwright test --config test/e2e/playwright.config.ts",
     "test:unit": "vitest run --config frontend/vite.config.ts",
-    "test:frontend": "npm run typecheck && npm run test:unit && npm run build",
+    "test:frontend": "bun run typecheck && bun run test:unit && bun run build",
     "typecheck": "tsc --project frontend/tsconfig.json"
   },
   "devDependencies": {
