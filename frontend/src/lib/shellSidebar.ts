@@ -1,3 +1,4 @@
+import { setAttributeIfChanged } from './domAttribute'
 import { shouldDeferMobileShellEscape } from './dialogKeyboard'
 import {
   APP_SHELL_SELECTOR,
@@ -26,7 +27,7 @@ export function querySidebarBackdrop(root: ParentNode): HTMLElement | null {
 
 /**
  * Mobile drawer: open/close sidebar, sync aria and backdrop.
- * **`setAttribute`** only when values differ — avoids redundant ARIA writes on repeated close (e.g. Escape).
+ * Uses {@link setAttributeIfChanged} — avoids redundant ARIA writes on repeated close (e.g. Escape).
  */
 export function initShellSidebar(): void {
   const shell = queryAppShell(document)
@@ -49,26 +50,22 @@ export function initShellSidebar(): void {
     }
     const expanded = open ? 'true' : 'false'
     const label = open ? 'Close navigation menu' : 'Open navigation menu'
-    if (toggle.getAttribute('aria-expanded') !== expanded) {
-      toggle.setAttribute('aria-expanded', expanded)
-    }
-    if (toggle.getAttribute('aria-label') !== label) {
-      toggle.setAttribute('aria-label', label)
-    }
+    setAttributeIfChanged(toggle, 'aria-expanded', expanded)
+    setAttributeIfChanged(toggle, 'aria-label', label)
   }
 
   function openMobileSidebar() {
     appShell.classList.add('sidebar-open')
-    if (backdrop && backdrop.getAttribute('aria-hidden') !== 'false') {
-      backdrop.setAttribute('aria-hidden', 'false')
+    if (backdrop) {
+      setAttributeIfChanged(backdrop, 'aria-hidden', 'false')
     }
     setExpanded(true)
   }
 
   function closeMobileSidebar() {
     appShell.classList.remove('sidebar-open')
-    if (backdrop && backdrop.getAttribute('aria-hidden') !== 'true') {
-      backdrop.setAttribute('aria-hidden', 'true')
+    if (backdrop) {
+      setAttributeIfChanged(backdrop, 'aria-hidden', 'true')
     }
     setExpanded(false)
   }
