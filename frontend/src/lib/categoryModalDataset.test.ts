@@ -47,4 +47,9 @@ describe('readCategoryEditRowDataset', () => {
     const ds = { id: '1', customHex: '' } as unknown as DOMStringMap
     expect(readCategoryEditRowDataset(ds)?.customHex).toBe('')
   })
+
+  it('trims whitespace-only customHex to empty (openEditModal sanitizes to fallback hex)', () => {
+    const ds = { id: '1', customHex: '  \t  ' } as unknown as DOMStringMap
+    expect(readCategoryEditRowDataset(ds)?.customHex).toBe('')
+  })
 })
