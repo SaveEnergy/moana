@@ -1,10 +1,8 @@
 import { CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT } from './categoryColor'
-
-/** Unicode Format (Cf) in row **`data-*`** — `String.prototype.trim()` does not remove ZWSP/ZWJ; strip before trim. */
-const CATEGORY_EDIT_DATASET_STRIP_CF = /\p{Cf}/gu
+import { stripUnicodeFormatChars } from './unicodeCf'
 
 function stripCfDatasetValue(s: string): string {
-  return s.replace(CATEGORY_EDIT_DATASET_STRIP_CF, '').trim()
+  return stripUnicodeFormatChars(s).trim()
 }
 
 /**

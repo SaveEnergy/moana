@@ -1,8 +1,6 @@
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
-
-/** Unicode Format (Cf) — ZWSP, ZWNJ, BOM-as-format, etc. `String.prototype.trim()` does not remove these. */
-const DATA_CONFIRM_STRIP_CF = /\p{Cf}/gu
+import { stripUnicodeFormatChars } from './unicodeCf'
 
 /**
  * Returns `data-confirm` text or `null` if missing or visually blank after normalizing.
@@ -13,7 +11,7 @@ export function readDataConfirmMessage(form: Element): string | null {
   if (raw == null) {
     return null
   }
-  const msg = raw.replace(DATA_CONFIRM_STRIP_CF, '').trim()
+  const msg = stripUnicodeFormatChars(raw).trim()
   return msg === '' ? null : msg
 }
 
