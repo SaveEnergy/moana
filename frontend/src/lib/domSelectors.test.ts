@@ -32,6 +32,7 @@ import {
   APP_SHELL_ELEMENT_ID,
   APP_SIDEBAR_BACKDROP_ELEMENT_ID,
   APP_SIDEBAR_TOGGLE_ELEMENT_ID,
+  APP_MAIN_SELECTOR,
   APP_SHELL_SELECTOR,
   APP_SIDEBAR_BACKDROP_SELECTOR,
   APP_SIDEBAR_TOGGLE_SELECTOR,
@@ -112,6 +113,12 @@ describe('domSelectors app shell', () => {
     expect(APP_SHELL_SELECTOR).toBe(`#${APP_SHELL_ELEMENT_ID}`)
     expect(APP_SIDEBAR_TOGGLE_SELECTOR).toBe(`#${APP_SIDEBAR_TOGGLE_ELEMENT_ID}`)
     expect(APP_SIDEBAR_BACKDROP_SELECTOR).toBe(`#${APP_SIDEBAR_BACKDROP_ELEMENT_ID}`)
+  })
+})
+
+describe('domSelectors app main', () => {
+  it('matches layout main landmark for local time scoping', () => {
+    expect(APP_MAIN_SELECTOR).toBe('main.app-main')
   })
 })
 

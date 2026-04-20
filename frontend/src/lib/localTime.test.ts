@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+import { APP_MAIN_SELECTOR, LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 import { applyLocalTimeElements, createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
 
 describe('formatLocalTimeLabel', () => {
@@ -89,6 +89,55 @@ describe('applyLocalTimeElements', () => {
     const root = { querySelectorAll: () => [el] } as unknown as ParentNode
     applyLocalTimeElements(root)
     expect(el.textContent).toBe('keep')
+  })
+})
+
+describe('applyLocalTimeElements default document root', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('scopes to main.app-main when present', () => {
+    const iso = '2020-06-15T14:30:00.000Z'
+    const expected = formatLocalTimeLabel(iso)
+    expect(expected).not.toBeNull()
+
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? iso : null),
+      textContent: '',
+    } as unknown as HTMLTimeElement
+    let qsArg = ''
+    const main = {
+      querySelectorAll: (sel: string) => {
+        qsArg = sel
+        return sel === LOCAL_TIME_ELEMENTS_SELECTOR ? [el] : []
+      },
+    } as unknown as ParentNode
+    const doc = {
+      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
+    } as unknown as Document
+    vi.stubGlobal('document', doc)
+
+    applyLocalTimeElements()
+
+    expect(qsArg).toBe(LOCAL_TIME_ELEMENTS_SELECTOR)
+    expect(el.textContent).toBe(expected)
+  })
+
+  it('falls back to document when main.app-main is absent', () => {
+    let qsArg = ''
+    const doc = {
+      querySelector: () => null,
+      querySelectorAll: (sel: string) => {
+        qsArg = sel
+        return []
+      },
+    } as unknown as Document
+    vi.stubGlobal('document', doc)
+
+    applyLocalTimeElements()
+
+    expect(qsArg).toBe(LOCAL_TIME_ELEMENTS_SELECTOR)
   })
 })
 

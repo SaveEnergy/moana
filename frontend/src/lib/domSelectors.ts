@@ -26,6 +26,9 @@ export const APP_SIDEBAR_CLOSE_ELEMENT_ID = 'app-sidebar-close' as const
 /** `#` + {@link APP_SIDEBAR_CLOSE_ELEMENT_ID} — `mobileShellDismiss` uses `closest()`, not `getElementById`. */
 export const APP_SIDEBAR_CLOSE_SELECTOR = `#${APP_SIDEBAR_CLOSE_ELEMENT_ID}` as const
 
+/** Primary content landmark (`layout.html` `main.app-main`); default `applyLocalTimeElements` scopes here so shell chrome is not scanned. */
+export const APP_MAIN_SELECTOR = 'main.app-main' as const
+
 /** History page sort `<select>` (`history.html`). */
 export const HISTORY_SORT_ELEMENT_ID = 'history-sort' as const
 

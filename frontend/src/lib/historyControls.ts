@@ -33,12 +33,8 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
 
 /**
  * History page: wire sort `<select>` → `form.requestSubmit()` when present.
- * Skips when that element is already wired (duplicate `bootApp`).
+ * Skips when that element is already wired (duplicate `bootApp`); see {@link wireHistorySortAutoSubmit}.
  */
 export function initHistoryControls(): void {
-  const select = queryHistorySortSelect(document)
-  if (!select || historySortWiredSelects.has(select)) {
-    return
-  }
-  wireHistorySortAutoSubmit(select)
+  wireHistorySortAutoSubmit(queryHistorySortSelect(document))
 }
