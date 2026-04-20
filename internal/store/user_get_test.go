@@ -37,3 +37,17 @@ func TestGetUserByID_found(t *testing.T) {
 		t.Fatalf("user %+v", u)
 	}
 }
+
+func TestGetUserByID_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.GetUserByID(alreadyCancelledContext(t), 1)
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestGetUserByEmail_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.GetUserByEmail(alreadyCancelledContext(t), "cancel-ctx@example.com")
+	assertErrIsContextCanceled(t, err)
+}
