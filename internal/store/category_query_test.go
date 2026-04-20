@@ -93,3 +93,10 @@ func TestGetCategoryByID_wrongHouseholdReturnsNil(t *testing.T) {
 		t.Fatalf("category from another household must not resolve: %+v", got)
 	}
 }
+
+func TestListCategories_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListCategories(alreadyCancelledContext(t), 1)
+	assertErrIsContextCanceled(t, err)
+}
