@@ -43,6 +43,7 @@ WHERE EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
 }
 
 // UpdateTransaction updates a row in the caller's household. categoryID is validated against the household's categories. occurredAt must be UTC.
+// actorUserID must belong to householdID (same enforcement pattern as [Store.CreateTransaction]).
 func (s *Store) UpdateTransaction(ctx context.Context, householdID, actorUserID, id int64, amountCents int64, occurredAt time.Time, description string, categoryID *int64) error {
 	if err := s.validateCategoryOwnership(ctx, householdID, categoryID); err != nil {
 		return err
@@ -51,7 +52,9 @@ func (s *Store) UpdateTransaction(ctx context.Context, householdID, actorUserID,
 	cat := sqlNullCategoryID(categoryID)
 	res, err := s.DB.ExecContext(ctx, `
 UPDATE transactions SET amount_cents = ?, occurred_at = ?, description = ?, category_id = ?
-WHERE id = ? AND user_id IN (SELECT id FROM users WHERE household_id = ?)`, amountCents, occ, description, cat, id, householdID)
+WHERE id = ? AND user_id IN (SELECT id FROM users WHERE household_id = ?)
+AND EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
+		amountCents, occ, description, cat, id, householdID, actorUserID, householdID)
 	if err != nil {
 		return err
 	}

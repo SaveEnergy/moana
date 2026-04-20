@@ -171,3 +171,44 @@ func TestUpdateTransaction_wrongHouseholdReturnsNoRows(t *testing.T) {
 		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
 	}
 }
+
+func TestUpdateTransaction_actorNotInHouseholdReturnsNoRows(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "pw-mutate-actor")
+
+	uidA, err := st.CreateUser(ctx, "mutate-act-a@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uA, err := st.GetUserByEmail(ctx, "mutate-act-a@example.com")
+	if err != nil || uA == nil {
+		t.Fatal(err)
+	}
+	uidB, err := st.CreateUser(ctx, "mutate-act-b@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uB, err := st.GetUserByEmail(ctx, "mutate-act-b@example.com")
+	if err != nil || uB == nil {
+		t.Fatal(err)
+	}
+	if uA.HouseholdID == uB.HouseholdID {
+		t.Fatal("expected distinct households")
+	}
+
+	day := time.Date(2026, 3, 15, 12, 0, 0, 0, time.UTC)
+	tid, err := st.CreateTransaction(ctx, uidA, uA.HouseholdID, -100, day, "mine", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = st.UpdateTransaction(ctx, uA.HouseholdID, uidB, tid, -200, day, "no", nil)
+	if err == nil {
+		t.Fatal("expected sql.ErrNoRows")
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
+	}
+}
