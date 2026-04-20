@@ -58,13 +58,16 @@ describe('initSettingsMemberDialog', () => {
       parentElement: null,
     } as unknown as HTMLDialogElement
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => {
-        if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) return dialog
-        if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) return openBtn
-        return null
-      },
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => {
+          if (sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR) return dialog
+          if (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR) return openBtn
+          return null
+        },
+      }),
+    )
 
     initSettingsMemberDialog()
 
@@ -116,10 +119,13 @@ describe('initSettingsMemberDialog', () => {
       parentElement: parent,
     } as unknown as HTMLDialogElement
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) =>
-        sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) =>
+          sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
+      }),
+    )
 
     initSettingsMemberDialog()
     initSettingsMemberDialog()

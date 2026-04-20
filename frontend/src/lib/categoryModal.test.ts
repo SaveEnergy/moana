@@ -15,7 +15,7 @@ import {
   CATEGORY_MODAL_TITLE_SELECTOR,
 } from './domSelectors'
 import { initCategoryModal } from './categoryModal'
-import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
+import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('initCategoryModal', () => {
   afterEach(() => {
@@ -120,15 +120,18 @@ describe('initCategoryModal', () => {
       querySelector: vi.fn((sel: string) => modalInnerBySelector[sel] ?? null),
     }
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => {
-        if (sel === CATEGORY_MODAL_SELECTOR) return dialog
-        if (sel === CATEGORY_PAGE_INTRO_SECTION_SELECTOR) return null
-        if (sel === CATEGORY_MODAL_OPEN_CREATE_SELECTOR) return addBtn
-        if (sel === CATEGORY_LIST_SECTION_SELECTOR) return null
-        return null
-      },
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => {
+          if (sel === CATEGORY_MODAL_SELECTOR) return dialog
+          if (sel === CATEGORY_PAGE_INTRO_SECTION_SELECTOR) return null
+          if (sel === CATEGORY_MODAL_OPEN_CREATE_SELECTOR) return addBtn
+          if (sel === CATEGORY_LIST_SECTION_SELECTOR) return null
+          return null
+        },
+      }),
+    )
 
     initCategoryModal()
 
@@ -254,7 +257,7 @@ describe('initCategoryModal', () => {
       return null
     })
 
-    vi.stubGlobal('document', { querySelector: docQuerySelector })
+    vi.stubGlobal('document', stubDocumentWithoutMainLandmark({ querySelector: docQuerySelector }))
 
     initCategoryModal()
 

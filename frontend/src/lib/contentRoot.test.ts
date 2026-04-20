@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { APP_MAIN_SELECTOR } from './domSelectors'
 import { resolveContentQueryRoot } from './contentRoot'
+import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('resolveContentQueryRoot', () => {
   afterEach(() => {
@@ -16,24 +17,21 @@ describe('resolveContentQueryRoot', () => {
 
   it('returns main when parent is document and main exists', () => {
     const main = { _: 'main' } as unknown as ParentNode
-    const doc = {
-      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
-    } as unknown as Document
+    const doc = stubDocumentMainLandmark(main) as unknown as Document
     vi.stubGlobal('document', doc)
     expect(resolveContentQueryRoot(doc as unknown as ParentNode)).toBe(main)
   })
 
   it('returns document when main is absent', () => {
-    const doc = {
-      querySelector: () => null,
-    } as unknown as Document
+    const doc = stubDocumentWithoutMainLandmark() as unknown as Document
     vi.stubGlobal('document', doc)
     expect(resolveContentQueryRoot(doc as unknown as ParentNode)).toBe(doc)
   })
 
   it('queries the main landmark at most once per document instance', () => {
     const main = { _: 'main' } as unknown as ParentNode
-    const qs = vi.fn((sel: string) => (sel === APP_MAIN_SELECTOR ? main : null))
+    const base = stubDocumentMainLandmark(main)
+    const qs = vi.fn((sel: string) => base.querySelector(sel))
     const doc = { querySelector: qs } as unknown as Document
     vi.stubGlobal('document', doc)
     const p = doc as unknown as ParentNode
