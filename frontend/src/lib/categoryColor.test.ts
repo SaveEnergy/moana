@@ -68,4 +68,12 @@ describe('sanitizeCategoryCustomHex', () => {
     expect(sanitizeCategoryCustomHex('#fff', '#abc')).toBe('#abc')
     expect(sanitizeCategoryCustomHex('not-a-color')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
   })
+
+  it('rejects wrong-length or non-hex six-digit shapes', () => {
+    expect(sanitizeCategoryCustomHex('#12')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
+    expect(sanitizeCategoryCustomHex('#12345')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
+    expect(sanitizeCategoryCustomHex('#1234567')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
+    expect(sanitizeCategoryCustomHex('#12345g')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
+    expect(sanitizeCategoryCustomHex('#aabbccdd')).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
+  })
 })
