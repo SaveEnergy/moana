@@ -6,6 +6,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"moana/internal/money"
 )
 
 // ErrInvalidCategoryAmountKind is returned when [Store.ListCategoryAmountsInRange] is called with kind other than "income" or "expense".
@@ -100,10 +102,8 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 		if err := rows.Scan(&ca.CategoryID, &ca.Name, &ca.Icon, &ca.Color, &sum); err != nil {
 			return nil, err
 		}
-		if kind == "expense" {
-			sum = -sum
-		}
-		ca.AmountCents = sum
+		// Expense sums are negative in SQL; use magnitude (plain negation overflows at MinInt64).
+		ca.AmountCents = money.AbsCents(sum)
 		out = append(out, ca)
 	}
 	return out, rows.Err()

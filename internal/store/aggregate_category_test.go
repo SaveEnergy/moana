@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"math"
 	"testing"
 	"time"
 
@@ -120,5 +121,37 @@ func TestListCategoryAmountsInRange_incomeOrderedBySize(t *testing.T) {
 	}
 	if rows[1].Name != "Side" || rows[1].AmountCents != 5000 {
 		t.Fatalf("row1 %+v", rows[1])
+	}
+}
+
+func TestListCategoryAmountsInRange_expenseMinInt64SumUsesAbsCents(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "cat-exp-min64@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 6, 15, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, day, "edge", nil); err != nil {
+		t.Fatal(err)
+	}
+	from := day.Add(-time.Hour)
+	to := day.Add(time.Hour)
+	rows, err := st.ListCategoryAmountsInRange(ctx, hid, &from, &to, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("len=%d %+v", len(rows), rows)
+	}
+	if rows[0].AmountCents != math.MaxInt64 {
+		t.Fatalf("got %d want MaxInt64 (negating MinInt64 overflows)", rows[0].AmountCents)
 	}
 }
