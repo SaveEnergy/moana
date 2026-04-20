@@ -5,6 +5,7 @@ import {
 } from './categoryColor'
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
+import { shouldRepaintCategoryModalIconPreview } from './categoryModalIconPreview'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
 import {
@@ -84,6 +85,9 @@ export function initCategoryModal(): void {
   const colorRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_COLOR_RADIOS_SELECTOR)
   const iconRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_ICON_RADIOS_SELECTOR)
 
+  /** Last icon radio `value` we painted into `#cat-modal-preview-icon` (reset each open). */
+  let lastPaintedIconGroupValue: string | undefined
+
   function syncCatModalPreview() {
     const colorVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME)
     catPreview.style.background = resolveCategoryModalPreviewBackground(
@@ -92,6 +96,11 @@ export function initCategoryModal(): void {
     )
 
     const iconVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_ICON_RADIO_GROUP_NAME)
+    if (!shouldRepaintCategoryModalIconPreview(lastPaintedIconGroupValue, iconVal)) {
+      return
+    }
+    lastPaintedIconGroupValue = iconVal
+
     const ir =
       iconRadioByValue.get(iconVal) ??
       catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
@@ -156,6 +165,7 @@ export function initCategoryModal(): void {
 
   function openEditModal(btn: HTMLElement) {
     scheduleCatModalPreview.cancelPending()
+    lastPaintedIconGroupValue = undefined
     const row = readCategoryEditRowDataset(btn.dataset)
     if (!row) {
       return
