@@ -1,6 +1,11 @@
 /** Minimal shape for delegated `click` handlers and Vitest stubs (see `dialogDismiss`, `mobileShellDismiss`). */
 export type ClickTargetEvent = Pick<Event, 'target'>
 
+/** Vitest: arbitrary `target` as {@link ClickTargetEvent} (not a live DOM event). */
+export function stubClickTargetEvent(target: unknown): ClickTargetEvent {
+  return { target } as unknown as ClickTargetEvent
+}
+
 /**
  * Resolve a `click` event target to an `Element` for delegated handlers.
  * When the hit target is a `Text` node (e.g. label or × character), `event.target`

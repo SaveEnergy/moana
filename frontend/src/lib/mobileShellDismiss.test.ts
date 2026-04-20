@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { stubClickTargetEvent } from './clickTarget'
 import { APP_SIDEBAR_CLOSE_SELECTOR } from './domSelectors'
 import { shouldCloseMobileSidebarFromShellClick } from './mobileShellDismiss'
 
 describe('shouldCloseMobileSidebarFromShellClick', () => {
   it('returns true when target is the backdrop element', () => {
     const backdrop = { closest: () => null } as unknown as Element
-    const e = { target: backdrop } as unknown as MouseEvent
-    expect(shouldCloseMobileSidebarFromShellClick(e, backdrop)).toBe(true)
+    expect(shouldCloseMobileSidebarFromShellClick(stubClickTargetEvent(backdrop), backdrop)).toBe(true)
   })
 
   it('returns true when closest finds app-sidebar-close', () => {
@@ -23,17 +23,12 @@ describe('shouldCloseMobileSidebarFromShellClick', () => {
       closest: () => null,
     } as unknown as Element
     const backdrop = {} as unknown as Element
-    const e = { target: link } as unknown as MouseEvent
-    expect(shouldCloseMobileSidebarFromShellClick(e, backdrop)).toBe(false)
+    expect(shouldCloseMobileSidebarFromShellClick(stubClickTargetEvent(link), backdrop)).toBe(false)
   })
 
   it('returns false when clickEventTargetElement resolves null (missing or opaque target)', () => {
-    expect(shouldCloseMobileSidebarFromShellClick({ target: null } as unknown as MouseEvent, null)).toBe(
-      false,
-    )
-    expect(shouldCloseMobileSidebarFromShellClick({ target: undefined } as unknown as MouseEvent, null)).toBe(
-      false,
-    )
-    expect(shouldCloseMobileSidebarFromShellClick({ target: 0 } as unknown as MouseEvent, null)).toBe(false)
+    expect(shouldCloseMobileSidebarFromShellClick(stubClickTargetEvent(null), null)).toBe(false)
+    expect(shouldCloseMobileSidebarFromShellClick(stubClickTargetEvent(undefined), null)).toBe(false)
+    expect(shouldCloseMobileSidebarFromShellClick(stubClickTargetEvent(0), null)).toBe(false)
   })
 })

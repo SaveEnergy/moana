@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { type ClickTargetEvent, stubClickTargetEvent } from './clickTarget'
 import { attachNativeDialogDismiss, shouldCloseNativeDialogFromClick } from './dialogDismiss'
 
 describe('shouldCloseNativeDialogFromClick', () => {
@@ -7,8 +8,7 @@ describe('shouldCloseNativeDialogFromClick', () => {
     const close = vi.fn()
     // Plain object is not `instanceof Element` in Node; `closest` satisfies `clickEventTargetElement`.
     const dialog = { close, closest: () => null } as unknown as HTMLDialogElement
-    const e = { target: dialog } as unknown as MouseEvent
-    expect(shouldCloseNativeDialogFromClick(e, dialog, ['#x'])).toBe(true)
+    expect(shouldCloseNativeDialogFromClick(stubClickTargetEvent(dialog), dialog, ['#x'])).toBe(true)
   })
 
   it('closes when closest matches a selector', () => {
@@ -17,9 +17,7 @@ describe('shouldCloseNativeDialogFromClick', () => {
     const inner = {
       closest: (sel: string) => (sel === '#close' ? inner : null),
     } as unknown as Element
-    expect(
-      shouldCloseNativeDialogFromClick({ target: inner } as unknown as MouseEvent, dialog, ['#close']),
-    ).toBe(true)
+    expect(shouldCloseNativeDialogFromClick(stubClickTargetEvent(inner), dialog, ['#close'])).toBe(true)
   })
 
   it('does not close when click is inside dialog but not on a close control', () => {
@@ -34,9 +32,7 @@ describe('shouldCloseNativeDialogFromClick', () => {
 
   it('still closes on backdrop when dismiss selector list is empty', () => {
     const dialog = { closest: () => null } as unknown as HTMLDialogElement
-    expect(shouldCloseNativeDialogFromClick({ target: dialog } as unknown as MouseEvent, dialog, [])).toBe(
-      true,
-    )
+    expect(shouldCloseNativeDialogFromClick(stubClickTargetEvent(dialog), dialog, [])).toBe(true)
   })
 
   it('does not close on inner content when dismiss selector list is empty', () => {
@@ -44,9 +40,7 @@ describe('shouldCloseNativeDialogFromClick', () => {
     const inner = {
       closest: () => null,
     } as unknown as Element
-    expect(shouldCloseNativeDialogFromClick({ target: inner } as unknown as MouseEvent, dialog, [])).toBe(
-      false,
-    )
+    expect(shouldCloseNativeDialogFromClick(stubClickTargetEvent(inner), dialog, [])).toBe(false)
   })
 
   it('ignores blank dismiss selectors and still matches valid ones', () => {
@@ -55,11 +49,7 @@ describe('shouldCloseNativeDialogFromClick', () => {
       closest: (sel: string) => (sel === '#close' ? inner : null),
     } as unknown as Element
     expect(
-      shouldCloseNativeDialogFromClick({ target: inner } as unknown as MouseEvent, dialog, [
-        '',
-        '   ',
-        '#close',
-      ]),
+      shouldCloseNativeDialogFromClick(stubClickTargetEvent(inner), dialog, ['', '   ', '#close']),
     ).toBe(true)
   })
 })
@@ -73,8 +63,8 @@ describe('attachNativeDialogDismiss', () => {
 
     attachNativeDialogDismiss(dialog, ['#ignored-for-backdrop'])
 
-    const onClick = addEventListener.mock.calls[0][1] as (e: MouseEvent) => void
-    onClick({ target: dialog } as unknown as MouseEvent)
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(dialog))
 
     expect(close).toHaveBeenCalledTimes(1)
   })
@@ -87,8 +77,8 @@ describe('attachNativeDialogDismiss', () => {
 
     attachNativeDialogDismiss(dialog, ['#cat-modal-close'])
 
-    const onClick = addEventListener.mock.calls[0][1] as (e: MouseEvent) => void
-    onClick({ target: inner } as unknown as MouseEvent)
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(inner))
 
     expect(close).not.toHaveBeenCalled()
   })

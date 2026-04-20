@@ -189,10 +189,10 @@ export function initCategoryModal(): void {
         return
       }
       const btn = el.closest(CATEGORY_MODAL_OPEN_EDIT_SELECTOR)
-      if (!btn) {
+      if (!btn || !(btn instanceof HTMLElement)) {
         return
       }
-      openEditModal(btn as HTMLElement)
+      openEditModal(btn)
     })
   }
 
