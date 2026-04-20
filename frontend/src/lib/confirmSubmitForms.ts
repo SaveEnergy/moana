@@ -35,24 +35,34 @@ export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string
   confirmSubmitWiredForms.add(form)
 }
 
-/**
- * Forms that opt in with `form[data-confirm]` and a non-blank message after trim.
- * Single pass; used by `initConfirmSubmitForms` and unit tests (regression: skip empty messages).
- */
-export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormElement; message: string }> {
-  const out: Array<{ form: HTMLFormElement; message: string }> = []
+/** One `querySelectorAll` + trim filter — boot wires without building an intermediate list. */
+function forEachConfirmableForm(
+  root: ParentNode,
+  fn: (form: HTMLFormElement, message: string) => void,
+): void {
   for (const form of root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)) {
     const msg = readDataConfirmMessage(form)
     if (msg !== null) {
-      out.push({ form, message: msg })
+      fn(form, msg)
     }
   }
+}
+
+/**
+ * Forms that opt in with `form[data-confirm]` and a non-blank message after trim.
+ * Uses the same discovery path as `initConfirmSubmitForms` (regression: skip empty messages).
+ */
+export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormElement; message: string }> {
+  const out: Array<{ form: HTMLFormElement; message: string }> = []
+  forEachConfirmableForm(root, (form, message) => {
+    out.push({ form, message })
+  })
   return out
 }
 
 /** Wire all matching `form[data-confirm]` under the layout main landmark when present. Idempotent via `attachConfirmBeforeSubmit`. */
 export function initConfirmSubmitForms(): void {
-  for (const { form, message } of findDataConfirmForms(resolveBootContentQueryRoot())) {
+  forEachConfirmableForm(resolveBootContentQueryRoot(), (form, message) => {
     attachConfirmBeforeSubmit(form, message)
-  }
+  })
 }
