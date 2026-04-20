@@ -120,6 +120,15 @@ describe('getFormRadioGroupValue', () => {
     expect(getFormRadioGroupValue(form, 'color')).toBe('one-off')
   })
 
+  it('trims string values (radio group / single control)', () => {
+    const form = {
+      elements: {
+        namedItem: () => ({ value: '  preset  ' } as RadioNodeList),
+      },
+    } as unknown as HTMLFormElement
+    expect(getFormRadioGroupValue(form, 'color')).toBe('preset')
+  })
+
   it('returns empty string when value is present but not a string', () => {
     const form = {
       elements: {

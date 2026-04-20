@@ -58,6 +58,24 @@ describe('createRafScheduler', () => {
     expect(run).toHaveBeenCalledTimes(2)
   })
 
+  it('allows scheduling again after cancelPending (new frame, no stale callback)', () => {
+    const run = vi.fn()
+    const callbacks: FrameRequestCallback[] = []
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      callbacks.push(cb)
+      return callbacks.length
+    })
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+
+    const { schedule, cancelPending } = createRafScheduler(run)
+    schedule()
+    cancelPending()
+    schedule()
+    expect(callbacks).toHaveLength(2)
+    callbacks[1]!(0)
+    expect(run).toHaveBeenCalledTimes(1)
+  })
+
   it('runs synchronously when requestAnimationFrame is not a function', () => {
     vi.stubGlobal('requestAnimationFrame', undefined as unknown as typeof requestAnimationFrame)
     const run = vi.fn()
