@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	"golang.org/x/sync/errgroup"
+
 	"moana/internal/httperr"
 	"moana/internal/money"
 	"moana/internal/safepath"
@@ -14,6 +16,7 @@ import (
 )
 
 // TransactionEdit shows the edit form for a transaction (GET /transactions/{id}/edit).
+// It loads the transaction row and the household category list concurrently (independent reads).
 func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.User) {
 	id, ok := pathPositiveInt64(r, "id")
 	if !ok {
@@ -21,18 +24,27 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 		return
 	}
 	ctx := r.Context()
-	tx, err := a.Store.GetTransactionByID(ctx, u.HouseholdID, id)
-	if err != nil {
+	var (
+		tx   *store.Transaction
+		cats []store.Category
+	)
+	g, gctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		tx, err = a.Store.GetTransactionByID(gctx, u.HouseholdID, id)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		cats, err = a.Store.ListCategories(gctx, u.HouseholdID)
+		return err
+	})
+	if err := g.Wait(); err != nil {
 		httperr.Internal(w, r, err)
 		return
 	}
 	if tx == nil {
 		http.NotFound(w, r)
-		return
-	}
-	cats, err := a.Store.ListCategories(ctx, u.HouseholdID)
-	if err != nil {
-		httperr.Internal(w, r, err)
 		return
 	}
 	loc := tz.DisplayLocation(r)
