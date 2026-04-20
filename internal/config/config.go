@@ -71,14 +71,15 @@ func Load() (*Config, error) {
 	}, nil
 }
 
-// parseMaxRequestBodyBytesEnv reads MOANA_MAX_REQUEST_BODY_BYTES; invalid or negative values yield 0 (server default cap).
+// parseMaxRequestBodyBytesEnv reads MOANA_MAX_REQUEST_BODY_BYTES.
+// Empty, invalid, negative, or zero values yield 0 on [Config], so [moana/internal/server.maxRequestBodyBytes] applies the default 1 MiB cap (explicit "0" is not unlimited).
 func parseMaxRequestBodyBytesEnv() int64 {
 	s := os.Getenv("MOANA_MAX_REQUEST_BODY_BYTES")
 	if s == "" {
 		return 0
 	}
 	v, err := strconv.ParseInt(s, 10, 64)
-	if err != nil || v < 0 {
+	if err != nil || v <= 0 {
 		return 0
 	}
 	return v

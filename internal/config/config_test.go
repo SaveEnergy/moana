@@ -314,3 +314,16 @@ func TestLoad_negativeMaxRequestBodyBytesFallsBackToZero(t *testing.T) {
 		t.Fatalf("MaxRequestBodyBytes %d want 0", c.MaxRequestBodyBytes)
 	}
 }
+
+func TestLoad_maxRequestBodyBytesEnvZeroExplicitMeansDefaultCap(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_MAX_REQUEST_BODY_BYTES", "0")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.MaxRequestBodyBytes != 0 {
+		t.Fatalf("MaxRequestBodyBytes %d want 0 (server applies default cap)", c.MaxRequestBodyBytes)
+	}
+}
