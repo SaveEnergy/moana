@@ -265,4 +265,22 @@ describe('initCategoryModal', () => {
     expect(listSectionScoped.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     expect(listSectionDocumentFallback.addEventListener).not.toHaveBeenCalled()
   })
+
+  it('no-ops when the dialog exists but required inner nodes are missing', () => {
+    const dialog = {
+      addEventListener: vi.fn(),
+      closest: () => null,
+      querySelector: vi.fn(() => null),
+    }
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === CATEGORY_MODAL_SELECTOR ? dialog : null),
+      }),
+    )
+
+    expect(() => initCategoryModal()).not.toThrow()
+    expect(dialog.addEventListener).not.toHaveBeenCalled()
+  })
 })
