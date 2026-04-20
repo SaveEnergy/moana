@@ -78,6 +78,11 @@ describe('resolveCategoryModalPreviewBackground', () => {
 })
 
 describe('sanitizeCategoryCustomHex', () => {
+  it('returns the same string when input is already #RRGGBB (no trim)', () => {
+    const hex = '#aAbBcC'
+    expect(sanitizeCategoryCustomHex(hex)).toBe(hex)
+  })
+
   it('accepts 6-digit hex with leading #', () => {
     expect(sanitizeCategoryCustomHex('#aABBcc')).toBe('#aABBcc')
     expect(sanitizeCategoryCustomHex('  #00ff00  ')).toBe('#00ff00')

@@ -39,11 +39,16 @@ export function shouldUpdateCategoryModalPreviewBackground(
   return lastResolved !== nextResolved
 }
 
+const VALID_CATEGORY_CUSTOM_HEX = /^#[0-9a-fA-F]{6}$/
+
 /** Sanitize custom hex from data attributes for the category modal native color input. */
 export function sanitizeCategoryCustomHex(
   hex: string,
   fallback: string = CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT,
 ): string {
+  if (VALID_CATEGORY_CUSTOM_HEX.test(hex)) {
+    return hex
+  }
   const t = hex.trim()
-  return /^#[0-9a-fA-F]{6}$/.test(t) ? t : fallback
+  return VALID_CATEGORY_CUSTOM_HEX.test(t) ? t : fallback
 }
