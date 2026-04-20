@@ -72,6 +72,12 @@ describe('applyLocalTimeElements', () => {
     expect(seen).toBe(LOCAL_TIME_ELEMENTS_SELECTOR)
   })
 
+  it('does not touch global document when an explicit root is passed (Node / Vitest)', () => {
+    const root = { querySelectorAll: () => [] } as unknown as ParentNode
+    expect(globalThis.document).toBeUndefined()
+    expect(() => applyLocalTimeElements(root)).not.toThrow()
+  })
+
   it('does not overwrite text when datetime is invalid', () => {
     const el = {
       getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? 'not-a-date' : null),

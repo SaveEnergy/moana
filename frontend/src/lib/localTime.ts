@@ -1,4 +1,4 @@
-import { resolveContentQueryRoot } from './contentRoot'
+import { resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
 import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 
 /** Reused across rows so hydrating many `<time>` nodes does not allocate a formatter per call. */
@@ -25,8 +25,9 @@ export function createLocalTimeLabelMemo(): (iso: string) => string | undefined 
     if (!iso) {
       return undefined
     }
-    if (ok.has(iso)) {
-      return ok.get(iso)
+    const cached = ok.get(iso)
+    if (cached !== undefined) {
+      return cached
     }
     if (bad.has(iso)) {
       return undefined
@@ -46,10 +47,13 @@ const labelForIso = createLocalTimeLabelMemo()
 
 /**
  * Fill local clock labels for every `<time>` matching `LOCAL_TIME_ELEMENTS_SELECTOR` in `root`.
- * When `root` is `document`, uses {@link resolveContentQueryRoot} so `querySelectorAll` skips shell chrome when `<main.app-main>` exists.
+ * When `root` is the global `document` (including the default no-arg boot call), uses {@link resolveBootContentQueryRoot}; otherwise {@link resolveContentQueryRoot}.
  */
 export function applyLocalTimeElements(root: ParentNode = document): void {
-  const scope = resolveContentQueryRoot(root)
+  const scope =
+    typeof document !== 'undefined' && root === document
+      ? resolveBootContentQueryRoot()
+      : resolveContentQueryRoot(root)
   const nodes = scope.querySelectorAll<HTMLTimeElement>(LOCAL_TIME_ELEMENTS_SELECTOR)
   if (nodes.length === 0) {
     return
