@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -50,14 +50,8 @@ func Load() (*Config, error) {
 		secret = []byte("dev-insecure-session-secret-change-me")
 	}
 
-	maxAgeSec, _ := strconv.Atoi(getenv("MOANA_SESSION_MAX_AGE_SEC", strconv.Itoa(defaultSessionMaxAgeSec)))
-	if maxAgeSec <= 0 {
-		maxAgeSec = defaultSessionMaxAgeSec
-	}
-	timeoutSec, _ := strconv.Atoi(getenv("MOANA_REQUEST_TIMEOUT_SEC", strconv.Itoa(defaultRequestTimeoutSec)))
-	if timeoutSec <= 0 {
-		timeoutSec = defaultRequestTimeoutSec
-	}
+	maxAgeSec := parsePositiveIntEnv("MOANA_SESSION_MAX_AGE_SEC", defaultSessionMaxAgeSec)
+	timeoutSec := parsePositiveIntEnv("MOANA_REQUEST_TIMEOUT_SEC", defaultRequestTimeoutSec)
 
 	repoURL := getenv("MOANA_REPO_URL", "https://github.com/SaveEnergy/moana")
 
@@ -66,8 +60,18 @@ func Load() (*Config, error) {
 		DBPath:         dbPath,
 		SessionSecret:  secret,
 		SecureCookies:  env == "production",
-		SessionMaxAge:  time.Duration(maxAgeSec) * time.Second,
-		RequestTimeout: time.Duration(timeoutSec) * time.Second,
+		SessionMaxAge:  durationSecondsClamped(maxAgeSec),
+		RequestTimeout: durationSecondsClamped(timeoutSec),
 		RepoURL:        repoURL,
 	}, nil
+}
+
+// durationSecondsClamped converts a positive second count to [time.Duration] without int64 overflow.
+// Unclamped, [time.Duration](sec)*[time.Second] wraps for very large sec (e.g. negative duration).
+func durationSecondsClamped(sec int) time.Duration {
+	maxSec := int(math.MaxInt64 / int64(time.Second))
+	if sec > maxSec {
+		sec = maxSec
+	}
+	return time.Duration(sec) * time.Second
 }

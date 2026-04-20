@@ -1,6 +1,7 @@
 package config
 
 import (
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -236,5 +237,41 @@ func TestLoad_listenAndDbPathFromEnv(t *testing.T) {
 	}
 	if c.DBPath != "/tmp/moana-config-test.db" {
 		t.Fatalf("DBPath %q", c.DBPath)
+	}
+}
+
+func TestLoad_sessionMaxAgeHugeClampsToMaxDuration(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_SESSION_MAX_AGE_SEC", "9223372036854775807")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.SessionMaxAge < 0 {
+		t.Fatalf("SessionMaxAge must not wrap negative, got %v", c.SessionMaxAge)
+	}
+	maxSec := int(math.MaxInt64 / int64(time.Second))
+	want := time.Duration(maxSec) * time.Second
+	if c.SessionMaxAge != want {
+		t.Fatalf("SessionMaxAge %v want clamped %v", c.SessionMaxAge, want)
+	}
+}
+
+func TestLoad_requestTimeoutHugeClampsToMaxDuration(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_REQUEST_TIMEOUT_SEC", "9223372036854775807")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.RequestTimeout < 0 {
+		t.Fatalf("RequestTimeout must not wrap negative, got %v", c.RequestTimeout)
+	}
+	maxSec := int(math.MaxInt64 / int64(time.Second))
+	want := time.Duration(maxSec) * time.Second
+	if c.RequestTimeout != want {
+		t.Fatalf("RequestTimeout %v want clamped %v", c.RequestTimeout, want)
 	}
 }
