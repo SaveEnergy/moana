@@ -7,7 +7,7 @@ import {
   readDataConfirmMessage,
 } from './confirmSubmitForms'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
-import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
+import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 function elWithAttr(value: string | null): Element {
   return {
@@ -123,10 +123,12 @@ describe('initConfirmSubmitForms', () => {
       addEventListener: vi.fn(),
     } as unknown as HTMLFormElement
 
-    vi.stubGlobal('document', {
-      querySelector: () => null,
-      querySelectorAll: () => [wired, skipped],
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelectorAll: ((_sel: string) => [wired, skipped]) as unknown as Document['querySelectorAll'],
+      }),
+    )
 
     initConfirmSubmitForms()
 
@@ -135,10 +137,12 @@ describe('initConfirmSubmitForms', () => {
   })
 
   it('no-ops when no forms match the selector', () => {
-    vi.stubGlobal('document', {
-      querySelector: () => null,
-      querySelectorAll: () => [],
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelectorAll: ((_sel: string) => []) as unknown as Document['querySelectorAll'],
+      }),
+    )
     expect(() => initConfirmSubmitForms()).not.toThrow()
   })
 
@@ -149,10 +153,12 @@ describe('initConfirmSubmitForms', () => {
       addEventListener: vi.fn(),
     } as unknown as HTMLFormElement
 
-    vi.stubGlobal('document', {
-      querySelector: () => null,
-      querySelectorAll: () => [form],
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelectorAll: ((_sel: string) => [form]) as unknown as Document['querySelectorAll'],
+      }),
+    )
 
     initConfirmSubmitForms()
     initConfirmSubmitForms()

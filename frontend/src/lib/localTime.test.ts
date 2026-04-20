@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 import { applyLocalTimeElements, createLocalTimeLabelMemo, formatLocalTimeLabel } from './localTime'
-import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
+import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('formatLocalTimeLabel', () => {
   it('returns null for invalid ISO strings', () => {
@@ -124,14 +124,15 @@ describe('applyLocalTimeElements default document root', () => {
 
   it('falls back to document when main.app-main is absent', () => {
     let qsArg = ''
-    const doc = {
-      querySelector: () => null,
-      querySelectorAll: (sel: string) => {
-        qsArg = sel
-        return []
-      },
-    } as unknown as Document
-    vi.stubGlobal('document', doc)
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelectorAll: ((sel: string) => {
+          qsArg = sel
+          return []
+        }) as unknown as Document['querySelectorAll'],
+      }) as unknown as Document,
+    )
 
     applyLocalTimeElements()
 

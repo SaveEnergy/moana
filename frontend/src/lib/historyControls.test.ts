@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HISTORY_SORT_SELECTOR } from './domSelectors'
 import { initHistoryControls, queryHistorySortSelect, wireHistorySortAutoSubmit } from './historyControls'
-import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
+import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('queryHistorySortSelect', () => {
   it('uses HISTORY_SORT_SELECTOR on root', () => {
@@ -59,9 +59,7 @@ describe('initHistoryControls', () => {
   })
 
   it('no-ops when #history-sort is absent', () => {
-    vi.stubGlobal('document', {
-      querySelector: () => null,
-    })
+    vi.stubGlobal('document', stubDocumentWithoutMainLandmark())
     expect(() => initHistoryControls()).not.toThrow()
   })
 
@@ -71,9 +69,12 @@ describe('initHistoryControls', () => {
     const addEventListener = vi.fn()
     const select = { addEventListener, form } as unknown as HTMLSelectElement
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+      }),
+    )
 
     initHistoryControls()
 
@@ -89,9 +90,12 @@ describe('initHistoryControls', () => {
     const addEventListener = vi.fn()
     const select = { addEventListener, form } as unknown as HTMLSelectElement
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+      }),
+    )
 
     initHistoryControls()
     initHistoryControls()
@@ -124,9 +128,12 @@ describe('initHistoryControls', () => {
     const addEventListener = vi.fn()
     const select = { addEventListener, form } as unknown as HTMLSelectElement
 
-    vi.stubGlobal('document', {
-      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
-    })
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+      }),
+    )
 
     wireHistorySortAutoSubmit(select)
     addEventListener.mockClear()

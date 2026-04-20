@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SETTINGS_ADD_MEMBER_DIALOG_SELECTOR, SETTINGS_ADD_MEMBER_OPEN_SELECTOR } from './domSelectors'
-import { stubDocumentMainLandmark } from './stubDocumentMainLandmark'
+import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 import {
   initSettingsMemberDialog,
   querySettingsAddMemberDialog,
@@ -42,9 +42,7 @@ describe('initSettingsMemberDialog', () => {
   })
 
   it('no-ops when the dialog is absent', () => {
-    vi.stubGlobal('document', {
-      querySelector: () => null,
-    })
+    vi.stubGlobal('document', stubDocumentWithoutMainLandmark())
     expect(() => initSettingsMemberDialog()).not.toThrow()
   })
 
