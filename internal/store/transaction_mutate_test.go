@@ -212,3 +212,44 @@ func TestUpdateTransaction_actorNotInHouseholdReturnsNoRows(t *testing.T) {
 		t.Fatalf("got %v want %v", err, sql.ErrNoRows)
 	}
 }
+
+func TestUpdateTransaction_householdMemberCanUpdateOtherMembersTransaction(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "pw-shared")
+
+	ownerID, err := st.CreateUser(ctx, "coh-owner@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner, err := st.GetUserByEmail(ctx, "coh-owner@example.com")
+	if err != nil || owner == nil {
+		t.Fatal(err)
+	}
+	hid := owner.HouseholdID
+
+	hash2 := passwordtest.MustHash(t, "pw2")
+	memberID, err := st.CreateHouseholdMember(ctx, hid, "coh-member@example.com", hash2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	day := time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)
+	tid, err := st.CreateTransaction(ctx, ownerID, hid, -400, day, "owner tx", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	newDay := day.AddDate(0, 0, 1)
+	if err := st.UpdateTransaction(ctx, hid, memberID, tid, -500, newDay, "member edited", nil); err != nil {
+		t.Fatal(err)
+	}
+	got, err := st.GetTransactionByID(ctx, hid, tid)
+	if err != nil || got == nil {
+		t.Fatal(err)
+	}
+	if got.AmountCents != -500 || got.Description != "member edited" {
+		t.Fatalf("got %+v", got)
+	}
+}
