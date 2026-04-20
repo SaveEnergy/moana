@@ -84,3 +84,10 @@ func TestGetTransactionByID_wrongHouseholdReturnsNil(t *testing.T) {
 		t.Fatalf("transaction from another household must not resolve: %+v", got)
 	}
 }
+
+func TestGetTransactionByID_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.GetTransactionByID(alreadyCancelledContext(t), 1, 1)
+	assertErrIsContextCanceled(t, err)
+}

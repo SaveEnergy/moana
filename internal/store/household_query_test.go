@@ -83,3 +83,17 @@ func TestCountHouseholdMembers(t *testing.T) {
 		t.Fatalf("count %d want 2", n)
 	}
 }
+
+func TestGetHousehold_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.GetHousehold(alreadyCancelledContext(t), 1)
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestCountHouseholdMembers_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.CountHouseholdMembers(alreadyCancelledContext(t), 1)
+	assertErrIsContextCanceled(t, err)
+}
