@@ -7,6 +7,7 @@ describe('readCategoryEditRowDataset', () => {
   it('returns null when id is missing or whitespace-only', () => {
     expect(readCategoryEditRowDataset({} as DOMStringMap)).toBeNull()
     expect(readCategoryEditRowDataset({ id: '  \t  ' } as unknown as DOMStringMap)).toBeNull()
+    expect(readCategoryEditRowDataset({ id: '\u00a0' } as unknown as DOMStringMap)).toBeNull()
   })
 
   it('parses edit row fields and trims strings', () => {
