@@ -9,15 +9,27 @@ import (
 // It is intentionally separate from handler/DB deadlines ([config.Config.RequestTimeout]).
 const readHeaderTimeout = 10 * time.Second
 
+// idleTimeout caps how long a keep-alive connection may sit idle between requests. Set explicitly so
+// behavior does not depend on [http.Server] falling back to [http.Server.ReadTimeout] when IdleTimeout
+// is zero (see net/http Server docs).
+const idleTimeout = 120 * time.Second
+
 // NewHTTPServer builds a production [http.Server] with connection-level timeouts.
-// Read/write timeouts are derived from requestTimeout (request context deadline) but headers
-// must arrive within readHeaderTimeout.
+// When requestTimeout is positive, read/write deadlines are 2× that value (room beyond the handler
+// context deadline). Headers must still arrive within readHeaderTimeout. Keep-alive idle uses
+// idleTimeout. When requestTimeout is zero, read/write/idle are left unset (no per-connection body
+// deadline); ReadHeaderTimeout is still enforced.
 func NewHTTPServer(addr string, requestTimeout time.Duration, handler http.Handler) *http.Server {
-	return &http.Server{
+	srv := &http.Server{
 		Addr:              addr,
 		Handler:           handler,
 		ReadHeaderTimeout: readHeaderTimeout,
-		ReadTimeout:       requestTimeout * 2,
-		WriteTimeout:      requestTimeout * 2,
 	}
+	if requestTimeout > 0 {
+		d := requestTimeout * 2
+		srv.ReadTimeout = d
+		srv.WriteTimeout = d
+		srv.IdleTimeout = idleTimeout
+	}
+	return srv
 }

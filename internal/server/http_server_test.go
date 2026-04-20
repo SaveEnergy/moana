@@ -22,6 +22,9 @@ func TestNewHTTPServer_timeouts(t *testing.T) {
 	if srv.WriteTimeout != rt*2 {
 		t.Fatalf("WriteTimeout %v want %v", srv.WriteTimeout, rt*2)
 	}
+	if srv.IdleTimeout != idleTimeout {
+		t.Fatalf("IdleTimeout %v want %v", srv.IdleTimeout, idleTimeout)
+	}
 	if srv.Handler == nil {
 		t.Fatal("nil handler")
 	}
@@ -36,6 +39,9 @@ func TestNewHTTPServer_zeroRequestTimeoutNoReadWriteDeadline(t *testing.T) {
 	}
 	if srv.WriteTimeout != 0 {
 		t.Fatalf("WriteTimeout %v want 0", srv.WriteTimeout)
+	}
+	if srv.IdleTimeout != 0 {
+		t.Fatalf("IdleTimeout %v want 0", srv.IdleTimeout)
 	}
 	if srv.ReadHeaderTimeout != readHeaderTimeout {
 		t.Fatalf("ReadHeaderTimeout still enforced: %v", srv.ReadHeaderTimeout)
