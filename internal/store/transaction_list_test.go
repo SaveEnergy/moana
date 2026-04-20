@@ -2,11 +2,26 @@ package store
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"moana/internal/passwordtest"
 )
+
+func TestListTransactions_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err := st.ListTransactions(ctx, 1, TransactionFilter{})
+	if err == nil {
+		t.Fatal("expected error when context already cancelled")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("got %v want %v", err, context.Canceled)
+	}
+}
 
 func TestListTransactions_respectsLimit(t *testing.T) {
 	t.Parallel()

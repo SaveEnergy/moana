@@ -18,9 +18,9 @@ func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int
 	b.Grow(256)
 	b.WriteString(`SELECT t.occurred_at, t.amount_cents `)
 	b.WriteString(sqlFromHouseholdTx)
-	b.WriteString(` AND t.occurred_at >= ? AND t.occurred_at <= ?`)
 	args := make([]any, 0, 3)
-	args = append(args, householdID, timeutil.FormatSQLiteUTC(fromUTC), timeutil.FormatSQLiteUTC(toUTC))
+	args = append(args, householdID)
+	args = appendOccurredAtRange(&b, args, &fromUTC, &toUTC)
 	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
