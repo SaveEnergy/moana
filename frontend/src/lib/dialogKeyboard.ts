@@ -24,7 +24,11 @@ function pathIncludesOpenAnyTag(
 ): boolean {
   for (const n of path) {
     const r = readTagOpen(n)
-    if (r && r.open && tags.has(r.tag as 'DIALOG' | 'DETAILS')) {
+    if (!r?.open) {
+      continue
+    }
+    const tag = r.tag
+    if ((tag === 'DIALOG' || tag === 'DETAILS') && tags.has(tag)) {
       return true
     }
   }
