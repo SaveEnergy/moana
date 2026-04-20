@@ -1,5 +1,6 @@
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { attachNativeDialogDismiss } from './dialogDismiss'
+import { showModalIfClosed } from './dialogModal'
 import {
   SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
   SETTINGS_ADD_MEMBER_DISMISS_SELECTORS,
@@ -33,7 +34,7 @@ export function initSettingsMemberDialog(): void {
   const openBtn = querySettingsAddMemberOpenButton(dialog.parentElement ?? contentRoot)
 
   openBtn?.addEventListener('click', () => {
-    dialog.showModal()
+    showModalIfClosed(dialog)
   })
 
   attachNativeDialogDismiss(dialog, SETTINGS_ADD_MEMBER_DISMISS_SELECTORS)

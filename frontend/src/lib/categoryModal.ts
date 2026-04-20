@@ -8,6 +8,7 @@ import { resolveBootContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
 import { shouldRepaintCategoryModalIconPreview } from './categoryModalIconPreview'
 import { attachNativeDialogDismiss } from './dialogDismiss'
+import { showModalIfClosed } from './dialogModal'
 import { clickEventTargetElement } from './clickTarget'
 import {
   CATEGORY_COLOR_NATIVE_CLASS,
@@ -170,7 +171,7 @@ export function initCategoryModal(): void {
     if (colorNativeInput) colorNativeInput.value = CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
     syncCatModalPreview()
     catName.focus()
-    modal.showModal()
+    showModalIfClosed(modal)
   }
 
   function openEditModal(btn: HTMLElement) {
@@ -199,7 +200,7 @@ export function initCategoryModal(): void {
 
     syncCatModalPreview()
     catName.focus()
-    modal.showModal()
+    showModalIfClosed(modal)
   }
 
   addCategoryBtn?.addEventListener('click', () => openCreateModal())
