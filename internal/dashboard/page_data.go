@@ -6,12 +6,16 @@ import (
 	"math"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"moana/internal/money"
 	"moana/internal/store"
 	"moana/internal/timeutil"
 )
 
 // BuildPageData loads aggregates and layout data for the dashboard (no HTTP).
+// After [store.Store.SumRunningTotalAndIncomeExpenseInTwoRanges], outflow breakdown, heatmap, and
+// recent transactions load concurrently to reduce latency (independent read queries on the same DB).
 func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, now time.Time, periodQuery string) (PageData, error) {
 	cfg := parseStatsPeriod(periodQuery)
 
@@ -45,18 +49,32 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	}
 	budgetBarPct := math.Min(100, budgetUsedPct)
 
-	outflowRows, outflowDonut, totalAbs, err := buildOutflowSection(ctx, st, householdID, curStart, curEnd, periodExpense)
-	if err != nil {
-		return PageData{}, err
-	}
-
-	heatmapRangeLabel, heatmapCells, heatmapCols, err := buildHeatmapSection(ctx, st, householdID, loc, now)
-	if err != nil {
-		return PageData{}, err
-	}
-
-	recent, err := st.ListTransactions(ctx, householdID, store.TransactionFilter{Limit: 5})
-	if err != nil {
+	var (
+		outflowRows                          []OutflowRow
+		outflowDonut                         string
+		totalAbs                             int64
+		heatmapRangeLabel                    string
+		heatmapCells                         []HeatmapCell
+		heatmapCols                          int
+		recent                               []store.Transaction
+	)
+	g, gctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		outflowRows, outflowDonut, totalAbs, err = buildOutflowSection(gctx, st, householdID, curStart, curEnd, periodExpense)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		heatmapRangeLabel, heatmapCells, heatmapCols, err = buildHeatmapSection(gctx, st, householdID, loc, now)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		recent, err = st.ListTransactions(gctx, householdID, store.TransactionFilter{Limit: 5})
+		return err
+	})
+	if err := g.Wait(); err != nil {
 		return PageData{}, err
 	}
 

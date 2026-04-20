@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -59,5 +60,34 @@ func TestBuildPageData_smoke(t *testing.T) {
 	}
 	if data12.StatsPeriod != StatsPeriod12m {
 		t.Fatalf("12m period %q", data12.StatsPeriod)
+	}
+}
+
+func TestBuildPageData_expiredContext(t *testing.T) {
+	t.Parallel()
+	st := dbutil.MustOpenMemStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "dash-expired@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByEmail(ctx, "dash-expired@example.com")
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 8, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, u.HouseholdID, -100, day, "x", nil); err != nil {
+		t.Fatal(err)
+	}
+
+	deadlineCtx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Hour))
+	defer cancel()
+	_, err = BuildPageData(deadlineCtx, st, u.HouseholdID, time.UTC, day, StatsPeriod30d)
+	if err == nil {
+		t.Fatal("expected error from expired context")
+	}
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("want context.DeadlineExceeded, got %v", err)
 	}
 }
