@@ -3,7 +3,7 @@ import {
   resolveCategoryModalPreviewBackground,
   sanitizeCategoryCustomHex,
 } from './categoryColor'
-import { resolveContentQueryRoot } from './contentRoot'
+import { resolveBootContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
@@ -41,7 +41,7 @@ import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } 
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
 
 export function initCategoryModal(): void {
-  const contentRoot = resolveContentQueryRoot(document)
+  const contentRoot = resolveBootContentQueryRoot()
   const dialog = contentRoot.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
   if (!dialog) {
     return

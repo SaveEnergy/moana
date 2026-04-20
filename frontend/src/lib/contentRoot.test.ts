@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { APP_MAIN_SELECTOR } from './domSelectors'
-import { resolveContentQueryRoot } from './contentRoot'
+import { resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('resolveContentQueryRoot', () => {
@@ -39,5 +39,19 @@ describe('resolveContentQueryRoot', () => {
     expect(resolveContentQueryRoot(p)).toBe(main)
     expect(qs).toHaveBeenCalledTimes(1)
     expect(qs).toHaveBeenCalledWith(APP_MAIN_SELECTOR)
+  })
+})
+
+describe('resolveBootContentQueryRoot', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('delegates to resolveContentQueryRoot(document) with the same memoization', () => {
+    const main = { _: 'main' } as unknown as ParentNode
+    const doc = stubDocumentMainLandmark(main) as unknown as Document
+    vi.stubGlobal('document', doc)
+    expect(resolveBootContentQueryRoot()).toBe(main)
+    expect(resolveContentQueryRoot(doc as unknown as ParentNode)).toBe(main)
   })
 })

@@ -1,4 +1,4 @@
-import { resolveContentQueryRoot } from './contentRoot'
+import { resolveBootContentQueryRoot } from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
 
 /**
@@ -52,7 +52,7 @@ export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormEl
 
 /** Wire all matching `form[data-confirm]` under the layout main landmark when present. Idempotent via `attachConfirmBeforeSubmit`. */
 export function initConfirmSubmitForms(): void {
-  for (const { form, message } of findDataConfirmForms(resolveContentQueryRoot(document))) {
+  for (const { form, message } of findDataConfirmForms(resolveBootContentQueryRoot())) {
     attachConfirmBeforeSubmit(form, message)
   }
 }

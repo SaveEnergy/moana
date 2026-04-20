@@ -1,11 +1,11 @@
-import { resolveContentQueryRoot } from './contentRoot'
+import { resolveBootContentQueryRoot } from './contentRoot'
 import { HISTORY_SORT_SELECTOR } from './domSelectors'
 
 /** Avoid duplicate `change` → `requestSubmit` if history wiring runs twice. */
 const historySortWiredSelects = new WeakSet<HTMLSelectElement>()
 
 /**
- * Resolve the history sort `<select>` from a root (`initHistoryControls` uses `resolveContentQueryRoot(document)`).
+ * Resolve the history sort `<select>` from a root (`initHistoryControls` uses `resolveBootContentQueryRoot()`).
  * Uses {@link HISTORY_SORT_SELECTOR} so the id string lives only in `domSelectors.ts`.
  */
 export function queryHistorySortSelect(root: ParentNode): HTMLSelectElement | null {
@@ -37,5 +37,5 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
  * Skips when that element is already wired (duplicate `bootApp`); see {@link wireHistorySortAutoSubmit}.
  */
 export function initHistoryControls(): void {
-  wireHistorySortAutoSubmit(queryHistorySortSelect(resolveContentQueryRoot(document)))
+  wireHistorySortAutoSubmit(queryHistorySortSelect(resolveBootContentQueryRoot()))
 }

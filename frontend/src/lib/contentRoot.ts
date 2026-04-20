@@ -26,3 +26,10 @@ export function resolveContentQueryRoot(parent: ParentNode): ParentNode {
   contentRootMemo.set(doc, root)
   return root
 }
+
+/**
+ * Boot modules call this instead of inlining `resolveContentQueryRoot(document)` — same per-`document` WeakMap memo as {@link resolveContentQueryRoot}, clearer intent at call sites.
+ */
+export function resolveBootContentQueryRoot(): ParentNode {
+  return resolveContentQueryRoot(document)
+}
