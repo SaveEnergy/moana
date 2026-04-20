@@ -82,6 +82,13 @@ describe('parseMoanaTimezoneCookie', () => {
     expect(parseMoanaTimezoneCookie('notmoana_tz=Europe%2FBerlin')).toBeNull()
     expect(parseMoanaTimezoneCookie('a=1; notmoana_tz=x; b=2')).toBeNull()
   })
+
+  it('ignores moana_tz segments with no equals sign', () => {
+    expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}`)).toBeNull()
+    expect(
+      parseMoanaTimezoneCookie(`a=1; ${TIMEZONE_COOKIE_NAME}; ${TIMEZONE_COOKIE_NAME}=Europe%2FBerlin`),
+    ).toBe('Europe/Berlin')
+  })
 })
 
 describe('setBrowserTimezoneCookie', () => {
