@@ -89,3 +89,24 @@ func TestMaxRequestBodyBytes_resolution(t *testing.T) {
 		t.Fatalf("negative disables cap: got %d want 0", got)
 	}
 }
+
+func TestNewRouterWithRouterOptions_healthOKWithTimeoutAndMaxBodyStack(t *testing.T) {
+	t.Parallel()
+	// Minimal App: only Config is needed for GET /health (no store/render/session).
+	cfg := &config.Config{RequestTimeout: 30 * time.Second}
+	app := &handlers.App{Config: cfg}
+	opts := &RouterOptions{DisableRequestLogging: true, MaxRequestBodyBytes: 4096}
+	h := NewRouterWithRouterOptions(opts, app)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, HealthPath, nil)
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("code %d body %q", rec.Code, rec.Body.String())
+	}
+	if rec.Body.String() != "ok" {
+		t.Fatalf("body %q want ok", rec.Body.String())
+	}
+	if ct := rec.Header().Get("Content-Type"); ct != "text/plain; charset=utf-8" {
+		t.Fatalf("Content-Type %q", ct)
+	}
+}
