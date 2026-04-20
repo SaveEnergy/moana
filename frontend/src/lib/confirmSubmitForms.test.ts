@@ -118,6 +118,25 @@ describe('attachConfirmBeforeSubmit', () => {
     attachConfirmBeforeSubmit(form, 'Twice')
     expect(addEventListener).toHaveBeenCalledTimes(1)
   })
+
+  it('keeps the first confirm message when attach runs twice', () => {
+    const confirmFn = vi.fn(() => true)
+    vi.stubGlobal('confirm', confirmFn)
+    let onSubmit: ((e: SubmitEvent) => void) | null = null
+    const form = {
+      addEventListener: vi.fn((ev: string, fn: (e: SubmitEvent) => void) => {
+        if (ev === 'submit') {
+          onSubmit = fn
+        }
+      }),
+    } as unknown as HTMLFormElement
+    attachConfirmBeforeSubmit(form, 'First message')
+    attachConfirmBeforeSubmit(form, 'Second message')
+    expect(onSubmit).not.toBeNull()
+    onSubmit!({ preventDefault: vi.fn() } as unknown as SubmitEvent)
+    expect(confirmFn).toHaveBeenCalledTimes(1)
+    expect(confirmFn).toHaveBeenCalledWith('First message')
+  })
 })
 
 describe('initConfirmSubmitForms', () => {
