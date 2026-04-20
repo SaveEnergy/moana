@@ -36,6 +36,26 @@ func TestPositiveInt64String(t *testing.T) {
 	}
 }
 
+func TestPositiveInt64String_maxInt64AndOverflow(t *testing.T) {
+	t.Parallel()
+	const maxI64 = int64(1<<63 - 1)
+	tests := []struct {
+		in     string
+		wantID int64
+		wantOK bool
+	}{
+		{"9223372036854775807", maxI64, true},
+		{"9223372036854775808", 0, false}, // does not fit int64
+		{"001", 1, true},
+	}
+	for _, tc := range tests {
+		got, ok := positiveInt64String(tc.in)
+		if ok != tc.wantOK || got != tc.wantID {
+			t.Fatalf("positiveInt64String(%q) = (%d, %v), want (%d, %v)", tc.in, got, ok, tc.wantID, tc.wantOK)
+		}
+	}
+}
+
 func TestFormPositiveInt64(t *testing.T) {
 	t.Parallel()
 	r := httptest.NewRequest("POST", CategoriesDeletePath, strings.NewReader("id=42&empty=&bad=0&neg=-1&space=+19+"))
