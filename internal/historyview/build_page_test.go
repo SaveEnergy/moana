@@ -2,6 +2,7 @@ package historyview
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"testing"
 	"time"
@@ -87,5 +88,37 @@ func TestBuildPage_smoke_listsTransactionsAndNav(t *testing.T) {
 	}
 	if len(data.Groups) == 0 {
 		t.Fatal("expected at least one day group")
+	}
+}
+
+func TestBuildPage_expiredContext(t *testing.T) {
+	t.Parallel()
+	st := dbutil.MustOpenMemStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "hist-expired@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByEmail(ctx, "hist-expired@example.com")
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 8, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, u.HouseholdID, -100, day, "x", nil); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := url.Parse(RoutePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deadlineCtx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Hour))
+	defer cancel()
+	_, err = BuildPage(deadlineCtx, st, u.HouseholdID, time.UTC, raw, RoutePath)
+	if err == nil {
+		t.Fatal("expected error from expired context")
+	}
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("want context.DeadlineExceeded, got %v", err)
 	}
 }
