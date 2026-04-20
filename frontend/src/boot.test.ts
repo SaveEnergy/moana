@@ -19,7 +19,7 @@ vi.mock('./lib/historyControls', () => ({ initHistoryControls: stubs.initHistory
 vi.mock('./lib/confirmSubmitForms', () => ({ initConfirmSubmitForms: stubs.initConfirmSubmitForms }))
 
 import { BOOT_APP_INITIALIZERS, bootApp } from './boot'
-import { BOOT_INITIALIZER_NAMES } from './bootInitializerNames'
+import { BOOT_INITIALIZER_COUNT, BOOT_INITIALIZER_NAMES } from './bootInitializerNames'
 
 describe('bootApp', () => {
   beforeEach(() => {
@@ -27,7 +27,8 @@ describe('bootApp', () => {
   })
 
   it('BOOT_APP_INITIALIZERS lists one entry per boot step', () => {
-    expect(BOOT_APP_INITIALIZERS).toHaveLength(BOOT_INITIALIZER_NAMES.length)
+    expect(BOOT_INITIALIZER_COUNT).toBe(BOOT_INITIALIZER_NAMES.length)
+    expect(BOOT_APP_INITIALIZERS).toHaveLength(BOOT_INITIALIZER_COUNT)
   })
 
   it('invokes each initializer once', () => {
