@@ -15,6 +15,11 @@ describe('formatLocalTimeLabel', () => {
     expect(s).not.toBeNull()
     expect(s!.length).toBeGreaterThan(0)
   })
+
+  it('trims surrounding whitespace so Date can parse template padding', () => {
+    const inner = '2020-06-15T14:30:00.000Z'
+    expect(formatLocalTimeLabel(`  ${inner}  `)).toEqual(formatLocalTimeLabel(inner))
+  })
 })
 
 describe('applyLocalTimeElements', () => {
@@ -107,6 +112,23 @@ describe('applyLocalTimeElements', () => {
     applyLocalTimeElements(root)
     expect(el.textContent).toBe('keep')
   })
+
+  it('hydrates when datetime has leading and trailing whitespace', () => {
+    const inner = '2020-06-15T14:30:00.000Z'
+    const padded = `  \t${inner}  `
+    const expected = formatLocalTimeLabel(inner)
+    expect(expected).not.toBeNull()
+
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? padded : null),
+      textContent: '',
+    } as unknown as HTMLTimeElement
+    const root = { querySelectorAll: () => [el] } as unknown as ParentNode
+
+    applyLocalTimeElements(root)
+
+    expect(el.textContent).toBe(expected)
+  })
 })
 
 describe('applyLocalTimeElements default document root', () => {
@@ -172,5 +194,11 @@ describe('createLocalTimeLabelMemo', () => {
     const labelFor = createLocalTimeLabelMemo()
     expect(labelFor('not-a-date')).toBeUndefined()
     expect(labelFor('not-a-date')).toBeUndefined()
+  })
+
+  it('uses the same cache entry for the same instant with surrounding whitespace', () => {
+    const labelFor = createLocalTimeLabelMemo()
+    const iso = '2020-06-15T14:30:00.000Z'
+    expect(labelFor(`  ${iso}`)).toBe(labelFor(`${iso}  `))
   })
 })

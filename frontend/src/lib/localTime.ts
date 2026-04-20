@@ -7,9 +7,11 @@ const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
-/** Format ISO datetime for inline display (matches previous `toLocaleTimeString` behavior). */
+/** Format ISO datetime for inline display (matches previous `toLocaleTimeString` behavior); trims first. */
 export function formatLocalTimeLabel(iso: string): string | null {
-  const d = new Date(iso)
+  const t = iso.trim()
+  if (!t) return null
+  const d = new Date(t)
   if (Number.isNaN(d.getTime())) return null
   return localTimeFormatter.format(d)
 }
@@ -22,22 +24,23 @@ export function createLocalTimeLabelMemo(): (iso: string) => string | undefined 
   const ok = new Map<string, string>()
   const bad = new Set<string>()
   return (iso: string) => {
-    if (!iso) {
+    const key = iso.trim()
+    if (!key) {
       return undefined
     }
-    const cached = ok.get(iso)
+    const cached = ok.get(key)
     if (cached !== undefined) {
       return cached
     }
-    if (bad.has(iso)) {
+    if (bad.has(key)) {
       return undefined
     }
-    const formatted = formatLocalTimeLabel(iso)
+    const formatted = formatLocalTimeLabel(key)
     if (!formatted) {
-      bad.add(iso)
+      bad.add(key)
       return undefined
     }
-    ok.set(iso, formatted)
+    ok.set(key, formatted)
     return formatted
   }
 }
