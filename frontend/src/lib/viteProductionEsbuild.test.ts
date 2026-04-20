@@ -28,4 +28,20 @@ describe('vite.config production esbuild', () => {
     expect(prod.build?.reportCompressedSize).toBe(false)
     expect(String(prod.build?.outDir).replace(/\\/g, '/')).toMatch(/internal\/assets\/static$/)
   })
+
+  it('resolves main.ts input and fixed js/app.js + css/app.css output names', () => {
+    const prod = resolveConfig('production')
+    expect(String(prod.build?.rollupOptions?.input)).toMatch(/main\.ts$/)
+    const output = prod.build?.rollupOptions?.output
+    const out = Array.isArray(output) ? output[0] : output
+    expect(out).toMatchObject({
+      entryFileNames: 'js/app.js',
+    })
+    const assetFileNames = out?.assetFileNames
+    expect(typeof assetFileNames).toBe('function')
+    const fn = assetFileNames as (info: { names?: string[]; name?: string }) => string
+    expect(fn({ names: ['app.css'] })).toBe('css/app.css')
+    expect(fn({ name: 'app.css' })).toBe('css/app.css')
+    expect(fn({ name: 'other.png' })).toBe('assets/[name][extname]')
+  })
 })
