@@ -51,6 +51,7 @@ const labelForIso = createLocalTimeLabelMemo()
 /**
  * Fill local clock labels for every `<time>` matching `LOCAL_TIME_ELEMENTS_SELECTOR` in `root`.
  * When `root` is the global `document` (including the default no-arg boot call), uses {@link resolveBootContentQueryRoot}; otherwise {@link resolveContentQueryRoot}.
+ * Skips assigning `textContent` when it already equals the computed label (less DOM churn on repeat boot / re-scan).
  */
 export function applyLocalTimeElements(root: ParentNode = document): void {
   const scope =
@@ -70,6 +71,8 @@ export function applyLocalTimeElements(root: ParentNode = document): void {
     if (!label) {
       continue
     }
-    el.textContent = label
+    if (el.textContent !== label) {
+      el.textContent = label
+    }
   }
 }

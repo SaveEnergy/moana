@@ -60,6 +60,32 @@ describe('applyLocalTimeElements', () => {
     expect(el.textContent).toBe(expected)
   })
 
+  it('does not assign textContent on the second pass when the label is already set', () => {
+    const iso = '2020-06-15T14:30:00.000Z'
+    const expected = formatLocalTimeLabel(iso)
+    expect(expected).not.toBeNull()
+
+    let sets = 0
+    let text = ''
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? iso : null),
+      get textContent() {
+        return text
+      },
+      set textContent(v: string) {
+        sets++
+        text = v
+      },
+    } as unknown as HTMLTimeElement
+    const root = { querySelectorAll: () => [el] } as unknown as ParentNode
+
+    applyLocalTimeElements(root)
+    expect(sets).toBe(1)
+    applyLocalTimeElements(root)
+    expect(sets).toBe(1)
+    expect(el.textContent).toBe(expected)
+  })
+
   it('no-ops when the selector matches nothing', () => {
     const root = { querySelectorAll: () => [] } as unknown as ParentNode
     expect(() => applyLocalTimeElements(root)).not.toThrow()
