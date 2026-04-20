@@ -122,6 +122,23 @@ describe('initHistoryControls', () => {
     expect(requestSubmit).toHaveBeenCalledTimes(1)
   })
 
+  it('does not wire change when sort select exists without a form (repeat init safe)', () => {
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form: null } as unknown as HTMLSelectElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+      }),
+    )
+
+    expect(() => initHistoryControls()).not.toThrow()
+    expect(addEventListener).not.toHaveBeenCalled()
+    expect(() => initHistoryControls()).not.toThrow()
+    expect(addEventListener).not.toHaveBeenCalled()
+  })
+
   it('does not re-wire when wireHistorySortAutoSubmit ran before init', () => {
     const requestSubmit = vi.fn()
     const form = { requestSubmit } as unknown as HTMLFormElement
