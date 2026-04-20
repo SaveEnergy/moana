@@ -105,6 +105,7 @@ describe('attachConfirmBeforeSubmit', () => {
     } as unknown as HTMLFormElement
     attachConfirmBeforeSubmit(form, 'Remove?')
     expect(onSubmit).not.toBeNull()
+    expect(form.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function), { capture: true })
     const e = { preventDefault: vi.fn() } as unknown as SubmitEvent
     onSubmit!(e)
     expect(e.preventDefault).toHaveBeenCalledTimes(1)
@@ -121,6 +122,7 @@ describe('attachConfirmBeforeSubmit', () => {
       }),
     } as unknown as HTMLFormElement
     attachConfirmBeforeSubmit(form, 'Remove?')
+    expect(form.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function), { capture: true })
     const e = { preventDefault: vi.fn() } as unknown as SubmitEvent
     onSubmit!(e)
     expect(e.preventDefault).not.toHaveBeenCalled()
@@ -180,7 +182,7 @@ describe('initConfirmSubmitForms', () => {
 
     initConfirmSubmitForms()
 
-    expect(wired.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function))
+    expect(wired.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function), { capture: true })
     expect(skipped.addEventListener).not.toHaveBeenCalled()
   })
 
@@ -254,6 +256,6 @@ describe('initConfirmSubmitForms', () => {
 
     initConfirmSubmitForms()
 
-    expect(form.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function))
+    expect(form.addEventListener).toHaveBeenCalledWith('submit', expect.any(Function), { capture: true })
   })
 })

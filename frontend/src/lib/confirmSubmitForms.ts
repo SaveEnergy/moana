@@ -19,7 +19,8 @@ export function readDataConfirmMessage(form: Element): string | null {
 const confirmSubmitWiredForms = new WeakSet<HTMLFormElement>()
 
 /**
- * Destructive or irreversible POST forms: confirm in the capture/bubble submit path.
+ * Destructive or irreversible POST forms: confirm on **`submit`** in **capture** phase
+ * (before target/bubble listeners) so **`preventDefault`** always wins if the user declines.
  * Templates use `data-confirm="message"` instead of inline `onsubmit="return confirm(...)"`.
  * No-ops if `form` is already wired (same `WeakSet` as `initConfirmSubmitForms`).
  */
@@ -27,12 +28,16 @@ export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string
   if (confirmSubmitWiredForms.has(form)) {
     return
   }
-  form.addEventListener('submit', (e) => {
-    /* global `confirm` — Vitest stubs via `globalThis` / `stubGlobal`; avoid `window` (Node tests). */
-    if (!confirm(message)) {
-      e.preventDefault()
-    }
-  })
+  form.addEventListener(
+    'submit',
+    (e) => {
+      /* global `confirm` — Vitest stubs via `globalThis` / `stubGlobal`; avoid `window` (Node tests). */
+      if (!confirm(message)) {
+        e.preventDefault()
+      }
+    },
+    { capture: true },
+  )
   confirmSubmitWiredForms.add(form)
 }
 
