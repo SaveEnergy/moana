@@ -117,7 +117,7 @@ describe('domSelectors app shell', () => {
 })
 
 describe('domSelectors app main', () => {
-  it('matches layout main landmark for local time scoping', () => {
+  it('matches layout main landmark for boot content scoping', () => {
     expect(APP_MAIN_SELECTOR).toBe('main.app-main')
   })
 })
