@@ -47,6 +47,13 @@ describe('resolveCategoryModalPreviewBackground', () => {
     expect(resolveCategoryModalPreviewBackground('#abc123', undefined)).toBe('#abc123')
   })
 
+  it('returns the same native color string when custom is selected and hex has no edge whitespace', () => {
+    const native = '#abcdef'
+    expect(
+      resolveCategoryModalPreviewBackground(CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM, native),
+    ).toBe(native)
+  })
+
   it('trims checked radio value for preset and custom branches', () => {
     expect(resolveCategoryModalPreviewBackground('  #abc123  ', undefined)).toBe('#abc123')
     expect(

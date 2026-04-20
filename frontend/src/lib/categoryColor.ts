@@ -1,4 +1,13 @@
 import { CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM } from './domSelectors'
+import { trimEdgesIfNeeded } from './trimEdges'
+
+function optionalTrimmedNonEmpty(s: string | undefined): string | undefined {
+  if (s === undefined) {
+    return undefined
+  }
+  const t = trimEdgesIfNeeded(s)
+  return t ? t : undefined
+}
 
 /** Default preview strip when color = Auto; aligns with server-rendered modal gradient. */
 export const CATEGORY_MODAL_DEFAULT_PREVIEW_BG =
@@ -18,9 +27,9 @@ export function resolveCategoryModalPreviewBackground(
   checkedColorValue: string | undefined,
   nativeColorInputValue: string | undefined,
 ): string {
-  const checked = checkedColorValue?.trim()
+  const checked = optionalTrimmedNonEmpty(checkedColorValue)
   if (checked === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM) {
-    return nativeColorInputValue?.trim() || CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
+    return optionalTrimmedNonEmpty(nativeColorInputValue) || CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
   }
   if (checked) {
     return checked

@@ -1,5 +1,6 @@
 import { type ClickTargetEvent, clickEventTargetElement } from './clickTarget'
 import { closeDialogIfOpen } from './dialogModal'
+import { trimEdgesIfNeeded } from './trimEdges'
 
 /** One dismiss `click` listener per dialog (safe if `attachNativeDialogDismiss` runs twice). */
 const nativeDialogDismissWiredDialogs = new WeakSet<HTMLDialogElement>()
@@ -44,7 +45,7 @@ export function attachNativeDialogDismiss(
   }
   const selectors: readonly string[] =
     closeWithinSelectors.length > 0
-      ? closeWithinSelectors.filter((s) => s.trim() !== '')
+      ? closeWithinSelectors.map((s) => trimEdgesIfNeeded(s)).filter((s) => s !== '')
       : closeWithinSelectors
   dialog.addEventListener('click', (e) => {
     if (!shouldCloseNativeDialogFromClick(e, dialog, selectors)) {

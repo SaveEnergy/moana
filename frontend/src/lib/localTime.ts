@@ -1,5 +1,6 @@
 import { resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
 import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
+import { trimEdgesIfNeeded } from './trimEdges'
 
 /** Reused across rows so hydrating many `<time>` nodes does not allocate a formatter per call. */
 const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -7,14 +8,12 @@ const localTimeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 })
 
-const ISO_DATETIME_NEEDS_TRIM = /^\s|\s$/u
-
 /**
  * Normalize `datetime` attribute text for parsing / memo keys — **`trim`** only when edges are whitespace.
  * (Server-rendered ISO values are usually already tight; avoids an allocation on hot paths.)
  */
 export function normalizeIsoDatetimeAttr(iso: string): string | null {
-  const t = ISO_DATETIME_NEEDS_TRIM.test(iso) ? iso.trim() : iso
+  const t = trimEdgesIfNeeded(iso)
   return t ? t : null
 }
 
