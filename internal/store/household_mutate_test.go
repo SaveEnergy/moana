@@ -33,3 +33,54 @@ func TestUpdateHouseholdName(t *testing.T) {
 		t.Fatalf("household %+v", h)
 	}
 }
+
+func TestDetachUserToSoloHousehold(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "pw1")
+	ownerID, err := st.CreateUser(ctx, "detach-owner@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner, err := st.GetUserByID(ctx, ownerID)
+	if err != nil || owner == nil {
+		t.Fatal(err)
+	}
+	hid := owner.HouseholdID
+
+	hash2 := passwordtest.MustHash(t, "pw2")
+	memberID, err := st.CreateHouseholdMember(ctx, hid, "detach-member@example.com", hash2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := st.DetachUserToSoloHousehold(ctx, memberID); err != nil {
+		t.Fatal(err)
+	}
+	member, err := st.GetUserByID(ctx, memberID)
+	if err != nil || member == nil {
+		t.Fatal(err)
+	}
+	if member.HouseholdID == hid {
+		t.Fatalf("user still in old household %d", hid)
+	}
+	if member.HouseholdRole != "owner" {
+		t.Fatalf("HouseholdRole %q want owner", member.HouseholdRole)
+	}
+
+	nOld, err := st.CountHouseholdMembers(ctx, hid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nOld != 1 {
+		t.Fatalf("old household members %d want 1", nOld)
+	}
+	nSolo, err := st.CountHouseholdMembers(ctx, member.HouseholdID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nSolo != 1 {
+		t.Fatalf("new household members %d want 1", nSolo)
+	}
+}
