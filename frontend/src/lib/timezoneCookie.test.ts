@@ -30,6 +30,11 @@ describe('parseMoanaTimezoneCookie', () => {
     ).toBe('America/New_York')
   })
 
+  it('accepts RFC-style spaces around the equals sign in the segment', () => {
+    expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME} = Europe%2FBerlin`)).toBe('Europe/Berlin')
+    expect(parseMoanaTimezoneCookie(`a=1; ${TIMEZONE_COOKIE_NAME} =America%2FNew_York`)).toBe('America/New_York')
+  })
+
   it('returns empty string when the value is empty after equals', () => {
     expect(parseMoanaTimezoneCookie(`${TIMEZONE_COOKIE_NAME}=`)).toBe('')
     expect(parseMoanaTimezoneCookie(`a=1; ${TIMEZONE_COOKIE_NAME}=; b=2`)).toBe('')

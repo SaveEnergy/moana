@@ -10,12 +10,12 @@ export function timezoneCookieSegment(tz: string): string {
 /**
  * Read `moana_tz` from a `document.cookie`-style string (testable without JSDOM).
  * Returns null if missing or not decodable; an empty value after `=` yields `""` (valid `decodeURIComponent`).
- * Scans semicolon-separated segments without `split` so large `document.cookie` strings avoid an extra array allocation.
+ * Each segment uses the first `=` as the name/value boundary with **trimmed** names (RFC-style spaces around `=`).
+ * Scans semicolon-separated segments without `split` on the full header so large `document.cookie` avoids a segment array.
  */
 export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
-  const prefix = `${TIMEZONE_COOKIE_NAME}=`
-  /* One linear scan — skip segment walk when the name never appears (common on first visit / unrelated cookies). */
-  if (!cookieHeader.includes(prefix)) {
+  /* Skip the segment walk when the cookie name cannot appear (first-visit / unrelated jars). */
+  if (!cookieHeader.includes(TIMEZONE_COOKIE_NAME)) {
     return null
   }
   let pos = 0
@@ -23,12 +23,16 @@ export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
     const semi = cookieHeader.indexOf(';', pos)
     const end = semi === -1 ? cookieHeader.length : semi
     const s = cookieHeader.slice(pos, end).trim()
-    if (s.startsWith(prefix)) {
-      const raw = s.slice(prefix.length)
-      try {
-        return decodeURIComponent(raw)
-      } catch {
-        // Malformed segment — try another `moana_tz=` later in the header.
+    const eq = s.indexOf('=')
+    if (eq !== -1) {
+      const segName = s.slice(0, eq).trim()
+      if (segName === TIMEZONE_COOKIE_NAME) {
+        const raw = s.slice(eq + 1).trim()
+        try {
+          return decodeURIComponent(raw)
+        } catch {
+          // Malformed segment — try another `moana_tz` later in the header.
+        }
       }
     }
     if (semi === -1) {
