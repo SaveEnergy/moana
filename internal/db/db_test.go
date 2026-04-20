@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 )
 
@@ -108,5 +109,35 @@ func TestOpen_fileTuningPragmas(t *testing.T) {
 	// SQLite: 2 = MEMORY (see PRAGMA temp_store).
 	if tempStore != 2 {
 		t.Fatalf("PRAGMA temp_store = %d want 2 (MEMORY)", tempStore)
+	}
+}
+
+func TestOpen_concurrentReadQueries(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "concurrent.db")
+	d, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+
+	const n = 32
+	var wg sync.WaitGroup
+	errs := make(chan error, n)
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var one int
+			errs <- d.QueryRowContext(context.Background(), `SELECT 1`).Scan(&one)
+		}()
+	}
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }

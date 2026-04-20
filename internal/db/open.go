@@ -11,6 +11,11 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// sqliteMaxOpenConns caps the [database/sql] pool. Under WAL, SQLite allows concurrent readers
+// while writes remain serialized; a single connection forces strictly sequential queries and
+// wastes overlapping read work (e.g. dashboard section loads).
+const sqliteMaxOpenConns = 8
+
 var memoryDBSeq atomic.Uint64
 
 // sqliteDSN builds a modernc.org/sqlite driver URI. Each ":memory:" open uses a unique name so
@@ -60,7 +65,7 @@ func Open(path string) (*sql.DB, error) {
 	}
 
 	if path != ":memory:" {
-		// Single-connection app: larger cache + mmap reduce read I/O vs SQLite defaults (small cache, no mmap).
+		// Larger cache + mmap reduce read I/O vs SQLite defaults (small cache, no mmap).
 		if _, err := d.ExecContext(context.Background(), `PRAGMA cache_size = -16000;`); err != nil {
 			_ = d.Close()
 			return nil, fmt.Errorf("cache_size: %w", err)
