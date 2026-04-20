@@ -77,6 +77,42 @@ describe('attachNativeDialogDismiss', () => {
     expect(close).toHaveBeenCalledTimes(1)
   })
 
+  it('does not call close when the dialog is already closed (open === false)', () => {
+    const close = vi.fn()
+    const addEventListener = vi.fn()
+    const dialog = {
+      close,
+      open: false,
+      addEventListener,
+      closest: () => null,
+    } as unknown as HTMLDialogElement
+
+    attachNativeDialogDismiss(dialog, ['#x'])
+
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(dialog))
+
+    expect(close).not.toHaveBeenCalled()
+  })
+
+  it('calls close when open is true and shouldClose applies', () => {
+    const close = vi.fn()
+    const addEventListener = vi.fn()
+    const dialog = {
+      close,
+      open: true,
+      addEventListener,
+      closest: () => null,
+    } as unknown as HTMLDialogElement
+
+    attachNativeDialogDismiss(dialog, ['#x'])
+
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(dialog))
+
+    expect(close).toHaveBeenCalledTimes(1)
+  })
+
   it('does not close when inner target matches no dismiss selector', () => {
     const close = vi.fn()
     const addEventListener = vi.fn()
