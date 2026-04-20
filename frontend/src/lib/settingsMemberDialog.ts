@@ -20,7 +20,8 @@ export function querySettingsAddMemberOpenButton(root: ParentNode): HTMLElement 
 }
 
 export function initSettingsMemberDialog(): void {
-  const dialog = querySettingsAddMemberDialog(resolveBootContentQueryRoot())
+  const contentRoot = resolveBootContentQueryRoot()
+  const dialog = querySettingsAddMemberDialog(contentRoot)
   if (!dialog) {
     return
   }
@@ -28,11 +29,8 @@ export function initSettingsMemberDialog(): void {
     return
   }
 
-  /* Open control sits in `#settings-top` next to the dialog (`settings.html`); scope off parent when attached. */
-  const openRoot = dialog.parentElement
-  const openBtn = openRoot
-    ? querySettingsAddMemberOpenButton(openRoot)
-    : querySettingsAddMemberOpenButton(document)
+  /* Open control sits next to the dialog under the same parent (`settings.html`); fall back to main landmark scope. */
+  const openBtn = querySettingsAddMemberOpenButton(dialog.parentElement ?? contentRoot)
 
   openBtn?.addEventListener('click', () => {
     dialog.showModal()

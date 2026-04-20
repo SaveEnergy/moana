@@ -46,7 +46,7 @@ describe('initSettingsMemberDialog', () => {
     expect(() => initSettingsMemberDialog()).not.toThrow()
   })
 
-  it('resolves open button from document when dialog has no parent', () => {
+  it('resolves open button from content root when dialog has no parent', () => {
     const showModal = vi.fn()
     const dialogAdd = vi.fn()
     const openAddEventListener = vi.fn()

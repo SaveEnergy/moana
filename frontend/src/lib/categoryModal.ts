@@ -184,7 +184,7 @@ export function initCategoryModal(): void {
     contentRoot.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
   if (editDelegationRoot) {
     editDelegationRoot.addEventListener('click', (e) => {
-      const el = clickEventTargetElement(e as MouseEvent)
+      const el = clickEventTargetElement(e)
       if (!el) {
         return
       }

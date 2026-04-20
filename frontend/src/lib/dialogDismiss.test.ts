@@ -48,6 +48,20 @@ describe('shouldCloseNativeDialogFromClick', () => {
       false,
     )
   })
+
+  it('ignores blank dismiss selectors and still matches valid ones', () => {
+    const dialog = {} as unknown as HTMLDialogElement
+    const inner = {
+      closest: (sel: string) => (sel === '#close' ? inner : null),
+    } as unknown as Element
+    expect(
+      shouldCloseNativeDialogFromClick({ target: inner } as unknown as MouseEvent, dialog, [
+        '',
+        '   ',
+        '#close',
+      ]),
+    ).toBe(true)
+  })
 })
 
 describe('attachNativeDialogDismiss', () => {
