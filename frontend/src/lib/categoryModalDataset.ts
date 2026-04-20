@@ -1,9 +1,8 @@
 import { CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT } from './categoryColor'
-import { trimEdgesIfNeeded } from './trimEdges'
-import { stripUnicodeFormatChars } from './unicodeCf'
+import { stripCfTrimEdges } from './unicodeCf'
 
 function stripCfDatasetValue(s: string): string {
-  return trimEdgesIfNeeded(stripUnicodeFormatChars(s))
+  return stripCfTrimEdges(s)
 }
 
 /**
@@ -21,7 +20,7 @@ export type CategoryEditRowData = {
 
 /**
  * Parse `dataset` from `.cat-modal-open-edit` (or any element with the same attributes).
- * @returns `null` when `id` is missing or whitespace-only after Cf strip + trim (incl. NBSP). **`isCustom`** is true when **`data-custom`** is **`"1"`** after Cf strip + trim. **`name`** is left as in **`dataset`** (spacing preserved).
+ * @returns `null` when `id` is missing or whitespace-only after **`stripCfTrimEdges`** (incl. NBSP). **`isCustom`** is true when **`data-custom`** is **`"1"`** after **`stripCfTrimEdges`**. **`name`** is left as in **`dataset`** (spacing preserved).
  */
 export function readCategoryEditRowDataset(ds: DOMStringMap): CategoryEditRowData | null {
   const id = stripCfDatasetValue(ds.id ?? '')

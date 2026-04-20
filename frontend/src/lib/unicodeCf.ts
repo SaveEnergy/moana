@@ -1,7 +1,10 @@
+import { trimEdgesIfNeeded } from './trimEdges'
+
 /**
  * Unicode "Format" (Cf) — ZWSP, ZWJ, BOM-as-format, etc.
- * `String.prototype.trim()` does not remove these; strip before `trim()` when normalizing HTML / attribute text.
+ * Strip **Cf** before edge normalization — `String.prototype.trim()` does not remove format chars.
  */
+
 export const UNICODE_FORMAT_CHARS = /\p{Cf}/gu
 
 /** Non-global test — avoids `lastIndex` side effects from {@link UNICODE_FORMAT_CHARS}. */
@@ -12,4 +15,9 @@ export function stripUnicodeFormatChars(s: string): string {
     return s
   }
   return s.replace(UNICODE_FORMAT_CHARS, '')
+}
+
+/** **`stripUnicodeFormatChars`** then **`trimEdgesIfNeeded`** — shared by `data-*` and `data-confirm` normalization. */
+export function stripCfTrimEdges(s: string): string {
+  return trimEdgesIfNeeded(stripUnicodeFormatChars(s))
 }

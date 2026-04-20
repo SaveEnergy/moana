@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } from './radioMap'
 
@@ -93,6 +93,16 @@ describe('setRadioCheckedByValue', () => {
     const map = new Map([['', empty]])
     expect(setRadioCheckedByValue(map, '', '')).toBe(true)
     expect(empty.checked).toBe(true)
+  })
+
+  it('does not hit the map twice when preferred and fallback trim to the same key', () => {
+    const target = radio()
+    const map = new Map<string, HTMLInputElement>([['x', target]])
+    const getSpy = vi.spyOn(map, 'get')
+    expect(setRadioCheckedByValue(map, 'x', 'x')).toBe(true)
+    expect(target.checked).toBe(true)
+    expect(getSpy).toHaveBeenCalledTimes(1)
+    getSpy.mockRestore()
   })
 
   it('trims preferred and fallback keys when resolving map entries', () => {

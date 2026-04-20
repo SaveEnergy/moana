@@ -1,18 +1,17 @@
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
-import { trimEdgesIfNeeded } from './trimEdges'
-import { stripUnicodeFormatChars } from './unicodeCf'
+import { stripCfTrimEdges } from './unicodeCf'
 
 /**
  * Returns `data-confirm` text or `null` if missing or visually blank after normalizing.
- * Strips Unicode **Cf** characters, then trims; skips wiring so templates cannot show an empty `confirm()` dialog.
+ * Strips Unicode **Cf** characters, then **`trimEdgesIfNeeded`** (**`stripCfTrimEdges`**); skips wiring so templates cannot show an empty `confirm()` dialog.
  */
 export function readDataConfirmMessage(form: Element): string | null {
   const raw = form.getAttribute(DATA_CONFIRM_ATTRIBUTE)
   if (raw == null) {
     return null
   }
-  const msg = trimEdgesIfNeeded(stripUnicodeFormatChars(raw))
+  const msg = stripCfTrimEdges(raw)
   return msg === '' ? null : msg
 }
 

@@ -32,7 +32,14 @@ export function setRadioCheckedByValue(
   preferred: string,
   fallbackKey = '',
 ): boolean {
-  const input = map.get(trimEdgesIfNeeded(preferred)) ?? map.get(trimEdgesIfNeeded(fallbackKey))
+  const pref = trimEdgesIfNeeded(preferred)
+  let input = map.get(pref)
+  if (input === undefined) {
+    const fb = trimEdgesIfNeeded(fallbackKey)
+    if (fb !== pref) {
+      input = map.get(fb)
+    }
+  }
   if (!input) {
     return false
   }
