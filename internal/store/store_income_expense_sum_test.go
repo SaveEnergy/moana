@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -173,17 +172,10 @@ func TestSumRunningTotalAndIncomeExpenseInTwoRanges_matchesSeparateQueries(t *te
 func TestSumRunningTotalAndIncomeExpenseInTwoRanges_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
 	aFrom := time.Date(2026, 7, 1, 0, 0, 0, 0, time.UTC)
 	aTo := time.Date(2026, 7, 31, 23, 59, 59, 0, time.UTC)
 	bFrom := time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
 	bTo := time.Date(2026, 8, 31, 23, 59, 59, 0, time.UTC)
-	_, _, _, _, _, err := st.SumRunningTotalAndIncomeExpenseInTwoRanges(ctx, 1, aFrom, aTo, bFrom, bTo)
-	if err == nil {
-		t.Fatal("expected error when context already cancelled")
-	}
-	if !errors.Is(err, context.Canceled) {
-		t.Fatalf("got %v want %v", err, context.Canceled)
-	}
+	_, _, _, _, _, err := st.SumRunningTotalAndIncomeExpenseInTwoRanges(alreadyCancelledContext(t), 1, aFrom, aTo, bFrom, bTo)
+	assertErrIsContextCanceled(t, err)
 }

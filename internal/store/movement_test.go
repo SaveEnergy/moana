@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"errors"
 	"math"
 	"testing"
 	"time"
@@ -13,17 +12,10 @@ import (
 func TestDailyAbsMovementByLocalDate_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
 	fromUTC := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	toUTC := time.Date(2026, 1, 31, 23, 59, 59, 999999999, time.UTC)
-	_, err := st.DailyAbsMovementByLocalDate(ctx, 1, fromUTC, toUTC, time.UTC)
-	if err == nil {
-		t.Fatal("expected error when context already cancelled")
-	}
-	if !errors.Is(err, context.Canceled) {
-		t.Fatalf("got %v want %v", err, context.Canceled)
-	}
+	_, err := st.DailyAbsMovementByLocalDate(alreadyCancelledContext(t), 1, fromUTC, toUTC, time.UTC)
+	assertErrIsContextCanceled(t, err)
 }
 
 func TestDailyAbsMovementByLocalDate_bucketingBerlin(t *testing.T) {
