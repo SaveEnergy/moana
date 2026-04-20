@@ -1,18 +1,23 @@
 import { describe, expect, it } from 'vitest'
 
-import { clickEventTargetElement } from './clickTarget'
+import { type ClickTargetEvent, clickEventTargetElement } from './clickTarget'
+
+/** Vitest stubs are not real `EventTarget` instances — cast at the test boundary only. */
+function stubEv(target: unknown): ClickTargetEvent {
+  return { target } as unknown as ClickTargetEvent
+}
 
 describe('clickEventTargetElement', () => {
   it('returns an Element target unchanged', () => {
     const div = {
       closest: () => null,
     } as unknown as Element
-    expect(clickEventTargetElement({ target: div } as unknown as MouseEvent)).toBe(div)
+    expect(clickEventTargetElement(stubEv(div))).toBe(div)
   })
 
   it('returns the target when it has closest() but is not an Element (legacy / partial DOM)', () => {
     const fake = { closest: () => null as Element | null }
-    expect(clickEventTargetElement({ target: fake } as unknown as MouseEvent)).toBe(fake)
+    expect(clickEventTargetElement(stubEv(fake))).toBe(fake)
   })
 
   it('returns parentElement when target has no closest (e.g. text-like node)', () => {
@@ -20,27 +25,27 @@ describe('clickEventTargetElement', () => {
       closest: (sel: string) => (sel === '.btn' ? parent : null),
     } as unknown as Element
     const text = { parentElement: parent }
-    expect(clickEventTargetElement({ target: text } as unknown as MouseEvent)).toBe(parent)
+    expect(clickEventTargetElement(stubEv(text))).toBe(parent)
   })
 
   it('returns null when text-like node has no parentElement', () => {
     const text = { parentElement: null }
-    expect(clickEventTargetElement({ target: text } as unknown as MouseEvent)).toBeNull()
+    expect(clickEventTargetElement(stubEv(text))).toBeNull()
   })
 
   it('returns null for null target', () => {
-    expect(clickEventTargetElement({ target: null } as unknown as MouseEvent)).toBeNull()
+    expect(clickEventTargetElement(stubEv(null))).toBeNull()
   })
 
   it('returns null when target is undefined', () => {
-    expect(clickEventTargetElement({ target: undefined } as unknown as MouseEvent)).toBeNull()
+    expect(clickEventTargetElement(stubEv(undefined))).toBeNull()
   })
 
   it('returns null for non-object targets', () => {
-    expect(clickEventTargetElement({ target: 0 } as unknown as MouseEvent)).toBeNull()
+    expect(clickEventTargetElement(stubEv(0))).toBeNull()
   })
 
   it('returns null when object has neither closest nor parentElement', () => {
-    expect(clickEventTargetElement({ target: {} } as unknown as MouseEvent)).toBeNull()
+    expect(clickEventTargetElement(stubEv({}))).toBeNull()
   })
 })

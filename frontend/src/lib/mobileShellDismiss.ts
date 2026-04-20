@@ -1,12 +1,12 @@
-import { clickEventTargetElement } from './clickTarget'
+import { type ClickTargetEvent, clickEventTargetElement } from './clickTarget'
 import { APP_SIDEBAR_CLOSE_SELECTOR } from './domSelectors'
 
 /**
  * Whether a bubbled `click` on `#app-shell` should close the mobile drawer.
- * Caller must still gate on the mobile `matchMedia` breakpoint.
+ * Caller must still gate on the mobile `matchMedia` breakpoint. Uses {@link ClickTargetEvent} like `dialogDismiss`.
  */
 export function shouldCloseMobileSidebarFromShellClick(
-  e: MouseEvent,
+  e: ClickTargetEvent,
   backdrop: Element | null,
 ): boolean {
   const el = clickEventTargetElement(e)
