@@ -13,21 +13,28 @@ import (
 
 var memoryDBSeq atomic.Uint64
 
-// Open opens the SQLite database with WAL and foreign keys enabled.
-// Use path ":memory:" for an in-memory database (tests and ephemeral runs).
-func Open(path string) (*sql.DB, error) {
-	var dsn string
+// sqliteDSN builds a modernc.org/sqlite driver URI. Each ":memory:" open uses a unique name so
+// parallel tests do not share one database. File paths use forward slashes in the URI.
+func sqliteDSN(path string) (string, error) {
 	switch path {
 	case ":memory:":
-		// Unique URI per Open so parallel tests do not share one DB.
 		id := memoryDBSeq.Add(1)
-		dsn = fmt.Sprintf("file:memdb%d?mode=memory&cache=shared&_pragma=foreign_keys(1)", id)
+		return fmt.Sprintf("file:memdb%d?mode=memory&cache=shared&_pragma=foreign_keys(1)", id), nil
 	default:
 		clean := filepath.Clean(path)
 		if err := ensureDBParentDir(clean); err != nil {
-			return nil, err
+			return "", err
 		}
-		dsn = "file:" + strings.ReplaceAll(clean, "\\", "/") + "?cache=shared&_pragma=foreign_keys(1)"
+		return "file:" + strings.ReplaceAll(clean, "\\", "/") + "?cache=shared&_pragma=foreign_keys(1)", nil
+	}
+}
+
+// Open opens the SQLite database with WAL and foreign keys enabled.
+// Use path ":memory:" for an in-memory database (tests and ephemeral runs).
+func Open(path string) (*sql.DB, error) {
+	dsn, err := sqliteDSN(path)
+	if err != nil {
+		return nil, err
 	}
 	d, err := sql.Open("sqlite", dsn)
 	if err != nil {
