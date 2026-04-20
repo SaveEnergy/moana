@@ -1,3 +1,4 @@
+import { resolveContentQueryRoot } from './contentRoot'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import {
   SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
@@ -8,7 +9,7 @@ import {
 /** One init pass per dialog (`bootApp` may run more than once during tests or future SPA hooks). */
 const settingsMemberDialogInitialized = new WeakSet<HTMLDialogElement>()
 
-/** Resolve the add-member `<dialog>` from a root (usually `document`). */
+/** Resolve the add-member `<dialog>` from a root (`initSettingsMemberDialog` uses `resolveContentQueryRoot(document)`). */
 export function querySettingsAddMemberDialog(root: ParentNode): HTMLDialogElement | null {
   return root.querySelector<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
 }
@@ -19,7 +20,7 @@ export function querySettingsAddMemberOpenButton(root: ParentNode): HTMLElement 
 }
 
 export function initSettingsMemberDialog(): void {
-  const dialog = querySettingsAddMemberDialog(document)
+  const dialog = querySettingsAddMemberDialog(resolveContentQueryRoot(document))
   if (!dialog) {
     return
   }

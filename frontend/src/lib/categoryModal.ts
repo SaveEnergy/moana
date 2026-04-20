@@ -3,6 +3,7 @@ import {
   resolveCategoryModalPreviewBackground,
   sanitizeCategoryCustomHex,
 } from './categoryColor'
+import { resolveContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { clickEventTargetElement } from './clickTarget'
@@ -40,7 +41,8 @@ import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } 
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
 
 export function initCategoryModal(): void {
-  const dialog = document.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
+  const contentRoot = resolveContentQueryRoot(document)
+  const dialog = contentRoot.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
   if (!dialog) {
     return
   }
@@ -55,11 +57,11 @@ export function initCategoryModal(): void {
   const preview = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_SELECTOR)
   const iconWrap = dialog.querySelector<HTMLElement>(CATEGORY_MODAL_PREVIEW_ICON_SELECTOR)
   const nameInput = dialog.querySelector<HTMLInputElement>(CATEGORY_MODAL_NAME_SELECTOR)
-  const intro = document.querySelector(CATEGORY_PAGE_INTRO_SECTION_SELECTOR)
+  const intro = contentRoot.querySelector(CATEGORY_PAGE_INTRO_SECTION_SELECTOR)
   const categoriesPageRoot = intro?.parentElement
   const addCategoryBtn =
     intro?.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR) ??
-    document.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
+    contentRoot.querySelector<HTMLElement>(CATEGORY_MODAL_OPEN_CREATE_SELECTOR)
 
   if (!form || !idInput || !titleEl || !submitBtn || !preview || !iconWrap || !nameInput) {
     return
@@ -179,7 +181,7 @@ export function initCategoryModal(): void {
   /** Scoped to the list card so topbar/sidebar clicks do not run this handler (`categories.html`: list is sibling of intro under the same parent). */
   const editDelegationRoot =
     categoriesPageRoot?.querySelector(CATEGORY_LIST_SECTION_SELECTOR) ??
-    document.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
+    contentRoot.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
   if (editDelegationRoot) {
     editDelegationRoot.addEventListener('click', (e) => {
       const el = clickEventTargetElement(e as MouseEvent)

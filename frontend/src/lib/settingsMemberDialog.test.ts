@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  APP_MAIN_SELECTOR,
   SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
   SETTINGS_ADD_MEMBER_OPEN_SELECTOR,
 } from './domSelectors'
@@ -130,5 +131,33 @@ describe('initSettingsMemberDialog', () => {
 
     expect(openAddEventListener).toHaveBeenCalledTimes(1)
     expect(dialogAdd).toHaveBeenCalledTimes(1)
+  })
+
+  it('resolves dialog under main.app-main when the landmark exists', () => {
+    const showModal = vi.fn()
+    const dialogAdd = vi.fn()
+    const openAddEventListener = vi.fn()
+    const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
+    const parent = {
+      querySelector: (sel: string) => (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR ? openBtn : null),
+    } as unknown as ParentNode
+    const dialog = {
+      showModal,
+      addEventListener: dialogAdd,
+      parentElement: parent,
+    } as unknown as HTMLDialogElement
+    const main = {
+      querySelector: (sel: string) =>
+        sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
+    } as unknown as ParentNode
+
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
+    })
+
+    initSettingsMemberDialog()
+
+    expect(openAddEventListener).toHaveBeenCalledTimes(1)
+    expect(dialogAdd).toHaveBeenCalledWith('click', expect.any(Function))
   })
 })

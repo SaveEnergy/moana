@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { HISTORY_SORT_SELECTOR } from './domSelectors'
+import { APP_MAIN_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
 import { initHistoryControls, queryHistorySortSelect, wireHistorySortAutoSubmit } from './historyControls'
 
 describe('queryHistorySortSelect', () => {
@@ -96,6 +96,27 @@ describe('initHistoryControls', () => {
     initHistoryControls()
 
     expect(addEventListener).toHaveBeenCalledTimes(1)
+  })
+
+  it('resolves #history-sort under main.app-main when the landmark exists', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+    const main = {
+      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+    } as unknown as ParentNode
+
+    vi.stubGlobal('document', {
+      querySelector: (sel: string) => (sel === APP_MAIN_SELECTOR ? main : null),
+    })
+
+    initHistoryControls()
+
+    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    const onChange = addEventListener.mock.calls[0][1] as () => void
+    onChange()
+    expect(requestSubmit).toHaveBeenCalledTimes(1)
   })
 
   it('does not re-wire when wireHistorySortAutoSubmit ran before init', () => {
