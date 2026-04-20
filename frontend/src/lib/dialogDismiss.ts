@@ -1,4 +1,5 @@
 import { type ClickTargetEvent, clickEventTargetElement } from './clickTarget'
+import { closeDialogIfOpen } from './dialogModal'
 
 /** One dismiss `click` listener per dialog (safe if `attachNativeDialogDismiss` runs twice). */
 const nativeDialogDismissWiredDialogs = new WeakSet<HTMLDialogElement>()
@@ -30,7 +31,7 @@ export function shouldCloseNativeDialogFromClick(
 
 /**
  * One `click` listener: backdrop + close/cancel controls identified by `closest()`.
- * Skips **`dialog.close()`** when **`dialog.open === false`** (redundant close / race) — stubs without **`open`** still call **`close()`** when dismiss applies.
+ * Uses {@link closeDialogIfOpen} — skips redundant **`close()`** when **`dialog.open === false`**.
  * The dialog is recorded **after** `addEventListener` so a failed registration does not block a later retry.
  * Whitespace-only dismiss selectors are filtered once here so hot `click` paths skip them.
  */
@@ -49,11 +50,7 @@ export function attachNativeDialogDismiss(
     if (!shouldCloseNativeDialogFromClick(e, dialog, selectors)) {
       return
     }
-    /* `open === false`: closed dialog / race — skip redundant `close()` (stubs omit `open` → still close). */
-    if (dialog.open === false) {
-      return
-    }
-    dialog.close()
+    closeDialogIfOpen(dialog)
   })
   nativeDialogDismissWiredDialogs.add(dialog)
 }
