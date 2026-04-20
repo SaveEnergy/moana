@@ -50,6 +50,10 @@ describe('readCategoryEditRowDataset', () => {
     expect(readCategoryEditRowDataset({ id: '1', custom: '01' } as unknown as DOMStringMap)?.isCustom).toBe(
       false,
     )
+    expect(readCategoryEditRowDataset({ id: '1', custom: ' 0 ' } as unknown as DOMStringMap)?.isCustom).toBe(
+      false,
+    )
+    expect(readCategoryEditRowDataset({ id: '1', custom: '' } as unknown as DOMStringMap)?.isCustom).toBe(false)
   })
 
   it('keeps empty string customHex when attribute is present but blank (dataset key exists)', () => {

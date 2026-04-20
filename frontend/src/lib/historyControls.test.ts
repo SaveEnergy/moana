@@ -42,6 +42,25 @@ describe('wireHistorySortAutoSubmit', () => {
     expect(addEventListener).not.toHaveBeenCalled()
   })
 
+  it('subscribes on a later wire when form was missing then attached (WeakSet not primed early)', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form: null as HTMLFormElement | null } as unknown as HTMLSelectElement
+
+    wireHistorySortAutoSubmit(select)
+    expect(addEventListener).not.toHaveBeenCalled()
+
+    Object.assign(select, { form })
+    wireHistorySortAutoSubmit(select)
+
+    expect(addEventListener).toHaveBeenCalledTimes(1)
+    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    const onChange = addEventListener.mock.calls[0][1] as () => void
+    onChange()
+    expect(requestSubmit).toHaveBeenCalledTimes(1)
+  })
+
   it('does not subscribe twice when wiring runs twice on the same select', () => {
     const requestSubmit = vi.fn()
     const form = { requestSubmit } as unknown as HTMLFormElement
