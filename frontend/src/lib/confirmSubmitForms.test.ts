@@ -32,10 +32,13 @@ describe('readDataConfirmMessage', () => {
   it('returns null when the message is only Unicode format chars (e.g. ZWSP) that trim() keeps', () => {
     expect(readDataConfirmMessage(elWithAttr('\u200b'))).toBeNull()
     expect(readDataConfirmMessage(elWithAttr('\u200b \u200c\t'))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('\ufeff'))).toBeNull()
+    expect(readDataConfirmMessage(elWithAttr('\u2060'))).toBeNull()
   })
 
   it('strips Cf characters so confirm text is visible', () => {
     expect(readDataConfirmMessage(elWithAttr('\u200bReally?\u200b'))).toBe('Really?')
+    expect(readDataConfirmMessage(elWithAttr('\ufeffProceed?\ufeff'))).toBe('Proceed?')
   })
 })
 
