@@ -24,10 +24,7 @@ func (s *Store) CreateTransaction(ctx context.Context, userID, householdID int64
 	occ := timeutil.FormatSQLiteUTC(occurredAt)
 	now := timeutil.NowSQLiteUTC()
 	cat := sqlNullCategoryID(categoryID)
-	res, err := s.DB.ExecContext(ctx, `
-INSERT INTO transactions (user_id, amount_cents, occurred_at, description, category_id, created_at)
-SELECT ?, ?, ?, ?, ?, ?
-WHERE EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
+	res, err := s.DB.ExecContext(ctx, sqlTransactionInsertConditional,
 		userID, amountCents, occ, description, cat, now, userID, householdID)
 	if err != nil {
 		return 0, err
@@ -46,10 +43,7 @@ func (s *Store) UpdateTransaction(ctx context.Context, householdID, actorUserID,
 	}
 	occ := timeutil.FormatSQLiteUTC(occurredAt)
 	cat := sqlNullCategoryID(categoryID)
-	res, err := s.DB.ExecContext(ctx, `
-UPDATE transactions SET amount_cents = ?, occurred_at = ?, description = ?, category_id = ?
-WHERE id = ? AND user_id IN (SELECT id FROM users WHERE household_id = ?)
-AND EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`,
+	res, err := s.DB.ExecContext(ctx, sqlTransactionUpdateHouseholdScoped,
 		amountCents, occ, description, cat, id, householdID, actorUserID, householdID)
 	if err != nil {
 		return err

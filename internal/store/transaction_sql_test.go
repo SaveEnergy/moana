@@ -17,3 +17,25 @@ func TestSqlTransactionGetByIDHousehold_matchesSelectPlusIdAndHouseholdWhere(t *
 		t.Fatalf("sqlTransactionGetByIDHousehold must stay aligned with select + id/household WHERE placeholders")
 	}
 }
+
+func TestSqlTransactionInsertConditional_stable(t *testing.T) {
+	t.Parallel()
+	want := `
+INSERT INTO transactions (user_id, amount_cents, occurred_at, description, category_id, created_at)
+SELECT ?, ?, ?, ?, ?, ?
+WHERE EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`
+	if sqlTransactionInsertConditional != want {
+		t.Fatalf("sqlTransactionInsertConditional drift")
+	}
+}
+
+func TestSqlTransactionUpdateHouseholdScoped_stable(t *testing.T) {
+	t.Parallel()
+	want := `
+UPDATE transactions SET amount_cents = ?, occurred_at = ?, description = ?, category_id = ?
+WHERE id = ? AND user_id IN (SELECT id FROM users WHERE household_id = ?)
+AND EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`
+	if sqlTransactionUpdateHouseholdScoped != want {
+		t.Fatalf("sqlTransactionUpdateHouseholdScoped drift")
+	}
+}

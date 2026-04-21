@@ -16,7 +16,7 @@ var ErrInvalidUserEmail = errors.New("invalid user email")
 
 // UpdateHouseholdName sets the display name for a household.
 func (s *Store) UpdateHouseholdName(ctx context.Context, householdID int64, name string) error {
-	res, err := s.DB.ExecContext(ctx, `UPDATE households SET name = ? WHERE id = ?`, name, householdID)
+	res, err := s.DB.ExecContext(ctx, sqlHouseholdUpdateName, name, householdID)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s *Store) DetachUserToSoloHousehold(ctx context.Context, userID int64) err
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	res, err := tx.ExecContext(ctx, `INSERT INTO households (name, created_at) VALUES ('My household', ?)`, now)
+	res, err := tx.ExecContext(ctx, sqlHouseholdInsertDefaultName, now)
 	if err != nil {
 		return err
 	}
@@ -57,8 +57,7 @@ func (s *Store) DetachUserToSoloHousehold(ctx context.Context, userID int64) err
 	if err != nil {
 		return err
 	}
-	res2, err := tx.ExecContext(ctx, `
-UPDATE users SET household_id = ?, household_role = 'owner' WHERE id = ?`, hid, userID)
+	res2, err := tx.ExecContext(ctx, sqlUserDetachToSoloHousehold, hid, userID)
 	if err != nil {
 		return err
 	}

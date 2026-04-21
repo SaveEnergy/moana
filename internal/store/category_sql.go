@@ -8,3 +8,9 @@ const sqlCategoryListByHousehold = sqlCategorySelectFull + ` WHERE household_id 
 
 // sqlCategoryGetByIDHousehold loads one category row scoped to household.
 const sqlCategoryGetByIDHousehold = sqlCategorySelectFull + ` WHERE id = ? AND household_id = ?`
+
+const sqlCategoryInsert = `INSERT INTO categories (household_id, name, icon, color) VALUES (?, ?, ?, ?)`
+
+const sqlCategoryUpdate = `UPDATE categories SET name = ?, icon = ?, color = ? WHERE id = ? AND household_id = ?`
+
+const sqlCategoryDelete = `DELETE FROM categories WHERE id = ? AND household_id = ?`

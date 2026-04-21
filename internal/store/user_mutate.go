@@ -20,7 +20,7 @@ func (s *Store) CreateUser(ctx context.Context, email string, passwordHash []byt
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	res, err := tx.ExecContext(ctx, `INSERT INTO households (name, created_at) VALUES ('My household', ?)`, now)
+	res, err := tx.ExecContext(ctx, sqlHouseholdInsertDefaultName, now)
 	if err != nil {
 		return 0, err
 	}
@@ -47,7 +47,7 @@ func (s *Store) CreateUser(ctx context.Context, email string, passwordHash []byt
 
 // UpdateUserPassword sets a new password hash.
 func (s *Store) UpdateUserPassword(ctx context.Context, userID int64, passwordHash []byte) error {
-	res, err := s.DB.ExecContext(ctx, `UPDATE users SET password_hash = ? WHERE id = ?`, passwordHash, userID)
+	res, err := s.DB.ExecContext(ctx, sqlUserUpdatePassword, passwordHash, userID)
 	if err != nil {
 		return err
 	}
@@ -56,8 +56,7 @@ func (s *Store) UpdateUserPassword(ctx context.Context, userID int64, passwordHa
 
 // UpdateUserProfile updates name for the signed-in user.
 func (s *Store) UpdateUserProfile(ctx context.Context, userID int64, firstName, lastName string) error {
-	res, err := s.DB.ExecContext(ctx, `
-UPDATE users SET first_name = ?, last_name = ? WHERE id = ?`, firstName, lastName, userID)
+	res, err := s.DB.ExecContext(ctx, sqlUserUpdateProfile, firstName, lastName, userID)
 	if err != nil {
 		return err
 	}

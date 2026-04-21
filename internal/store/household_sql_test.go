@@ -17,3 +17,19 @@ func TestSqlHouseholdCountMembers_stable(t *testing.T) {
 		t.Fatalf("sqlHouseholdCountMembers drift")
 	}
 }
+
+func TestSqlHouseholdInsertDefaultName_stable(t *testing.T) {
+	t.Parallel()
+	want := `INSERT INTO households (name, created_at) VALUES ('My household', ?)`
+	if sqlHouseholdInsertDefaultName != want {
+		t.Fatalf("sqlHouseholdInsertDefaultName drift")
+	}
+}
+
+func TestSqlHouseholdUpdateName_stable(t *testing.T) {
+	t.Parallel()
+	want := `UPDATE households SET name = ? WHERE id = ?`
+	if sqlHouseholdUpdateName != want {
+		t.Fatalf("sqlHouseholdUpdateName drift")
+	}
+}

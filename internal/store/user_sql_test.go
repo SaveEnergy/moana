@@ -34,3 +34,27 @@ FROM users WHERE household_id = ? ORDER BY id`
 		t.Fatalf("sqlUserListHouseholdMembers drift")
 	}
 }
+
+func TestSqlUserUpdatePassword_stable(t *testing.T) {
+	t.Parallel()
+	want := `UPDATE users SET password_hash = ? WHERE id = ?`
+	if sqlUserUpdatePassword != want {
+		t.Fatalf("sqlUserUpdatePassword drift")
+	}
+}
+
+func TestSqlUserUpdateProfile_stable(t *testing.T) {
+	t.Parallel()
+	want := `UPDATE users SET first_name = ?, last_name = ? WHERE id = ?`
+	if sqlUserUpdateProfile != want {
+		t.Fatalf("sqlUserUpdateProfile drift")
+	}
+}
+
+func TestSqlUserDetachToSoloHousehold_stable(t *testing.T) {
+	t.Parallel()
+	want := `UPDATE users SET household_id = ?, household_role = 'owner' WHERE id = ?`
+	if sqlUserDetachToSoloHousehold != want {
+		t.Fatalf("sqlUserDetachToSoloHousehold drift")
+	}
+}

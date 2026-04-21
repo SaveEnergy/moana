@@ -13,8 +13,7 @@ var ErrDuplicateCategoryName = errors.New("duplicate category name")
 
 // CreateCategory adds a category for the household.
 func (s *Store) CreateCategory(ctx context.Context, householdID int64, name, icon, color string) (int64, error) {
-	res, err := s.DB.ExecContext(ctx, `
-INSERT INTO categories (household_id, name, icon, color) VALUES (?, ?, ?, ?)`, householdID, name, icon, color)
+	res, err := s.DB.ExecContext(ctx, sqlCategoryInsert, householdID, name, icon, color)
 	if err != nil {
 		if sqliteUniqueError(err) {
 			return 0, ErrDuplicateCategoryName
@@ -26,8 +25,7 @@ INSERT INTO categories (household_id, name, icon, color) VALUES (?, ?, ?, ?)`, h
 
 // UpdateCategory sets name, icon, and color for a category in the household.
 func (s *Store) UpdateCategory(ctx context.Context, householdID, categoryID int64, name, icon, color string) error {
-	res, err := s.DB.ExecContext(ctx, `
-UPDATE categories SET name = ?, icon = ?, color = ? WHERE id = ? AND household_id = ?`, name, icon, color, categoryID, householdID)
+	res, err := s.DB.ExecContext(ctx, sqlCategoryUpdate, name, icon, color, categoryID, householdID)
 	if err != nil {
 		if sqliteUniqueError(err) {
 			return ErrDuplicateCategoryName
@@ -39,8 +37,7 @@ UPDATE categories SET name = ?, icon = ?, color = ? WHERE id = ? AND household_i
 
 // DeleteCategory removes a category if it belongs to the household.
 func (s *Store) DeleteCategory(ctx context.Context, householdID, categoryID int64) error {
-	res, err := s.DB.ExecContext(ctx, `
-DELETE FROM categories WHERE id = ? AND household_id = ?`, categoryID, householdID)
+	res, err := s.DB.ExecContext(ctx, sqlCategoryDelete, categoryID, householdID)
 	if err != nil {
 		return err
 	}

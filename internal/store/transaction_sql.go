@@ -28,3 +28,15 @@ FROM transactions t
 LEFT JOIN categories c ON c.id = t.category_id
 INNER JOIN users owner ON owner.id = t.user_id
 WHERE owner.household_id = ?`
+
+// sqlTransactionInsertConditional inserts a row only if user_id belongs to household_id.
+const sqlTransactionInsertConditional = `
+INSERT INTO transactions (user_id, amount_cents, occurred_at, description, category_id, created_at)
+SELECT ?, ?, ?, ?, ?, ?
+WHERE EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`
+
+// sqlTransactionUpdateHouseholdScoped updates a row scoped to household membership ([UpdateTransaction]).
+const sqlTransactionUpdateHouseholdScoped = `
+UPDATE transactions SET amount_cents = ?, occurred_at = ?, description = ?, category_id = ?
+WHERE id = ? AND user_id IN (SELECT id FROM users WHERE household_id = ?)
+AND EXISTS (SELECT 1 FROM users WHERE id = ? AND household_id = ?)`
