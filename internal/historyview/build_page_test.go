@@ -32,6 +32,9 @@ func TestBuildPage_invalidDateRange_returnsErrorPayload(t *testing.T) {
 	if data.Groups != nil {
 		t.Fatalf("Groups=%v want nil", data.Groups)
 	}
+	if data.TruncationLimit != defaultHistoryFetchLimit {
+		t.Fatalf("TruncationLimit=%d want %d (template banner must match limit.go cap)", data.TruncationLimit, defaultHistoryFetchLimit)
+	}
 }
 
 func TestBuildPage_partialDateOnly_returnsErrorPayload(t *testing.T) {
@@ -48,6 +51,9 @@ func TestBuildPage_partialDateOnly_returnsErrorPayload(t *testing.T) {
 	}
 	if data.Error != InvalidDateRangeMessage {
 		t.Fatalf("Error=%q", data.Error)
+	}
+	if data.TruncationLimit != defaultHistoryFetchLimit {
+		t.Fatalf("TruncationLimit=%d want %d", data.TruncationLimit, defaultHistoryFetchLimit)
 	}
 }
 
@@ -82,6 +88,9 @@ func TestBuildPage_smoke_listsTransactionsAndNav(t *testing.T) {
 	}
 	if data.Truncated {
 		t.Fatal("unexpected truncation")
+	}
+	if data.TruncationLimit != defaultHistoryFetchLimit {
+		t.Fatalf("TruncationLimit=%d want %d", data.TruncationLimit, defaultHistoryFetchLimit)
 	}
 	if data.Nav.LinkAll == "" || data.Nav.SortNewest == "" {
 		t.Fatalf("nav: %+v", data.Nav)
