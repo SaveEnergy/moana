@@ -38,6 +38,21 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 			return scanTransactionRows(rows, limit)
 		}
 	}
+	if f.FromUTC == nil && f.ToUTC == nil && search != "" {
+		if q, ok := staticListTransactionsSearchNoDateQuery(kind, f.OldestFirst, limit); ok {
+			term := "%" + escapeSQLLikePattern(search) + "%"
+			args := []any{householdID, term, term}
+			if limit > 0 {
+				args = append(args, limit)
+			}
+			rows, err := s.DB.QueryContext(ctx, q, args...)
+			if err != nil {
+				return nil, err
+			}
+			defer rows.Close()
+			return scanTransactionRows(rows, limit)
+		}
+	}
 	var b strings.Builder
 	b.Grow(512)
 	b.WriteString(sqlTransactionListFromHousehold)
@@ -231,6 +246,48 @@ func staticListTransactionsDatedNoSearchQuery(fromUTC, toUTC *time.Time, oldestF
 			}
 			return sqlTransactionListDatedToOnlyExpenseDesc, true
 		}
+	}
+	return "", false
+}
+
+// staticListTransactionsSearchNoDateQuery returns fixed SQL for [ListTransactions] with search, no date bounds, optional LIMIT.
+func staticListTransactionsSearchNoDateQuery(kind string, oldestFirst bool, limit int) (string, bool) {
+	withLimit := limit > 0
+	frag := sqlAmountKindFilter(kind)
+	switch frag {
+	case "":
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListSearchNoDateNoKindAscLimit, true
+			}
+			return sqlTransactionListSearchNoDateNoKindAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListSearchNoDateNoKindDescLimit, true
+		}
+		return sqlTransactionListSearchNoDateNoKindDesc, true
+	case sqlFilterAmountIncome:
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListSearchNoDateIncomeAscLimit, true
+			}
+			return sqlTransactionListSearchNoDateIncomeAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListSearchNoDateIncomeDescLimit, true
+		}
+		return sqlTransactionListSearchNoDateIncomeDesc, true
+	case sqlFilterAmountExpense:
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListSearchNoDateExpenseAscLimit, true
+			}
+			return sqlTransactionListSearchNoDateExpenseAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListSearchNoDateExpenseDescLimit, true
+		}
+		return sqlTransactionListSearchNoDateExpenseDesc, true
 	}
 	return "", false
 }

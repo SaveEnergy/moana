@@ -30,6 +30,73 @@ func TestListTransactions_kindIncomeRecentLimit_cancelledContext(t *testing.T) {
 	assertErrIsContextCanceled(t, err)
 }
 
+func TestListTransactions_searchNoDate_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListTransactions(alreadyCancelledContext(t), 1, TransactionFilter{Search: "x", Limit: 10})
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestListTransactions_searchNoDate_incomeMatchesDescription(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "list-search-nodate@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 10000, day, "windfall bonus", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -3000, day, "coffee", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Kind: "income", Search: "bonus", Limit: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 1 || txs[0].Description != "windfall bonus" {
+		t.Fatalf("want 1 row, got %+v", txs)
+	}
+}
+
+func TestListTransactions_searchNoDate_zeroLimit_returnsAllMatches(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "list-search-z@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 11, 2, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "alpha token", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, 200, day, "beta token", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Search: "token", Limit: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 2 {
+		t.Fatalf("want 2 rows, got %d %+v", len(txs), txs)
+	}
+}
+
 func TestListTransactions_datedNoSearch_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

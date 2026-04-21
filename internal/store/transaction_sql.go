@@ -87,6 +87,23 @@ const (
 // sqlTransactionListSearchLike is appended after household/date/kind filters for [ListTransactions] search (two LIKE placeholders).
 const sqlTransactionListSearchLike = ` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`
 
+// sqlTransactionListSearchNoDate* are [ListTransactions] with no date bounds, a search term, optional kind filter, and optional LIMIT.
+const (
+	sqlTransactionListSearchNoDateNoKindDescLimit  = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	sqlTransactionListSearchNoDateNoKindAscLimit   = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+	sqlTransactionListSearchNoDateIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	sqlTransactionListSearchNoDateIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+	sqlTransactionListSearchNoDateExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	sqlTransactionListSearchNoDateExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+
+	sqlTransactionListSearchNoDateNoKindDesc  = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
+	sqlTransactionListSearchNoDateNoKindAsc   = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
+	sqlTransactionListSearchNoDateIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
+	sqlTransactionListSearchNoDateIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
+	sqlTransactionListSearchNoDateExpenseDesc = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
+	sqlTransactionListSearchNoDateExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
+)
+
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `
 WHERE t.id = ? AND owner.household_id = ?`
