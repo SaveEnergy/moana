@@ -1,18 +1,30 @@
 package store
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestSqlAmountKindFilter(t *testing.T) {
 	t.Parallel()
-	if got, want := sqlAmountKindFilter("income"), sqlFilterAmountIncome; got != want {
-		t.Fatalf("income: got %q want %q", got, want)
+	cases := []struct {
+		kind string
+		want string
+	}{
+		{"income", sqlFilterAmountIncome},
+		{"expense", sqlFilterAmountExpense},
+		{"", ""},
+		{"net", ""},
+		{" ", ""},
+		{"INCOME", ""},
+		{" income ", ""},
 	}
-	if got, want := sqlAmountKindFilter("expense"), sqlFilterAmountExpense; got != want {
-		t.Fatalf("expense: got %q want %q", got, want)
-	}
-	for _, kind := range []string{"", "net", " ", "INCOME"} {
-		if sqlAmountKindFilter(kind) != "" {
-			t.Fatalf("kind %q: want empty fragment", kind)
-		}
+	for _, tc := range cases {
+		t.Run(fmt.Sprintf("kind_%q", tc.kind), func(t *testing.T) {
+			t.Parallel()
+			if got := sqlAmountKindFilter(tc.kind); got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
 	}
 }

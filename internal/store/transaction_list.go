@@ -37,7 +37,7 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	}
 	if search != "" {
 		term := "%" + escapeSQLLikePattern(search) + "%"
-		b.WriteString(` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`)
+		b.WriteString(sqlTransactionListSearchLike)
 		args = append(args, term, term)
 	}
 	if f.OldestFirst {

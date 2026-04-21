@@ -36,6 +36,9 @@ const sqlTransactionListOldestAscLimitIncome = sqlTransactionListFromHousehold +
 
 const sqlTransactionListOldestAscLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
 
+// sqlTransactionListSearchLike is appended after household/date/kind filters for [ListTransactions] search (two LIKE placeholders).
+const sqlTransactionListSearchLike = ` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`
+
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `
 WHERE t.id = ? AND owner.household_id = ?`
