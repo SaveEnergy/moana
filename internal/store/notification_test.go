@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"moana/internal/passwordtest"
@@ -42,6 +43,31 @@ func TestInsertNotification_emptyBody(t *testing.T) {
 	_, err := st.InsertNotification(ctx, 1, "   ")
 	if !errors.Is(err, ErrInvalidNotificationBody) {
 		t.Fatalf("got %v want %v", err, ErrInvalidNotificationBody)
+	}
+}
+
+func TestListNotificationsForUser_limitCapsRowCount(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "notif-limit-cap@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const total = 15
+	const lim = 7
+	for i := range total {
+		if _, err := st.InsertNotification(ctx, uid, fmt.Sprintf("n%d", i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	list, err := st.ListNotificationsForUser(ctx, uid, lim)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != lim {
+		t.Fatalf("len=%d want %d (LIMIT)", len(list), lim)
 	}
 }
 

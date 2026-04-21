@@ -7,6 +7,15 @@ import (
 	"moana/internal/timeutil"
 )
 
+func finalizeUserCreatedAt(u *User, created string) error {
+	t, err := timeutil.ParseSQLiteTimestamp(created)
+	if err != nil {
+		return err
+	}
+	u.CreatedAt = t.UTC()
+	return nil
+}
+
 func scanUser(row *sql.Row) (*User, error) {
 	var u User
 	var created string
@@ -18,11 +27,9 @@ func scanUser(row *sql.Row) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	t, err := timeutil.ParseSQLiteTimestamp(created)
-	if err != nil {
+	if err := finalizeUserCreatedAt(&u, created); err != nil {
 		return nil, err
 	}
-	u.CreatedAt = t.UTC()
 	return &u, nil
 }
 
@@ -39,10 +46,8 @@ func scanUserAndUnread(row *sql.Row) (*User, int64, error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	t, err := timeutil.ParseSQLiteTimestamp(created)
-	if err != nil {
+	if err := finalizeUserCreatedAt(&u, created); err != nil {
 		return nil, 0, err
 	}
-	u.CreatedAt = t.UTC()
 	return &u, unread, nil
 }

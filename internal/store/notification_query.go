@@ -31,7 +31,8 @@ func (s *Store) ListNotificationsForUser(ctx context.Context, userID int64, limi
 		return nil, err
 	}
 	defer rows.Close()
-	out := make([]Notification, 0, min(limit, 64))
+	// At most `limit` rows (SQL LIMIT); size the slice once to avoid repeated growth when limit is large.
+	out := make([]Notification, 0, limit)
 	for rows.Next() {
 		var n Notification
 		var readAt sql.NullString
