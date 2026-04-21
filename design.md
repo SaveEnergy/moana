@@ -66,6 +66,7 @@ Tokens follow **Material-style naming** (surface / on-surface / primary / contai
 - **`--ring-cat-icon-checked`** — checked category icon tile (`05-history-categories.css`)
 - **`--inset-donut-hole`** — dashboard outflows **`.dashboard-donut`** paper “hole” (`1.35rem` inset ring)
 - **`--ring-notif-badge`** — **`.app-notif-badge`** cutout ring against **`--shell-topbar`** (`02-shell.css`)
+- **`--shadow-input-underline-idle`** / **`--shadow-input-underline-focus`** — underline-style **`.input`** bottom edge (transparent vs **`--primary`**)
 - `--shadow-float`, `--shadow-card`
 
 ### Typography tokens
@@ -147,7 +148,7 @@ Pattern: **desktop-first shell** with a **1023px** cutoff for drawer navigation.
 
 ### Forms
 
-- **Underline style:** `.input` — focus draws a bottom edge in `--primary`
+- **Underline style:** `.input` — focus draws a bottom edge in **`--primary`** via **`--shadow-input-underline-focus`** (idle uses **`--shadow-input-underline-idle`**)
 - **Float pattern:** `.float-field`, `.float-label`, `.float-input` inside bordered surfaces; focus uses border + outer shadow
 - **Amount entry:** `.amount-input-wrap`, `.input-amount` — large Manrope numerics; wrap highlights with `--primary-container` on focus  
 - **Confirm-before POST:** `form[data-confirm="…"]` (**`FORM_DATA_CONFIRM_SELECTOR`**, **`DATA_CONFIRM_ATTRIBUTE`**, **`domSelectors.ts`**) — `window.confirm` on **`submit`** (`confirmSubmitForms.ts`; **`initConfirmSubmitForms`** uses **`queryBootContentAll`** (**`FORM_DATA_CONFIRM_SELECTOR`**, **`contentRoot.ts`**) on the boot root (**`main.app-main`** when present); **`findDataConfirmForms`** uses the same indexed walk on an explicit subtree; **`readDataConfirmMessage`** (**`unicodeCf.ts`**: **`stripCfTrimEdges`** when the attribute is non-empty) returns null immediately for **`""`** (skips the strip pipeline), otherwise strips Unicode **Cf** format characters (e.g. zero-width space), normalizes edges, and skips blank / whitespace-only results, then **`attachConfirmBeforeSubmit`** wires **`submit`** with **`{ capture: true }`** (before bubble listeners) — idempotent per form via **`WeakSet`**); avoid inline handlers  

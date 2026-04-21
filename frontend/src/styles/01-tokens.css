@@ -88,5 +88,8 @@
   --input-surface-readonly: color-mix(in srgb, var(--app-canvas) 42%, var(--surface-lowest));
   /* Secondary body copy (alerts, subdued labels) — alias of variant on-surface */
   --text-muted: var(--on-surface-variant);
+  /* Underline `.input` chrome — bottom edge via inset shadow (`04-transactions-forms-settings.css`) */
+  --shadow-input-underline-idle: inset 0 -2px 0 0 transparent;
+  --shadow-input-underline-focus: inset 0 -2px 0 0 var(--primary);
 }
 

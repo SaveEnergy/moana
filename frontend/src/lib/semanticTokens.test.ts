@@ -73,6 +73,14 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines underline input shadow tokens', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(/--shadow-input-underline-idle:\s*inset 0 -2px 0 0 transparent\s*;/)
+    expect(src).toMatch(
+      /--shadow-input-underline-focus:\s*inset 0 -2px 0 0 var\(--primary\)\s*;/,
+    )
+  })
+
   it('defines dashboard donut inset and notification badge ring tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(
