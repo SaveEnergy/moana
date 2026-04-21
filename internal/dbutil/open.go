@@ -8,6 +8,7 @@ import (
 )
 
 // OpenStore opens SQLite at path and returns a [store.Store] and the underlying [*sql.DB] (caller must Close the DB).
+// Pool sizing and idle behavior follow [db.Open] (see [db.MaxOpenConns], [db] package docs).
 func OpenStore(path string) (*store.Store, *sql.DB, error) {
 	database, err := db.Open(path)
 	if err != nil {
