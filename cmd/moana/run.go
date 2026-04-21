@@ -5,10 +5,22 @@ import (
 	"os"
 )
 
+// version is the binary version string; override at link time, e.g.
+// go build -ldflags "-X main.version=1.2.3"
+var version = "dev"
+
 // runUsage is printed for unknown top-level commands and invalid "serve" invocation.
-const runUsage = "usage: moana [serve | user <add|password> ...]\n"
+const runUsage = "usage: moana [serve | version | user <add|password> ...]\n"
 
 func run(args []string) int {
+	if len(args) >= 2 && versionArg(args[1]) {
+		if len(args) > 2 {
+			fmt.Fprint(os.Stderr, runUsage)
+			return 1
+		}
+		fmt.Fprintln(os.Stdout, version)
+		return 0
+	}
 	if len(args) >= 2 && args[1] == "user" {
 		return runUser(args[2:])
 	}
@@ -26,4 +38,13 @@ func run(args []string) int {
 	}
 	runServe()
 	return 0
+}
+
+func versionArg(s string) bool {
+	switch s {
+	case "version", "-version", "--version":
+		return true
+	default:
+		return false
+	}
 }

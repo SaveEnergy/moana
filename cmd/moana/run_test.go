@@ -2,6 +2,48 @@ package main
 
 import "testing"
 
+func TestRun_version(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "version"}); g != 0 {
+		t.Fatalf("exit %d want 0", g)
+	}
+}
+
+func TestRun_versionExtraArgs(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "version", "extra"}); g != 1 {
+		t.Fatalf("exit %d want 1", g)
+	}
+}
+
+func TestRun_dashVersion(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "-version"}); g != 0 {
+		t.Fatalf("exit %d want 0", g)
+	}
+}
+
+func TestRun_doubleDashVersion(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "--version"}); g != 0 {
+		t.Fatalf("exit %d want 0", g)
+	}
+}
+
+func TestVersionArg(t *testing.T) {
+	t.Parallel()
+	for _, s := range []string{"version", "-version", "--version"} {
+		if !versionArg(s) {
+			t.Fatalf("versionArg(%q) want true", s)
+		}
+	}
+	for _, s := range []string{"", "v", "serve", "-v"} {
+		if versionArg(s) {
+			t.Fatalf("versionArg(%q) want false", s)
+		}
+	}
+}
+
 func TestRun_unknownSubcommand(t *testing.T) {
 	t.Parallel()
 	if g := run([]string{"moana", "nope"}); g != 1 {
