@@ -16,6 +16,9 @@ func TestNewHTTPServer_timeouts(t *testing.T) {
 	if srv.ReadHeaderTimeout != readHeaderTimeout {
 		t.Fatalf("ReadHeaderTimeout %v want %v", srv.ReadHeaderTimeout, readHeaderTimeout)
 	}
+	if srv.MaxHeaderBytes != maxHeaderBytes {
+		t.Fatalf("MaxHeaderBytes %d want %d", srv.MaxHeaderBytes, maxHeaderBytes)
+	}
 	if srv.ReadTimeout != rt*2 {
 		t.Fatalf("ReadTimeout %v want %v", srv.ReadTimeout, rt*2)
 	}
@@ -45,5 +48,8 @@ func TestNewHTTPServer_zeroRequestTimeoutNoReadWriteDeadline(t *testing.T) {
 	}
 	if srv.ReadHeaderTimeout != readHeaderTimeout {
 		t.Fatalf("ReadHeaderTimeout still enforced: %v", srv.ReadHeaderTimeout)
+	}
+	if srv.MaxHeaderBytes != maxHeaderBytes {
+		t.Fatalf("MaxHeaderBytes %d want %d", srv.MaxHeaderBytes, maxHeaderBytes)
 	}
 }

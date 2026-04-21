@@ -14,7 +14,12 @@ const readHeaderTimeout = 10 * time.Second
 // is zero (see net/http Server docs).
 const idleTimeout = 120 * time.Second
 
-// NewHTTPServer builds a production [http.Server] with connection-level timeouts.
+// maxHeaderBytes caps request header size (matches [http.DefaultMaxHeaderBytes]); set explicitly so
+// production limits are visible in code review.
+const maxHeaderBytes = 1 << 20
+
+// NewHTTPServer builds a production [http.Server] with connection-level timeouts and bounded headers
+// ([maxHeaderBytes], same as [http.DefaultMaxHeaderBytes]).
 // When requestTimeout is positive, read/write deadlines are 2× that value (room beyond the handler
 // context deadline). Headers must still arrive within readHeaderTimeout. Keep-alive idle uses
 // idleTimeout. When requestTimeout is zero, read/write/idle are left unset (no per-connection body
@@ -24,6 +29,7 @@ func NewHTTPServer(addr string, requestTimeout time.Duration, handler http.Handl
 		Addr:              addr,
 		Handler:           handler,
 		ReadHeaderTimeout: readHeaderTimeout,
+		MaxHeaderBytes:    maxHeaderBytes,
 	}
 	if requestTimeout > 0 {
 		d := requestTimeout * 2

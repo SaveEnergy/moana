@@ -121,6 +121,15 @@ func TestUserFacingStoreMessage_notificationNotFound(t *testing.T) {
 	}
 }
 
+func TestUserFacingStoreMessage_invalidNotificationBody(t *testing.T) {
+	t.Parallel()
+	got := userFacingStoreMessage(store.ErrInvalidNotificationBody)
+	const want = "Notification text cannot be empty."
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
 func TestUserFacingStoreMessage_invalidCategoryAmountKind_mapsToInternal(t *testing.T) {
 	t.Parallel()
 	// Used by dashboard aggregates only; handlers must not surface raw strings if this ever leaks.

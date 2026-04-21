@@ -37,4 +37,5 @@ var storeUserMessages = []struct {
 	{store.ErrDuplicateUserEmail, "A user with that email already exists."},
 	{store.ErrInvalidUserEmail, "That email address is not valid."},
 	{store.ErrNotificationNotFound, "That notification could not be found."},
+	{store.ErrInvalidNotificationBody, "Notification text cannot be empty."},
 }
