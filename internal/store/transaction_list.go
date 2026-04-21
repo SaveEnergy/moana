@@ -12,6 +12,16 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	if limit < 0 {
 		limit = 0
 	}
+	kind := strings.TrimSpace(f.Kind)
+	search := strings.TrimSpace(f.Search)
+	if f.FromUTC == nil && f.ToUTC == nil && kind == "" && search == "" && !f.OldestFirst && limit > 0 {
+		rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimit, householdID, limit)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		return scanTransactionRows(rows, limit)
+	}
 	var b strings.Builder
 	b.Grow(512)
 	b.WriteString(sqlTransactionListFromHousehold)
@@ -20,11 +30,10 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	args = append(args, householdID)
 	args = appendOccurredAtRange(&b, args, f.FromUTC, f.ToUTC)
 	// Only "income" / "expense" add a sign filter; unknown kind strings are ignored (same as Kind "").
-	kind := strings.TrimSpace(f.Kind)
 	if frag := sqlAmountKindFilter(kind); frag != "" {
 		b.WriteString(frag)
 	}
-	if search := strings.TrimSpace(f.Search); search != "" {
+	if search != "" {
 		term := "%" + escapeSQLLikePattern(search) + "%"
 		b.WriteString(` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`)
 		args = append(args, term, term)
@@ -44,13 +53,15 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 		return nil, err
 	}
 	defer rows.Close()
-	var out []Transaction
-	switch {
-	case limit > 0:
-		out = make([]Transaction, 0, limit)
-	default:
-		out = make([]Transaction, 0, 64)
+	return scanTransactionRows(rows, limit)
+}
+
+func scanTransactionRows(rows *sql.Rows, limit int) ([]Transaction, error) {
+	cap := 64
+	if limit > 0 {
+		cap = limit
 	}
+	out := make([]Transaction, 0, cap)
 	for rows.Next() {
 		var t Transaction
 		var occ, cre string

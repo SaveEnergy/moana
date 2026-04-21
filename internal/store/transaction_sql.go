@@ -12,6 +12,9 @@ INNER JOIN users owner ON owner.id = t.user_id`
 const sqlTransactionListFromHousehold = sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
 
+// sqlTransactionListRecentDescLimit is [ListTransactions] when only Limit is set (default sort, no filters).
+const sqlTransactionListRecentDescLimit = sqlTransactionListFromHousehold + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `
 WHERE t.id = ? AND owner.household_id = ?`

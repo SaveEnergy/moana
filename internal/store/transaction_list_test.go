@@ -15,6 +15,13 @@ func TestListTransactions_cancelledContext(t *testing.T) {
 	assertErrIsContextCanceled(t, err)
 }
 
+func TestListTransactions_recentLimitOnly_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListTransactions(alreadyCancelledContext(t), 1, TransactionFilter{Limit: 3})
+	assertErrIsContextCanceled(t, err)
+}
+
 func TestListTransactions_respectsLimit(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
