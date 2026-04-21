@@ -139,22 +139,41 @@ func TestNewRouterWithRouterOptions_healthNonGETReturns405(t *testing.T) {
 
 func TestRouterMiddlewareComposition_matchesNewRouterWithRouterOptions(t *testing.T) {
 	t.Parallel()
-	// Mirrors [NewRouterWithRouterOptions] when timeout > 0 (without [RequestLogging]):
-	// inner := WithMaxRequestBodyBytes(...)(mux); inner := WithRequestTimeout(...)(inner).
+	// Same stack as [NewRouterWithRouterOptions] minus [RequestLogging]: [wrapRouterMiddleware].
 	var sawDeadline bool
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /probe", func(w http.ResponseWriter, r *http.Request) {
 		_, sawDeadline = r.Context().Deadline()
 		w.WriteHeader(http.StatusOK)
 	})
-	inner := WithMaxRequestBodyBytes(100)(mux)
-	inner = WithRequestTimeout(30 * time.Second)(inner)
+	cfg := &config.Config{RequestTimeout: 30 * time.Second}
+	app := &handlers.App{Config: cfg}
+	opts := &RouterOptions{MaxRequestBodyBytes: 100}
+	h := wrapRouterMiddleware(mux, opts, app)
 	rec := httptest.NewRecorder()
-	inner.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/probe", nil))
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/probe", nil))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("code %d", rec.Code)
 	}
 	if !sawDeadline {
-		t.Fatal("inner handler must see request context deadline (keep middleware order in sync with NewRouterWithRouterOptions)")
+		t.Fatal("handler must see request context deadline (wrapRouterMiddleware must stay in sync with NewRouterWithRouterOptions)")
+	}
+}
+
+func TestWrapRouterMiddleware_appliesTimeoutFromAppWhenOptsUnset(t *testing.T) {
+	t.Parallel()
+	var sawDeadline bool
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /probe", func(w http.ResponseWriter, r *http.Request) {
+		_, sawDeadline = r.Context().Deadline()
+		w.WriteHeader(http.StatusOK)
+	})
+	app := &handlers.App{Config: &config.Config{RequestTimeout: 5 * time.Second}}
+	opts := &RouterOptions{MaxRequestBodyBytes: 512}
+	h := wrapRouterMiddleware(mux, opts, app)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/probe", nil))
+	if !sawDeadline {
+		t.Fatal("expected deadline from app.Config.RequestTimeout when RouterOptions.RequestTimeout is zero")
 	}
 }
