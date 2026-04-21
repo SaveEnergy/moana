@@ -32,11 +32,11 @@ func runUserPassword(args []string) int {
 	ctx := context.Background()
 	u, err := st.GetUserByEmail(ctx, *email)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "lookup: %v\n", err)
+		stderrLookup(err)
 		return 1
 	}
 	if u == nil {
-		fmt.Fprintf(os.Stderr, "user not found\n")
+		fmt.Fprint(os.Stderr, cliUserPasswordNotFound)
 		return 1
 	}
 	hash, err := auth.HashPassword(*password)
@@ -45,7 +45,7 @@ func runUserPassword(args []string) int {
 		return 1
 	}
 	if err := st.UpdateUserPassword(ctx, u.ID, hash); err != nil {
-		fmt.Fprintf(os.Stderr, "update: %v\n", err)
+		stderrUpdate(err)
 		return 1
 	}
 	fmt.Printf("updated password for %s\n", strings.TrimSpace(*email))

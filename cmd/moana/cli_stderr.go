@@ -12,3 +12,15 @@ func stderrDatabase(err error) {
 func stderrHash(err error) {
 	fmt.Fprintf(os.Stderr, "hash: %v\n", err)
 }
+
+func stderrLookup(err error) {
+	fmt.Fprintf(os.Stderr, "lookup: %v\n", err)
+}
+
+func stderrUpdate(err error) {
+	fmt.Fprintf(os.Stderr, "update: %v\n", err)
+}
+
+func stderrCreateUser(err error) {
+	fmt.Fprintf(os.Stderr, "create user: %v\n", err)
+}

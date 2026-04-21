@@ -50,3 +50,11 @@ func TestRun_userAdd_invalidRole(t *testing.T) {
 		t.Fatalf("exit %d want 2", g)
 	}
 }
+
+func TestRun_userPassword_unknownEmail(t *testing.T) {
+	// Do not use t.Parallel: MOANA_DB_PATH must not race with other tests.
+	t.Setenv("MOANA_DB_PATH", ":memory:")
+	if g := run([]string{"moana", "user", "password", "-email", "nobody@example.com", "-password", "secret"}); g != 1 {
+		t.Fatalf("exit %d want 1 (user not in empty DB)", g)
+	}
+}

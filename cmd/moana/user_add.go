@@ -26,7 +26,7 @@ func runUserAdd(args []string) int {
 	}
 	r := strings.ToLower(strings.TrimSpace(*role))
 	if r != "user" && r != "admin" {
-		fmt.Fprintf(os.Stderr, "-role must be user or admin\n")
+		fmt.Fprint(os.Stderr, cliRoleInvalid)
 		return 2
 	}
 
@@ -46,14 +46,14 @@ func runUserAdd(args []string) int {
 	id, err := st.CreateUser(ctx, *email, hash, r)
 	if err != nil {
 		if errors.Is(err, store.ErrDuplicateUserEmail) {
-			fmt.Fprintf(os.Stderr, "create user: email already exists\n")
+			fmt.Fprint(os.Stderr, cliCreateUserEmailExists)
 			return 1
 		}
 		if errors.Is(err, store.ErrInvalidUserEmail) {
-			fmt.Fprintf(os.Stderr, "create user: invalid email\n")
+			fmt.Fprint(os.Stderr, cliCreateUserInvalidEmail)
 			return 1
 		}
-		fmt.Fprintf(os.Stderr, "create user: %v\n", err)
+		stderrCreateUser(err)
 		return 1
 	}
 	fmt.Printf("created user id=%d email=%s role=%s\n", id, strings.TrimSpace(*email), r)
