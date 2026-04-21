@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -63,6 +64,77 @@ func TestListTransactions_kindExpenseWithLimit_newestFirst(t *testing.T) {
 	if txs[0].Description != "new" || txs[1].Description != "mid" {
 		t.Fatalf("want newest first: %+v %+v", txs[0], txs[1])
 	}
+}
+
+func TestStaticListTransactionsQuery(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		old    bool
+		kind   string
+		wantOK bool
+	}{
+		{false, "", true},
+		{false, "income", true},
+		{false, "expense", true},
+		{false, "bogus", false},
+		{true, "", true},
+		{true, "income", true},
+		{true, "expense", true},
+		{true, "bogus", false},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(fmt.Sprintf("old_%v_kind_%q", tc.old, tc.kind), func(t *testing.T) {
+			t.Parallel()
+			_, ok := staticListTransactionsQuery(tc.old, tc.kind)
+			if ok != tc.wantOK {
+				t.Fatalf("ok=%v want %v", ok, tc.wantOK)
+			}
+		})
+	}
+}
+
+func TestListTransactions_oldestFirstIncomeWithLimit_oldestFirst(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "old-inc@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	base := time.Date(2026, 12, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 100, base, "first", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, 200, base.Add(time.Hour), "second", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, 300, base.Add(2*time.Hour), "third", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Kind: "income", Limit: 2, OldestFirst: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 2 {
+		t.Fatalf("want 2 got %d %+v", len(txs), txs)
+	}
+	if txs[0].Description != "first" || txs[1].Description != "second" {
+		t.Fatalf("want oldest first: %+v %+v", txs[0], txs[1])
+	}
+}
+
+func TestListTransactions_oldestFirstLimitOnly_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListTransactions(alreadyCancelledContext(t), 1, TransactionFilter{Limit: 3, OldestFirst: true})
+	assertErrIsContextCanceled(t, err)
 }
 
 func TestListTransactions_respectsLimit(t *testing.T) {

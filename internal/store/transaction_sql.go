@@ -12,13 +12,23 @@ INNER JOIN users owner ON owner.id = t.user_id`
 const sqlTransactionListFromHousehold = sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
 
+const sqlTransactionListOrderDescLimit = ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+const sqlTransactionListOrderAscLimit = ` ORDER BY t.occurred_at ASC, t.id ASC LIMIT ?`
+
 // sqlTransactionListRecentDescLimit is [ListTransactions] when only Limit is set (default sort, no filters).
-const sqlTransactionListRecentDescLimit = sqlTransactionListFromHousehold + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+const sqlTransactionListRecentDescLimit = sqlTransactionListFromHousehold + sqlTransactionListOrderDescLimit
 
 // sqlTransactionListRecentDescLimitIncome / Expense are [ListTransactions] with kind income|expense, Limit, and no other filters.
-const sqlTransactionListRecentDescLimitIncome = sqlTransactionListFromHousehold + sqlFilterAmountIncome + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+const sqlTransactionListRecentDescLimitIncome = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
 
-const sqlTransactionListRecentDescLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+const sqlTransactionListRecentDescLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
+
+// sqlTransactionListOldestAscLimit variants are [ListTransactions] with OldestFirst, Limit, and no date/search filters.
+const sqlTransactionListOldestAscLimit = sqlTransactionListFromHousehold + sqlTransactionListOrderAscLimit
+
+const sqlTransactionListOldestAscLimitIncome = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+
+const sqlTransactionListOldestAscLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
 
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `

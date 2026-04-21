@@ -14,24 +14,9 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	}
 	kind := strings.TrimSpace(f.Kind)
 	search := strings.TrimSpace(f.Search)
-	if f.FromUTC == nil && f.ToUTC == nil && search == "" && !f.OldestFirst && limit > 0 {
-		switch kind {
-		case "":
-			rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimit, householdID, limit)
-			if err != nil {
-				return nil, err
-			}
-			defer rows.Close()
-			return scanTransactionRows(rows, limit)
-		case "income":
-			rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimitIncome, householdID, limit)
-			if err != nil {
-				return nil, err
-			}
-			defer rows.Close()
-			return scanTransactionRows(rows, limit)
-		case "expense":
-			rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimitExpense, householdID, limit)
+	if f.FromUTC == nil && f.ToUTC == nil && search == "" && limit > 0 {
+		if q, ok := staticListTransactionsQuery(f.OldestFirst, kind); ok {
+			rows, err := s.DB.QueryContext(ctx, q, householdID, limit)
 			if err != nil {
 				return nil, err
 			}
@@ -92,4 +77,28 @@ func scanTransactionRows(rows *sql.Rows, limit int) ([]Transaction, error) {
 		out = append(out, t)
 	}
 	return out, rows.Err()
+}
+
+// staticListTransactionsQuery returns fixed SQL for household + sort + optional income|expense filter + LIMIT.
+// kind must be trimmed; unknown kinds use the dynamic query path in [Store.ListTransactions].
+func staticListTransactionsQuery(oldestFirst bool, kind string) (query string, ok bool) {
+	switch kind {
+	case "":
+		if oldestFirst {
+			return sqlTransactionListOldestAscLimit, true
+		}
+		return sqlTransactionListRecentDescLimit, true
+	case "income":
+		if oldestFirst {
+			return sqlTransactionListOldestAscLimitIncome, true
+		}
+		return sqlTransactionListRecentDescLimitIncome, true
+	case "expense":
+		if oldestFirst {
+			return sqlTransactionListOldestAscLimitExpense, true
+		}
+		return sqlTransactionListRecentDescLimitExpense, true
+	default:
+		return "", false
+	}
 }
