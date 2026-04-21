@@ -123,7 +123,7 @@
 .history-seg-active {
   color: var(--primary);
   background: var(--app-paper);
-  box-shadow: 0 1px 3px rgba(44, 47, 48, 0.06);
+  box-shadow: var(--shadow-raise-xs);
 }
 
 .history-controls {

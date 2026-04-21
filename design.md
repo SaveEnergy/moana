@@ -52,6 +52,7 @@ Tokens follow **Material-style naming** (surface / on-surface / primary / contai
 
 - `--radius-lg: 0.5rem` — default control radius  
 - Many cards use literal `border-radius: 1rem` (not tokenized)
+- **`--shadow-raise-xs`** / **`--shadow-raise-xs-strong`** — paper “lift” inside tinted pill rails (`.history-seg-active` vs `.kind-option` checked; same blur/spread, **0.06** vs **0.08** alpha so the two controls keep their tuned contrast)
 - `--shadow-float`, `--shadow-card`
 
 ### Typography tokens

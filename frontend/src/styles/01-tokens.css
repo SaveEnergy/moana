@@ -34,6 +34,9 @@
   --app-canvas: var(--dashboard-canvas);
   --app-paper: var(--dashboard-paper);
   --radius-lg: 0.5rem;
+  /* Pill / segmented “on” state: paper lift inside a tinted rail (history tabs, transaction kind) */
+  --shadow-raise-xs: 0 1px 3px rgba(44, 47, 48, 0.06);
+  --shadow-raise-xs-strong: 0 1px 3px rgba(44, 47, 48, 0.08);
   --shadow-float: 0 12px 32px rgba(44, 47, 48, 0.06);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
   /* App shell — rails share page canvas; cards/content use --app-paper */

@@ -965,7 +965,7 @@
 .kind-option input:checked + span {
   background: var(--surface-lowest);
   color: var(--primary);
-  box-shadow: 0 1px 3px rgba(44, 47, 48, 0.08);
+  box-shadow: var(--shadow-raise-xs-strong);
 }
 
 .kind-option input:focus-visible + span {

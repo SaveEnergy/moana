@@ -22,4 +22,12 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(/--surface-tint-warm:\s*#fff8f0\s*;/)
   })
+
+  it('defines pill rail elevation tokens (history vs kind toggle keep distinct alpha)', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(/--shadow-raise-xs:\s*0 1px 3px rgba\(44,\s*47,\s*48,\s*0\.06\)\s*;/)
+    expect(src).toMatch(
+      /--shadow-raise-xs-strong:\s*0 1px 3px rgba\(44,\s*47,\s*48,\s*0\.08\)\s*;/,
+    )
+  })
 })
