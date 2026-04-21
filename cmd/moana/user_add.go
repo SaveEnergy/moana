@@ -32,14 +32,14 @@ func runUserAdd(args []string) int {
 
 	st, sqlDB, err := openCLIStore()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "database: %v\n", err)
+		stderrDatabase(err)
 		return 1
 	}
 	defer sqlDB.Close()
 
 	hash, err := auth.HashPassword(*password)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "hash: %v\n", err)
+		stderrHash(err)
 		return 1
 	}
 	ctx := context.Background()

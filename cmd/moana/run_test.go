@@ -43,3 +43,10 @@ func TestRun_userPassword_missingEmailPassword(t *testing.T) {
 		t.Fatalf("exit %d want 2", g)
 	}
 }
+
+func TestRun_userAdd_invalidRole(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "user", "add", "-email", "a@b.co", "-password", "secret", "-role", "superadmin"}); g != 2 {
+		t.Fatalf("exit %d want 2", g)
+	}
+}
