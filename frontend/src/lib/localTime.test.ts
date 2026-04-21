@@ -227,6 +227,14 @@ describe('applyLocalTimeElements default document root', () => {
 })
 
 describe('createLocalTimeLabelMemo', () => {
+  it('matches formatLocalTimeLabel on first miss (normalized key shares one Date parse path)', () => {
+    const labelFor = createLocalTimeLabelMemo()
+    const iso = '2020-06-15T14:30:00.000Z'
+    const expected = formatLocalTimeLabel(iso)
+    expect(expected).not.toBeNull()
+    expect(labelFor(iso)).toBe(expected)
+  })
+
   it('returns the same label for repeated identical ISO strings', () => {
     const labelFor = createLocalTimeLabelMemo()
     const iso = '2020-06-15T14:30:00.000Z'

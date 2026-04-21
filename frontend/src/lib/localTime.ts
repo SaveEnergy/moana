@@ -17,13 +17,18 @@ export function normalizeIsoDatetimeAttr(iso: string): string | null {
   return t ? t : null
 }
 
+/** Parse + format when **`t`** is already **`normalizeIsoDatetimeAttr`** output (memo cache miss — skips second edge probe). */
+function formatLocalTimeLabelNormalized(t: string): string | null {
+  const d = new Date(t)
+  if (Number.isNaN(d.getTime())) return null
+  return localTimeFormatter.format(d)
+}
+
 /** Format ISO datetime for inline display (matches previous `toLocaleTimeString` behavior). */
 export function formatLocalTimeLabel(iso: string): string | null {
   const t = normalizeIsoDatetimeAttr(iso)
   if (!t) return null
-  const d = new Date(t)
-  if (Number.isNaN(d.getTime())) return null
-  return localTimeFormatter.format(d)
+  return formatLocalTimeLabelNormalized(t)
 }
 
 /**
@@ -45,7 +50,7 @@ export function createLocalTimeLabelMemo(): (iso: string) => string | undefined 
     if (bad.has(key)) {
       return undefined
     }
-    const formatted = formatLocalTimeLabel(key)
+    const formatted = formatLocalTimeLabelNormalized(key)
     if (!formatted) {
       bad.add(key)
       return undefined
