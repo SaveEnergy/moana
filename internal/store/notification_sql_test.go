@@ -18,3 +18,11 @@ func TestSqlNotificationInsert_stable(t *testing.T) {
 		t.Fatalf("sqlNotificationInsert drift")
 	}
 }
+
+func TestSqlNotificationMarkRead_stable(t *testing.T) {
+	t.Parallel()
+	want := `UPDATE notifications SET read_at = ? WHERE id = ? AND user_id = ?`
+	if sqlNotificationMarkRead != want {
+		t.Fatalf("sqlNotificationMarkRead drift")
+	}
+}

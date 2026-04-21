@@ -94,6 +94,13 @@ func TestCategoryMutatePaths_haveCategoriesPrefix(t *testing.T) {
 	}
 }
 
+func TestNotificationsMarkReadPath_underNotificationsPrefix(t *testing.T) {
+	t.Parallel()
+	if !strings.HasPrefix(NotificationsMarkReadPath, NotificationsPath+"/") {
+		t.Fatalf("NotificationsMarkReadPath=%q must be under %q/", NotificationsMarkReadPath, NotificationsPath)
+	}
+}
+
 func TestSettingsPOSTPaths_haveSettingsPrefix(t *testing.T) {
 	t.Parallel()
 	for _, p := range []string{

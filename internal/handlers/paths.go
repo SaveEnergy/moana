@@ -34,6 +34,8 @@ const (
 	// TransactionNextQueryParam is the form/query field for post-edit redirects ([safepath.Internal]); templates use the same name.
 	TransactionNextQueryParam = "next"
 	NotificationsPath         = "/notifications"
+	// NotificationsMarkReadPath is POST target to mark one notification read.
+	NotificationsMarkReadPath = NotificationsPath + "/read"
 )
 
 // TransactionURLPath returns the concrete URL path for one transaction (POST target, etc.).

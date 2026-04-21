@@ -10,6 +10,12 @@
     <li class="notifications-list-item" role="listitem">
       <p class="notifications-list-body">{{.Body}}</p>
       <p class="muted small notifications-list-meta">{{.When}}{{if .Unread}} · <span class="notifications-unread">Unread</span>{{end}}</p>
+      {{if .Unread}}
+      <form method="post" action="{{$.MarkReadPath}}" class="notifications-mark-read-form">
+        <input type="hidden" name="id" value="{{.ID}}"/>
+        <button type="submit" class="btn btn-ghost btn-small">Mark read</button>
+      </form>
+      {{end}}
     </li>
     {{end}}
   </ul>

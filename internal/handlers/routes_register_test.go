@@ -150,6 +150,7 @@ func TestRegisterRoutes_protectedPOST_redirectsAnonymous(t *testing.T) {
 		{http.MethodPost, handlers.SettingsHouseholdPath},
 		{http.MethodPost, handlers.SettingsHouseholdMembersPath},
 		{http.MethodPost, handlers.SettingsHouseholdMembersRemovePath},
+		{http.MethodPost, handlers.NotificationsMarkReadPath},
 	}
 	for _, tc := range cases {
 		t.Run(tc.method+" "+tc.path, func(t *testing.T) {

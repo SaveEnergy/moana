@@ -17,4 +17,6 @@ const (
 	SettingsFieldHouseholdName      = "household_name"
 	// SettingsFieldMemberUserID is the hidden field for member remove / leave (settings.html).
 	SettingsFieldMemberUserID = "user_id"
+	// NotificationFieldID is the notification id for POST /notifications/read (notifications.html).
+	NotificationFieldID = "id"
 )

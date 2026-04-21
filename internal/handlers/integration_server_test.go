@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -472,6 +473,38 @@ func TestNotificationsPage_listsStoredNotifications(t *testing.T) {
 	s := string(body)
 	if !strings.Contains(s, "Integration test ping") {
 		t.Fatalf("expected notification body in HTML, got prefix %q", s[:min(800, len(s))])
+	}
+}
+
+func TestNotificationsPage_markReadPost(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	uid := testutil.MustCreateUser(t, app, "notif-mark@moana.test", "pw", "user")
+	ctx := context.Background()
+	nid, err := app.Store.InsertNotification(ctx, uid, "Mark me read")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "notif-mark@moana.test", "pw")
+	resp, err := client.PostForm(srv.URL+handlers.NotificationsMarkReadPath, url.Values{
+		handlers.NotificationFieldID: {strconv.FormatInt(nid, 10)},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 (after redirect)", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Mark me read") {
+		t.Fatalf("expected notification body after mark read, got prefix %q", s[:min(800, len(s))])
+	}
+	if strings.Contains(s, "notifications-unread") {
+		t.Fatalf("expected unread marker removed after mark read")
 	}
 }
 
