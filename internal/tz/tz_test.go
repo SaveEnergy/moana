@@ -89,3 +89,13 @@ func TestDisplayLocation_nilRequestIsUTCAndNonNil(t *testing.T) {
 		t.Fatalf("got %v want non-nil UTC", loc)
 	}
 }
+
+func TestDisplayLocation_invalidIANA_returnsUTC(t *testing.T) {
+	t.Parallel()
+	r := &http.Request{Header: http.Header{}}
+	r.AddCookie(&http.Cookie{Name: CookieName, Value: "Not/A/Real/Zone"})
+	loc := DisplayLocation(r)
+	if loc != time.UTC {
+		t.Fatalf("got %v want UTC (same policy as CookieZone for invalid zones)", loc)
+	}
+}
