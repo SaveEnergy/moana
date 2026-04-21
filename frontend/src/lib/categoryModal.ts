@@ -1,16 +1,13 @@
-import { CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT, sanitizeCategoryCustomHex } from './categoryColor'
 import { resolveBootContentQueryRoot } from './contentRoot'
-import { readCategoryEditRowDataset } from './categoryModalDataset'
 import { attachCategoryModalFormPreviewListeners } from './categoryModalForm'
+import { createCategoryModalOpenFlow } from './categoryModalOpenFlow'
 import { createCategoryModalPreviewController } from './categoryModalPreview'
 import { attachNativeDialogDismiss } from './dialogDismiss'
-import { showModalIfClosed } from './dialogModal'
 import { clickEventTargetElement } from './clickTarget'
 import {
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_PAGE_INTRO_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
-  CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM,
   CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   CATEGORY_MODAL_DISMISS_SELECTORS,
@@ -25,7 +22,7 @@ import {
   CATEGORY_MODAL_SUBMIT_SELECTOR,
   CATEGORY_MODAL_TITLE_SELECTOR,
 } from './domSelectors'
-import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
+import { buildRadioMapByValue } from './radioMap'
 
 /** Full modal wiring once per `<dialog>` (duplicate `bootApp` must not stack listeners). */
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
@@ -83,49 +80,18 @@ export function initCategoryModal(): void {
 
   attachCategoryModalFormPreviewListeners(catForm, catPreviewCtl)
 
-  function openCreateModal() {
-    catPreviewCtl.raf.cancelPending()
-    catPreviewCtl.resetPaintState()
-    catForm.action = '/categories'
-    catId.value = ''
-    catTitle.textContent = 'New category'
-    catSubmit.textContent = 'Create category'
-    catForm.reset()
-    setRadioCheckedByValue(colorRadioByValue, '', '')
-    setRadioCheckedByValue(iconRadioByValue, '', '')
-    if (colorNativeInput) colorNativeInput.value = CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
-    catPreviewCtl.sync()
-    catName.focus()
-    showModalIfClosed(modal)
-  }
-
-  function openEditModal(btn: HTMLElement) {
-    catPreviewCtl.raf.cancelPending()
-    catPreviewCtl.resetPaintState()
-    const row = readCategoryEditRowDataset(btn.dataset)
-    if (!row) {
-      return
-    }
-    catForm.action = '/categories/update'
-    catId.value = row.id
-    catTitle.textContent = 'Edit category'
-    catSubmit.textContent = 'Save changes'
-
-    catName.value = row.name
-
-    if (row.isCustom) {
-      setRadioCheckedByValue(colorRadioByValue, CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM, '')
-      if (colorNativeInput) colorNativeInput.value = sanitizeCategoryCustomHex(row.customHex)
-    } else {
-      setRadioCheckedByValue(colorRadioByValue, row.rawColor, '')
-    }
-
-    setRadioCheckedByValue(iconRadioByValue, row.iconVal, '')
-
-    catPreviewCtl.sync()
-    catName.focus()
-    showModalIfClosed(modal)
-  }
+  const { openCreateModal, openEditModal } = createCategoryModalOpenFlow({
+    modal,
+    form: catForm,
+    idInput: catId,
+    titleEl: catTitle,
+    submitBtn: catSubmit,
+    nameInput: catName,
+    colorNativeInput,
+    colorRadioByValue,
+    iconRadioByValue,
+    previewCtl: catPreviewCtl,
+  })
 
   addCategoryBtn?.addEventListener('click', () => openCreateModal())
 
