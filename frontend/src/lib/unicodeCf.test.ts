@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { trimEdgesIfNeeded } from './trimEdges'
 import { stripCfTrimEdges, stripUnicodeFormatChars } from './unicodeCf'
 
 describe('stripUnicodeFormatChars', () => {
@@ -35,5 +36,19 @@ describe('stripCfTrimEdges', () => {
   it('returns empty when Cf-only and/or whitespace-only after normalization', () => {
     expect(stripCfTrimEdges('\u200b\u200c')).toBe('')
     expect(stripCfTrimEdges('  \t  ')).toBe('')
+  })
+
+  it('matches trimEdgesIfNeeded(stripUnicodeFormatChars(s)) for mixed inputs (spec guard)', () => {
+    const samples = [
+      'plain',
+      '  padded  ',
+      '\u200binner\u200b',
+      ' \u200bx ',
+      'a\u200b\u200cb',
+      '',
+    ]
+    for (const s of samples) {
+      expect(stripCfTrimEdges(s)).toBe(trimEdgesIfNeeded(stripUnicodeFormatChars(s)))
+    }
   })
 })

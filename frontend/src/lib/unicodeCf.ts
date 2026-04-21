@@ -17,7 +17,13 @@ export function stripUnicodeFormatChars(s: string): string {
   return s.replace(UNICODE_FORMAT_CHARS, '')
 }
 
-/** **`stripUnicodeFormatChars`** then **`trimEdgesIfNeeded`** — shared by `data-*` and `data-confirm` normalization. */
+/**
+ * Shared by `data-*` and `data-confirm` normalization.
+ * When no **Cf** is present, **`trimEdgesIfNeeded`** only (avoids a nested **`stripUnicodeFormatChars`** call on hot attribute strings).
+ */
 export function stripCfTrimEdges(s: string): string {
-  return trimEdgesIfNeeded(stripUnicodeFormatChars(s))
+  if (!HAS_UNICODE_FORMAT_CHAR.test(s)) {
+    return trimEdgesIfNeeded(s)
+  }
+  return trimEdgesIfNeeded(s.replace(UNICODE_FORMAT_CHARS, ''))
 }
