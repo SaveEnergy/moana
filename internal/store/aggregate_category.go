@@ -25,6 +25,14 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	if limit < 1 {
 		limit = 5
 	}
+	if fromUTC == nil && toUTC == nil {
+		rows, err := s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesNoDate, householdID, limit)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		return scanCategoryExpenseRows(rows, limit)
+	}
 	var b strings.Builder
 	b.Grow(512)
 	b.WriteString(sqlListTopExpenseCategoriesPrefix)
@@ -40,6 +48,10 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 		return nil, err
 	}
 	defer rows.Close()
+	return scanCategoryExpenseRows(rows, limit)
+}
+
+func scanCategoryExpenseRows(rows *sql.Rows, limit int) ([]CategoryExpense, error) {
 	out := make([]CategoryExpense, 0, limit)
 	for rows.Next() {
 		var ce CategoryExpense

@@ -82,6 +82,9 @@ const sqlListTopExpenseCategoriesPrefix = `SELECT t.category_id, COALESCE(c.name
 
 const sqlListTopExpenseCategoriesSuffix = ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
 
+// sqlListTopExpenseCategoriesNoDate is [ListTopExpenseCategories] with no date bounds.
+const sqlListTopExpenseCategoriesNoDate = sqlListTopExpenseCategoriesPrefix + sqlListTopExpenseCategoriesSuffix
+
 // sqlListCategoryAmountsSelectPrefix is the SELECT + FROM for [ListCategoryAmountsInRange] (date + kind filters appended).
 const sqlListCategoryAmountsSelectPrefix = `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
 ` + sqlAggregateFromHouseholdTx
