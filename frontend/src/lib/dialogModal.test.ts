@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { closeDialogIfOpen, showModalIfClosed } from './dialogModal'
+import { attachShowModalOnClick, closeDialogIfOpen, showModalIfClosed } from './dialogModal'
 
 describe('showModalIfClosed', () => {
   it('calls showModal when open is false', () => {
@@ -22,6 +22,30 @@ describe('showModalIfClosed', () => {
     const dialog = { showModal } as unknown as HTMLDialogElement
     showModalIfClosed(dialog)
     expect(showModal).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('attachShowModalOnClick', () => {
+  it('registers click that calls showModalIfClosed', () => {
+    const showModal = vi.fn()
+    const dialog = { open: false, showModal } as unknown as HTMLDialogElement
+    const handlers: Array<() => void> = []
+    const openBtn = {
+      addEventListener: (_type: string, fn: () => void) => {
+        handlers.push(fn)
+      },
+    } as unknown as HTMLElement
+
+    attachShowModalOnClick(openBtn, dialog)
+
+    expect(handlers).toHaveLength(1)
+    handlers[0]()
+    expect(showModal).toHaveBeenCalledTimes(1)
+  })
+
+  it('no-ops when open button is null', () => {
+    const dialog = { open: false, showModal: vi.fn() } as unknown as HTMLDialogElement
+    expect(() => attachShowModalOnClick(null, dialog)).not.toThrow()
   })
 })
 

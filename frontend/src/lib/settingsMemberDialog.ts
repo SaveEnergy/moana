@@ -1,6 +1,6 @@
 import { queryBootContent, resolveBootContentQueryRoot } from './contentRoot'
 import { attachNativeDialogDismiss } from './dialogDismiss'
-import { showModalIfClosed } from './dialogModal'
+import { attachShowModalOnClick } from './dialogModal'
 import {
   SETTINGS_ADD_MEMBER_DIALOG_SELECTOR,
   SETTINGS_ADD_MEMBER_DISMISS_SELECTORS,
@@ -32,9 +32,7 @@ export function initSettingsMemberDialog(): void {
   /* Open control sits next to the dialog under the same parent (`settings.html`); fall back to boot content root. */
   const openBtn = querySettingsAddMemberOpenButton(dialog.parentElement ?? resolveBootContentQueryRoot())
 
-  openBtn?.addEventListener('click', () => {
-    showModalIfClosed(dialog)
-  })
+  attachShowModalOnClick(openBtn, dialog)
 
   attachNativeDialogDismiss(dialog, SETTINGS_ADD_MEMBER_DISMISS_SELECTORS)
   settingsMemberDialogInitialized.add(dialog)

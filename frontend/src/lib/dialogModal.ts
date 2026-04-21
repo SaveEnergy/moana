@@ -10,6 +10,18 @@ export function showModalIfClosed(dialog: HTMLDialogElement): void {
 }
 
 /**
+ * Wire a single “open” control to {@link showModalIfClosed} (settings add-member, other one-button dialogs).
+ */
+export function attachShowModalOnClick(
+  openBtn: HTMLElement | null | undefined,
+  dialog: HTMLDialogElement,
+): void {
+  openBtn?.addEventListener('click', () => {
+    showModalIfClosed(dialog)
+  })
+}
+
+/**
  * Close a native `<dialog>` only when **`open !== false`**
  * (stubs without **`open`** still call **`close()`** — same rule as {@link attachNativeDialogDismiss}).
  */
