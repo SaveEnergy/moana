@@ -68,6 +68,13 @@ const (
 const sqlSumIncomeExpenseBase = `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
 COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx
 
+// sqlSumIncomeExpenseInRange* are [SumIncomeExpenseCentsInRange] with optional occurred_at bounds (same fragments as [appendOccurredAtRange]).
+const (
+	sqlSumIncomeExpenseInRangeFromOnly = sqlSumIncomeExpenseBase + sqlFilterOccurredAtFrom
+	sqlSumIncomeExpenseInRangeToOnly   = sqlSumIncomeExpenseBase + sqlFilterOccurredAtTo
+	sqlSumIncomeExpenseInRangeBoth     = sqlSumIncomeExpenseBase + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo
+)
+
 // sqlSumRunningTotalAndIncomeExpenseInTwoRanges is the dashboard aggregate: one scan for all-time net plus
 // income/expense in two closed ranges. Placeholders: aFrom, aTo (each range uses two CASE branches); then household_id.
 const sqlSumRunningTotalAndIncomeExpenseInTwoRanges = `SELECT

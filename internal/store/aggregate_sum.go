@@ -20,14 +20,24 @@ func (s *Store) SumIncomeExpenseCentsInRange(ctx context.Context, householdID in
 		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseBase, householdID).Scan(&incomeSum, &expenseSum)
 		return incomeSum, expenseSum, err
 	}
-	var b strings.Builder
-	b.Grow(256)
-	b.WriteString(sqlSumIncomeExpenseBase)
-	// cap: household + optional from/to.
-	args := make([]any, 0, 3)
-	args = append(args, householdID)
-	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	err = s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&incomeSum, &expenseSum)
+	switch {
+	case fromUTC != nil && toUTC != nil:
+		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseInRangeBoth,
+			householdID,
+			timeutil.FormatSQLiteUTC(*fromUTC),
+			timeutil.FormatSQLiteUTC(*toUTC),
+		).Scan(&incomeSum, &expenseSum)
+	case fromUTC != nil:
+		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseInRangeFromOnly,
+			householdID,
+			timeutil.FormatSQLiteUTC(*fromUTC),
+		).Scan(&incomeSum, &expenseSum)
+	default:
+		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseInRangeToOnly,
+			householdID,
+			timeutil.FormatSQLiteUTC(*toUTC),
+		).Scan(&incomeSum, &expenseSum)
+	}
 	return incomeSum, expenseSum, err
 }
 

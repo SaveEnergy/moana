@@ -10,6 +10,19 @@ func TestSqlSelectOccurredAtAmountFromHouseholdInRange_matchesAppendOccurredAtSh
 	}
 }
 
+func TestSqlSumIncomeExpenseInRange_matchesAppendOccurredAtShapes(t *testing.T) {
+	t.Parallel()
+	if g, w := sqlSumIncomeExpenseInRangeFromOnly, sqlSumIncomeExpenseBase+sqlFilterOccurredAtFrom; g != w {
+		t.Fatalf("sqlSumIncomeExpenseInRangeFromOnly drift")
+	}
+	if g, w := sqlSumIncomeExpenseInRangeToOnly, sqlSumIncomeExpenseBase+sqlFilterOccurredAtTo; g != w {
+		t.Fatalf("sqlSumIncomeExpenseInRangeToOnly drift")
+	}
+	if g, w := sqlSumIncomeExpenseInRangeBoth, sqlSumIncomeExpenseBase+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo; g != w {
+		t.Fatalf("sqlSumIncomeExpenseInRangeBoth drift")
+	}
+}
+
 func TestSqlTransactionListFromHousehold_matchesSelectPlusHouseholdWhere(t *testing.T) {
 	t.Parallel()
 	want := sqlTransactionSelectFromHousehold + "\nWHERE owner.household_id = ?"

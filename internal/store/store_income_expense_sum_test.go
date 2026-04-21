@@ -93,6 +93,64 @@ func TestSumIncomeExpenseCentsInRange_matchesSplitQueries(t *testing.T) {
 	}
 }
 
+func TestSumIncomeExpenseCentsInRange_fromOnly_toOnly_matchSplitQueries(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "agg-one-bound@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 8, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 7000, day, "in", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -2000, day, "out", nil); err != nil {
+		t.Fatal(err)
+	}
+
+	from := day.Add(-time.Hour)
+	to := day.Add(time.Hour)
+
+	incFrom, expFrom, err := st.SumIncomeExpenseCentsInRange(ctx, hid, &from, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantIncFrom, err := st.SumAmountCentsByKind(ctx, hid, &from, nil, "income")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantExpFrom, err := st.SumAmountCentsByKind(ctx, hid, &from, nil, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if incFrom != wantIncFrom || expFrom != wantExpFrom {
+		t.Fatalf("from-only: got inc=%d exp=%d want inc=%d exp=%d", incFrom, expFrom, wantIncFrom, wantExpFrom)
+	}
+
+	incTo, expTo, err := st.SumIncomeExpenseCentsInRange(ctx, hid, nil, &to)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantIncTo, err := st.SumAmountCentsByKind(ctx, hid, nil, &to, "income")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantExpTo, err := st.SumAmountCentsByKind(ctx, hid, nil, &to, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if incTo != wantIncTo || expTo != wantExpTo {
+		t.Fatalf("to-only: got inc=%d exp=%d want inc=%d exp=%d", incTo, expTo, wantIncTo, wantExpTo)
+	}
+}
+
 func TestSumIncomeExpenseCentsInTwoRanges_matchesSeparateQueries(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
