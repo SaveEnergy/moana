@@ -96,6 +96,31 @@ func TestListNotificationsForUser_zeroLimitSameAsDefaultConstant(t *testing.T) {
 	}
 }
 
+func TestClampNotificationListLimit(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		in   int
+		want int
+	}{
+		{0, DefaultNotificationListLimit},
+		{-1, DefaultNotificationListLimit},
+		{-100, DefaultNotificationListLimit},
+		{1, 1},
+		{50, 50},
+		{MaxNotificationListLimit, MaxNotificationListLimit},
+		{MaxNotificationListLimit + 1, MaxNotificationListLimit},
+		{999999, MaxNotificationListLimit},
+	}
+	for _, tc := range cases {
+		t.Run(fmt.Sprintf("in_%d", tc.in), func(t *testing.T) {
+			t.Parallel()
+			if got := clampNotificationListLimit(tc.in); got != tc.want {
+				t.Fatalf("clampNotificationListLimit(%d)=%d want %d", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestListNotificationsForUser_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

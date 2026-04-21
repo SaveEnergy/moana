@@ -18,14 +18,20 @@ const DefaultNotificationListLimit = 50
 // MaxNotificationListLimit avoids unbounded reads when callers pass a larger limit.
 const MaxNotificationListLimit = 500
 
-// ListNotificationsForUser returns notifications for the user, newest first.
-func (s *Store) ListNotificationsForUser(ctx context.Context, userID int64, limit int) ([]Notification, error) {
+// clampNotificationListLimit applies [DefaultNotificationListLimit] and [MaxNotificationListLimit].
+func clampNotificationListLimit(limit int) int {
 	if limit < 1 {
-		limit = DefaultNotificationListLimit
+		return DefaultNotificationListLimit
 	}
 	if limit > MaxNotificationListLimit {
-		limit = MaxNotificationListLimit
+		return MaxNotificationListLimit
 	}
+	return limit
+}
+
+// ListNotificationsForUser returns notifications for the user, newest first.
+func (s *Store) ListNotificationsForUser(ctx context.Context, userID int64, limit int) ([]Notification, error) {
+	limit = clampNotificationListLimit(limit)
 	rows, err := s.DB.QueryContext(ctx, sqlNotificationListForUser, userID, limit)
 	if err != nil {
 		return nil, err
