@@ -38,6 +38,31 @@ func TestParseSQLiteTimestamp_invalid(t *testing.T) {
 	}
 }
 
+func TestParseSQLiteTimestampUTC_matchesParseThenUTC(t *testing.T) {
+	t.Parallel()
+	s := "2024-06-01T12:00:00+02:00"
+	want, err := ParseSQLiteTimestamp(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = want.UTC()
+	got, err := ParseSQLiteTimestampUTC(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.Equal(want) || got.Location() != time.UTC {
+		t.Fatalf("got %v want %v (UTC)", got, want)
+	}
+}
+
+func TestParseSQLiteTimestampUTC_invalid(t *testing.T) {
+	t.Parallel()
+	_, err := ParseSQLiteTimestampUTC("not a timestamp")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
 func TestNowSQLiteUTC_roundTrips(t *testing.T) {
 	t.Parallel()
 	s := NowSQLiteUTC()

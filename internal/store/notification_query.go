@@ -41,19 +41,17 @@ func (s *Store) ListNotificationsForUser(ctx context.Context, userID int64, limi
 			return nil, err
 		}
 		if readAt.Valid {
-			t, err := timeutil.ParseSQLiteTimestamp(readAt.String)
+			t, err := timeutil.ParseSQLiteTimestampUTC(readAt.String)
 			if err != nil {
 				return nil, err
 			}
-			tt := t.UTC()
-			n.ReadAt = &tt
+			n.ReadAt = &t
 		}
 		var err error
-		n.CreatedAt, err = timeutil.ParseSQLiteTimestamp(created)
+		n.CreatedAt, err = timeutil.ParseSQLiteTimestampUTC(created)
 		if err != nil {
 			return nil, err
 		}
-		n.CreatedAt = n.CreatedAt.UTC()
 		out = append(out, n)
 	}
 	return out, rows.Err()

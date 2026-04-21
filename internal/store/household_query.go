@@ -20,11 +20,11 @@ func (s *Store) GetHousehold(ctx context.Context, id int64) (*Household, error) 
 	if err != nil {
 		return nil, err
 	}
-	t, err := timeutil.ParseSQLiteTimestamp(created)
+	t, err := timeutil.ParseSQLiteTimestampUTC(created)
 	if err != nil {
 		return nil, err
 	}
-	h.CreatedAt = t.UTC()
+	h.CreatedAt = t
 	return &h, nil
 }
 

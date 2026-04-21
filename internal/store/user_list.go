@@ -20,11 +20,11 @@ func (s *Store) ListUsers(ctx context.Context) ([]UserSummary, error) {
 		if err := rows.Scan(&u.ID, &u.Email, &u.Role, &created); err != nil {
 			return nil, err
 		}
-		t, err := timeutil.ParseSQLiteTimestamp(created)
+		t, err := timeutil.ParseSQLiteTimestampUTC(created)
 		if err != nil {
 			return nil, err
 		}
-		u.CreatedAt = t.UTC()
+		u.CreatedAt = t
 		out = append(out, u)
 	}
 	return out, rows.Err()

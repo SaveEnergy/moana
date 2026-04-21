@@ -8,11 +8,11 @@ import (
 )
 
 func finalizeUserCreatedAt(u *User, created string) error {
-	t, err := timeutil.ParseSQLiteTimestamp(created)
+	t, err := timeutil.ParseSQLiteTimestampUTC(created)
 	if err != nil {
 		return err
 	}
-	u.CreatedAt = t.UTC()
+	u.CreatedAt = t
 	return nil
 }
 

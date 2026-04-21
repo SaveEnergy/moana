@@ -34,7 +34,7 @@ func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int
 		if err := rows.Scan(&occ, &cents); err != nil {
 			return nil, err
 		}
-		t, err := timeutil.ParseSQLiteTimestamp(occ)
+		t, err := timeutil.ParseSQLiteTimestampUTC(occ)
 		if err != nil {
 			return nil, err
 		}

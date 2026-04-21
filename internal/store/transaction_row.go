@@ -9,10 +9,10 @@ import (
 func hydrateTransaction(t *Transaction, occ, cre string, catID sql.NullInt64) error {
 	t.CategoryID = catID
 	var err error
-	t.OccurredAt, err = timeutil.ParseSQLiteTimestamp(occ)
+	t.OccurredAt, err = timeutil.ParseSQLiteTimestampUTC(occ)
 	if err != nil {
 		return err
 	}
-	t.CreatedAt, err = timeutil.ParseSQLiteTimestamp(cre)
+	t.CreatedAt, err = timeutil.ParseSQLiteTimestampUTC(cre)
 	return err
 }

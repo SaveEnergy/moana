@@ -11,6 +11,16 @@ func ParseSQLiteTimestamp(s string) (time.Time, error) {
 	return t, nil
 }
 
+// ParseSQLiteTimestampUTC parses a SQLite TEXT timestamp and returns the same instant in UTC.
+// Use for model fields that are stored and compared in UTC ([FormatSQLiteUTC]).
+func ParseSQLiteTimestampUTC(s string) (time.Time, error) {
+	t, err := ParseSQLiteTimestamp(s)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t.UTC(), nil
+}
+
 // FormatSQLiteUTC formats t as UTC RFC3339Nano for SQLite TEXT columns and query parameters.
 func FormatSQLiteUTC(t time.Time) string {
 	return t.UTC().Format(time.RFC3339Nano)
