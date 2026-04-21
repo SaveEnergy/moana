@@ -12,6 +12,10 @@ INNER JOIN users owner ON owner.id = t.user_id`
 const sqlTransactionListFromHousehold = sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
 
+// sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
+const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `
+WHERE t.id = ? AND owner.household_id = ?`
+
 // sqlFromHouseholdTx scopes transactions to a household without joining category columns (sums, movement).
 const sqlFromHouseholdTx = `
 FROM transactions t

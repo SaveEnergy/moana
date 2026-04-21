@@ -8,8 +8,7 @@ import (
 
 // GetTransactionByID returns a transaction visible to the household (same household as the row owner), or nil if not found.
 func (s *Store) GetTransactionByID(ctx context.Context, householdID, id int64) (*Transaction, error) {
-	row := s.DB.QueryRowContext(ctx, sqlTransactionSelectFromHousehold+`
-WHERE t.id = ? AND owner.household_id = ?`, id, householdID)
+	row := s.DB.QueryRowContext(ctx, sqlTransactionGetByIDHousehold, id, householdID)
 	var t Transaction
 	var occ, cre string
 	var catID sql.NullInt64
