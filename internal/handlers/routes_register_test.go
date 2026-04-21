@@ -122,6 +122,18 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 	assertSeeOtherToLogin(t, mux, http.MethodPost, handlers.LogoutPath, nil, false)
 }
 
+// TestRegisterRoutes_transactionsDELETE_methodNotAllowed verifies DELETE /transactions is not registered (GET+POST only).
+func TestRegisterRoutes_transactionsDELETE_methodNotAllowed(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, handlers.TransactionsPath, nil))
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("DELETE %s: status %d want 405", handlers.TransactionsPath, rec.Code)
+	}
+}
+
 // TestRegisterRoutes_notificationsReadGET_methodNotAllowed verifies GET /notifications/read is POST-only (stdlib returns 405).
 func TestRegisterRoutes_notificationsReadGET_methodNotAllowed(t *testing.T) {
 	t.Parallel()
