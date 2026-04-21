@@ -17,5 +17,5 @@ func (a *App) Settings(w http.ResponseWriter, r *http.Request, u *store.User) {
 		httperr.Internal(w, r, err)
 		return
 	}
-	a.renderShell(w, "settings.html", data, layoutShellMain("Settings", "settings", "settings-shell", u))
+	a.renderShell(w, r, "settings.html", data, "Settings", "settings", "settings-shell", u)
 }

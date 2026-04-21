@@ -25,7 +25,7 @@ func (a *App) Transactions(w http.ResponseWriter, r *http.Request, u *store.User
 		Today:         today,
 		SelectedCatID: 0,
 	}
-	a.renderShell(w, "transactions_new.html", data, layoutShell("New entry", "tx", u))
+	a.renderShell(w, r, "transactions_new.html", data, "New entry", "tx", "", u)
 }
 
 // TransactionCreate handles POST /transactions.

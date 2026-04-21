@@ -174,6 +174,32 @@ func TestUnknownAppRouteReturns404WhenAuthenticated(t *testing.T) {
 	}
 }
 
+func TestDashboard_showsNotificationBadgeWhenUnread(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	uid := testutil.MustCreateUser(t, app, "badge-dash@moana.test", "pw", "user")
+	ctx := context.Background()
+	if _, err := app.Store.InsertNotification(ctx, uid, "unread for badge"); err != nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "badge-dash@moana.test", "pw")
+	resp, err := client.Get(srv.URL + handlers.DashboardPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, `class="app-notif-badge"`) {
+		t.Fatalf("expected topbar notification badge, got prefix %q", s[:min(1200, len(s))])
+	}
+}
+
 func TestDashboardWithPeriodQuery(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)

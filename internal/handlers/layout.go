@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"moana/internal/httperr"
 	"moana/internal/render"
 	"moana/internal/store"
 )
@@ -28,17 +29,33 @@ func layoutShellMain(title, navKey, mainClass string, u *store.User) LayoutData 
 
 func layoutData(title, navKey, mainClass string, u *store.User) LayoutData {
 	return LayoutData{
-		Title:     title,
-		User:      u,
-		Year:      shellYear(),
-		Active:    navKey,
-		MainClass: mainClass,
+		Title:                   title,
+		User:                    u,
+		Year:                    shellYear(),
+		Active:                  navKey,
+		MainClass:               mainClass,
+		UnreadNotificationCount: 0,
 	}
 }
 
 // renderShell executes the named page template (e.g. dashboard.html) into the layout body.
-func (a *App) renderShell(w http.ResponseWriter, contentTemplate string, data any, ld LayoutData) {
-	a.Render.Shell(w, contentTemplate, data, ld, a.Config.RepoURL)
+// It loads [store.Store.CountUnreadNotificationsForUser] for the top bar badge.
+func (a *App) renderShell(w http.ResponseWriter, r *http.Request, contentTemplate string, pageData any, title, navKey, mainClass string, u *store.User) {
+	ctx := r.Context()
+	unread, err := a.Store.CountUnreadNotificationsForUser(ctx, u.ID)
+	if err != nil {
+		httperr.Internal(w, r, err)
+		return
+	}
+	ld := LayoutData{
+		Title:                   title,
+		User:                    u,
+		Year:                    shellYear(),
+		Active:                  navKey,
+		MainClass:               mainClass,
+		UnreadNotificationCount: unread,
+	}
+	a.Render.Shell(w, contentTemplate, pageData, ld, a.Config.RepoURL)
 }
 
 // renderSimple executes a standalone template (e.g. login.html) without the app shell.

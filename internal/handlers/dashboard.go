@@ -22,5 +22,5 @@ func (a *App) Dashboard(w http.ResponseWriter, r *http.Request, u *store.User) {
 		return
 	}
 
-	a.renderShell(w, "dashboard.html", data, layoutShellMain("Dashboard", "dashboard", "dashboard-page", u))
+	a.renderShell(w, r, "dashboard.html", data, "Dashboard", "dashboard", "dashboard-page", u)
 }

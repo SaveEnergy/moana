@@ -32,7 +32,7 @@ func (a *App) Notifications(w http.ResponseWriter, r *http.Request, u *store.Use
 			Unread: n.ReadAt == nil,
 		})
 	}
-	a.renderShell(w, "notifications.html", p, layoutShell("Notifications", "notifications", u))
+	a.renderShell(w, r, "notifications.html", p, "Notifications", "notifications", "", u)
 }
 
 // NotificationMarkRead handles POST /notifications/read (mark one row read for the signed-in user).

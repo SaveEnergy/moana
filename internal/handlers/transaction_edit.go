@@ -67,7 +67,7 @@ func (a *App) TransactionEdit(w http.ResponseWriter, r *http.Request, u *store.U
 		SelectedCatID: sel,
 		Next:          safepath.Internal(r.URL.Query().Get(TransactionNextQueryParam)),
 	}
-	a.renderTransactionEdit(w, u, data)
+	a.renderTransactionEdit(w, r, u, data)
 }
 
 // TransactionUpdate applies edits (POST /transactions/{id}).

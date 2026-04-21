@@ -20,4 +20,7 @@ func TestLayoutShell_mainClassEmptyWhileShellMainSets(t *testing.T) {
 	if shell.Title != main.Title || shell.Active != main.Active || shell.User != main.User {
 		t.Fatalf("common fields differ: %#v vs %#v", shell, main)
 	}
+	if shell.UnreadNotificationCount != 0 || main.UnreadNotificationCount != 0 {
+		t.Fatalf("layoutShell helpers expect zero unread count: %d %d", shell.UnreadNotificationCount, main.UnreadNotificationCount)
+	}
 }

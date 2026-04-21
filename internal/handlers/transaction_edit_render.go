@@ -8,8 +8,8 @@ import (
 	"moana/internal/txform"
 )
 
-func (a *App) renderTransactionEdit(w http.ResponseWriter, u *store.User, data txEditFormData) {
-	a.renderShell(w, "transactions_edit.html", data, layoutShell("Edit entry", "history", u))
+func (a *App) renderTransactionEdit(w http.ResponseWriter, r *http.Request, u *store.User, data txEditFormData) {
+	a.renderShell(w, r, "transactions_edit.html", data, "Edit entry", "history", "", u)
 }
 
 // renderTransactionEditFailed re-renders the edit form after POST validation failure (keeps user input).
@@ -36,5 +36,5 @@ func (a *App) renderTransactionEditFailed(w http.ResponseWriter, r *http.Request
 		SelectedCatID: sel,
 		Next:          next,
 	}
-	a.renderTransactionEdit(w, u, data)
+	a.renderTransactionEdit(w, r, u, data)
 }

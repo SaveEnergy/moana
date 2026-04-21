@@ -17,7 +17,7 @@ func (a *App) Categories(w http.ResponseWriter, r *http.Request, u *store.User) 
 		httperr.Internal(w, r, err)
 		return
 	}
-	a.renderShell(w, "categories.html", data, layoutShell("Categories", "cat", u))
+	a.renderShell(w, r, "categories.html", data, "Categories", "cat", "", u)
 }
 
 // CategoryCreate handles POST /categories.
