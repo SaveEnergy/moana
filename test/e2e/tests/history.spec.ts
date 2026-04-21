@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
+import { HISTORY_SORT } from '../helpers/shellSelectors'
 
 test('history page loads shell and heading', async ({ page }) => {
   await signInAsTestUser(page)
@@ -22,7 +23,7 @@ test('history search submits q on GET', async ({ page }) => {
 test('history sort select submits sort on change', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/history')
-  await page.locator('#history-sort').selectOption('oldest')
+  await page.locator(HISTORY_SORT).selectOption('oldest')
   await expect(page).toHaveURL(/[?&]sort=oldest(?:&|$)/)
 })
 

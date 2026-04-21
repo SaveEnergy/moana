@@ -1,7 +1,15 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
-import { NOTIFICATIONS_PATH, TOPBAR_NOTIFICATIONS_LINK } from '../helpers/shellSelectors'
+import {
+  APP_GLOBAL_SEARCH,
+  APP_SHELL,
+  APP_SIDEBAR_BACKDROP,
+  APP_SIDEBAR_CLOSE,
+  APP_SIDEBAR_NAV,
+  NOTIFICATIONS_PATH,
+  TOPBAR_NOTIFICATIONS_LINK,
+} from '../helpers/shellSelectors'
 
 test.beforeEach(async ({ page }) => {
   await signInAsTestUser(page)
@@ -37,7 +45,7 @@ test('dashboard period active class follows period query', async ({ page }) => {
 
 test('sidebar main nav links reach primary routes', async ({ page }) => {
   await page.goto('/')
-  const nav = page.locator('#app-sidebar-nav')
+  const nav = page.locator(APP_SIDEBAR_NAV)
   await nav.getByRole('link', { name: 'Transactions' }).click()
   await expect(page).toHaveURL(/\/transactions/)
   await nav.getByRole('link', { name: 'History' }).click()
@@ -50,17 +58,17 @@ test('sidebar main nav links reach primary routes', async ({ page }) => {
 
 test('sidebar active link matches current route', async ({ page }) => {
   await page.goto('/history')
-  await expect(page.locator('#app-sidebar-nav a[href="/history"]')).toHaveClass(/sidebar-link-active/)
-  await expect(page.locator('#app-sidebar-nav a[href="/"]')).not.toHaveClass(/sidebar-link-active/)
+  await expect(page.locator(`${APP_SIDEBAR_NAV} a[href="/history"]`)).toHaveClass(/sidebar-link-active/)
+  await expect(page.locator(`${APP_SIDEBAR_NAV} a[href="/"]`)).not.toHaveClass(/sidebar-link-active/)
 
   await page.goto('/transactions')
-  await expect(page.locator('#app-sidebar-nav a[href="/transactions"]')).toHaveClass(/sidebar-link-active/)
+  await expect(page.locator(`${APP_SIDEBAR_NAV} a[href="/transactions"]`)).toHaveClass(/sidebar-link-active/)
 
   await page.goto('/categories')
-  await expect(page.locator('#app-sidebar-nav a[href="/categories"]')).toHaveClass(/sidebar-link-active/)
+  await expect(page.locator(`${APP_SIDEBAR_NAV} a[href="/categories"]`)).toHaveClass(/sidebar-link-active/)
 
   await page.goto('/')
-  await expect(page.locator('#app-sidebar-nav a[href="/"]')).toHaveClass(/sidebar-link-active/)
+  await expect(page.locator(`${APP_SIDEBAR_NAV} a[href="/"]`)).toHaveClass(/sidebar-link-active/)
 })
 
 test('sidebar FAB links to new transaction', async ({ page }) => {
@@ -90,8 +98,8 @@ test('global search control is in shell', async ({ page }) => {
 test('topbar search submits to history with q', async ({ page }) => {
   await page.goto('/')
   const q = 'e2e-topbar-search'
-  await page.locator('#app-global-search').fill(q)
-  await page.locator('#app-global-search').press('Enter')
+  await page.locator(APP_GLOBAL_SEARCH).fill(q)
+  await page.locator(APP_GLOBAL_SEARCH).press('Enter')
   await expect(page).toHaveURL(/\/history(\?|$)/)
   expect(new URL(page.url()).searchParams.get('q')).toBe(q)
 })
@@ -107,7 +115,7 @@ test('notifications link is reachable', async ({ page }) => {
 test('mobile sidebar toggles', async ({ page }) => {
   await page.setViewportSize({ width: 600, height: 800 })
   await page.goto('/')
-  const shell = page.locator('#app-shell')
+  const shell = page.locator(APP_SHELL)
   await expect(shell).not.toHaveClass(/sidebar-open/)
   await page.getByRole('button', { name: 'Open navigation menu' }).click()
   await expect(shell).toHaveClass(/sidebar-open/)
@@ -118,27 +126,27 @@ test('mobile sidebar toggles', async ({ page }) => {
 test('mobile sidebar closes on backdrop click', async ({ page }) => {
   await page.setViewportSize({ width: 600, height: 800 })
   await page.goto('/')
-  const shell = page.locator('#app-shell')
+  const shell = page.locator(APP_SHELL)
   await page.getByRole('button', { name: 'Open navigation menu' }).click()
   await expect(shell).toHaveClass(/sidebar-open/)
-  await page.locator('#app-sidebar-backdrop').click()
+  await page.locator(APP_SIDEBAR_BACKDROP).click()
   await expect(shell).not.toHaveClass(/sidebar-open/)
 })
 
 test('mobile sidebar closes on drawer close control', async ({ page }) => {
   await page.setViewportSize({ width: 600, height: 800 })
   await page.goto('/')
-  const shell = page.locator('#app-shell')
+  const shell = page.locator(APP_SHELL)
   await page.getByRole('button', { name: 'Open navigation menu' }).click()
   await expect(shell).toHaveClass(/sidebar-open/)
-  await page.locator('#app-sidebar-close').click()
+  await page.locator(APP_SIDEBAR_CLOSE).click()
   await expect(shell).not.toHaveClass(/sidebar-open/)
 })
 
 test('mobile: Escape does not collapse drawer while account menu is open', async ({ page }) => {
   await page.setViewportSize({ width: 600, height: 800 })
   await page.goto('/')
-  const shell = page.locator('#app-shell')
+  const shell = page.locator(APP_SHELL)
   const menu = page.locator('details.app-user-menu')
   await page.locator('details.app-user-menu summary.app-user-menu-btn').click()
   await expect(menu).toHaveAttribute('open', '')
