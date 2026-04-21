@@ -13,7 +13,7 @@ import (
 
 // MaxOpenConns is the [database/sql] pool size for SQLite opened by [Open]. Under WAL, readers can
 // overlap while writes stay serialized; a pool of one would serialize concurrent read workloads
-// (e.g. [moana/internal/dashboard.BuildPageData] overlapping aggregate + heatmap + recent queries).
+// (e.g. [moana/internal/dashboard.BuildPageData] overlapping aggregate + heatmap + recent + outflow queries).
 // Keep this greater than 1 so those reads can run concurrently.
 const MaxOpenConns = 8
 

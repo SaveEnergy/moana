@@ -13,8 +13,8 @@ import (
 
 func TestBuildPageData_requiresDbPoolForConcurrentReads(t *testing.T) {
 	t.Parallel()
-	// BuildPageData runs aggregate, heatmap, and recent list queries concurrently; a pool of one
-	// connection would serialize them and undo the overlap (see page_data.go, db.MaxOpenConns).
+	// BuildPageData runs aggregate, heatmap, recent list, and outflow category queries concurrently;
+	// a pool of one connection would serialize them and undo the overlap (see page_data.go, db.MaxOpenConns).
 	if db.MaxOpenConns < 2 {
 		t.Fatalf("db.MaxOpenConns=%d must be >= 2 for overlapping dashboard reads", db.MaxOpenConns)
 	}

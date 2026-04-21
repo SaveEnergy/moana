@@ -14,10 +14,11 @@ import (
 )
 
 // BuildPageData loads aggregates and layout data for the dashboard (no HTTP).
-// The running-total / period aggregate query runs concurrently with the heatmap and recent-transaction
-// reads (independent work; [moana/internal/db.MaxOpenConns] must stay >1 so the pool can overlap
-// those reads under WAL). Outflow breakdown runs after aggregates complete because it needs
-// periodExpense from the aggregate scan.
+// The running-total / period aggregate query runs concurrently with the heatmap, recent transactions,
+// and outflow category breakdown ([store.Store.ListCategoryAmountsInRange] for the current period).
+// Those reads are independent; [moana/internal/db.MaxOpenConns] must stay >1 so the pool can overlap
+// them under WAL. After [errgroup.Group.Wait], outflow rows are merged with [periodExpense] from the
+// aggregate scan for percentages (totals already loaded in parallel).
 func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc *time.Location, now time.Time, periodQuery string) (PageData, error) {
 	cfg := parseStatsPeriod(periodQuery)
 
@@ -30,6 +31,7 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 		heatmapCells                                                          []HeatmapCell
 		heatmapCols                                                           int
 		recent                                                                []store.Transaction
+		expenseByCategory                                                     []store.CategoryAmount
 	)
 	g, gctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
@@ -45,6 +47,11 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	g.Go(func() error {
 		var err error
 		recent, err = st.ListTransactions(gctx, householdID, store.TransactionFilter{Limit: 5})
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		expenseByCategory, err = st.ListCategoryAmountsInRange(gctx, householdID, &curStart, &curEnd, "expense")
 		return err
 	})
 	if err := g.Wait(); err != nil {
@@ -74,10 +81,7 @@ func BuildPageData(ctx context.Context, st *store.Store, householdID int64, loc 
 	}
 	budgetBarPct := math.Min(100, budgetUsedPct)
 
-	outflowRows, outflowDonut, totalAbs, err := buildOutflowSection(ctx, st, householdID, curStart, curEnd, periodExpense)
-	if err != nil {
-		return PageData{}, err
-	}
+	outflowRows, outflowDonut, totalAbs := buildOutflowFromExpenseRows(expenseByCategory, periodExpense)
 
 	return PageData{
 		StatsPeriod:          cfg.Period,

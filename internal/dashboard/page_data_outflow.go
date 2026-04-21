@@ -1,19 +1,13 @@
 package dashboard
 
 import (
-	"context"
-	"time"
-
 	"moana/internal/category"
 	"moana/internal/money"
 	"moana/internal/store"
 )
 
-func buildOutflowSection(ctx context.Context, st *store.Store, householdID int64, curStart, curEnd time.Time, periodExpense int64) ([]OutflowRow, string, int64, error) {
-	expenseRows, err := st.ListCategoryAmountsInRange(ctx, householdID, &curStart, &curEnd, "expense")
-	if err != nil {
-		return nil, "", 0, err
-	}
+// buildOutflowFromExpenseRows turns per-category expense totals into donut + table rows (no I/O).
+func buildOutflowFromExpenseRows(expenseRows []store.CategoryAmount, periodExpense int64) ([]OutflowRow, string, int64) {
 	outflowMerged := MergeCategoryTopN(expenseRows, defaultOutflowMergeLimit)
 	totalAbs := money.AbsCents(periodExpense)
 	n := len(outflowMerged)
@@ -35,5 +29,5 @@ func buildOutflowSection(ctx context.Context, st *store.Store, householdID int64
 		hexes = append(hexes, category.HexOrDefault(cat))
 	}
 	outflowDonut := DonutConicGradient(pcts, hexes)
-	return outflowRows, outflowDonut, totalAbs, nil
+	return outflowRows, outflowDonut, totalAbs
 }
