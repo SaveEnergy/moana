@@ -36,6 +36,30 @@ const sqlTransactionListOldestAscLimitIncome = sqlTransactionListFromHousehold +
 
 const sqlTransactionListOldestAscLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
 
+// sqlTransactionListDated* are [ListTransactions] with optional occurred_at bounds, no search, LIMIT ? (same fragment order as the dynamic builder).
+const (
+	sqlTransactionListDatedBothNoKindDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothNoKindAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedBothIncomeDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothIncomeAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedBothExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
+
+	sqlTransactionListDatedFromOnlyNoKindDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedFromOnlyNoKindAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedFromOnlyIncomeDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedFromOnlyIncomeAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedFromOnlyExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedFromOnlyExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
+
+	sqlTransactionListDatedToOnlyNoKindDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedToOnlyNoKindAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedToOnlyIncomeDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedToOnlyIncomeAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedToOnlyExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedToOnlyExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
+)
+
 // sqlTransactionListSearchLike is appended after household/date/kind filters for [ListTransactions] search (two LIKE placeholders).
 const sqlTransactionListSearchLike = ` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`
 

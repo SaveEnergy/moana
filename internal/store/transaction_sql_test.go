@@ -67,6 +67,19 @@ func TestSqlListTopExpenseCategoriesRange_matchesAppendOccurredAtShapes(t *testi
 	}
 }
 
+func TestSqlTransactionListDated_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
+	t.Parallel()
+	if g, w := sqlTransactionListDatedBothNoKindDescLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlTransactionListOrderDescLimit; g != w {
+		t.Fatalf("sqlTransactionListDatedBothNoKindDescLimit drift")
+	}
+	if g, w := sqlTransactionListDatedFromOnlyIncomeAscLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtFrom+sqlFilterAmountIncome+sqlTransactionListOrderAscLimit; g != w {
+		t.Fatalf("sqlTransactionListDatedFromOnlyIncomeAscLimit drift")
+	}
+	if g, w := sqlTransactionListDatedToOnlyExpenseDescLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtTo+sqlFilterAmountExpense+sqlTransactionListOrderDescLimit; g != w {
+		t.Fatalf("sqlTransactionListDatedToOnlyExpenseDescLimit drift")
+	}
+}
+
 func TestSqlListCategoryAmountsRange_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
 	t.Parallel()
 	if g, w := sqlListCategoryAmountsIncomeRangeBoth, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlFilterAmountIncome+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderIncome; g != w {
