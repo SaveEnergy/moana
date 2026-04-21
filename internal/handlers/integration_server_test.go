@@ -381,6 +381,36 @@ func TestTransactionsPageOKForLoggedInUser(t *testing.T) {
 	}
 }
 
+func TestTransactionCreate_zeroAmountShowsValidationError(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "tx-zero@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "tx-zero@moana.test", "pw")
+	// DisplayLocation defaults to UTC when moana_tz is unset (see internal/tz).
+	day := time.Now().UTC().Format(time.DateOnly)
+	resp, err := client.PostForm(srv.URL+handlers.TransactionsPath, url.Values{
+		txform.FieldAmount:      {"0"},
+		txform.FieldOccurredOn:  {day},
+		txform.FieldDescription: {"note"},
+		txform.FieldKind:        {"income"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d want 200 (re-render form)", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	assertBodyHasErrorAlert(t, s)
+	if !strings.Contains(s, "Amount must be greater than zero.") {
+		t.Fatalf("expected validation copy, got prefix %q", s[:min(800, len(s))])
+	}
+}
+
 func TestCategoriesPageOKForLoggedInUser(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
