@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import * as contentRoot from './contentRoot'
 import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 import {
   applyLocalTimeElements,
@@ -182,6 +183,31 @@ describe('applyLocalTimeElements', () => {
 describe('applyLocalTimeElements default document root', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  it('calls resolveBootContentQueryRoot only once per default-root apply', () => {
+    const iso = '2020-06-15T14:30:00.000Z'
+    const expected = formatLocalTimeLabel(iso)
+    expect(expected).not.toBeNull()
+
+    const el = {
+      getAttribute: (name: string) => (name === TIME_DATETIME_ATTRIBUTE ? iso : null),
+      textContent: '',
+    } as unknown as HTMLTimeElement
+    const main = {
+      querySelectorAll: (sel: string) =>
+        sel === LOCAL_TIME_ELEMENTS_SELECTOR ? [el] : ([] as HTMLTimeElement[]),
+    } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main) as unknown as Document)
+
+    const spy = vi.spyOn(contentRoot, 'resolveBootContentQueryRoot')
+    try {
+      applyLocalTimeElements()
+      expect(spy).toHaveBeenCalledTimes(1)
+    } finally {
+      spy.mockRestore()
+    }
+    expect(el.textContent).toBe(expected)
   })
 
   it('scopes to main.app-main when present', () => {
