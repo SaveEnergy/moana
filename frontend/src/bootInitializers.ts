@@ -25,6 +25,20 @@ export const BOOT_APP_INITIALIZERS: ReadonlyArray<BootInitializer> = [
 ]
 
 /**
+ * Explicit name order for **`design.md`** §2 **Boot content root** and regression tests.
+ * Must match {@link BOOT_APP_INITIALIZERS} `.map(fn => fn.name)` — update both when reordering.
+ */
+export const DOCUMENTED_BOOT_INITIALIZER_NAMES = [
+  'setBrowserTimezoneCookie',
+  'applyLocalTimeElements',
+  'initShellSidebar',
+  'initSettingsMemberDialog',
+  'initCategoryModal',
+  'initHistoryControls',
+  'initConfirmSubmitForms',
+] as const
+
+/**
  * `function.name` per {@link BOOT_APP_INITIALIZERS} (Vitest / tooling; unused by `bootApp` and typically tree-shaken from production).
  */
 export const BOOT_INITIALIZER_NAMES: readonly string[] = Object.freeze(
