@@ -17,3 +17,10 @@ func (s *Store) GetUserByID(ctx context.Context, id int64) (*User, error) {
 	row := s.DB.QueryRowContext(ctx, sqlUserGetByID, id)
 	return scanUser(row)
 }
+
+// GetUserByIDWithUnreadNotificationCount returns a user by id and how many notifications are unread.
+// One round trip (scalar subquery over notifications); see [sqlUserGetByIDWithUnreadCount].
+func (s *Store) GetUserByIDWithUnreadNotificationCount(ctx context.Context, id int64) (*User, int64, error) {
+	row := s.DB.QueryRowContext(ctx, sqlUserGetByIDWithUnreadCount, id)
+	return scanUserAndUnread(row)
+}

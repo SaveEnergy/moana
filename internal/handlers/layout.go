@@ -44,13 +44,19 @@ func layoutDataWithUnread(title, navKey, mainClass string, u *store.User, unread
 }
 
 // renderShell executes the named page template (e.g. dashboard.html) into the layout body.
-// It loads [store.Store.CountUnreadNotificationsForUser] for the top bar badge.
+// Unread count comes from [WithAuth] request context when present; otherwise it falls back to
+// [store.Store.CountUnreadNotificationsForUser].
 func (a *App) renderShell(w http.ResponseWriter, r *http.Request, contentTemplate string, pageData any, title, navKey, mainClass string, u *store.User) {
-	ctx := r.Context()
-	unread, err := a.Store.CountUnreadNotificationsForUser(ctx, u.ID)
-	if err != nil {
-		httperr.Internal(w, r, err)
-		return
+	var unread int64
+	if n, ok := unreadNotificationCountFromContext(r); ok {
+		unread = n
+	} else {
+		var err error
+		unread, err = a.Store.CountUnreadNotificationsForUser(r.Context(), u.ID)
+		if err != nil {
+			httperr.Internal(w, r, err)
+			return
+		}
 	}
 	a.Render.Shell(w, contentTemplate, pageData, layoutDataWithUnread(title, navKey, mainClass, u, unread), a.Config.RepoURL)
 }

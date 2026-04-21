@@ -13,24 +13,32 @@ import (
 // login. Database errors from the store are returned as-is so callers can respond with 500.
 var ErrAuthRequired = errors.New("authentication required")
 
-// CurrentUser returns the signed-in user from the session cookie, or nil with [ErrAuthRequired]
-// if not authenticated. Store failures (e.g. DB down) are returned unchanged.
-func (a *App) CurrentUser(r *http.Request) (*store.User, error) {
+// loadUserForSession resolves the session user and unread notification count in one store round trip.
+// Returns [ErrAuthRequired] when there is no valid session, the user row is missing, or the role
+// no longer matches the session (treat as logout). Store failures are returned unchanged.
+func (a *App) loadUserForSession(r *http.Request) (*store.User, int64, error) {
 	sess, err := auth.ReadSession(r, a.Config.SessionSecret)
 	if err != nil || sess == nil {
-		return nil, ErrAuthRequired
+		return nil, 0, ErrAuthRequired
 	}
 	ctx := r.Context()
-	u, err := a.Store.GetUserByID(ctx, sess.UserID)
+	u, unread, err := a.Store.GetUserByIDWithUnreadNotificationCount(ctx, sess.UserID)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	if u == nil {
-		return nil, ErrAuthRequired
+		return nil, 0, ErrAuthRequired
 	}
 	if u.Role != sess.Role {
 		// role changed server-side; treat as logout
-		return nil, ErrAuthRequired
+		return nil, 0, ErrAuthRequired
 	}
-	return u, nil
+	return u, unread, nil
+}
+
+// CurrentUser returns the signed-in user from the session cookie, or nil with [ErrAuthRequired]
+// if not authenticated. Store failures (e.g. DB down) are returned unchanged.
+func (a *App) CurrentUser(r *http.Request) (*store.User, error) {
+	u, _, err := a.loadUserForSession(r)
+	return u, err
 }
