@@ -12,8 +12,14 @@ INNER JOIN users owner ON owner.id = t.user_id`
 const sqlTransactionListFromHousehold = sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
 
-const sqlTransactionListOrderDescLimit = ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
-const sqlTransactionListOrderAscLimit = ` ORDER BY t.occurred_at ASC, t.id ASC LIMIT ?`
+// sqlTransactionListOrderDesc / Asc are shared by [ListTransactions] static queries and the dynamic SQL builder.
+const sqlTransactionListOrderDesc = ` ORDER BY t.occurred_at DESC, t.id DESC`
+const sqlTransactionListOrderAsc = ` ORDER BY t.occurred_at ASC, t.id ASC`
+
+const sqlTransactionListLimitSuffix = ` LIMIT ?`
+
+const sqlTransactionListOrderDescLimit = sqlTransactionListOrderDesc + sqlTransactionListLimitSuffix
+const sqlTransactionListOrderAscLimit = sqlTransactionListOrderAsc + sqlTransactionListLimitSuffix
 
 // sqlTransactionListRecentDescLimit is [ListTransactions] when only Limit is set (default sort, no filters).
 const sqlTransactionListRecentDescLimit = sqlTransactionListFromHousehold + sqlTransactionListOrderDescLimit

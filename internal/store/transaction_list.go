@@ -41,12 +41,12 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 		args = append(args, term, term)
 	}
 	if f.OldestFirst {
-		b.WriteString(` ORDER BY t.occurred_at ASC, t.id ASC`)
+		b.WriteString(sqlTransactionListOrderAsc)
 	} else {
-		b.WriteString(` ORDER BY t.occurred_at DESC, t.id DESC`)
+		b.WriteString(sqlTransactionListOrderDesc)
 	}
 	if limit > 0 {
-		b.WriteString(` LIMIT ?`)
+		b.WriteString(sqlTransactionListLimitSuffix)
 		args = append(args, limit)
 	}
 
