@@ -1,4 +1,4 @@
-import { queryBootContent, resolveBootContentQueryRoot } from './contentRoot'
+import { resolveBootContentQueryRoot } from './contentRoot'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { attachShowModalOnClick } from './dialogModal'
 import { querySettingsAddMemberInitContext } from './settingsMemberDialogQueries'
@@ -11,7 +11,7 @@ import {
 /** One init pass per dialog (`bootApp` may run more than once during tests or future SPA hooks). */
 const settingsMemberDialogInitialized = new WeakSet<HTMLDialogElement>()
 
-/** Resolve the add-member `<dialog>` from a root (`initSettingsMemberDialog` uses {@link queryBootContent}). */
+/** Resolve the add-member `<dialog>` from a root (`initSettingsMemberDialog` uses one {@link resolveBootContentQueryRoot} for `contentRoot`, then `querySelector`). */
 export function querySettingsAddMemberDialog(root: ParentNode): HTMLDialogElement | null {
   return root.querySelector<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
 }
@@ -22,7 +22,8 @@ export function querySettingsAddMemberOpenButton(root: ParentNode): HTMLElement 
 }
 
 export function initSettingsMemberDialog(): void {
-  const dialog = queryBootContent<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
+  const contentRoot = resolveBootContentQueryRoot()
+  const dialog = contentRoot.querySelector<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
   if (!dialog) {
     return
   }
@@ -30,7 +31,7 @@ export function initSettingsMemberDialog(): void {
     return
   }
 
-  const { openBtn } = querySettingsAddMemberInitContext(resolveBootContentQueryRoot(), dialog)
+  const { openBtn } = querySettingsAddMemberInitContext(contentRoot, dialog)
 
   attachShowModalOnClick(openBtn, dialog)
 

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import * as contentRoot from './contentRoot'
 import { SETTINGS_ADD_MEMBER_DIALOG_SELECTOR, SETTINGS_ADD_MEMBER_OPEN_SELECTOR } from './domSelectors'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 import {
@@ -155,6 +156,37 @@ describe('initSettingsMemberDialog', () => {
     expect(() => initSettingsMemberDialog()).not.toThrow()
     expect(dialogAdd).toHaveBeenCalledTimes(1)
     expect(dialogAdd).toHaveBeenCalledWith('click', expect.any(Function))
+  })
+
+  it('calls resolveBootContentQueryRoot only once per successful wiring pass', () => {
+    const showModal = vi.fn()
+    const dialogAdd = vi.fn()
+    const openAddEventListener = vi.fn()
+    const openBtn = { addEventListener: openAddEventListener } as unknown as HTMLElement
+    const parent = {
+      querySelector: (sel: string) => (sel === SETTINGS_ADD_MEMBER_OPEN_SELECTOR ? openBtn : null),
+    } as unknown as ParentNode
+    const dialog = {
+      showModal,
+      addEventListener: dialogAdd,
+      parentElement: parent,
+    } as unknown as HTMLDialogElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) =>
+          sel === SETTINGS_ADD_MEMBER_DIALOG_SELECTOR ? dialog : null,
+      }),
+    )
+
+    const spy = vi.spyOn(contentRoot, 'resolveBootContentQueryRoot')
+    try {
+      initSettingsMemberDialog()
+      expect(spy).toHaveBeenCalledTimes(1)
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('resolves dialog under main.app-main when the landmark exists', () => {
