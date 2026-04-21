@@ -236,3 +236,65 @@ func TestSumAmountCentsByKind_cancelledContext(t *testing.T) {
 	_, err := st.SumAmountCentsByKind(alreadyCancelledContext(t), 1, &from, &to, "expense")
 	assertErrIsContextCanceled(t, err)
 }
+
+func TestSumAmountCentsByKind_nilNil_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.SumAmountCentsByKind(alreadyCancelledContext(t), 1, nil, nil, "")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestSumAmountCentsByKind_nilNil_kindsMatchExpected(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "sum-kind-nil@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 10000, day, "in", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -3000, day, "out", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, 500, day, "small", nil); err != nil {
+		t.Fatal(err)
+	}
+
+	gotAll, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotAll != 7500 {
+		t.Fatalf("all kinds sum got %d want 7500", gotAll)
+	}
+	gotInc, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "income")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotInc != 10500 {
+		t.Fatalf("income sum got %d want 10500", gotInc)
+	}
+	gotExp, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotExp != -3000 {
+		t.Fatalf("expense sum got %d want -3000", gotExp)
+	}
+	gotUnknownKindSameAsAll, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "not-a-kind")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotUnknownKindSameAsAll != gotAll {
+		t.Fatalf("unknown kind should match all-sum, got %d want %d", gotUnknownKindSameAsAll, gotAll)
+	}
+}

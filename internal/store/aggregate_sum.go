@@ -52,10 +52,23 @@ func (s *Store) SumRunningTotalAndIncomeExpenseInTwoRanges(ctx context.Context, 
 
 // SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense".
 func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) (int64, error) {
+	if fromUTC == nil && toUTC == nil {
+		var sum int64
+		switch frag := sqlAmountKindFilter(kind); frag {
+		case "":
+			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold, householdID).Scan(&sum)
+			return sum, err
+		case sqlFilterAmountIncome:
+			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold+sqlFilterAmountIncome, householdID).Scan(&sum)
+			return sum, err
+		case sqlFilterAmountExpense:
+			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold+sqlFilterAmountExpense, householdID).Scan(&sum)
+			return sum, err
+		}
+	}
 	var b strings.Builder
 	b.Grow(256)
-	b.WriteString(`SELECT COALESCE(SUM(t.amount_cents), 0) `)
-	b.WriteString(sqlFromHouseholdTx)
+	b.WriteString(sqlSumAmountAllHousehold)
 	// cap: household + optional from/to.
 	args := make([]any, 0, 3)
 	args = append(args, householdID)
