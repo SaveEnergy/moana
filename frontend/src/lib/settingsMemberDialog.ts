@@ -1,4 +1,4 @@
-import { resolveBootContentQueryRoot } from './contentRoot'
+import { queryBootContent, resolveBootContentQueryRoot } from './contentRoot'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { showModalIfClosed } from './dialogModal'
 import {
@@ -10,7 +10,7 @@ import {
 /** One init pass per dialog (`bootApp` may run more than once during tests or future SPA hooks). */
 const settingsMemberDialogInitialized = new WeakSet<HTMLDialogElement>()
 
-/** Resolve the add-member `<dialog>` from a root (`initSettingsMemberDialog` uses `resolveBootContentQueryRoot()`). */
+/** Resolve the add-member `<dialog>` from a root (`initSettingsMemberDialog` uses {@link queryBootContent}). */
 export function querySettingsAddMemberDialog(root: ParentNode): HTMLDialogElement | null {
   return root.querySelector<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
 }
@@ -31,7 +31,7 @@ export function initSettingsMemberDialog(): void {
   }
 
   /* Open control sits next to the dialog under the same parent (`settings.html`); fall back to main landmark scope. */
-  const openBtn = querySettingsAddMemberOpenButton(dialog.parentElement ?? contentRoot)
+  const openBtn = querySettingsAddMemberOpenButton(dialog.parentElement ?? resolveBootContentQueryRoot())
 
   openBtn?.addEventListener('click', () => {
     showModalIfClosed(dialog)

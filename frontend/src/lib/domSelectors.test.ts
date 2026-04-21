@@ -42,6 +42,9 @@ import {
   APP_SIDEBAR_CLOSE_SELECTOR,
   APP_SIDEBAR_TOGGLE_SELECTOR,
   APP_USER_MENU_OPEN_SELECTOR,
+  APP_NOTIF_BADGE_CLASS,
+  APP_TOPBAR_NOTIF_BTN_CLASS,
+  APP_TOPBAR_NOTIF_LINK_SELECTOR,
   HISTORY_SORT_ELEMENT_ID,
   HISTORY_SORT_SELECTOR,
   SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID,
@@ -121,6 +124,14 @@ describe('domSelectors data-confirm forms', () => {
 describe('domSelectors local time', () => {
   it('targets js-local-time elements with the datetime attribute', () => {
     expect(LOCAL_TIME_ELEMENTS_SELECTOR).toBe(`time.js-local-time[${TIME_DATETIME_ATTRIBUTE}]`)
+  })
+})
+
+describe('domSelectors topbar notifications', () => {
+  it('keeps bell link class and badge aligned with layout.html', () => {
+    expect(APP_TOPBAR_NOTIF_BTN_CLASS).toBe('app-topbar-notif-btn')
+    expect(APP_NOTIF_BADGE_CLASS).toBe('app-notif-badge')
+    expect(APP_TOPBAR_NOTIF_LINK_SELECTOR).toBe(`a.${APP_TOPBAR_NOTIF_BTN_CLASS}`)
   })
 })
 

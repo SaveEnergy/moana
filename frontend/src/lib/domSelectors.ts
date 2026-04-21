@@ -6,6 +6,18 @@
 /** Topbar account menu when expanded (`layout.html` `details.app-user-menu[open]`). */
 export const APP_USER_MENU_OPEN_SELECTOR = 'details.app-user-menu[open]' as const
 
+/** Notifications bell — second class on the topbar anchor (`layout.html`); pairs with {@link APP_TOPBAR_NOTIF_LINK_SELECTOR}. */
+export const APP_TOPBAR_NOTIF_BTN_CLASS = 'app-topbar-notif-btn' as const
+
+/**
+ * Unread count pill inside the bell link (`layout.html`). Optional server-rendered markup; **`aria-hidden="true"`** —
+ * **`title`** / **`.sr-only`** on the anchor carry the control name.
+ */
+export const APP_NOTIF_BADGE_CLASS = 'app-notif-badge' as const
+
+/** `a.app-topbar-notif-btn` — class hook (no dedicated id); E2E / docs. */
+export const APP_TOPBAR_NOTIF_LINK_SELECTOR = `a.${APP_TOPBAR_NOTIF_BTN_CLASS}` as const
+
 /** Mobile shell root (`layout.html` `id="app-shell"`). */
 export const APP_SHELL_ELEMENT_ID = 'app-shell' as const
 
@@ -41,7 +53,7 @@ export const SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID = 'settings-add-member-open' as
 export const SETTINGS_ADD_MEMBER_CLOSE_ELEMENT_ID = 'settings-add-member-close' as const
 export const SETTINGS_ADD_MEMBER_CANCEL_ELEMENT_ID = 'settings-add-member-cancel' as const
 
-/** `#` + dialog / open button ids — `querySettingsAddMemberDialog(resolveBootContentQueryRoot())` (`settingsMemberDialog.ts`); open button via `querySettingsAddMemberOpenButton(dialog.parentElement ?? resolveBootContentQueryRoot())`. */
+/** `#` + dialog / open button ids — **`initSettingsMemberDialog`** uses **`queryBootContent`** with the dialog selector (`settingsMemberDialog.ts`); open button via **`querySettingsAddMemberOpenButton(dialog.parentElement ?? resolveBootContentQueryRoot())`**. */
 export const SETTINGS_ADD_MEMBER_DIALOG_SELECTOR = `#${SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID}` as const
 export const SETTINGS_ADD_MEMBER_OPEN_SELECTOR = `#${SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID}` as const
 

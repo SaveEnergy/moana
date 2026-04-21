@@ -505,6 +505,30 @@ body.app-body {
   color: var(--primary);
 }
 
+/* Notifications bell — optional .app-notif-badge when server renders unread count */
+.app-topbar-notif-btn {
+  position: relative;
+}
+
+.app-notif-badge {
+  position: absolute;
+  top: 0.12rem;
+  right: 0.12rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: var(--error);
+  color: var(--on-primary);
+  font-family: var(--font-body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1rem;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--shell-topbar);
+  pointer-events: none;
+}
+
 .app-topbar-rule--desktop {
   display: none;
 }

@@ -28,13 +28,18 @@ func layoutShellMain(title, navKey, mainClass string, u *store.User) LayoutData 
 }
 
 func layoutData(title, navKey, mainClass string, u *store.User) LayoutData {
+	return layoutDataWithUnread(title, navKey, mainClass, u, 0)
+}
+
+// layoutDataWithUnread builds shell metadata; unread is used for the top bar notification badge.
+func layoutDataWithUnread(title, navKey, mainClass string, u *store.User, unread int64) LayoutData {
 	return LayoutData{
 		Title:                   title,
 		User:                    u,
 		Year:                    shellYear(),
 		Active:                  navKey,
 		MainClass:               mainClass,
-		UnreadNotificationCount: 0,
+		UnreadNotificationCount: unread,
 	}
 }
 
@@ -47,15 +52,7 @@ func (a *App) renderShell(w http.ResponseWriter, r *http.Request, contentTemplat
 		httperr.Internal(w, r, err)
 		return
 	}
-	ld := LayoutData{
-		Title:                   title,
-		User:                    u,
-		Year:                    shellYear(),
-		Active:                  navKey,
-		MainClass:               mainClass,
-		UnreadNotificationCount: unread,
-	}
-	a.Render.Shell(w, contentTemplate, pageData, ld, a.Config.RepoURL)
+	a.Render.Shell(w, contentTemplate, pageData, layoutDataWithUnread(title, navKey, mainClass, u, unread), a.Config.RepoURL)
 }
 
 // renderSimple executes a standalone template (e.g. login.html) without the app shell.
