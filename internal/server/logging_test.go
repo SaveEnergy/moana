@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -113,7 +115,7 @@ func TestStatusWriter_pushDelegatesToUnderlying(t *testing.T) {
 }
 
 func TestRequestLogging_delegatesToInner(t *testing.T) {
-	t.Parallel()
+	// Not parallel: shares process-wide [slog.Default] with [TestRequestLogging_skipsSlogForHealthGET].
 	var saw bool
 	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		saw = true
@@ -126,5 +128,33 @@ func TestRequestLogging_delegatesToInner(t *testing.T) {
 	}
 	if rec.Code != http.StatusTeapot {
 		t.Fatalf("code %d want %d", rec.Code, http.StatusTeapot)
+	}
+}
+
+func TestRequestLogging_skipsSlogForHealthGET(t *testing.T) {
+	// Not parallel: mutates [slog.Default] for this package's tests.
+	var buf bytes.Buffer
+	h := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	prev := slog.Default()
+	slog.SetDefault(h)
+	t.Cleanup(func() { slog.SetDefault(prev) })
+
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	chained := RequestLogging(inner)
+	rec := httptest.NewRecorder()
+	chained.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, HealthPath, nil))
+	if buf.Len() != 0 {
+		t.Fatalf("expected no slog output for GET %s, got %q", HealthPath, buf.String())
+	}
+	if rec.Code != http.StatusOK {
+		t.Fatalf("code %d", rec.Code)
+	}
+
+	buf.Reset()
+	chained.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api", nil))
+	if buf.Len() == 0 {
+		t.Fatal("expected slog output for non-health GET")
 	}
 }

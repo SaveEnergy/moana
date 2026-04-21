@@ -7,8 +7,14 @@ import (
 )
 
 // RequestLogging logs method, path, status, and duration for each request.
+// GET [HealthPath] is omitted so load balancers / k8s probes do not allocate wrappers or emit
+// slog work on every tick (handlers still run; only logging is skipped).
 func RequestLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && r.URL.Path == HealthPath {
+			next.ServeHTTP(w, r)
+			return
+		}
 		start := time.Now()
 		lw := &statusWriter{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(lw, r)
