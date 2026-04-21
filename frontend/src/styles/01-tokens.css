@@ -37,6 +37,14 @@
   /* Pill / segmented “on” state: paper lift inside a tinted rail (history tabs, transaction kind) */
   --shadow-raise-xs: 0 1px 3px rgba(44, 47, 48, 0.06);
   --shadow-raise-xs-strong: 0 1px 3px rgba(44, 47, 48, 0.08);
+  /* Native dialog shell (`.cat-modal-panel`) */
+  --shadow-modal-panel: 0 24px 56px rgba(44, 47, 48, 0.14);
+  /* Picker card chrome (`.cat-picker-card`) */
+  --shadow-picker-stack: 0 10px 40px rgba(44, 47, 48, 0.06);
+  /* Transaction category tiles (`.category-picker-card` default / hover / checked) */
+  --shadow-category-tile: 0 1px 2px rgba(44, 47, 48, 0.04);
+  --shadow-category-tile-hover: 0 4px 14px rgba(44, 47, 48, 0.07);
+  --shadow-category-tile-selected: 0 6px 18px rgba(44, 47, 48, 0.09);
   --shadow-float: 0 12px 32px rgba(44, 47, 48, 0.06);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
   /* App shell — rails share page canvas; cards/content use --app-paper */

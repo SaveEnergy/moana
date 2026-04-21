@@ -20,6 +20,14 @@ test('static app.css is served with bytes', async ({ request }) => {
   expect(len).toBeGreaterThan(500)
 })
 
+test('built app.css retains design-system shadow custom properties', async ({ request }) => {
+  const res = await request.get(STATIC_APP_CSS_PATH)
+  expect(res.ok()).toBeTruthy()
+  const text = await res.text()
+  expect(text).toContain('--shadow-modal-panel:')
+  expect(text).toContain('--shadow-category-tile-selected:')
+})
+
 test('static app.js is served with bytes', async ({ request }) => {
   const res = await request.get(STATIC_APP_JS_PATH)
   expect(res.ok()).toBeTruthy()

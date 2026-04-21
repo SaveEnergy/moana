@@ -30,4 +30,23 @@ describe('01-tokens.css semantic + indicator tokens', () => {
       /--shadow-raise-xs-strong:\s*0 1px 3px rgba\(44,\s*47,\s*48,\s*0\.08\)\s*;/,
     )
   })
+
+  it('defines modal, picker stack, and category tile elevation tokens', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(
+      /--shadow-modal-panel:\s*0 24px 56px rgba\(44,\s*47,\s*48,\s*0\.14\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-picker-stack:\s*0 10px 40px rgba\(44,\s*47,\s*48,\s*0\.06\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-category-tile:\s*0 1px 2px rgba\(44,\s*47,\s*48,\s*0\.04\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-category-tile-hover:\s*0 4px 14px rgba\(44,\s*47,\s*48,\s*0\.07\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-category-tile-selected:\s*0 6px 18px rgba\(44,\s*47,\s*48,\s*0\.09\)\s*;/,
+    )
+  })
 })

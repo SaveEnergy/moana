@@ -380,7 +380,7 @@
   background: var(--app-paper);
   border: 1px solid var(--dashboard-edge);
   border-radius: 1rem;
-  box-shadow: 0 24px 56px rgba(44, 47, 48, 0.14);
+  box-shadow: var(--shadow-modal-panel);
   overflow: hidden;
 }
 
@@ -524,7 +524,7 @@
   border-radius: calc(var(--radius-lg) + 4px);
   background: var(--surface-lowest);
   border: 1px solid color-mix(in srgb, var(--outline-variant) 45%, transparent);
-  box-shadow: 0 10px 40px rgba(44, 47, 48, 0.06);
+  box-shadow: var(--shadow-picker-stack);
 }
 
 .cat-picker-title {
