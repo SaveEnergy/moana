@@ -61,6 +61,18 @@ describe('queryBootContent', () => {
     vi.stubGlobal('document', stubDocumentMainLandmark(main))
     expect(queryBootContent<HTMLSelectElement>(HISTORY_SORT_SELECTOR)).toBe(select)
   })
+
+  it('matches resolveBootContentQueryRoot().querySelector (API equivalence)', () => {
+    const select = { _: 'history-sort' } as unknown as HTMLSelectElement
+    const main = {
+      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+    } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
+    const root = resolveBootContentQueryRoot()
+    expect(queryBootContent<HTMLSelectElement>(HISTORY_SORT_SELECTOR)).toBe(
+      root.querySelector<HTMLSelectElement>(HISTORY_SORT_SELECTOR),
+    )
+  })
 })
 
 describe('queryBootContentAll', () => {
