@@ -18,7 +18,8 @@ func TestEngineSimple(t *testing.T) {
 	}
 	e := &Engine{Templates: tmpl}
 	rec := httptest.NewRecorder()
-	e.Simple(rec, "page.html", struct{ Title string }{Title: "ok"})
+	req := httptest.NewRequest(http.MethodGet, "/login", nil)
+	e.Simple(rec, req, "page.html", struct{ Title string }{Title: "ok"})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
@@ -36,7 +37,8 @@ func TestSimple_execErrorDoesNotWritePartialHTML(t *testing.T) {
 	tmpl := template.Must(template.New("bad.html").Parse(`<!doctype html><p>{{.Missing}}</p>`))
 	e := &Engine{Templates: tmpl}
 	rec := httptest.NewRecorder()
-	e.Simple(rec, "bad.html", struct{}{})
+	req := httptest.NewRequest(http.MethodGet, "/login", nil)
+	e.Simple(rec, req, "bad.html", struct{}{})
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("status %d want 500", rec.Code)
 	}

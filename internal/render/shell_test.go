@@ -18,7 +18,8 @@ func TestShell_writesFullPage(t *testing.T) {
 `))
 	e := &Engine{Templates: tmpl}
 	rec := httptest.NewRecorder()
-	e.Shell(rec, "page.html", nil, LayoutData{Title: "t"}, "")
+	req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+	e.Shell(rec, req, "page.html", nil, LayoutData{Title: "t"}, "")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status %d", rec.Code)
 	}
@@ -36,7 +37,8 @@ func TestShell_contentExecErrorDoesNotWriteHTML(t *testing.T) {
 `))
 	e := &Engine{Templates: tmpl}
 	rec := httptest.NewRecorder()
-	e.Shell(rec, "page.html", struct{}{}, LayoutData{Title: "t"}, "")
+	req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+	e.Shell(rec, req, "page.html", struct{}{}, LayoutData{Title: "t"}, "")
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("status %d want 500", rec.Code)
 	}
@@ -57,7 +59,8 @@ func TestShell_layoutExecErrorDoesNotWriteHTML(t *testing.T) {
 `))
 	e := &Engine{Templates: tmpl}
 	rec := httptest.NewRecorder()
-	e.Shell(rec, "page.html", nil, LayoutData{Title: "t"}, "")
+	req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+	e.Shell(rec, req, "page.html", nil, LayoutData{Title: "t"}, "")
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("status %d want 500", rec.Code)
 	}

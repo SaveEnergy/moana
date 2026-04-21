@@ -1,3 +1,3 @@
 // Package render executes HTML templates (app shell and standalone pages) without HTTP handler logic.
-// [LayoutData] is in layout_data.go; [Engine] in engine.go; [Engine.Shell] in shell.go (buffers full layout before writing); [Engine.Simple] in simple.go (buffers full page before writing; simple_test.go).
+// [LayoutData] is in layout_data.go; [Engine] in engine.go; [Engine.Shell] in shell.go (buffers full layout before writing; passes [*http.Request] for error logs); [Engine.Simple] in simple.go (buffers full page before writing; same; simple_test.go).
 package render

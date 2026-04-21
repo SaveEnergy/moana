@@ -58,10 +58,10 @@ func (a *App) renderShell(w http.ResponseWriter, r *http.Request, contentTemplat
 			return
 		}
 	}
-	a.Render.Shell(w, contentTemplate, pageData, layoutDataWithUnread(title, navKey, mainClass, u, unread), a.Config.RepoURL)
+	a.Render.Shell(w, r, contentTemplate, pageData, layoutDataWithUnread(title, navKey, mainClass, u, unread), a.Config.RepoURL)
 }
 
 // renderSimple executes a standalone template (e.g. login.html) without the app shell.
-func (a *App) renderSimple(w http.ResponseWriter, name string, data any) {
-	a.Render.Simple(w, name, data)
+func (a *App) renderSimple(w http.ResponseWriter, r *http.Request, name string, data any) {
+	a.Render.Simple(w, r, name, data)
 }

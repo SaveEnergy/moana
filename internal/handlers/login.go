@@ -25,7 +25,7 @@ func (a *App) LoginPage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get(LoginErrorQueryParam) != "" {
 		data.Error = "Session expired or invalid. Please sign in again."
 	}
-	a.renderSimple(w, "login.html", data)
+	a.renderSimple(w, r, "login.html", data)
 }
 
 // LoginSubmit validates credentials and sets the session cookie.
@@ -46,7 +46,7 @@ func (a *App) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if u == nil || auth.CheckPassword(u.PasswordHash, password) != nil {
-		a.renderSimple(w, "login.html", a.loginTemplateData("Invalid email or password."))
+		a.renderSimple(w, r, "login.html", a.loginTemplateData("Invalid email or password."))
 		return
 	}
 	maxAge := a.Config.SessionMaxAge
