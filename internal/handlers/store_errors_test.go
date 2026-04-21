@@ -10,24 +10,6 @@ import (
 	"moana/internal/store"
 )
 
-func TestUserFacingStoreMessage_invalidCategory(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrInvalidCategory)
-	const want = "That category is not valid for this household."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
-func TestUserFacingStoreMessage_userNotInHousehold(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrUserNotInHousehold)
-	const want = "That account cannot record transactions in this household."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
 func TestUserFacingStoreMessage_wrappedUserNotInHousehold(t *testing.T) {
 	t.Parallel()
 	err := fmt.Errorf("create: %w", store.ErrUserNotInHousehold)
@@ -76,60 +58,6 @@ func TestUserFacingStoreMessage_wrappedSqlErrNoRows(t *testing.T) {
 	}
 }
 
-func TestUserFacingStoreMessage_categoryNotFound(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrCategoryNotFound)
-	const want = "That category could not be found."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
-func TestUserFacingStoreMessage_duplicateCategoryName(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrDuplicateCategoryName)
-	const want = "A category with that name already exists."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
-func TestUserFacingStoreMessage_duplicateUserEmail(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrDuplicateUserEmail)
-	const want = "A user with that email already exists."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
-func TestUserFacingStoreMessage_invalidUserEmail(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrInvalidUserEmail)
-	const want = "That email address is not valid."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
-func TestUserFacingStoreMessage_notificationNotFound(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrNotificationNotFound)
-	const want = "That notification could not be found."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
-func TestUserFacingStoreMessage_invalidNotificationBody(t *testing.T) {
-	t.Parallel()
-	got := userFacingStoreMessage(store.ErrInvalidNotificationBody)
-	const want = "Notification text cannot be empty."
-	if got != want {
-		t.Fatalf("got %q want %q", got, want)
-	}
-}
-
 func TestUserFacingStoreMessage_invalidCategoryAmountKind_mapsToInternal(t *testing.T) {
 	t.Parallel()
 	// Used by dashboard aggregates only; handlers must not surface raw strings if this ever leaks.
@@ -147,7 +75,7 @@ func TestUserFacingStoreMessage_nilError_mapsToInternal(t *testing.T) {
 	}
 }
 
-func TestStoreUserMessages_tableIntegrity(t *testing.T) {
+func TestStoreUserMessages_tableIntegrityAndDirectMapping(t *testing.T) {
 	t.Parallel()
 	seen := make(map[error]struct{})
 	for i, row := range storeUserMessages {
@@ -161,5 +89,8 @@ func TestStoreUserMessages_tableIntegrity(t *testing.T) {
 			t.Fatalf("row %d: duplicate sentinel %v", i, row.sentinel)
 		}
 		seen[row.sentinel] = struct{}{}
+		if got := userFacingStoreMessage(row.sentinel); got != row.msg {
+			t.Fatalf("row %d: userFacingStoreMessage(%v) = %q want %q", i, row.sentinel, got, row.msg)
+		}
 	}
 }
