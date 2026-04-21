@@ -17,7 +17,7 @@ Moana’s UI is a **server-rendered, CSS-first “editorial shell”**: warm **c
 
 Templates load `/static/css/app.css` and Google Fonts in `<head>`; **`rel="modulepreload"`** on `/static/js/app.js` starts fetch early while HTML parses. **`app.js` executes at the end of `<body>`** (module deferred, runs after parse). The login template also includes `app.js` so the **timezone cookie** is set before the first authenticated request; subsequent loads **skip rewriting** `document.cookie` when `moana_tz` already matches the browser zone (`parseMoanaTimezoneCookie` in `timezoneCookie.ts`). **`parseMoanaTimezoneCookie`** skips the segment walk when the substring **`moana_tz`** cannot appear, then walks semicolon-separated segments **without** `String.prototype.split` on the full jar — each segment uses **`trimEdgesIfNeeded`** on the slice and on **name** / **value** parts before the first **`=`** so spaces around **`=`** (RFC-style) still match; **`xmoana_tz`** remains a distinct name.
 
-There is **no React component library** in-repo; “components” are **CSS class contracts** in HTML. **Structure:** ordered style partials preserve cascade; behavior is split into small TypeScript modules for testing and navigation.
+There is **no React component library** in-repo; “components” are **CSS class contracts** in HTML. **Structure:** ordered style partials preserve cascade; behavior is split into small TypeScript modules for testing and navigation. Hot **`querySelectorAll`** walks (local **`<time>`** labels, **`form[data-confirm]`**, category radio maps) use indexed **`for`** loops over the **`NodeList`** so iteration avoids iterator protocol overhead on large pages.
 
 ## 3. Design tokens (`:root`)
 

@@ -77,7 +77,8 @@ export function applyLocalTimeElements(root: ParentNode = document): void {
   if (nodes.length === 0) {
     return
   }
-  for (const el of nodes) {
+  for (let i = 0, n = nodes.length; i < n; i++) {
+    const el = nodes[i]
     const iso = el.getAttribute(TIME_DATETIME_ATTRIBUTE)
     if (!iso) {
       continue

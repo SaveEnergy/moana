@@ -15,7 +15,9 @@ export function buildRadioMapByValue(
   radiosSelector: string,
 ): Map<string, HTMLInputElement> {
   const m = new Map<string, HTMLInputElement>()
-  for (const r of scope.querySelectorAll<HTMLInputElement>(radiosSelector)) {
+  const radios = scope.querySelectorAll<HTMLInputElement>(radiosSelector)
+  for (let i = 0, n = radios.length; i < n; i++) {
+    const r = radios[i]
     m.set(typeof r.value === 'string' ? trimEdgesIfNeeded(r.value) : '', r)
   }
   return m

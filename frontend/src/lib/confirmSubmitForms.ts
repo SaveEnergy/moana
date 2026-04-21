@@ -50,7 +50,9 @@ function forEachConfirmableForm(
   root: ParentNode,
   fn: (form: HTMLFormElement, message: string) => void,
 ): void {
-  for (const form of root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)) {
+  const forms = root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)
+  for (let i = 0, n = forms.length; i < n; i++) {
+    const form = forms[i]
     const msg = readDataConfirmMessage(form)
     if (msg !== null) {
       fn(form, msg)
