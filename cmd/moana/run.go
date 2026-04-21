@@ -10,6 +10,10 @@ func run(args []string) int {
 		return runUser(args[2:])
 	}
 	if len(args) >= 2 && args[1] == "serve" {
+		if len(args) > 2 {
+			fmt.Fprintf(os.Stderr, "usage: moana [serve | user <add|password> ...]\n")
+			return 1
+		}
 		runServe()
 		return 0
 	}

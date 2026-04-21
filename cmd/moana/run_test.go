@@ -9,6 +9,13 @@ func TestRun_unknownSubcommand(t *testing.T) {
 	}
 }
 
+func TestRun_serveExtraArgs(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "serve", "extra"}); g != 1 {
+		t.Fatalf("exit %d want 1", g)
+	}
+}
+
 func TestRun_userWithoutSubcommand(t *testing.T) {
 	t.Parallel()
 	if g := run([]string{"moana", "user"}); g != 2 {
