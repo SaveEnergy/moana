@@ -22,22 +22,13 @@ function readOpenTagNameIfOpen(n: unknown): string | null {
   return raw.toUpperCase()
 }
 
-/** Reused on Escape / path scans — no per-call `Set` allocation. */
-const PATH_OPEN_DIALOG = new Set<'DIALOG' | 'DETAILS'>(['DIALOG'])
-const PATH_OPEN_DETAILS = new Set<'DIALOG' | 'DETAILS'>(['DETAILS'])
-const PATH_OPEN_DIALOG_OR_DETAILS = new Set<'DIALOG' | 'DETAILS'>(['DIALOG', 'DETAILS'])
-
-/** Uses `tagName` + `open` so tests can run without a full DOM `instanceof`. */
-function pathIncludesOpenAnyTag(
-  path: readonly unknown[],
-  tags: ReadonlySet<'DIALOG' | 'DETAILS'>,
-): boolean {
-  for (const n of path) {
-    const tag = readOpenTagNameIfOpen(n)
-    if (!tag) {
-      continue
-    }
-    if (tags.has(tag as 'DIALOG' | 'DETAILS')) {
+/**
+ * True when an event path includes a native `dialog` element that is currently open
+ * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
+ */
+export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
+  for (let i = 0, n = path.length; i < n; i++) {
+    if (readOpenTagNameIfOpen(path[i]) === 'DIALOG') {
       return true
     }
   }
@@ -45,18 +36,15 @@ function pathIncludesOpenAnyTag(
 }
 
 /**
- * True when an event path includes a native `dialog` element that is currently open
- * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
- */
-export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
-  return pathIncludesOpenAnyTag(path, PATH_OPEN_DIALOG)
-}
-
-/**
  * True when the path includes an open `<details>` (e.g. focus inside the disclosure). See also {@link isAppUserMenuDetailsOpen}.
  */
 export function eventPathIncludesOpenDetails(path: readonly unknown[]): boolean {
-  return pathIncludesOpenAnyTag(path, PATH_OPEN_DETAILS)
+  for (let i = 0, n = path.length; i < n; i++) {
+    if (readOpenTagNameIfOpen(path[i]) === 'DETAILS') {
+      return true
+    }
+  }
+  return false
 }
 
 export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
@@ -70,7 +58,13 @@ export function isAppUserMenuDetailsOpen(): boolean {
 
 /** One pass over `composedPath()` — used by {@link shouldDeferMobileShellEscape} to avoid two scans + a query when the path already answers. */
 function pathIncludesOpenDialogOrDetails(path: readonly unknown[]): boolean {
-  return pathIncludesOpenAnyTag(path, PATH_OPEN_DIALOG_OR_DETAILS)
+  for (let i = 0, n = path.length; i < n; i++) {
+    const tag = readOpenTagNameIfOpen(path[i])
+    if (tag === 'DIALOG' || tag === 'DETAILS') {
+      return true
+    }
+  }
+  return false
 }
 
 /** Single guard for `shellSidebar` Escape: open `dialog` or open `<details>` in path, else open account menu via DOM (drawer can cover the bar while `[open]` stays true). */

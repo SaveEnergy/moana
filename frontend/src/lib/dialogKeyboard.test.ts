@@ -34,6 +34,10 @@ describe('eventPathIncludesOpenDialog', () => {
     expect(eventPathIncludesOpenDialog([{ tagName: 1, open: true }] as unknown[])).toBe(false)
   })
 
+  it('is false when another element reports open: true (e.g. VIDEO)', () => {
+    expect(eventPathIncludesOpenDialog([{ tagName: 'VIDEO', open: true }])).toBe(false)
+  })
+
   it('detects open DIALOG when it is not the first path node', () => {
     expect(
       eventPathIncludesOpenDialog([
