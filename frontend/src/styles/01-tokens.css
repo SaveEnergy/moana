@@ -18,6 +18,8 @@
   --semantic-positive: #1b5e20;
   --semantic-negative: #b91c1c;
   --semantic-negative-muted: #b85454;
+  /* Dashboard “live” / recency dot (`.pill-live-dot`) */
+  --indicator-live: #2196f3;
   --on-surface: #1c1d1e;
   --on-surface-variant: #5c5f62;
   --outline-variant: #abadae;

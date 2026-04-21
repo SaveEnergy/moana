@@ -113,7 +113,7 @@
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: #2196f3;
+  background: var(--indicator-live);
   display: inline-block;
 }
 
@@ -347,7 +347,7 @@
 }
 
 .dashboard-kpi-value--net:not(.dashboard-kpi-value--neg) {
-  color: #1b5e20;
+  color: var(--semantic-positive);
 }
 
 .dashboard-kpi-value--neg {
