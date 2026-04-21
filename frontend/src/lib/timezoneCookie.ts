@@ -48,7 +48,7 @@ export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
   return null
 }
 
-/** Persist browser IANA timezone for server-side date handling. */
+/** Persist browser IANA timezone for server-side date handling. Snapshots **`document.cookie`** once when comparing to the resolved zone. */
 export function setBrowserTimezoneCookie(): void {
   try {
     if (!browserTimeZoneFormat) {
@@ -56,7 +56,8 @@ export function setBrowserTimezoneCookie(): void {
     }
     const tz = browserTimeZoneFormat.resolvedOptions().timeZone
     if (!tz) return
-    if (parseMoanaTimezoneCookie(document.cookie) === tz) {
+    const jar = document.cookie
+    if (parseMoanaTimezoneCookie(jar) === tz) {
       return
     }
     document.cookie = timezoneCookieSegment(tz)

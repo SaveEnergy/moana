@@ -15,6 +15,12 @@ describe('resolveContentQueryRoot', () => {
     expect(resolveContentQueryRoot(parent)).toBe(parent)
   })
 
+  it('returns parent when the document global is undefined (Node / non-DOM)', () => {
+    const parent = { _: 'no-dom' } as unknown as ParentNode
+    vi.stubGlobal('document', undefined)
+    expect(resolveContentQueryRoot(parent)).toBe(parent)
+  })
+
   it('returns main when parent is document and main exists', () => {
     const main = { _: 'main' } as unknown as ParentNode
     const doc = stubDocumentMainLandmark(main) as unknown as Document
