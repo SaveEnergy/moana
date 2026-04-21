@@ -8,7 +8,7 @@ const contentRootMemo = new WeakMap<Document, ParentNode>()
  * so scans skip shell chrome. Falls back to `document` when the landmark is absent (e.g. `login.html`).
  * Returns `parent` unchanged when it is not the global `document` (tests, explicit subtrees) or when `document` is undefined (Node).
  *
- * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses {@link queryBootContentAll} (**`LOCAL_TIME_ELEMENTS_SELECTOR`**) when given the global `document`, else {@link resolveContentQueryRoot} on an explicit subtree. Other boot features: **`initConfirmSubmitForms`** ({@link queryBootContentAll} for **`form[data-confirm]`**), **`initCategoryModal`**, **`initHistoryControls`** ({@link resolveBootContentQueryRoot} + **`queryHistorySortSelect`** — same **`ParentNode`** as {@link queryBootContent} with **`HISTORY_SORT_SELECTOR`**), **`initSettingsMemberDialog`** (one {@link resolveBootContentQueryRoot} for **`dialog`** **`querySelector`** + **`querySettingsAddMemberInitContext`**). {@link queryBootContent} / {@link queryBootContentAll} remain for ad-hoc boot-scoped queries.
+ * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses {@link queryBootContentAll} (**`LOCAL_TIME_ELEMENTS_SELECTOR`**) when given the global `document`, else {@link resolveContentQueryRoot} on an explicit subtree. Other boot features: **`initConfirmSubmitForms`** (one {@link resolveBootContentQueryRoot} + **`querySelectorAll`** for **`form[data-confirm]`** — same **`NodeList`** as {@link queryBootContentAll} with **`FORM_DATA_CONFIRM_SELECTOR`**), **`initCategoryModal`**, **`initHistoryControls`** ({@link resolveBootContentQueryRoot} + **`queryHistorySortSelect`** — same **`ParentNode`** as {@link queryBootContent} with **`HISTORY_SORT_SELECTOR`**), **`initSettingsMemberDialog`** (one {@link resolveBootContentQueryRoot} for **`dialog`** **`querySelector`** + **`querySettingsAddMemberInitContext`**). {@link queryBootContent} / {@link queryBootContentAll} remain for ad-hoc boot-scoped queries (**`applyLocalTimeElements`**, tests).
  */
 export function resolveContentQueryRoot(parent: ParentNode): ParentNode {
   if (typeof document === 'undefined') {
@@ -43,7 +43,7 @@ export function queryBootContent<E extends Element = Element>(selector: string):
 }
 
 /**
- * `resolveBootContentQueryRoot().querySelectorAll` — boot-scoped list queries (e.g. **`applyLocalTimeElements`**, **`initConfirmSubmitForms`**).
+ * `resolveBootContentQueryRoot().querySelectorAll` — boot-scoped list queries (e.g. **`applyLocalTimeElements`** default path).
  */
 export function queryBootContentAll<E extends Element = Element>(selector: string): NodeListOf<E> {
   return resolveBootContentQueryRoot().querySelectorAll<E>(selector)

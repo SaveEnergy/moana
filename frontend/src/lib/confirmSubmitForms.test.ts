@@ -6,6 +6,7 @@ import {
   initConfirmSubmitForms,
   readDataConfirmMessage,
 } from './confirmSubmitForms'
+import * as contentRoot from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
 import * as unicodeCf from './unicodeCf'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
@@ -166,6 +167,29 @@ describe('attachConfirmBeforeSubmit', () => {
 describe('initConfirmSubmitForms', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  it('calls resolveBootContentQueryRoot only once per init', () => {
+    const form = {
+      getAttribute: (name: string) =>
+        name === DATA_CONFIRM_ATTRIBUTE ? 'Really delete?' : null,
+      addEventListener: vi.fn(),
+    } as unknown as HTMLFormElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelectorAll: ((_sel: string) => [form]) as unknown as Document['querySelectorAll'],
+      }),
+    )
+
+    const spy = vi.spyOn(contentRoot, 'resolveBootContentQueryRoot')
+    try {
+      initConfirmSubmitForms()
+      expect(spy).toHaveBeenCalledTimes(1)
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('wires submit only for forms whose data-confirm is non-blank after trim', () => {
