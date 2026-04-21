@@ -43,3 +43,15 @@ func TestRouterOptionsFromConfig_zeroValuesStillSet(t *testing.T) {
 		t.Fatalf("got timeout=%v maxBody=%d want zeros", opts.RequestTimeout, opts.MaxRequestBodyBytes)
 	}
 }
+
+func TestRouterOptionsFromConfig_negativeMaxRequestBodyBytesPassesThrough(t *testing.T) {
+	t.Parallel()
+	cfg := &config.Config{MaxRequestBodyBytes: -1}
+	opts := routerOptionsFromConfig(cfg)
+	if opts == nil {
+		t.Fatal("nil opts")
+	}
+	if opts.MaxRequestBodyBytes != -1 {
+		t.Fatalf("MaxRequestBodyBytes %d want -1 (server disables cap)", opts.MaxRequestBodyBytes)
+	}
+}
