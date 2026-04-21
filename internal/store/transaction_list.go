@@ -14,8 +14,7 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	}
 	var b strings.Builder
 	b.Grow(512)
-	b.WriteString(sqlTransactionSelectFromHousehold)
-	b.WriteString("\nWHERE owner.household_id = ?")
+	b.WriteString(sqlTransactionListFromHousehold)
 	// At most: household, from, to, 2×search, limit.
 	args := make([]any, 0, 6)
 	args = append(args, householdID)

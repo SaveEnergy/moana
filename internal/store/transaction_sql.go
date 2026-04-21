@@ -7,6 +7,11 @@ FROM transactions t
 LEFT JOIN categories c ON c.id = t.category_id
 INNER JOIN users owner ON owner.id = t.user_id`
 
+// sqlTransactionListFromHousehold is [sqlTransactionSelectFromHousehold] plus the household scope
+// WHERE (filters are appended: date bounds, kind, search, order, limit).
+const sqlTransactionListFromHousehold = sqlTransactionSelectFromHousehold + `
+WHERE owner.household_id = ?`
+
 // sqlFromHouseholdTx scopes transactions to a household without joining category columns (sums, movement).
 const sqlFromHouseholdTx = `
 FROM transactions t
