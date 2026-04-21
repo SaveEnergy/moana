@@ -35,6 +35,24 @@ describe('wireHistorySortAutoSubmit', () => {
     expect(requestSubmit).toHaveBeenCalledTimes(1)
   })
 
+  it('no-ops change when select.form is null at event time', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    let currentForm: HTMLFormElement | null = form
+    const select = {
+      addEventListener,
+      get form() {
+        return currentForm
+      },
+    } as unknown as HTMLSelectElement
+    wireHistorySortAutoSubmit(select)
+    currentForm = null
+    const onChange = addEventListener.mock.calls[0][1] as () => void
+    expect(() => onChange()).not.toThrow()
+    expect(requestSubmit).not.toHaveBeenCalled()
+  })
+
   it('uses select.form when change fires, not the form reference at wire time', () => {
     const requestSubmitA = vi.fn()
     const requestSubmitB = vi.fn()
