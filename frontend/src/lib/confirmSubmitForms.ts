@@ -11,6 +11,10 @@ export function readDataConfirmMessage(form: Element): string | null {
   if (raw == null) {
     return null
   }
+  /* Exact empty attribute — skip Cf/trim pipeline (common on malformed templates). */
+  if (raw === '') {
+    return null
+  }
   const msg = stripCfTrimEdges(raw)
   return msg === '' ? null : msg
 }

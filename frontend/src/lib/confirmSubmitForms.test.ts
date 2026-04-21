@@ -7,6 +7,7 @@ import {
   readDataConfirmMessage,
 } from './confirmSubmitForms'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
+import * as unicodeCf from './unicodeCf'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 function elWithAttr(value: string | null): Element {
@@ -20,8 +21,14 @@ describe('readDataConfirmMessage', () => {
     expect(readDataConfirmMessage(elWithAttr(null))).toBeNull()
   })
 
-  it('returns null when attribute is blank or whitespace-only', () => {
+  it('returns null for empty string without running stripCfTrimEdges', () => {
+    const spy = vi.spyOn(unicodeCf, 'stripCfTrimEdges')
     expect(readDataConfirmMessage(elWithAttr(''))).toBeNull()
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
+  })
+
+  it('returns null when attribute is whitespace-only (non-empty)', () => {
     expect(readDataConfirmMessage(elWithAttr('   \t '))).toBeNull()
     expect(readDataConfirmMessage(elWithAttr('\n\r'))).toBeNull()
     expect(readDataConfirmMessage(elWithAttr('\u2028\u2029'))).toBeNull()

@@ -124,12 +124,12 @@ export function initCategoryModal(): void {
       iconRadioByValue.get(iconVal) ??
       catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
     catIconWrap.innerHTML = ''
-    if (!ir?.value) {
-      catIconWrap.classList.add(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS)
+    const isAutoIcon = !ir?.value
+    catIconWrap.classList.toggle(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS, isAutoIcon)
+    if (isAutoIcon) {
       catIconWrap.textContent = 'A'
       return
     }
-    catIconWrap.classList.remove(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS)
     const label = ir.closest('label')
     const svg = label?.querySelector(MOANA_ICON_SVG_SELECTOR)
     if (svg) {
