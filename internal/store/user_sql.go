@@ -9,5 +9,12 @@ const sqlUserGetByEmailCaseInsensitive = sqlUserSelectFull + ` WHERE email = ? C
 // sqlUserGetByID loads one user by primary key.
 const sqlUserGetByID = sqlUserSelectFull + ` WHERE id = ?`
 
+// sqlUserListSummaryAdmin lists accounts for admin views (subset of columns).
+const sqlUserListSummaryAdmin = `SELECT id, email, role, created_at FROM users ORDER BY id`
+
+// sqlUserListHouseholdMembers lists members of one household (display fields + role).
+const sqlUserListHouseholdMembers = `SELECT id, email, IFNULL(first_name, ''), IFNULL(last_name, ''), household_role
+FROM users WHERE household_id = ? ORDER BY id`
+
 // Insert user with empty names; household_role is typically 'owner' (new household) or 'member' (invite).
 const sqlUserInsert = `INSERT INTO users (email, password_hash, role, created_at, household_id, first_name, last_name, household_role) VALUES (?, ?, ?, ?, ?, '', '', ?)`

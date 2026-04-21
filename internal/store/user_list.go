@@ -8,8 +8,7 @@ import (
 
 // ListUsers returns all accounts ordered by id (admin).
 func (s *Store) ListUsers(ctx context.Context) ([]UserSummary, error) {
-	rows, err := s.DB.QueryContext(ctx, `
-SELECT id, email, role, created_at FROM users ORDER BY id`)
+	rows, err := s.DB.QueryContext(ctx, sqlUserListSummaryAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -33,9 +32,7 @@ SELECT id, email, role, created_at FROM users ORDER BY id`)
 
 // ListHouseholdMembers returns users in the same household.
 func (s *Store) ListHouseholdMembers(ctx context.Context, householdID int64) ([]HouseholdMember, error) {
-	rows, err := s.DB.QueryContext(ctx, `
-SELECT id, email, IFNULL(first_name, ''), IFNULL(last_name, ''), household_role
-FROM users WHERE household_id = ? ORDER BY id`, householdID)
+	rows, err := s.DB.QueryContext(ctx, sqlUserListHouseholdMembers, householdID)
 	if err != nil {
 		return nil, err
 	}
