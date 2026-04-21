@@ -1,16 +1,5 @@
 /**
- * Expected `function.name` for each entry in {@link BOOT_APP_INITIALIZERS} (`bootInitializers.ts`), in order.
- * Keep in sync when changing initializer order; `bootInitializers.test.ts` asserts against `BOOT_APP_INITIALIZERS`.
+ * Re-export for modules that already import this path (`boot.test.ts`, docs).
+ * {@link BOOT_INITIALIZER_NAMES} and {@link BOOT_INITIALIZER_COUNT} are defined alongside {@link BOOT_APP_INITIALIZERS} in `bootInitializers.ts`.
  */
-export const BOOT_INITIALIZER_NAMES = [
-  'setBrowserTimezoneCookie',
-  'applyLocalTimeElements',
-  'initShellSidebar',
-  'initSettingsMemberDialog',
-  'initCategoryModal',
-  'initHistoryControls',
-  'initConfirmSubmitForms',
-] as const
-
-/** Length of {@link BOOT_INITIALIZER_NAMES} — use in tests that mock initializer implementations. */
-export const BOOT_INITIALIZER_COUNT = BOOT_INITIALIZER_NAMES.length
+export { BOOT_INITIALIZER_COUNT, BOOT_INITIALIZER_NAMES } from './bootInitializers'

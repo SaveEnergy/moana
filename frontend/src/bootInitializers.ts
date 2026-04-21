@@ -6,12 +6,13 @@ import { initCategoryModal } from './lib/categoryModal'
 import { initHistoryControls } from './lib/historyControls'
 import { initConfirmSubmitForms } from './lib/confirmSubmitForms'
 
-/** One synchronous `bootApp` step (name must match {@link BOOT_INITIALIZER_NAMES}). */
+/** One synchronous `bootApp` step (`function.name` must match the same index in {@link BOOT_INITIALIZER_NAMES}). */
 export type BootInitializer = () => void
 
 /**
  * Ordered client initializers (single source of truth for `bootApp` order).
- * Each no-ops when its DOM is missing. Documented in `design.md`; expected `function.name` order lives in `bootInitializerNames.ts` (asserted by `bootInitializers.test.ts`, which does not mock lib modules).
+ * Each no-ops when its DOM is missing. Documented in `design.md`.
+ * {@link BOOT_INITIALIZER_NAMES} is derived here so reordering this array cannot drift from a parallel name table.
  */
 export const BOOT_APP_INITIALIZERS: ReadonlyArray<BootInitializer> = [
   setBrowserTimezoneCookie,
@@ -22,3 +23,13 @@ export const BOOT_APP_INITIALIZERS: ReadonlyArray<BootInitializer> = [
   initHistoryControls,
   initConfirmSubmitForms,
 ]
+
+/**
+ * `function.name` per {@link BOOT_APP_INITIALIZERS} (Vitest / tooling; unused by `bootApp` and typically tree-shaken from production).
+ */
+export const BOOT_INITIALIZER_NAMES: readonly string[] = Object.freeze(
+  BOOT_APP_INITIALIZERS.map((fn) => fn.name),
+)
+
+/** Length of {@link BOOT_APP_INITIALIZERS} — use in tests that mock initializer implementations. */
+export const BOOT_INITIALIZER_COUNT = BOOT_APP_INITIALIZERS.length
