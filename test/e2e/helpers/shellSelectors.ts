@@ -1,8 +1,12 @@
 /**
  * Playwright locator strings aligned with `frontend/src/lib/domSelectors.ts` and
- * `internal/assets/templates/` (`layout.html`, `settings.html`, `history.html`, transaction forms).
+ * `internal/assets/templates/` (`login.html`, `layout.html`, `settings.html`, `history.html`, transaction forms).
  * Single place to update when template ids change.
  */
+
+// --- Login (`login.html`; `login-email`, `login-password`)
+export const LOGIN_INPUT_EMAIL = '#login-email' as const
+export const LOGIN_INPUT_PASSWORD = '#login-password' as const
 
 // --- Notifications (`layout.html` topbar; `APP_TOPBAR_NOTIF_*`, `NOTIFICATIONS_PATH`)
 export const NOTIFICATIONS_PATH = '/notifications' as const
@@ -33,6 +37,9 @@ export const SETTINGS_ADD_MEMBER_OPEN = '#settings-add-member-open' as const
 export const SETTINGS_ADD_MEMBER_TITLE = '#settings-add-member-title' as const
 export const SETTINGS_ADD_MEMBER_CANCEL = '#settings-add-member-cancel' as const
 
+/** Dismiss hit target for add-member backdrop tests (`settings.html`). */
+export const SETTINGS_ADD_MEMBER_DIALOG_HEADER = '.admin-add-dialog-header' as const
+
 /** Readonly profile email (`settings.html`). */
 export const SETTINGS_EMAIL = '#settings-email' as const
 
@@ -52,9 +59,19 @@ export const CATEGORY_MODAL_CLOSE = '#cat-modal-close' as const
 export const CATEGORY_MODAL_NAME = '#cat-modal-name' as const
 export const CATEGORY_MODAL_SUBMIT = '#cat-modal-submit' as const
 
+export const CATEGORY_MODAL_PANEL = '.cat-modal-panel' as const
+export const CATEGORY_LIST_ROW = '.cat-list-row' as const
+export const CATEGORY_DELETE_FORM = 'form.cat-delete' as const
+
 // --- Transaction forms (shared `name` attrs on `transactions_new.html` / `transactions_edit.html`)
 export const TX_INPUT_AMOUNT = 'input[name="amount"]' as const
 export const TX_INPUT_OCCURRED_ON = 'input[name="occurred_on"]' as const
+
+/** Kind pill + hidden radio (`kind-toggle` on transaction forms). */
+export const TX_KIND_LABEL_EXPENSE = 'label.kind-option:has(input[name="kind"][value="expense"])' as const
+export const TX_KIND_LABEL_INCOME = 'label.kind-option:has(input[name="kind"][value="income"])' as const
+export const TX_INPUT_KIND_EXPENSE = 'input[name="kind"][value="expense"]' as const
+export const TX_INPUT_KIND_INCOME = 'input[name="kind"][value="income"]' as const
 
 // --- Transaction edit (`transactions_edit.html`)
 export const TX_EDIT_NOTE = '#tx-edit-note' as const

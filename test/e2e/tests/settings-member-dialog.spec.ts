@@ -5,6 +5,7 @@ import {
   APP_SHELL,
   SETTINGS_ADD_MEMBER_CANCEL,
   SETTINGS_ADD_MEMBER_DIALOG,
+  SETTINGS_ADD_MEMBER_DIALOG_HEADER,
   SETTINGS_ADD_MEMBER_DIALOG_ID,
   SETTINGS_ADD_MEMBER_OPEN,
   SETTINGS_ADD_MEMBER_TITLE,
@@ -37,7 +38,7 @@ test('add-member dialog closes on backdrop click outside card', async ({ page })
   await page.locator(SETTINGS_ADD_MEMBER_OPEN).click()
   const dlg = page.locator(SETTINGS_ADD_MEMBER_DIALOG)
   await expect(dlg).toBeVisible()
-  const header = page.locator('.admin-add-dialog-header')
+  const header = page.locator(SETTINGS_ADD_MEMBER_DIALOG_HEADER)
   const box = await header.boundingBox()
   expect(box).not.toBeNull()
   await page.mouse.click(box!.x + box!.width / 2, Math.max(8, box!.y - 24))

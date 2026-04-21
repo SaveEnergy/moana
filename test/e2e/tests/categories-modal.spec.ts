@@ -3,11 +3,14 @@ import { test, expect } from '@playwright/test'
 import { signInAsTestUser } from '../helpers/auth'
 import {
   APP_SHELL,
+  CATEGORY_DELETE_FORM,
+  CATEGORY_LIST_ROW,
   CATEGORY_MODAL,
   CATEGORY_MODAL_CLOSE,
   CATEGORY_MODAL_ID,
   CATEGORY_MODAL_NAME,
   CATEGORY_MODAL_OPEN_CREATE,
+  CATEGORY_MODAL_PANEL,
   CATEGORY_MODAL_SUBMIT,
   CATEGORY_MODAL_TITLE,
 } from '../helpers/shellSelectors'
@@ -42,7 +45,7 @@ test('category modal closes on backdrop click outside panel', async ({ page }) =
   await page.goto('/categories')
   await page.locator(CATEGORY_MODAL_OPEN_CREATE).click()
   const dialog = page.locator(CATEGORY_MODAL)
-  const panel = page.locator('.cat-modal-panel')
+  const panel = page.locator(CATEGORY_MODAL_PANEL)
   await expect(dialog).toBeVisible()
   const box = await panel.boundingBox()
   expect(box).not.toBeNull()
@@ -105,9 +108,9 @@ test('category delete confirm accept removes category', async ({ page }) => {
     await dialog.accept()
   })
   await page
-    .locator('.cat-list-row')
+    .locator(CATEGORY_LIST_ROW)
     .filter({ hasText: name })
-    .locator('form.cat-delete')
+    .locator(CATEGORY_DELETE_FORM)
     .getByRole('button', { name: 'Remove' })
     .click()
   await expect(page.getByText(name)).not.toBeVisible()
