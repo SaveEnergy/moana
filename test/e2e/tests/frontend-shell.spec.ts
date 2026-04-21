@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
+import { NOTIFICATIONS_PATH, TOPBAR_NOTIFICATIONS_LINK } from '../helpers/shellSelectors'
 
 test.beforeEach(async ({ page }) => {
   await signInAsTestUser(page)
@@ -97,8 +98,9 @@ test('topbar search submits to history with q', async ({ page }) => {
 
 test('notifications link is reachable', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('link', { name: 'Notifications' }).click()
-  await expect(page).toHaveURL(/\/notifications/)
+  await expect(page.locator(TOPBAR_NOTIFICATIONS_LINK)).toBeVisible()
+  await page.locator(TOPBAR_NOTIFICATIONS_LINK).click()
+  await expect(page).toHaveURL(new RegExp(`${NOTIFICATIONS_PATH}$`))
   await expect(page.getByRole('heading', { name: 'Notifications' })).toBeVisible()
 })
 
