@@ -16,11 +16,13 @@ func (s *Store) SumAmountCents(ctx context.Context, householdID int64, fromUTC, 
 // SumIncomeExpenseCentsInRange returns income (positive amounts) and expense (negative amounts) sums
 // for the household in one query. Net equals incomeSum + expenseSum.
 func (s *Store) SumIncomeExpenseCentsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time) (incomeSum int64, expenseSum int64, err error) {
+	if fromUTC == nil && toUTC == nil {
+		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseBase, householdID).Scan(&incomeSum, &expenseSum)
+		return incomeSum, expenseSum, err
+	}
 	var b strings.Builder
 	b.Grow(256)
-	b.WriteString(`SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
-COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) `)
-	b.WriteString(sqlFromHouseholdTx)
+	b.WriteString(sqlSumIncomeExpenseBase)
 	// cap: household + optional from/to.
 	args := make([]any, 0, 3)
 	args = append(args, householdID)
@@ -41,20 +43,10 @@ func (s *Store) SumIncomeExpenseCentsInTwoRanges(ctx context.Context, householdI
 // [Store.SumAmountCents] with no date filter) plus income and expense totals for two closed intervals,
 // in a single scan. Used by the dashboard to avoid an extra round trip.
 func (s *Store) SumRunningTotalAndIncomeExpenseInTwoRanges(ctx context.Context, householdID int64, aFrom, aTo, bFrom, bTo time.Time) (running int64, aIncome, aExpense, bIncome, bExpense int64, err error) {
-	var b strings.Builder
-	b.Grow(768)
-	b.WriteString(`SELECT
-  COALESCE(SUM(t.amount_cents), 0),
-  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
-  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0),
-  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
-  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0)
-`)
-	b.WriteString(sqlFromHouseholdTx)
 	aF, aT := timeutil.FormatSQLiteUTC(aFrom), timeutil.FormatSQLiteUTC(aTo)
 	bF, bT := timeutil.FormatSQLiteUTC(bFrom), timeutil.FormatSQLiteUTC(bTo)
 	args := []any{aF, aT, aF, aT, bF, bT, bF, bT, householdID}
-	err = s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&running, &aIncome, &aExpense, &bIncome, &bExpense)
+	err = s.DB.QueryRowContext(ctx, sqlSumRunningTotalAndIncomeExpenseInTwoRanges, args...).Scan(&running, &aIncome, &aExpense, &bIncome, &bExpense)
 	return running, aIncome, aExpense, bIncome, bExpense, err
 }
 

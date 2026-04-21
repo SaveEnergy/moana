@@ -22,6 +22,20 @@ FROM transactions t
 INNER JOIN users owner ON owner.id = t.user_id
 WHERE owner.household_id = ?`
 
+// sqlSumIncomeExpenseBase is [SumIncomeExpenseCentsInRange] with no date bounds (appendOccurredAtRange adds optional ANDs).
+const sqlSumIncomeExpenseBase = `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
+COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx
+
+// sqlSumRunningTotalAndIncomeExpenseInTwoRanges is the dashboard aggregate: one scan for all-time net plus
+// income/expense in two closed ranges. Placeholders: aFrom, aTo (each range uses two CASE branches); then household_id.
+const sqlSumRunningTotalAndIncomeExpenseInTwoRanges = `SELECT
+  COALESCE(SUM(t.amount_cents), 0),
+  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
+  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0),
+  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
+  COALESCE(SUM(CASE WHEN t.occurred_at >= ? AND t.occurred_at <= ? AND t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0)
+` + sqlFromHouseholdTx
+
 // sqlAggregateFromHouseholdTx is FROM/WHERE for household aggregates that need the category join (matches listing joins).
 const sqlAggregateFromHouseholdTx = `
 FROM transactions t

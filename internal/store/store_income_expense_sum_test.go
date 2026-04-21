@@ -8,6 +8,45 @@ import (
 	"moana/internal/passwordtest"
 )
 
+func TestSumIncomeExpenseCentsInRange_nilNil_matchesSplitQueries(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "agg-nil@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 7, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 10000, day, "in", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -3000, day, "out", nil); err != nil {
+		t.Fatal(err)
+	}
+
+	inc, exp, err := st.SumIncomeExpenseCentsInRange(ctx, hid, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantInc, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "income")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantExp, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inc != wantInc || exp != wantExp {
+		t.Fatalf("nil,nil range got inc=%d exp=%d want inc=%d exp=%d", inc, exp, wantInc, wantExp)
+	}
+}
+
 func TestSumIncomeExpenseCentsInRange_matchesSplitQueries(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
