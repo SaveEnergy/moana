@@ -21,16 +21,16 @@ func (a *App) Notifications(w http.ResponseWriter, r *http.Request, u *store.Use
 	loc := tz.DisplayLocation(r)
 	p := NotificationsPageData{
 		MarkReadPath: NotificationsMarkReadPath,
-		Items:        make([]NotificationView, 0, len(items)),
+		Items:        make([]NotificationView, len(items)),
 	}
-	for _, n := range items {
+	for i, n := range items {
 		when := n.CreatedAt.In(loc).Format(time.DateTime)
-		p.Items = append(p.Items, NotificationView{
+		p.Items[i] = NotificationView{
 			ID:     n.ID,
 			Body:   n.Body,
 			When:   when,
 			Unread: n.ReadAt == nil,
-		})
+		}
 	}
 	a.renderShell(w, r, "notifications.html", p, "Notifications", "notifications", "", u)
 }

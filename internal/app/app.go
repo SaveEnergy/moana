@@ -25,14 +25,27 @@ func New(cfg *config.Config, st *store.Store) (*handlers.App, error) {
 	}, nil
 }
 
+// routerOptionsFromConfig maps env-backed settings onto [server.RouterOptions] for the production
+// router. Request timeout and max body size are applied here so [server.NewRouterWithRouterOptions]
+// does not rely only on [handlers.App.Config] fallbacks (both stay in sync with [config.Config]).
+func routerOptionsFromConfig(cfg *config.Config) *server.RouterOptions {
+	if cfg == nil {
+		return nil
+	}
+	return &server.RouterOptions{
+		MaxRequestBodyBytes: cfg.MaxRequestBodyBytes,
+		RequestTimeout:      cfg.RequestTimeout,
+	}
+}
+
 // HTTPHandler returns the production HTTP handler (parsed templates + routes + logging).
-// It passes [config.Config.MaxRequestBodyBytes] into [server.RouterOptions] so env-driven limits apply; see [server.NewRouterWithRouterOptions] for the full middleware chain.
+// It passes [config.Config] limits into [server.RouterOptions] (request deadline + POST body cap);
+// see [server.NewRouterWithRouterOptions] for the full middleware chain.
 // Tests that need a bare [handlers.App] should use [New] and [server.NewRouter] directly.
 func HTTPHandler(cfg *config.Config, st *store.Store) (http.Handler, error) {
 	a, err := New(cfg, st)
 	if err != nil {
 		return nil, err
 	}
-	opts := &server.RouterOptions{MaxRequestBodyBytes: cfg.MaxRequestBodyBytes}
-	return server.NewRouterWithRouterOptions(opts, a), nil
+	return server.NewRouterWithRouterOptions(routerOptionsFromConfig(cfg), a), nil
 }
