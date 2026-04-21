@@ -8,8 +8,7 @@ import (
 
 // ListCategories returns all categories for a household, ordered by name.
 func (s *Store) ListCategories(ctx context.Context, householdID int64) ([]Category, error) {
-	rows, err := s.DB.QueryContext(ctx,
-		sqlCategorySelectFull+` WHERE household_id = ? ORDER BY name COLLATE NOCASE`, householdID)
+	rows, err := s.DB.QueryContext(ctx, sqlCategoryListByHousehold, householdID)
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +26,7 @@ func (s *Store) ListCategories(ctx context.Context, householdID int64) ([]Catego
 
 // GetCategoryByID returns a category in the household, or nil.
 func (s *Store) GetCategoryByID(ctx context.Context, householdID, categoryID int64) (*Category, error) {
-	row := s.DB.QueryRowContext(ctx,
-		sqlCategorySelectFull+` WHERE id = ? AND household_id = ?`, categoryID, householdID)
+	row := s.DB.QueryRowContext(ctx, sqlCategoryGetByIDHousehold, categoryID, householdID)
 	var c Category
 	err := row.Scan(&c.ID, &c.HouseholdID, &c.Name, &c.Icon, &c.Color)
 	if errors.Is(err, sql.ErrNoRows) {
