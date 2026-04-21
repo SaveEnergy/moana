@@ -152,4 +152,25 @@ describe('attachNativeDialogDismiss', () => {
     expect(close).not.toHaveBeenCalled()
     expect(closest).not.toHaveBeenCalled()
   })
+
+  it('preserves non-blank dismiss selector order after attach-time trim', () => {
+    const close = vi.fn()
+    const addEventListener = vi.fn()
+    const dialog = { close, addEventListener } as unknown as HTMLDialogElement
+    const seen: string[] = []
+    const inner = {
+      closest: (sel: string) => {
+        seen.push(sel)
+        return null
+      },
+    } as unknown as Element
+
+    attachNativeDialogDismiss(dialog, ['  #first  ', '', '#second'])
+
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(inner))
+
+    expect(seen).toEqual(['#first', '#second'])
+    expect(close).not.toHaveBeenCalled()
+  })
 })

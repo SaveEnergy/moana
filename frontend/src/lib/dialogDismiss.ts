@@ -18,9 +18,9 @@ export function shouldCloseNativeDialogFromClick(
   if (el === dialog) {
     return true
   }
-  for (const sel of closeWithinSelectors) {
+  for (let i = 0, n = closeWithinSelectors.length; i < n; i++) {
     /* Invalid or empty selectors throw from `closest`; skip blanks so callers can pad lists safely. */
-    const t = trimEdgesIfNeeded(sel)
+    const t = trimEdgesIfNeeded(closeWithinSelectors[i])
     if (!t) {
       continue
     }
@@ -44,10 +44,19 @@ export function attachNativeDialogDismiss(
   if (nativeDialogDismissWiredDialogs.has(dialog)) {
     return
   }
-  const selectors: readonly string[] =
-    closeWithinSelectors.length > 0
-      ? closeWithinSelectors.map((s) => trimEdgesIfNeeded(s)).filter((s) => s !== '')
-      : closeWithinSelectors
+  let selectors: readonly string[]
+  if (closeWithinSelectors.length > 0) {
+    const out: string[] = []
+    for (let i = 0, n = closeWithinSelectors.length; i < n; i++) {
+      const t = trimEdgesIfNeeded(closeWithinSelectors[i])
+      if (t) {
+        out.push(t)
+      }
+    }
+    selectors = out
+  } else {
+    selectors = closeWithinSelectors
+  }
   dialog.addEventListener('click', (e) => {
     if (!shouldCloseNativeDialogFromClick(e, dialog, selectors)) {
       return
