@@ -43,6 +43,22 @@ describe('attachShowModalOnClick', () => {
     expect(showModal).toHaveBeenCalledTimes(1)
   })
 
+  it('click handler skips showModal when dialog is already open', () => {
+    const showModal = vi.fn()
+    const dialog = { open: true, showModal } as unknown as HTMLDialogElement
+    const handlers: Array<() => void> = []
+    const openBtn = {
+      addEventListener: (_type: string, fn: () => void) => {
+        handlers.push(fn)
+      },
+    } as unknown as HTMLElement
+
+    attachShowModalOnClick(openBtn, dialog)
+    handlers[0]()
+
+    expect(showModal).not.toHaveBeenCalled()
+  })
+
   it('no-ops when open button is null', () => {
     const dialog = { open: false, showModal: vi.fn() } as unknown as HTMLDialogElement
     expect(() => attachShowModalOnClick(null, dialog)).not.toThrow()
