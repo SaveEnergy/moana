@@ -327,3 +327,22 @@ func TestLoad_maxRequestBodyBytesEnvZeroExplicitMeansDefaultCap(t *testing.T) {
 		t.Fatalf("MaxRequestBodyBytes %d want 0 (server applies default cap)", c.MaxRequestBodyBytes)
 	}
 }
+
+func TestDurationSecondsClamped_clampsOverflow(t *testing.T) {
+	t.Parallel()
+	maxSec := int(math.MaxInt64 / int64(time.Second))
+	want := time.Duration(maxSec) * time.Second
+	if got := durationSecondsClamped(maxSec + 1); got != want {
+		t.Fatalf("maxSec+1: got %v want %v", got, want)
+	}
+	if got := durationSecondsClamped(maxSec); got != want {
+		t.Fatalf("maxSec: got %v want %v", got, want)
+	}
+}
+
+func TestDurationSecondsClamped_small(t *testing.T) {
+	t.Parallel()
+	if got := durationSecondsClamped(42); got != 42*time.Second {
+		t.Fatalf("got %v want 42s", got)
+	}
+}
