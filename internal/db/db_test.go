@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 )
@@ -87,6 +88,13 @@ func TestOpen_fileTuningPragmas(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer d.Close()
+	var journal string
+	if err := d.QueryRowContext(context.Background(), `PRAGMA journal_mode`).Scan(&journal); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.EqualFold(journal, "wal") {
+		t.Fatalf("PRAGMA journal_mode = %q want wal (file-backed DB must use WAL)", journal)
+	}
 	var cache int64
 	if err := d.QueryRowContext(context.Background(), `PRAGMA cache_size`).Scan(&cache); err != nil {
 		t.Fatal(err)
