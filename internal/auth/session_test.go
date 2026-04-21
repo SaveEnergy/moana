@@ -151,6 +151,18 @@ func TestSignSession_rejectsNonPositiveUserID(t *testing.T) {
 	}
 }
 
+func TestSignSession_rejectsNegativeUserID(t *testing.T) {
+	t.Parallel()
+	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
+	w := httptest.NewRecorder()
+	if err := SignSession(w, secret, SessionPayload{UserID: -1, Role: "user"}, time.Hour, false); err == nil {
+		t.Fatal("expected error")
+	}
+	if sessionCookieValue(w) != "" {
+		t.Fatal("expected no Set-Cookie on validation failure")
+	}
+}
+
 func TestReadSession_invalidRole(t *testing.T) {
 	t.Parallel()
 	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
