@@ -253,6 +253,12 @@ func TestDonutConicGradient(t *testing.T) {
 	if s == "" || len(s) < 20 {
 		t.Fatal(s)
 	}
+	if !strings.HasPrefix(s, "conic-gradient(from -90deg, ") {
+		t.Fatalf("expected CSS conic-gradient prefix, got %q", s)
+	}
+	if !strings.HasSuffix(s, ")") {
+		t.Fatalf("expected closed gradient, got %q", s)
+	}
 }
 
 func TestDonutConicGradient_empty(t *testing.T) {
