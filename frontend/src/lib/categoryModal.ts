@@ -93,8 +93,15 @@ export function initCategoryModal(): void {
   /** Last `resolveCategoryModalPreviewBackground` string applied to `#cat-modal-preview` (reset each open). */
   let lastResolvedPreviewBackground: string | undefined
 
-  function syncCatModalPreview() {
-    const colorVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME)
+  function syncCatModalPreview(opts?: {
+    colorRadioTarget?: HTMLInputElement
+    iconRadioTarget?: HTMLInputElement
+  }) {
+    const colorVal = getFormRadioGroupValue(
+      catForm,
+      CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
+      opts?.colorRadioTarget,
+    )
     const nextBg = resolveCategoryModalPreviewBackground(
       colorVal || undefined,
       colorNativeInput?.value,
@@ -104,7 +111,11 @@ export function initCategoryModal(): void {
       lastResolvedPreviewBackground = nextBg
     }
 
-    const iconVal = getFormRadioGroupValue(catForm, CATEGORY_MODAL_ICON_RADIO_GROUP_NAME)
+    const iconVal = getFormRadioGroupValue(
+      catForm,
+      CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
+      opts?.iconRadioTarget,
+    )
     if (!shouldRepaintCategoryModalIconPreview(lastPaintedIconGroupValue, iconVal)) {
       return
     }
@@ -149,8 +160,12 @@ export function initCategoryModal(): void {
       if (!(t instanceof HTMLInputElement)) {
         return
       }
-      if (t.name === CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME || t.name === CATEGORY_MODAL_ICON_RADIO_GROUP_NAME) {
-        syncCatModalPreview()
+      if (t.name === CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME) {
+        syncCatModalPreview({ colorRadioTarget: t })
+        return
+      }
+      if (t.name === CATEGORY_MODAL_ICON_RADIO_GROUP_NAME) {
+        syncCatModalPreview({ iconRadioTarget: t })
       }
     })
   }

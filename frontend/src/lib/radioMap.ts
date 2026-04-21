@@ -53,8 +53,17 @@ export function setRadioCheckedByValue(
  * Checked `value` for a radio group `name` inside `form` (empty string if none or non-string).
  * Uses `HTMLFormElement.elements` / `RadioNodeList.value` instead of `:checked` `querySelector` on hot paths.
  * String values use **`trimEdgesIfNeeded`** so `buildRadioMapByValue` lookups stay aligned with browser quirks / odd markup.
+ *
+ * **`trustedChangeTarget`:** when it is the `change` event’s target and **`target.name` === `name`**, reads **`target.value`** instead of **`namedItem`** (same string the group just committed; skips a redundant lookup on category modal hot paths).
  */
-export function getFormRadioGroupValue(form: HTMLFormElement, name: string): string {
+export function getFormRadioGroupValue(
+  form: HTMLFormElement,
+  name: string,
+  trustedChangeTarget?: HTMLInputElement,
+): string {
+  if (trustedChangeTarget && trustedChangeTarget.name === name) {
+    return trimEdgesIfNeeded(trustedChangeTarget.value)
+  }
   const el = form.elements.namedItem(name)
   if (!el) {
     return ''

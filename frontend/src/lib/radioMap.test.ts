@@ -183,4 +183,34 @@ describe('getFormRadioGroupValue', () => {
     } as unknown as HTMLFormElement
     expect(getFormRadioGroupValue(form, 'color')).toBe('')
   })
+
+  it('uses trusted change target when name matches (skips namedItem)', () => {
+    const namedItem = vi.fn()
+    const form = {
+      elements: { namedItem },
+    } as unknown as HTMLFormElement
+    const target = { name: 'color', value: 'from-target' } as HTMLInputElement
+    expect(getFormRadioGroupValue(form, 'color', target)).toBe('from-target')
+    expect(namedItem).not.toHaveBeenCalled()
+  })
+
+  it('falls back to namedItem when trusted target name differs', () => {
+    const namedItem = vi.fn(() => ({ value: 'from-form' } as RadioNodeList))
+    const form = {
+      elements: { namedItem },
+    } as unknown as HTMLFormElement
+    const target = { name: 'icon', value: 'wrong' } as HTMLInputElement
+    expect(getFormRadioGroupValue(form, 'color', target)).toBe('from-form')
+    expect(namedItem).toHaveBeenCalledWith('color')
+  })
+
+  it('trims trusted change target value', () => {
+    const namedItem = vi.fn()
+    const form = {
+      elements: { namedItem },
+    } as unknown as HTMLFormElement
+    const target = { name: 'color', value: '  x  ' } as HTMLInputElement
+    expect(getFormRadioGroupValue(form, 'color', target)).toBe('x')
+    expect(namedItem).not.toHaveBeenCalled()
+  })
 })
