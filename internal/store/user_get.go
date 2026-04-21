@@ -8,12 +8,12 @@ func (s *Store) GetUserByEmail(ctx context.Context, email string) (*User, error)
 	if email == "" {
 		return nil, nil
 	}
-	row := s.DB.QueryRowContext(ctx, sqlUserSelectFull+` WHERE email = ? COLLATE NOCASE`, email)
+	row := s.DB.QueryRowContext(ctx, sqlUserGetByEmailCaseInsensitive, email)
 	return scanUser(row)
 }
 
 // GetUserByID returns a user by id.
 func (s *Store) GetUserByID(ctx context.Context, id int64) (*User, error) {
-	row := s.DB.QueryRowContext(ctx, sqlUserSelectFull+` WHERE id = ?`, id)
+	row := s.DB.QueryRowContext(ctx, sqlUserGetByID, id)
 	return scanUser(row)
 }

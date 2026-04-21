@@ -3,5 +3,11 @@ package store
 // Full user row (credentials + household fields) for scanUser.
 const sqlUserSelectFull = `SELECT id, email, password_hash, role, created_at, household_id, first_name, last_name, household_role FROM users`
 
+// sqlUserGetByEmailCaseInsensitive loads one user by email with COLLATE NOCASE (see [normalizeUserEmail]).
+const sqlUserGetByEmailCaseInsensitive = sqlUserSelectFull + ` WHERE email = ? COLLATE NOCASE`
+
+// sqlUserGetByID loads one user by primary key.
+const sqlUserGetByID = sqlUserSelectFull + ` WHERE id = ?`
+
 // Insert user with empty names; household_role is typically 'owner' (new household) or 'member' (invite).
 const sqlUserInsert = `INSERT INTO users (email, password_hash, role, created_at, household_id, first_name, last_name, household_role) VALUES (?, ?, ?, ?, ?, '', '', ?)`
