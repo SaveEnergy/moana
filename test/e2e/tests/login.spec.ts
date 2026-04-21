@@ -17,3 +17,10 @@ test('login page exposes remember me and disabled oauth placeholders', async ({ 
   await expect(page.getByRole('button', { name: 'Google' })).toBeDisabled()
   await expect(page.getByRole('button', { name: 'GitHub' })).toBeDisabled()
 })
+
+test('login page forgot password control is disabled until wired', async ({ page }) => {
+  await page.goto('/login')
+  const forgot = page.getByRole('button', { name: 'Forgot password?' })
+  await expect(forgot).toBeVisible()
+  await expect(forgot).toBeDisabled()
+})

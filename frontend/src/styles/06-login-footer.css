@@ -123,10 +123,21 @@
 }
 
 .login-forgot {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: inherit;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--primary);
-  cursor: default;
+  cursor: not-allowed;
+}
+
+.login-forgot:disabled {
+  opacity: 1;
+  color: var(--primary);
 }
 
 .login-submit {
