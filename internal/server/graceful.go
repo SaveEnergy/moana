@@ -11,8 +11,8 @@ import (
 )
 
 // ListenAndServeGracefully runs srv.ListenAndServe in the background, logs the listen address,
-// blocks until SIGINT or SIGTERM, then shuts down with shutdownTimeout. If ListenAndServe fails
-// with an error other than [http.ErrServerClosed], it logs and calls os.Exit(1).
+// blocks until SIGINT or SIGTERM, then shuts down with shutdownTimeout (logs non-nil [http.Server.Shutdown] errors).
+// If ListenAndServe fails with an error other than [http.ErrServerClosed], it logs and calls os.Exit(1).
 func ListenAndServeGracefully(srv *http.Server, shutdownTimeout time.Duration) {
 	slog.Info("listening", "addr", srv.Addr)
 	go func() {
@@ -28,6 +28,8 @@ func ListenAndServeGracefully(srv *http.Server, shutdownTimeout time.Duration) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
-	_ = srv.Shutdown(ctx)
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("shutdown", "err", err)
+	}
 	slog.Info("shutdown complete")
 }
