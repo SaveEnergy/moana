@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
-import { HISTORY_SORT } from '../helpers/shellSelectors'
+import { HISTORY_FROM, HISTORY_Q, HISTORY_SORT, HISTORY_TO } from '../helpers/shellSelectors'
 
 test('history page loads shell and heading', async ({ page }) => {
   await signInAsTestUser(page)
@@ -15,8 +15,8 @@ test('history search submits q on GET', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/history')
   const q = 'e2e-history-q'
-  await page.locator('#history-q').fill(q)
-  await page.locator('#history-q').press('Enter')
+  await page.locator(HISTORY_Q).fill(q)
+  await page.locator(HISTORY_Q).press('Enter')
   await expect(page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(q)}`))
 })
 
@@ -38,8 +38,8 @@ test('history clear filters link returns to bare /history', async ({ page }) => 
 test('history apply dates submits from and to on GET', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/history')
-  await page.locator('#history-from').fill('2026-01-10')
-  await page.locator('#history-to').fill('2026-04-19')
+  await page.locator(HISTORY_FROM).fill('2026-01-10')
+  await page.locator(HISTORY_TO).fill('2026-04-19')
   await page.getByRole('button', { name: 'Apply dates' }).click()
   await expect(page).toHaveURL(/[?&]from=2026-01-10(?:&|$)/)
   await expect(page).toHaveURL(/[?&]to=2026-04-19(?:&|$)/)

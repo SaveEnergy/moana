@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test'
 import { E2E_USER_EMAIL, signInAsTestUser } from '../helpers/auth'
 import { todayLocalISODate } from '../helpers/dates'
 import { APP_CSS_STYLESHEET, APP_JS_MODULE_PRELOAD } from '../helpers/modulePreload'
+import { SETTINGS_EMAIL } from '../helpers/shellSelectors'
 
 test('categories page renders', async ({ page }) => {
   await signInAsTestUser(page)
@@ -42,7 +43,7 @@ test('settings profile loads', async ({ page }) => {
   await page.goto('/settings')
   await expect(page).toHaveURL(/\/settings/)
   await expect(page.getByRole('heading', { name: 'Personal' })).toBeVisible()
-  await expect(page.locator('#settings-email')).toHaveValue(E2E_USER_EMAIL)
+  await expect(page.locator(SETTINGS_EMAIL)).toHaveValue(E2E_USER_EMAIL)
 })
 
 test('transaction edit loads from history and save returns to history', async ({ page }) => {
