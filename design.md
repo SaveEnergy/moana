@@ -54,6 +54,7 @@ Tokens follow **Material-style naming** (surface / on-surface / primary / contai
 - Many cards use literal `border-radius: 1rem` (not tokenized)
 - **`--shadow-raise-xs`** / **`--shadow-raise-xs-strong`** — paper “lift” inside tinted pill rails (`.history-seg-active` vs `.kind-option` checked; same blur/spread, **0.06** vs **0.08** alpha so the two controls keep their tuned contrast)
 - **`--shadow-modal-panel`** — `.cat-modal-panel` (native category dialog stack)
+- **`--shadow-admin-add-dialog`** — settings **add-member** `.admin-add-dialog` (`--shadow-float` + outline-variant hairline)
 - **`--shadow-picker-stack`** — `.cat-picker-card` (dense picker chrome when that pattern is used)
 - **`--shadow-category-tile`** / **`--shadow-category-tile-hover`** / **`--shadow-category-tile-selected`** — `.category-picker-card` default, hover, and checked elevation (checked state still adds a **2px** `color-mix` ring in the declaration)
 - **`--shadow-drawer-edge`** / **`--shadow-shell-control`** — mobile **`.app-sidebar`** off-canvas stack and **`.app-sidebar-close`** floating control (`color-mix` on **`--on-surface`**, `03-dashboard.css`)

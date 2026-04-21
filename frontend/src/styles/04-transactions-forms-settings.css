@@ -881,7 +881,7 @@ input[type='date'].float-input {
   max-width: 26rem;
   width: calc(100vw - 2rem);
   background: var(--surface-lowest);
-  box-shadow: var(--shadow-float), 0 0 0 1px color-mix(in srgb, var(--outline-variant) 40%, transparent);
+  box-shadow: var(--shadow-admin-add-dialog);
 }
 
 .admin-add-dialog::backdrop {

@@ -73,6 +73,15 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines admin add-member dialog shadow stack', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toContain('--shadow-admin-add-dialog:')
+    expect(src).toContain('var(--shadow-float)')
+    expect(src).toMatch(
+      /0 0 0 1px color-mix\(in srgb, var\(--outline-variant\) 40%, transparent\)/,
+    )
+  })
+
   it('defines modal, picker stack, and category tile elevation tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(
