@@ -5,9 +5,12 @@ import (
 	"os"
 )
 
+// userUsage is printed when "moana user" is run without a subcommand.
+const userUsage = "usage: moana user <add|password> [flags]\n"
+
 func runUser(args []string) int {
 	if len(args) < 1 {
-		fmt.Fprintf(os.Stderr, "usage: moana user <add|password> [flags]\n")
+		fmt.Fprint(os.Stderr, userUsage)
 		return 2
 	}
 	switch args[0] {
