@@ -27,8 +27,8 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 			return scanTransactionRows(rows, limit)
 		}
 	}
-	if search == "" && limit > 0 && (f.FromUTC != nil || f.ToUTC != nil) {
-		if q, ok := staticListTransactionsDatedNoSearchQuery(f.FromUTC, f.ToUTC, f.OldestFirst, kind); ok {
+	if search == "" && (f.FromUTC != nil || f.ToUTC != nil) {
+		if q, ok := staticListTransactionsDatedNoSearchQuery(f.FromUTC, f.ToUTC, f.OldestFirst, kind, limit); ok {
 			args := listTransactionDatedNoSearchArgs(householdID, f.FromUTC, f.ToUTC, limit)
 			rows, err := s.DB.QueryContext(ctx, q, args...)
 			if err != nil {
@@ -96,16 +96,29 @@ func scanTransactionRows(rows *sql.Rows, limit int) ([]Transaction, error) {
 func listTransactionDatedNoSearchArgs(householdID int64, fromUTC, toUTC *time.Time, limit int) []any {
 	switch {
 	case fromUTC != nil && toUTC != nil:
-		return []any{householdID, timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC), limit}
+		a := []any{householdID, timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC)}
+		if limit > 0 {
+			a = append(a, limit)
+		}
+		return a
 	case fromUTC != nil:
-		return []any{householdID, timeutil.FormatSQLiteUTC(*fromUTC), limit}
+		a := []any{householdID, timeutil.FormatSQLiteUTC(*fromUTC)}
+		if limit > 0 {
+			a = append(a, limit)
+		}
+		return a
 	default:
-		return []any{householdID, timeutil.FormatSQLiteUTC(*toUTC), limit}
+		a := []any{householdID, timeutil.FormatSQLiteUTC(*toUTC)}
+		if limit > 0 {
+			a = append(a, limit)
+		}
+		return a
 	}
 }
 
-// staticListTransactionsDatedNoSearchQuery returns fixed SQL when [Store.ListTransactions] has date bounds, no search, and LIMIT.
-func staticListTransactionsDatedNoSearchQuery(fromUTC, toUTC *time.Time, oldestFirst bool, kind string) (query string, ok bool) {
+// staticListTransactionsDatedNoSearchQuery returns fixed SQL when [Store.ListTransactions] has date bounds and no search (optional LIMIT when limit > 0).
+func staticListTransactionsDatedNoSearchQuery(fromUTC, toUTC *time.Time, oldestFirst bool, kind string, limit int) (query string, ok bool) {
+	withLimit := limit > 0
 	frag := sqlAmountKindFilter(kind)
 	both := fromUTC != nil && toUTC != nil
 	fromOnly := fromUTC != nil && toUTC == nil
@@ -114,55 +127,109 @@ func staticListTransactionsDatedNoSearchQuery(fromUTC, toUTC *time.Time, oldestF
 		switch frag {
 		case "":
 			if oldestFirst {
-				return sqlTransactionListDatedBothNoKindAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedBothNoKindAscLimit, true
+				}
+				return sqlTransactionListDatedBothNoKindAsc, true
 			}
-			return sqlTransactionListDatedBothNoKindDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedBothNoKindDescLimit, true
+			}
+			return sqlTransactionListDatedBothNoKindDesc, true
 		case sqlFilterAmountIncome:
 			if oldestFirst {
-				return sqlTransactionListDatedBothIncomeAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedBothIncomeAscLimit, true
+				}
+				return sqlTransactionListDatedBothIncomeAsc, true
 			}
-			return sqlTransactionListDatedBothIncomeDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedBothIncomeDescLimit, true
+			}
+			return sqlTransactionListDatedBothIncomeDesc, true
 		case sqlFilterAmountExpense:
 			if oldestFirst {
-				return sqlTransactionListDatedBothExpenseAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedBothExpenseAscLimit, true
+				}
+				return sqlTransactionListDatedBothExpenseAsc, true
 			}
-			return sqlTransactionListDatedBothExpenseDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedBothExpenseDescLimit, true
+			}
+			return sqlTransactionListDatedBothExpenseDesc, true
 		}
 	case fromOnly:
 		switch frag {
 		case "":
 			if oldestFirst {
-				return sqlTransactionListDatedFromOnlyNoKindAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedFromOnlyNoKindAscLimit, true
+				}
+				return sqlTransactionListDatedFromOnlyNoKindAsc, true
 			}
-			return sqlTransactionListDatedFromOnlyNoKindDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedFromOnlyNoKindDescLimit, true
+			}
+			return sqlTransactionListDatedFromOnlyNoKindDesc, true
 		case sqlFilterAmountIncome:
 			if oldestFirst {
-				return sqlTransactionListDatedFromOnlyIncomeAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedFromOnlyIncomeAscLimit, true
+				}
+				return sqlTransactionListDatedFromOnlyIncomeAsc, true
 			}
-			return sqlTransactionListDatedFromOnlyIncomeDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedFromOnlyIncomeDescLimit, true
+			}
+			return sqlTransactionListDatedFromOnlyIncomeDesc, true
 		case sqlFilterAmountExpense:
 			if oldestFirst {
-				return sqlTransactionListDatedFromOnlyExpenseAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedFromOnlyExpenseAscLimit, true
+				}
+				return sqlTransactionListDatedFromOnlyExpenseAsc, true
 			}
-			return sqlTransactionListDatedFromOnlyExpenseDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedFromOnlyExpenseDescLimit, true
+			}
+			return sqlTransactionListDatedFromOnlyExpenseDesc, true
 		}
 	default:
 		switch frag {
 		case "":
 			if oldestFirst {
-				return sqlTransactionListDatedToOnlyNoKindAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedToOnlyNoKindAscLimit, true
+				}
+				return sqlTransactionListDatedToOnlyNoKindAsc, true
 			}
-			return sqlTransactionListDatedToOnlyNoKindDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedToOnlyNoKindDescLimit, true
+			}
+			return sqlTransactionListDatedToOnlyNoKindDesc, true
 		case sqlFilterAmountIncome:
 			if oldestFirst {
-				return sqlTransactionListDatedToOnlyIncomeAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedToOnlyIncomeAscLimit, true
+				}
+				return sqlTransactionListDatedToOnlyIncomeAsc, true
 			}
-			return sqlTransactionListDatedToOnlyIncomeDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedToOnlyIncomeDescLimit, true
+			}
+			return sqlTransactionListDatedToOnlyIncomeDesc, true
 		case sqlFilterAmountExpense:
 			if oldestFirst {
-				return sqlTransactionListDatedToOnlyExpenseAscLimit, true
+				if withLimit {
+					return sqlTransactionListDatedToOnlyExpenseAscLimit, true
+				}
+				return sqlTransactionListDatedToOnlyExpenseAsc, true
 			}
-			return sqlTransactionListDatedToOnlyExpenseDescLimit, true
+			if withLimit {
+				return sqlTransactionListDatedToOnlyExpenseDescLimit, true
+			}
+			return sqlTransactionListDatedToOnlyExpenseDesc, true
 		}
 	}
 	return "", false

@@ -81,6 +81,37 @@ func TestListTransactions_datedNoSearch_boundsIncomeOldestFirst(t *testing.T) {
 	}
 }
 
+func TestListTransactions_datedNoSearch_zeroLimit_returnsAllInRange(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "list-dated-z@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	from := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 3, 31, 23, 59, 59, 0, time.UTC)
+	for i := 0; i < 3; i++ {
+		d := time.Date(2026, 3, 5+i, 12, 0, 0, 0, time.UTC)
+		if _, err := st.CreateTransaction(ctx, uid, hid, int64(-100*(i+1)), d, fmt.Sprintf("t%d", i), nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{FromUTC: &from, ToUTC: &to, Limit: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 3 {
+		t.Fatalf("want 3 rows, got %d %+v", len(txs), txs)
+	}
+}
+
 func TestListTransactions_kindExpenseWithLimit_newestFirst(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

@@ -38,26 +38,50 @@ const sqlTransactionListOldestAscLimitExpense = sqlTransactionListFromHousehold 
 
 // sqlTransactionListDated* are [ListTransactions] with optional occurred_at bounds, no search, LIMIT ? (same fragment order as the dynamic builder).
 const (
-	sqlTransactionListDatedBothNoKindDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothNoKindAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedBothIncomeDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothIncomeAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedBothNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedBothIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
 	sqlTransactionListDatedBothExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
 	sqlTransactionListDatedBothExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
 
-	sqlTransactionListDatedFromOnlyNoKindDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlyNoKindAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedFromOnlyIncomeDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlyIncomeAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedFromOnlyNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedFromOnlyNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedFromOnlyIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedFromOnlyIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
 	sqlTransactionListDatedFromOnlyExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
 	sqlTransactionListDatedFromOnlyExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
 
-	sqlTransactionListDatedToOnlyNoKindDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlyNoKindAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedToOnlyIncomeDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlyIncomeAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedToOnlyNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedToOnlyNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedToOnlyIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedToOnlyIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
 	sqlTransactionListDatedToOnlyExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
 	sqlTransactionListDatedToOnlyExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
+)
+
+// sqlTransactionListDated*NoLimit are [ListTransactions] with date bounds and no search, without LIMIT (unbounded scan for the filter).
+const (
+	sqlTransactionListDatedBothNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderDesc
+	sqlTransactionListDatedBothNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderAsc
+	sqlTransactionListDatedBothIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDesc
+	sqlTransactionListDatedBothIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAsc
+	sqlTransactionListDatedBothExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDesc
+	sqlTransactionListDatedBothExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAsc
+
+	sqlTransactionListDatedFromOnlyNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderDesc
+	sqlTransactionListDatedFromOnlyNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderAsc
+	sqlTransactionListDatedFromOnlyIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderDesc
+	sqlTransactionListDatedFromOnlyIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderAsc
+	sqlTransactionListDatedFromOnlyExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderDesc
+	sqlTransactionListDatedFromOnlyExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderAsc
+
+	sqlTransactionListDatedToOnlyNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderDesc
+	sqlTransactionListDatedToOnlyNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderAsc
+	sqlTransactionListDatedToOnlyIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDesc
+	sqlTransactionListDatedToOnlyIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAsc
+	sqlTransactionListDatedToOnlyExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDesc
+	sqlTransactionListDatedToOnlyExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAsc
 )
 
 // sqlTransactionListSearchLike is appended after household/date/kind filters for [ListTransactions] search (two LIKE placeholders).

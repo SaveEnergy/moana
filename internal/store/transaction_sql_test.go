@@ -78,6 +78,9 @@ func TestSqlTransactionListDated_matchesAppendOccurredAtAndKindShapes(t *testing
 	if g, w := sqlTransactionListDatedToOnlyExpenseDescLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtTo+sqlFilterAmountExpense+sqlTransactionListOrderDescLimit; g != w {
 		t.Fatalf("sqlTransactionListDatedToOnlyExpenseDescLimit drift")
 	}
+	if g, w := sqlTransactionListDatedBothNoKindDesc, sqlTransactionListFromHousehold+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlTransactionListOrderDesc; g != w {
+		t.Fatalf("sqlTransactionListDatedBothNoKindDesc drift")
+	}
 }
 
 func TestSqlListCategoryAmountsRange_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
