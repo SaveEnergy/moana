@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/url"
@@ -445,6 +446,32 @@ func TestNotificationsPageOKForLoggedInUser(t *testing.T) {
 	s := string(body)
 	if !strings.Contains(s, "Notifications") || !strings.Contains(s, "no notifications") {
 		t.Fatalf("expected notifications page shell, got prefix %q", s[:min(500, len(s))])
+	}
+}
+
+func TestNotificationsPage_listsStoredNotifications(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	uid := testutil.MustCreateUser(t, app, "notif-listed@moana.test", "pw", "user")
+	ctx := context.Background()
+	if _, err := app.Store.InsertNotification(ctx, uid, "Integration test ping"); err != nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "notif-listed@moana.test", "pw")
+	resp, err := client.Get(srv.URL + handlers.NotificationsPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "Integration test ping") {
+		t.Fatalf("expected notification body in HTML, got prefix %q", s[:min(800, len(s))])
 	}
 }
 

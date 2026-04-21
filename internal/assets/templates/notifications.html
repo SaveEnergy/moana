@@ -4,8 +4,19 @@
     <h1 class="headline-sm">Notifications</h1>
     <p class="muted small">Account and activity alerts will appear here.</p>
   </div>
+  {{if .Items}}
+  <ul class="notifications-list entry-card" role="list">
+    {{range .Items}}
+    <li class="notifications-list-item" role="listitem">
+      <p class="notifications-list-body">{{.Body}}</p>
+      <p class="muted small notifications-list-meta">{{.When}}{{if .Unread}} · <span class="notifications-unread">Unread</span>{{end}}</p>
+    </li>
+    {{end}}
+  </ul>
+  {{else}}
   <div class="entry-card notifications-empty-card">
     <p class="muted" role="status">You have no notifications.</p>
   </div>
+  {{end}}
 </div>
 {{end}}
