@@ -1,12 +1,7 @@
-import {
-  CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT,
-  resolveCategoryModalPreviewBackground,
-  sanitizeCategoryCustomHex,
-  shouldUpdateCategoryModalPreviewBackground,
-} from './categoryColor'
+import { CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT, sanitizeCategoryCustomHex } from './categoryColor'
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
-import { shouldRepaintCategoryModalIconPreview } from './categoryModalIconPreview'
+import { createCategoryModalPreviewController } from './categoryModalPreview'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { showModalIfClosed } from './dialogModal'
 import { clickEventTargetElement } from './clickTarget'
@@ -18,9 +13,8 @@ import {
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
-  CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
   CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM,
-  CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR,
+  CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
   CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   CATEGORY_MODAL_DISMISS_SELECTORS,
@@ -29,17 +23,13 @@ import {
   CATEGORY_MODAL_NAME_SELECTOR,
   CATEGORY_MODAL_OPEN_CREATE_SELECTOR,
   CATEGORY_MODAL_OPEN_EDIT_SELECTOR,
-  CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS,
   CATEGORY_MODAL_PREVIEW_ICON_SELECTOR,
   CATEGORY_MODAL_PREVIEW_SELECTOR,
   CATEGORY_MODAL_SELECTOR,
   CATEGORY_MODAL_SUBMIT_SELECTOR,
   CATEGORY_MODAL_TITLE_SELECTOR,
-  MOANA_ICON_CAT_PREVIEW_CLASS,
-  MOANA_ICON_SVG_SELECTOR,
 } from './domSelectors'
-import { buildRadioMapByValue, getFormRadioGroupValue, setRadioCheckedByValue } from './radioMap'
-import { createRafScheduler } from './scheduleAnimationFrame'
+import { buildRadioMapByValue, setRadioCheckedByValue } from './radioMap'
 
 /** Full modal wiring once per `<dialog>` (duplicate `bootApp` must not stack listeners). */
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
@@ -87,59 +77,13 @@ export function initCategoryModal(): void {
   const colorRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_COLOR_RADIOS_SELECTOR)
   const iconRadioByValue = buildRadioMapByValue(catForm, CATEGORY_MODAL_ICON_RADIOS_SELECTOR)
 
-  /** Last icon radio `value` we painted into `#cat-modal-preview-icon` (reset each open). */
-  let lastPaintedIconGroupValue: string | undefined
-
-  /** Last `resolveCategoryModalPreviewBackground` string applied to `#cat-modal-preview` (reset each open). */
-  let lastResolvedPreviewBackground: string | undefined
-
-  function syncCatModalPreview(opts?: {
-    colorRadioTarget?: HTMLInputElement
-    iconRadioTarget?: HTMLInputElement
-  }) {
-    const colorVal = getFormRadioGroupValue(
-      catForm,
-      CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
-      opts?.colorRadioTarget,
-    )
-    const nativeForPreview =
-      colorVal === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM ? colorNativeInput?.value : undefined
-    const nextBg = resolveCategoryModalPreviewBackground(colorVal || undefined, nativeForPreview)
-    if (shouldUpdateCategoryModalPreviewBackground(lastResolvedPreviewBackground, nextBg)) {
-      catPreview.style.background = nextBg
-      lastResolvedPreviewBackground = nextBg
-    }
-
-    const iconVal = getFormRadioGroupValue(
-      catForm,
-      CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
-      opts?.iconRadioTarget,
-    )
-    if (!shouldRepaintCategoryModalIconPreview(lastPaintedIconGroupValue, iconVal)) {
-      return
-    }
-    lastPaintedIconGroupValue = iconVal
-
-    const ir =
-      iconRadioByValue.get(iconVal) ??
-      catForm.querySelector<HTMLInputElement>(CATEGORY_MODAL_ICON_RADIO_CHECKED_SELECTOR)
-    catIconWrap.innerHTML = ''
-    const isAutoIcon = !ir?.value
-    catIconWrap.classList.toggle(CATEGORY_MODAL_PREVIEW_ICON_AUTO_CLASS, isAutoIcon)
-    if (isAutoIcon) {
-      catIconWrap.textContent = 'A'
-      return
-    }
-    const label = ir.closest('label')
-    const svg = label?.querySelector(MOANA_ICON_SVG_SELECTOR)
-    if (svg) {
-      const clone = svg.cloneNode(true) as SVGElement
-      clone.classList.add(MOANA_ICON_CAT_PREVIEW_CLASS)
-      catIconWrap.appendChild(clone)
-    }
-  }
-
-  const scheduleCatModalPreview = createRafScheduler(syncCatModalPreview)
+  const catPreviewCtl = createCategoryModalPreviewController({
+    form: catForm,
+    colorNativeInput,
+    iconRadioByValue,
+    preview: catPreview,
+    iconWrap: catIconWrap,
+  })
 
   function wireCategoryFormPreview() {
     catForm.addEventListener('input', (e) => {
@@ -151,7 +95,7 @@ export function initCategoryModal(): void {
       const r = wrap?.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR)
       if (r) {
         r.checked = true
-        scheduleCatModalPreview.schedule()
+        catPreviewCtl.raf.schedule()
       }
     })
     catForm.addEventListener('change', (e) => {
@@ -160,11 +104,11 @@ export function initCategoryModal(): void {
         return
       }
       if (t.name === CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME) {
-        syncCatModalPreview({ colorRadioTarget: t })
+        catPreviewCtl.sync({ colorRadioTarget: t })
         return
       }
       if (t.name === CATEGORY_MODAL_ICON_RADIO_GROUP_NAME) {
-        syncCatModalPreview({ iconRadioTarget: t })
+        catPreviewCtl.sync({ iconRadioTarget: t })
       }
     })
   }
@@ -172,9 +116,8 @@ export function initCategoryModal(): void {
   wireCategoryFormPreview()
 
   function openCreateModal() {
-    scheduleCatModalPreview.cancelPending()
-    lastPaintedIconGroupValue = undefined
-    lastResolvedPreviewBackground = undefined
+    catPreviewCtl.raf.cancelPending()
+    catPreviewCtl.resetPaintState()
     catForm.action = '/categories'
     catId.value = ''
     catTitle.textContent = 'New category'
@@ -183,15 +126,14 @@ export function initCategoryModal(): void {
     setRadioCheckedByValue(colorRadioByValue, '', '')
     setRadioCheckedByValue(iconRadioByValue, '', '')
     if (colorNativeInput) colorNativeInput.value = CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT
-    syncCatModalPreview()
+    catPreviewCtl.sync()
     catName.focus()
     showModalIfClosed(modal)
   }
 
   function openEditModal(btn: HTMLElement) {
-    scheduleCatModalPreview.cancelPending()
-    lastPaintedIconGroupValue = undefined
-    lastResolvedPreviewBackground = undefined
+    catPreviewCtl.raf.cancelPending()
+    catPreviewCtl.resetPaintState()
     const row = readCategoryEditRowDataset(btn.dataset)
     if (!row) {
       return
@@ -212,7 +154,7 @@ export function initCategoryModal(): void {
 
     setRadioCheckedByValue(iconRadioByValue, row.iconVal, '')
 
-    syncCatModalPreview()
+    catPreviewCtl.sync()
     catName.focus()
     showModalIfClosed(modal)
   }

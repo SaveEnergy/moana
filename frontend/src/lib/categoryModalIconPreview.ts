@@ -1,6 +1,6 @@
 /**
  * Category modal preview icon well: DOM rebuild only depends on the checked icon radio `value`
- * (`""` = auto placeholder). When that value matches the last painted state, {@link initCategoryModal}
+ * (`""` = auto placeholder). When that value matches the last painted state, {@link createCategoryModalPreviewController}
  * can skip `innerHTML` / SVG clone after updating the color strip.
  */
 export function shouldRepaintCategoryModalIconPreview(
