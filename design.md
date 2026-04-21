@@ -58,6 +58,10 @@ Tokens follow **Material-style naming** (surface / on-surface / primary / contai
 - **`--shadow-category-tile`** / **`--shadow-category-tile-hover`** / **`--shadow-category-tile-selected`** — `.category-picker-card` default, hover, and checked elevation (checked state still adds a **2px** `color-mix` ring in the declaration)
 - **`--shadow-drawer-edge`** / **`--shadow-shell-control`** — mobile **`.app-sidebar`** off-canvas stack and **`.app-sidebar-close`** floating control (`color-mix` on **`--on-surface`**, `03-dashboard.css`)
 - **`--shadow-primary-soft`** / **`--shadow-primary-action`** / **`--shadow-primary-fab`** — primary-filled controls (`.btn-indigo`, `.btn-settings-save`, `.cat-modal-submit`, `.sidebar-fab`; `28%` vs `35%` mixes per original tuning)
+- **`--ring-float-field-focus`** — `.float-field` / `.settings-float-field` **`:focus-within`** outer ring (`04-transactions-forms-settings.css`)
+- **`--inset-line-on-surface-6`** / **`--inset-line-on-surface-8`** — `.cat-modal-preview` well and `.cat-color-dot` / rainbow swatch inset hairlines
+- **`--shadow-cat-color-swatch-selected`** — double ring on checked color swatch (paper gap + outer halo)
+- **`--ring-cat-icon-checked`** — checked category icon tile (`05-history-categories.css`)
 - `--shadow-float`, `--shadow-card`
 
 ### Typography tokens

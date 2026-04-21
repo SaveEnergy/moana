@@ -54,6 +54,25 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines float-field focus ring and category picker inset / selection tokens', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(
+      /--ring-float-field-focus:\s*0 0 0 1px color-mix\(in srgb, var\(--primary\) 22%, transparent\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--inset-line-on-surface-6:\s*inset 0 0 0 1px color-mix\(in srgb, var\(--on-surface\) 6%, transparent\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--inset-line-on-surface-8:\s*inset 0 0 0 1px color-mix\(in srgb, var\(--on-surface\) 8%, transparent\)\s*;/,
+    )
+    expect(src).toContain('--shadow-cat-color-swatch-selected:')
+    expect(src).toMatch(/0 0 0 2px var\(--surface-lowest\)/)
+    expect(src).toMatch(/0 0 0 4px color-mix\(in srgb, var\(--on-surface\) 55%, transparent\)/)
+    expect(src).toMatch(
+      /--ring-cat-icon-checked:\s*0 0 0 2px color-mix\(in srgb, var\(--primary\) 18%, transparent\)\s*;/,
+    )
+  })
+
   it('defines modal, picker stack, and category tile elevation tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(

@@ -54,6 +54,13 @@
   --shadow-primary-soft: 0 1px 2px color-mix(in srgb, var(--primary) 28%, transparent);
   --shadow-primary-action: 0 2px 8px color-mix(in srgb, var(--primary) 35%, transparent);
   --shadow-primary-fab: 0 2px 12px color-mix(in srgb, var(--primary) 35%, transparent);
+  /* Float-field focus ring, category preview / swatch inset lines, picker selection halos */
+  --ring-float-field-focus: 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+  --inset-line-on-surface-6: inset 0 0 0 1px color-mix(in srgb, var(--on-surface) 6%, transparent);
+  --inset-line-on-surface-8: inset 0 0 0 1px color-mix(in srgb, var(--on-surface) 8%, transparent);
+  --shadow-cat-color-swatch-selected: 0 0 0 2px var(--surface-lowest),
+    0 0 0 4px color-mix(in srgb, var(--on-surface) 55%, transparent);
+  --ring-cat-icon-checked: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
   /* App shell — rails share page canvas; cards/content use --app-paper */
   --app-sidebar-width: 13.75rem;
   --sidebar-bg: var(--app-canvas);

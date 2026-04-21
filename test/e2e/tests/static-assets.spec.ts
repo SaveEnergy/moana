@@ -28,6 +28,7 @@ test('built app.css retains design-system shadow custom properties', async ({ re
   expect(text).toContain('--shadow-category-tile-selected:')
   expect(text).toContain('--shadow-drawer-edge:')
   expect(text).toContain('--shadow-primary-fab:')
+  expect(text).toContain('--ring-float-field-focus:')
 })
 
 test('static app.js is served with bytes', async ({ request }) => {

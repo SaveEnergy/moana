@@ -659,7 +659,7 @@
 .settings-float-field:focus-within:not(.settings-float-field--readonly),
 .float-field:focus-within:not(.float-field--readonly) {
   border-color: color-mix(in srgb, var(--primary) 35%, var(--outline-variant));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+  box-shadow: var(--ring-float-field-focus);
 }
 
 .settings-float-label,
