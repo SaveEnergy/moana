@@ -1,6 +1,7 @@
 package timeutil
 
 import (
+	"sync"
 	"testing"
 	"time"
 )
@@ -94,6 +95,28 @@ func TestLoadLocation_repeatedCallsReturnSamePointer(t *testing.T) {
 	b := LoadLocation("Europe/Berlin")
 	if a != b {
 		t.Fatal("expected cached *time.Location pointer identity for repeated lookups")
+	}
+}
+
+func TestLoadLocation_concurrentSameZoneCoalesces(t *testing.T) {
+	t.Parallel()
+	const zone = "Europe/Berlin"
+	const n = 64
+	var wg sync.WaitGroup
+	out := make([]*time.Location, n)
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			out[i] = LoadLocation(zone)
+		}(i)
+	}
+	wg.Wait()
+	first := out[0]
+	for i := 1; i < n; i++ {
+		if out[i] != first {
+			t.Fatalf("goroutine %d: ptr %p want %p", i, out[i], first)
+		}
 	}
 }
 
