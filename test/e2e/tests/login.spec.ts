@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test'
 
+import { LOGIN_BUTTON_FORGOT } from '../helpers/shellSelectors'
+
 test('login page exposes email, password, and sign-in', async ({ page }) => {
   await page.goto('/login')
   await expect(page.getByRole('heading', { name: /sign in to your account/i })).toBeVisible()
@@ -20,7 +22,8 @@ test('login page exposes remember me and disabled oauth placeholders', async ({ 
 
 test('login page forgot password control is disabled until wired', async ({ page }) => {
   await page.goto('/login')
-  const forgot = page.getByRole('button', { name: 'Forgot password?' })
+  const forgot = page.locator(LOGIN_BUTTON_FORGOT)
   await expect(forgot).toBeVisible()
   await expect(forgot).toBeDisabled()
+  await expect(forgot).toHaveText('Forgot password?')
 })
