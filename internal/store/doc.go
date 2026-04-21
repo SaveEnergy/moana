@@ -1,5 +1,5 @@
 // Package store is the persistence layer: SQLite-backed users, households, categories,
-// transactions, aggregates (aggregate_sum.go including SumIncomeExpenseCentsInRange, SumIncomeExpenseCentsInTwoRanges, SumRunningTotalAndIncomeExpenseInTwoRanges, aggregate_category.go including ListCategoryAmountsInRange + ErrInvalidCategoryAmountKind, aggregate_time.go; household SQL fragments in transaction_sql.go), and
+// transactions, aggregates (aggregate_sum.go including SumIncomeExpenseCentsInRange, SumIncomeExpenseCentsInTwoRanges, SumRunningTotalAndIncomeExpenseInTwoRanges, aggregate_category.go including ListCategoryAmountsInRange + ErrInvalidCategoryAmountKind, aggregate_time.go; household SQL fragments in transaction_sql.go; income/expense AND filters in sql_amount_filter.go), and
 // daily movement for the heatmap. Open via [moana/internal/dbutil.OpenStore].
 // Household type in household.go; reads in household_query.go; writes in household_mutate.go (name, invites, detach; [ErrDuplicateUserEmail] from member insert).
 // User types in user_types.go; scanning in user_scan.go; reads in user_get.go, user_list.go (preallocated slices), user_sql.go; profile/password/create in user_mutate.go ([CreateUser] trims email, returns [ErrDuplicateUserEmail] or [ErrInvalidUserEmail]).

@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -101,7 +102,7 @@ func TestAuthenticatedRoute_redirectsWhenSessionRoleMismatchWithDB(t *testing.T)
 		t.Fatalf("dashboard before role change: status %d want 200", respDash.StatusCode)
 	}
 
-	if _, err := db.Exec(`UPDATE users SET role = 'admin' WHERE email = ?`, email); err != nil {
+	if _, err := db.ExecContext(context.Background(), `UPDATE users SET role = 'admin' WHERE email = ?`, email); err != nil {
 		t.Fatal(err)
 	}
 

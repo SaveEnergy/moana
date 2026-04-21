@@ -22,11 +22,8 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	args = appendOccurredAtRange(&b, args, f.FromUTC, f.ToUTC)
 	// Only "income" / "expense" add a sign filter; unknown kind strings are ignored (same as Kind "").
 	kind := strings.TrimSpace(f.Kind)
-	switch kind {
-	case "income":
-		b.WriteString(` AND t.amount_cents > 0`)
-	case "expense":
-		b.WriteString(` AND t.amount_cents < 0`)
+	if frag := sqlAmountKindFilter(kind); frag != "" {
+		b.WriteString(frag)
 	}
 	if search := strings.TrimSpace(f.Search); search != "" {
 		term := "%" + escapeSQLLikePattern(search) + "%"

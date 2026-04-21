@@ -68,11 +68,8 @@ func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fro
 	args := make([]any, 0, 3)
 	args = append(args, householdID)
 	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	switch kind {
-	case "income":
-		b.WriteString(` AND t.amount_cents > 0`)
-	case "expense":
-		b.WriteString(` AND t.amount_cents < 0`)
+	if frag := sqlAmountKindFilter(kind); frag != "" {
+		b.WriteString(frag)
 	}
 	var sum int64
 	err := s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&sum)

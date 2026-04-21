@@ -30,7 +30,7 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	b.WriteString(`SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
 `)
 	b.WriteString(sqlAggregateFromHouseholdTx)
-	b.WriteString(` AND t.amount_cents < 0`)
+	b.WriteString(sqlFilterAmountExpense)
 	// cap: household + optional from/to + limit.
 	args := make([]any, 0, 4)
 	args = append(args, householdID)
@@ -78,11 +78,7 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 	args := make([]any, 0, 3)
 	args = append(args, householdID)
 	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	if kind == "income" {
-		b.WriteString(` AND t.amount_cents > 0`)
-	} else {
-		b.WriteString(` AND t.amount_cents < 0`)
-	}
+	b.WriteString(sqlAmountKindFilter(kind))
 	b.WriteString(` GROUP BY t.category_id`)
 	if kind == "income" {
 		b.WriteString(` ORDER BY SUM(t.amount_cents) DESC`)
