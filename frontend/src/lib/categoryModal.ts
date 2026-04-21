@@ -1,9 +1,9 @@
 import { resolveBootContentQueryRoot } from './contentRoot'
+import { attachCategoryListEditDelegation } from './categoryModalEditDelegation'
 import { attachCategoryModalFormPreviewListeners } from './categoryModalForm'
 import { createCategoryModalOpenFlow } from './categoryModalOpenFlow'
 import { createCategoryModalPreviewController } from './categoryModalPreview'
 import { attachNativeDialogDismiss } from './dialogDismiss'
-import { clickEventTargetElement } from './clickTarget'
 import {
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_PAGE_INTRO_SECTION_SELECTOR,
@@ -15,7 +15,6 @@ import {
   CATEGORY_MODAL_ID_INPUT_SELECTOR,
   CATEGORY_MODAL_NAME_SELECTOR,
   CATEGORY_MODAL_OPEN_CREATE_SELECTOR,
-  CATEGORY_MODAL_OPEN_EDIT_SELECTOR,
   CATEGORY_MODAL_PREVIEW_ICON_SELECTOR,
   CATEGORY_MODAL_PREVIEW_SELECTOR,
   CATEGORY_MODAL_SELECTOR,
@@ -100,17 +99,7 @@ export function initCategoryModal(): void {
     categoriesPageRoot?.querySelector(CATEGORY_LIST_SECTION_SELECTOR) ??
     contentRoot.querySelector(CATEGORY_LIST_SECTION_SELECTOR)
   if (editDelegationRoot) {
-    editDelegationRoot.addEventListener('click', (e) => {
-      const el = clickEventTargetElement(e)
-      if (!el) {
-        return
-      }
-      const btn = el.closest(CATEGORY_MODAL_OPEN_EDIT_SELECTOR)
-      if (!btn || !(btn instanceof HTMLElement)) {
-        return
-      }
-      openEditModal(btn)
-    })
+    attachCategoryListEditDelegation(editDelegationRoot, openEditModal)
   }
 
   attachNativeDialogDismiss(modal, CATEGORY_MODAL_DISMISS_SELECTORS)
