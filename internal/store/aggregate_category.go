@@ -27,15 +27,12 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	}
 	var b strings.Builder
 	b.Grow(512)
-	b.WriteString(`SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
-`)
-	b.WriteString(sqlAggregateFromHouseholdTx)
-	b.WriteString(sqlFilterAmountExpense)
+	b.WriteString(sqlListTopExpenseCategoriesPrefix)
 	// cap: household + optional from/to + limit.
 	args := make([]any, 0, 4)
 	args = append(args, householdID)
 	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	b.WriteString(` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`)
+	b.WriteString(sqlListTopExpenseCategoriesSuffix)
 	args = append(args, limit)
 
 	rows, err := s.DB.QueryContext(ctx, b.String(), args...)

@@ -22,6 +22,9 @@ FROM transactions t
 INNER JOIN users owner ON owner.id = t.user_id
 WHERE owner.household_id = ?`
 
+// sqlSelectOccurredAtAmountFromHousehold is the prefix for [DailyAbsMovementByLocalDate] (date bounds appended).
+const sqlSelectOccurredAtAmountFromHousehold = `SELECT t.occurred_at, t.amount_cents ` + sqlFromHouseholdTx
+
 // sqlSumAmountAllHousehold is [SumAmountCentsByKind] with no date bounds and no income/expense sign filter (kind "").
 const sqlSumAmountAllHousehold = `SELECT COALESCE(SUM(t.amount_cents), 0) ` + sqlFromHouseholdTx
 
@@ -45,6 +48,12 @@ FROM transactions t
 LEFT JOIN categories c ON c.id = t.category_id
 INNER JOIN users owner ON owner.id = t.user_id
 WHERE owner.household_id = ?`
+
+// sqlListTopExpenseCategoriesPrefix and suffix wrap optional [appendOccurredAtRange] fragments for [ListTopExpenseCategories].
+const sqlListTopExpenseCategoriesPrefix = `SELECT t.category_id, COALESCE(c.name, 'Uncategorized'), COALESCE(SUM(t.amount_cents), 0)
+` + sqlAggregateFromHouseholdTx + sqlFilterAmountExpense
+
+const sqlListTopExpenseCategoriesSuffix = ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
 
 // sqlTransactionInsertConditional inserts a row only if user_id belongs to household_id.
 const sqlTransactionInsertConditional = `
