@@ -40,6 +40,7 @@ func routerOptionsFromConfig(cfg *config.Config) *server.RouterOptions {
 
 // HTTPHandler returns the production HTTP handler (parsed templates + routes + logging).
 // It passes [config.Config] limits into [server.RouterOptions] (request deadline + POST body cap);
+// a negative [config.Config.MaxRequestBodyBytes] disables the body cap (tests; [config.Load] never sets negative).
 // see [server.NewRouterWithRouterOptions] for the full middleware chain.
 // Tests that need a bare [handlers.App] should use [New] and [server.NewRouter] directly.
 func HTTPHandler(cfg *config.Config, st *store.Store) (http.Handler, error) {

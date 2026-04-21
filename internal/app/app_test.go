@@ -242,3 +242,30 @@ func TestHTTPHandler_maxRequestBodyBytesFromConfig(t *testing.T) {
 		t.Fatalf("body %q", rec.Body.String())
 	}
 }
+
+// TestHTTPHandler_negativeMaxRequestBodyBytesUncapped documents that a negative MaxRequestBodyBytes
+// on Config (tests only; config.Load never yields negative) disables [server.WithMaxRequestBodyBytes],
+// so POST bodies are not capped by the app's middleware.
+func TestHTTPHandler_negativeMaxRequestBodyBytesUncapped(t *testing.T) {
+	t.Parallel()
+	st, db, err := dbutil.OpenStore(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	cfg := testutil.DefaultTestConfig()
+	cfg.MaxRequestBodyBytes = -1
+	h, err := moanaapp.HTTPHandler(cfg, st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := "email=a@b.co&password=secret&" + strings.Repeat("z", 120)
+	req := httptest.NewRequest(http.MethodPost, handlers.LoginPath, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.ContentLength = int64(len(body))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code == http.StatusBadRequest && strings.Contains(rec.Body.String(), "bad form") {
+		t.Fatalf("body should not hit MaxBytesReader cap when MaxRequestBodyBytes=-1, got %d body %q", rec.Code, rec.Body.String())
+	}
+}
