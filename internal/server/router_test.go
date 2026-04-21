@@ -111,16 +111,29 @@ func TestNewRouterWithRouterOptions_healthOKWithTimeoutAndMaxBodyStack(t *testin
 	}
 }
 
-func TestNewRouterWithRouterOptions_healthPOSTReturns405(t *testing.T) {
-	t.Parallel()
+// TestNewRouterWithRouterOptions_healthNonGETReturns405 verifies [registerHealth] is GET-only on the full router stack.
+func TestNewRouterWithRouterOptions_healthNonGETReturns405(t *testing.T) {
 	cfg := &config.Config{RequestTimeout: 30 * time.Second}
 	app := &handlers.App{Config: cfg}
 	opts := &RouterOptions{DisableRequestLogging: true}
 	h := NewRouterWithRouterOptions(opts, app)
-	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, HealthPath, nil))
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("POST %s: status %d want 405", HealthPath, rec.Code)
+	// HEAD is not listed: Go's ServeMux may route HEAD to GET handlers (implicit HEAD).
+	methods := []string{
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodPatch,
+		http.MethodDelete,
+		http.MethodOptions,
+	}
+	for _, method := range methods {
+		t.Run(method, func(t *testing.T) {
+			t.Parallel()
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, httptest.NewRequest(method, HealthPath, nil))
+			if rec.Code != http.StatusMethodNotAllowed {
+				t.Fatalf("%s %s: status %d want 405", method, HealthPath, rec.Code)
+			}
+		})
 	}
 }
 
