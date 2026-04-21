@@ -1,4 +1,4 @@
-import { resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
+import { queryBootContentAll, resolveContentQueryRoot } from './contentRoot'
 import { LOCAL_TIME_ELEMENTS_SELECTOR, TIME_DATETIME_ATTRIBUTE } from './domSelectors'
 import { trimEdgesIfNeeded } from './trimEdges'
 
@@ -65,15 +65,14 @@ const labelForIso = createLocalTimeLabelMemo()
 
 /**
  * Fill local clock labels for every `<time>` matching `LOCAL_TIME_ELEMENTS_SELECTOR` in `root`.
- * When `root` is the global `document` (including the default no-arg boot call), uses {@link resolveBootContentQueryRoot}; otherwise {@link resolveContentQueryRoot}.
+ * When `root` is the global `document` (including the default no-arg boot call), uses {@link queryBootContentAll} with **`LOCAL_TIME_ELEMENTS_SELECTOR`**; otherwise {@link resolveContentQueryRoot} then **`querySelectorAll`**.
  * Skips assigning `textContent` when it already equals the computed label (less DOM churn on repeat boot / re-scan).
  */
 export function applyLocalTimeElements(root: ParentNode = document): void {
-  const scope =
+  const nodes =
     typeof document !== 'undefined' && root === document
-      ? resolveBootContentQueryRoot()
-      : resolveContentQueryRoot(root)
-  const nodes = scope.querySelectorAll<HTMLTimeElement>(LOCAL_TIME_ELEMENTS_SELECTOR)
+      ? queryBootContentAll<HTMLTimeElement>(LOCAL_TIME_ELEMENTS_SELECTOR)
+      : resolveContentQueryRoot(root).querySelectorAll<HTMLTimeElement>(LOCAL_TIME_ELEMENTS_SELECTOR)
   if (nodes.length === 0) {
     return
   }
