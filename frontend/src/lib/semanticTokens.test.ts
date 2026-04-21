@@ -31,6 +31,16 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines mobile shell drawer and close-control shadows (on-surface color-mix)', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(
+      /--shadow-drawer-edge:\s*8px 0 32px color-mix\(in srgb, var\(--on-surface\) 18%, transparent\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-shell-control:\s*0 1px 4px color-mix\(in srgb, var\(--on-surface\) 10%, transparent\)\s*;/,
+    )
+  })
+
   it('defines modal, picker stack, and category tile elevation tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(

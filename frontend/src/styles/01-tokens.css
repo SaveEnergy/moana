@@ -47,6 +47,9 @@
   --shadow-category-tile-selected: 0 6px 18px rgba(44, 47, 48, 0.09);
   --shadow-float: 0 12px 32px rgba(44, 47, 48, 0.06);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  /* Mobile shell (≤1023px): off-canvas drawer stack + floating close control (`03-dashboard.css`) */
+  --shadow-drawer-edge: 8px 0 32px color-mix(in srgb, var(--on-surface) 18%, transparent);
+  --shadow-shell-control: 0 1px 4px color-mix(in srgb, var(--on-surface) 10%, transparent);
   /* App shell — rails share page canvas; cards/content use --app-paper */
   --app-sidebar-width: 13.75rem;
   --sidebar-bg: var(--app-canvas);

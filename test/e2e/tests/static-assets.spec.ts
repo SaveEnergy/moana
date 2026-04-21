@@ -26,6 +26,7 @@ test('built app.css retains design-system shadow custom properties', async ({ re
   const text = await res.text()
   expect(text).toContain('--shadow-modal-panel:')
   expect(text).toContain('--shadow-category-tile-selected:')
+  expect(text).toContain('--shadow-drawer-edge:')
 })
 
 test('static app.js is served with bytes', async ({ request }) => {
