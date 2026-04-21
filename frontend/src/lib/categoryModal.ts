@@ -1,21 +1,17 @@
 import { CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT, sanitizeCategoryCustomHex } from './categoryColor'
 import { resolveBootContentQueryRoot } from './contentRoot'
 import { readCategoryEditRowDataset } from './categoryModalDataset'
+import { attachCategoryModalFormPreviewListeners } from './categoryModalForm'
 import { createCategoryModalPreviewController } from './categoryModalPreview'
 import { attachNativeDialogDismiss } from './dialogDismiss'
 import { showModalIfClosed } from './dialogModal'
 import { clickEventTargetElement } from './clickTarget'
 import {
-  CATEGORY_COLOR_NATIVE_CLASS,
-  CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR,
   CATEGORY_LIST_SECTION_SELECTOR,
   CATEGORY_PAGE_INTRO_SECTION_SELECTOR,
   CATEGORY_MODAL_COLOR_NATIVE_SELECTOR,
-  CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR,
-  CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
   CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM,
   CATEGORY_MODAL_COLOR_RADIOS_SELECTOR,
-  CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
   CATEGORY_MODAL_ICON_RADIOS_SELECTOR,
   CATEGORY_MODAL_DISMISS_SELECTORS,
   CATEGORY_MODAL_FORM_SELECTOR,
@@ -85,35 +81,7 @@ export function initCategoryModal(): void {
     iconWrap: catIconWrap,
   })
 
-  function wireCategoryFormPreview() {
-    catForm.addEventListener('input', (e) => {
-      const t = e.target
-      if (!(t instanceof Element) || !t.classList.contains(CATEGORY_COLOR_NATIVE_CLASS)) {
-        return
-      }
-      const wrap = t.closest(CATEGORY_COLOR_SWATCH_CUSTOM_SELECTOR)
-      const r = wrap?.querySelector<HTMLInputElement>(CATEGORY_MODAL_COLOR_RADIO_CUSTOM_SELECTOR)
-      if (r) {
-        r.checked = true
-        catPreviewCtl.raf.schedule()
-      }
-    })
-    catForm.addEventListener('change', (e) => {
-      const t = e.target
-      if (!(t instanceof HTMLInputElement)) {
-        return
-      }
-      if (t.name === CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME) {
-        catPreviewCtl.sync({ colorRadioTarget: t })
-        return
-      }
-      if (t.name === CATEGORY_MODAL_ICON_RADIO_GROUP_NAME) {
-        catPreviewCtl.sync({ iconRadioTarget: t })
-      }
-    })
-  }
-
-  wireCategoryFormPreview()
+  attachCategoryModalFormPreviewListeners(catForm, catPreviewCtl)
 
   function openCreateModal() {
     catPreviewCtl.raf.cancelPending()
