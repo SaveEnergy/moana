@@ -33,6 +33,8 @@
   --dashboard-edge: rgba(28, 29, 30, 0.08);
   --app-canvas: var(--dashboard-canvas);
   --app-paper: var(--dashboard-paper);
+  /* Outflows donut — inset “hole” matching paper (`03-dashboard.css` `.dashboard-donut`) */
+  --inset-donut-hole: inset 0 0 0 1.35rem var(--dashboard-paper);
   --radius-lg: 0.5rem;
   /* Pill / segmented “on” state: paper lift inside a tinted rail (history tabs, transaction kind) */
   --shadow-raise-xs: 0 1px 3px rgba(44, 47, 48, 0.06);
@@ -76,6 +78,8 @@
   --sidebar-active-bg: color-mix(in srgb, var(--primary) 14%, var(--app-canvas));
   --sidebar-active-text: var(--primary);
   --shell-topbar: var(--app-canvas);
+  /* Unread badge halo: same fill as topbar so the pill reads “cut out” (`02-shell.css`) */
+  --ring-notif-badge: 0 0 0 2px var(--shell-topbar);
   --shell-search-icon: var(--on-surface-variant);
   /* Controls on warm canvas: blend paper + canvas (avoid flat cool greys in forms) */
   --input-surface: color-mix(in srgb, var(--app-canvas) 36%, var(--app-paper));

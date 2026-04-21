@@ -525,7 +525,7 @@ body.app-body {
   font-weight: 600;
   line-height: 1rem;
   text-align: center;
-  box-shadow: 0 0 0 2px var(--shell-topbar);
+  box-shadow: var(--ring-notif-badge);
   pointer-events: none;
 }
 

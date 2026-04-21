@@ -73,6 +73,14 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines dashboard donut inset and notification badge ring tokens', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(
+      /--inset-donut-hole:\s*inset 0 0 0 1\.35rem var\(--dashboard-paper\)\s*;/,
+    )
+    expect(src).toMatch(/--ring-notif-badge:\s*0 0 0 2px var\(--shell-topbar\)\s*;/)
+  })
+
   it('defines native dialog ::backdrop scrim tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(/--backdrop-cat-modal:\s*rgba\(15,\s*17,\s*18,\s*0\.42\)\s*;/)

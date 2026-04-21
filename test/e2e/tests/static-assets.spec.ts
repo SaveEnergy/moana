@@ -31,6 +31,7 @@ test('built app.css retains design-system shadow custom properties', async ({ re
   expect(text).toContain('--ring-float-field-focus:')
   expect(text).toContain('--shadow-admin-add-dialog:')
   expect(text).toContain('--backdrop-cat-modal:')
+  expect(text).toContain('--inset-donut-hole:')
 })
 
 test('static app.js is served with bytes', async ({ request }) => {
