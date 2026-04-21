@@ -300,7 +300,7 @@
 }
 
 .tx-amt-income {
-  color: #1b5e20;
+  color: var(--semantic-positive);
 }
 
 .history-empty {
