@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { type ClickTargetEvent, stubClickTargetEvent } from './clickTarget'
 import { attachNativeDialogDismiss, shouldCloseNativeDialogFromClick } from './dialogDismiss'
+import * as trimEdges from './trimEdges'
 
 describe('shouldCloseNativeDialogFromClick', () => {
   it('closes on backdrop (target === dialog)', () => {
@@ -171,6 +172,33 @@ describe('attachNativeDialogDismiss', () => {
 
     expect(close).not.toHaveBeenCalled()
     expect(closest).not.toHaveBeenCalled()
+  })
+
+  it('does not call trimEdgesIfNeeded on each click (selectors normalized at attach)', () => {
+    const trimSpy = vi.spyOn(trimEdges, 'trimEdgesIfNeeded')
+
+    const close = vi.fn()
+    const addEventListener = vi.fn()
+    const dialog = {
+      close,
+      open: true,
+      addEventListener,
+    } as unknown as HTMLDialogElement
+    const inner = {
+      closest: (sel: string) => (sel === '#close' ? inner : null),
+    } as unknown as Element
+
+    attachNativeDialogDismiss(dialog, ['  #close  '])
+
+    trimSpy.mockClear()
+
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(inner))
+
+    expect(close).toHaveBeenCalledTimes(1)
+    expect(trimSpy).not.toHaveBeenCalled()
+
+    trimSpy.mockRestore()
   })
 
   it('preserves non-blank dismiss selector order after attach-time trim', () => {

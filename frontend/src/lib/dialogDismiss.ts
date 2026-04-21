@@ -5,11 +5,16 @@ import { trimEdgesIfNeeded } from './trimEdges'
 /** One dismiss `click` listener per dialog (safe if `attachNativeDialogDismiss` runs twice). */
 const nativeDialogDismissWiredDialogs = new WeakSet<HTMLDialogElement>()
 
-/** Backdrop (`target === dialog`) or `closest()` any of the selectors (inner nodes included). */
-export function shouldCloseNativeDialogFromClick(
+/**
+ * Backdrop (`target === dialog`) or `closest()` any of the selectors (inner nodes included).
+ * When **`selectorsArePreTrimmed`** is true (listener wired by {@link attachNativeDialogDismiss}), skips
+ * **`trimEdgesIfNeeded`** on each **`click`** — selectors were normalized once at attach.
+ */
+function nativeDialogDismissClickWouldClose(
   e: ClickTargetEvent,
   dialog: HTMLDialogElement,
   closeWithinSelectors: readonly string[],
+  selectorsArePreTrimmed: boolean,
 ): boolean {
   const el = clickEventTargetElement(e)
   if (!el) {
@@ -20,7 +25,8 @@ export function shouldCloseNativeDialogFromClick(
   }
   for (let i = 0, n = closeWithinSelectors.length; i < n; i++) {
     /* Invalid or empty selectors throw from `closest`; skip blanks so callers can pad lists safely. */
-    const t = trimEdgesIfNeeded(closeWithinSelectors[i])
+    const raw = closeWithinSelectors[i]
+    const t = selectorsArePreTrimmed ? raw : trimEdgesIfNeeded(raw)
     if (!t) {
       continue
     }
@@ -29,6 +35,15 @@ export function shouldCloseNativeDialogFromClick(
     }
   }
   return false
+}
+
+/** Backdrop (`target === dialog`) or `closest()` any of the selectors (trims each entry — tests, ad-hoc callers). */
+export function shouldCloseNativeDialogFromClick(
+  e: ClickTargetEvent,
+  dialog: HTMLDialogElement,
+  closeWithinSelectors: readonly string[],
+): boolean {
+  return nativeDialogDismissClickWouldClose(e, dialog, closeWithinSelectors, false)
 }
 
 /**
@@ -61,7 +76,7 @@ export function attachNativeDialogDismiss(
     if (dialog.open === false) {
       return
     }
-    if (!shouldCloseNativeDialogFromClick(e, dialog, selectors)) {
+    if (!nativeDialogDismissClickWouldClose(e, dialog, selectors, true)) {
       return
     }
     closeDialogIfOpen(dialog)
