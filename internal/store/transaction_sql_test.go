@@ -23,6 +23,37 @@ func TestSqlSumIncomeExpenseInRange_matchesAppendOccurredAtShapes(t *testing.T) 
 	}
 }
 
+func TestSqlSumAmountHouseholdRange_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
+	t.Parallel()
+	if g, w := sqlSumAmountHouseholdRangeBoth, sqlSumAmountAllHousehold+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeBoth drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeFromOnly, sqlSumAmountAllHousehold+sqlFilterOccurredAtFrom; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeFromOnly drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeToOnly, sqlSumAmountAllHousehold+sqlFilterOccurredAtTo; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeToOnly drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeBothIncome, sqlSumAmountHouseholdRangeBoth+sqlFilterAmountIncome; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeBothIncome drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeBothExpense, sqlSumAmountHouseholdRangeBoth+sqlFilterAmountExpense; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeBothExpense drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeFromOnlyIncome, sqlSumAmountHouseholdRangeFromOnly+sqlFilterAmountIncome; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeFromOnlyIncome drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeFromOnlyExpense, sqlSumAmountHouseholdRangeFromOnly+sqlFilterAmountExpense; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeFromOnlyExpense drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeToOnlyIncome, sqlSumAmountHouseholdRangeToOnly+sqlFilterAmountIncome; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeToOnlyIncome drift")
+	}
+	if g, w := sqlSumAmountHouseholdRangeToOnlyExpense, sqlSumAmountHouseholdRangeToOnly+sqlFilterAmountExpense; g != w {
+		t.Fatalf("sqlSumAmountHouseholdRangeToOnlyExpense drift")
+	}
+}
+
 func TestSqlTransactionListFromHousehold_matchesSelectPlusHouseholdWhere(t *testing.T) {
 	t.Parallel()
 	want := sqlTransactionSelectFromHousehold + "\nWHERE owner.household_id = ?"

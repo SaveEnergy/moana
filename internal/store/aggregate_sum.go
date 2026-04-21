@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"moana/internal/timeutil"
@@ -76,18 +75,41 @@ func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fro
 			return sum, err
 		}
 	}
-	var b strings.Builder
-	b.Grow(256)
-	b.WriteString(sqlSumAmountAllHousehold)
-	// cap: household + optional from/to.
-	args := make([]any, 0, 3)
-	args = append(args, householdID)
-	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	if frag := sqlAmountKindFilter(kind); frag != "" {
-		b.WriteString(frag)
-	}
+	frag := sqlAmountKindFilter(kind)
 	var sum int64
-	err := s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&sum)
+	var err error
+	switch {
+	case fromUTC != nil && toUTC != nil:
+		f, t := timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC)
+		switch frag {
+		case "":
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeBoth, householdID, f, t).Scan(&sum)
+		case sqlFilterAmountIncome:
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeBothIncome, householdID, f, t).Scan(&sum)
+		case sqlFilterAmountExpense:
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeBothExpense, householdID, f, t).Scan(&sum)
+		}
+	case fromUTC != nil:
+		f := timeutil.FormatSQLiteUTC(*fromUTC)
+		switch frag {
+		case "":
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeFromOnly, householdID, f).Scan(&sum)
+		case sqlFilterAmountIncome:
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeFromOnlyIncome, householdID, f).Scan(&sum)
+		case sqlFilterAmountExpense:
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeFromOnlyExpense, householdID, f).Scan(&sum)
+		}
+	default:
+		t := timeutil.FormatSQLiteUTC(*toUTC)
+		switch frag {
+		case "":
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeToOnly, householdID, t).Scan(&sum)
+		case sqlFilterAmountIncome:
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeToOnlyIncome, householdID, t).Scan(&sum)
+		case sqlFilterAmountExpense:
+			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeToOnlyExpense, householdID, t).Scan(&sum)
+		}
+	}
 	if err != nil {
 		return 0, err
 	}

@@ -64,6 +64,20 @@ const (
 	sqlSumAmountExpenseHouseholdNoBounds = sqlSumAmountAllHousehold + sqlFilterAmountExpense
 )
 
+// sqlSumAmountHouseholdRange* are [SumAmountCentsByKind] with date bounds (income|expense filters after occurred_at, same order as [appendOccurredAtRange] + [sqlAmountKindFilter]).
+const (
+	sqlSumAmountHouseholdRangeBoth     = sqlSumAmountAllHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo
+	sqlSumAmountHouseholdRangeFromOnly = sqlSumAmountAllHousehold + sqlFilterOccurredAtFrom
+	sqlSumAmountHouseholdRangeToOnly   = sqlSumAmountAllHousehold + sqlFilterOccurredAtTo
+
+	sqlSumAmountHouseholdRangeBothIncome      = sqlSumAmountHouseholdRangeBoth + sqlFilterAmountIncome
+	sqlSumAmountHouseholdRangeBothExpense     = sqlSumAmountHouseholdRangeBoth + sqlFilterAmountExpense
+	sqlSumAmountHouseholdRangeFromOnlyIncome  = sqlSumAmountHouseholdRangeFromOnly + sqlFilterAmountIncome
+	sqlSumAmountHouseholdRangeFromOnlyExpense = sqlSumAmountHouseholdRangeFromOnly + sqlFilterAmountExpense
+	sqlSumAmountHouseholdRangeToOnlyIncome    = sqlSumAmountHouseholdRangeToOnly + sqlFilterAmountIncome
+	sqlSumAmountHouseholdRangeToOnlyExpense   = sqlSumAmountHouseholdRangeToOnly + sqlFilterAmountExpense
+)
+
 // sqlSumIncomeExpenseBase is [SumIncomeExpenseCentsInRange] with no date bounds (appendOccurredAtRange adds optional ANDs).
 const sqlSumIncomeExpenseBase = `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
 COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx
