@@ -68,6 +68,27 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 			return scanTransactionRows(rows, limit)
 		}
 	}
+	if search != "" && (f.FromUTC != nil) != (f.ToUTC != nil) {
+		if q, ok := staticListTransactionsDatedSingleBoundSearchQuery(f.FromUTC, f.ToUTC, f.OldestFirst, kind, limit); ok {
+			term := "%" + escapeSQLLikePattern(search) + "%"
+			var args []any
+			if f.FromUTC != nil {
+				args = []any{householdID, timeutil.FormatSQLiteUTC(*f.FromUTC), term, term}
+			} else {
+				args = []any{householdID, timeutil.FormatSQLiteUTC(*f.ToUTC), term, term}
+			}
+			if limit > 0 {
+				args = append(args, limit)
+			}
+			rows, err := s.DB.QueryContext(ctx, q, args...)
+			if err != nil {
+				return nil, err
+			}
+			defer rows.Close()
+			return scanTransactionRows(rows, limit)
+		}
+	}
+	// Fallback: e.g. full-household unbounded scan (no search, no dates, limit 0) or unknown kind with limit-only fast path skipped.
 	var b strings.Builder
 	b.Grow(512)
 	b.WriteString(sqlTransactionListFromHousehold)
@@ -345,6 +366,91 @@ func staticListTransactionsDatedBothSearchQuery(kind string, oldestFirst bool, l
 			return sqlTransactionListDatedBothSearchExpenseDescLimit, true
 		}
 		return sqlTransactionListDatedBothSearchExpenseDesc, true
+	}
+	return "", false
+}
+
+// staticListTransactionsDatedSingleBoundSearchQuery returns fixed SQL when [ListTransactions] has search and exactly one of from|to bounds.
+func staticListTransactionsDatedSingleBoundSearchQuery(fromUTC, toUTC *time.Time, oldestFirst bool, kind string, limit int) (string, bool) {
+	fromOnly := fromUTC != nil && toUTC == nil
+	toOnly := fromUTC == nil && toUTC != nil
+	if !fromOnly && !toOnly {
+		return "", false
+	}
+	withLimit := limit > 0
+	frag := sqlAmountKindFilter(kind)
+	if fromOnly {
+		switch frag {
+		case "":
+			if oldestFirst {
+				if withLimit {
+					return sqlTransactionListDatedFromOnlySearchNoKindAscLimit, true
+				}
+				return sqlTransactionListDatedFromOnlySearchNoKindAsc, true
+			}
+			if withLimit {
+				return sqlTransactionListDatedFromOnlySearchNoKindDescLimit, true
+			}
+			return sqlTransactionListDatedFromOnlySearchNoKindDesc, true
+		case sqlFilterAmountIncome:
+			if oldestFirst {
+				if withLimit {
+					return sqlTransactionListDatedFromOnlySearchIncomeAscLimit, true
+				}
+				return sqlTransactionListDatedFromOnlySearchIncomeAsc, true
+			}
+			if withLimit {
+				return sqlTransactionListDatedFromOnlySearchIncomeDescLimit, true
+			}
+			return sqlTransactionListDatedFromOnlySearchIncomeDesc, true
+		case sqlFilterAmountExpense:
+			if oldestFirst {
+				if withLimit {
+					return sqlTransactionListDatedFromOnlySearchExpenseAscLimit, true
+				}
+				return sqlTransactionListDatedFromOnlySearchExpenseAsc, true
+			}
+			if withLimit {
+				return sqlTransactionListDatedFromOnlySearchExpenseDescLimit, true
+			}
+			return sqlTransactionListDatedFromOnlySearchExpenseDesc, true
+		}
+		return "", false
+	}
+	switch frag {
+	case "":
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListDatedToOnlySearchNoKindAscLimit, true
+			}
+			return sqlTransactionListDatedToOnlySearchNoKindAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListDatedToOnlySearchNoKindDescLimit, true
+		}
+		return sqlTransactionListDatedToOnlySearchNoKindDesc, true
+	case sqlFilterAmountIncome:
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListDatedToOnlySearchIncomeAscLimit, true
+			}
+			return sqlTransactionListDatedToOnlySearchIncomeAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListDatedToOnlySearchIncomeDescLimit, true
+		}
+		return sqlTransactionListDatedToOnlySearchIncomeDesc, true
+	case sqlFilterAmountExpense:
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListDatedToOnlySearchExpenseAscLimit, true
+			}
+			return sqlTransactionListDatedToOnlySearchExpenseAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListDatedToOnlySearchExpenseDescLimit, true
+		}
+		return sqlTransactionListDatedToOnlySearchExpenseDesc, true
 	}
 	return "", false
 }

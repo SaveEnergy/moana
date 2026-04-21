@@ -97,6 +97,45 @@ func TestListTransactions_searchNoDate_zeroLimit_returnsAllMatches(t *testing.T)
 	}
 }
 
+func TestListTransactions_datedSingleBoundSearch_fromOnlyExpense(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "list-1bnd@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	from := time.Date(2026, 12, 1, 0, 0, 0, 0, time.UTC)
+	day := time.Date(2026, 12, 10, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -500, day, "matchme latte", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, 10000, day, "salary noise", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{FromUTC: &from, Search: "matchme", Kind: "expense", Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 1 || txs[0].Description != "matchme latte" {
+		t.Fatalf("want 1 row, got %+v", txs)
+	}
+}
+
+func TestListTransactions_datedSingleBoundSearch_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	from := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
+	_, err := st.ListTransactions(alreadyCancelledContext(t), 1, TransactionFilter{FromUTC: &from, Search: "q", Limit: 5})
+	assertErrIsContextCanceled(t, err)
+}
+
 func TestListTransactions_datedBothSearch_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

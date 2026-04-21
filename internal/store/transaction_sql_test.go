@@ -101,6 +101,18 @@ func TestSqlTransactionListDatedBothSearch_matchesFragmentOrder(t *testing.T) {
 	}
 }
 
+func TestSqlTransactionListDatedSingleBoundSearch_matchesFragmentOrder(t *testing.T) {
+	t.Parallel()
+	wantFrom := sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	if sqlTransactionListDatedFromOnlySearchExpenseDescLimit != wantFrom {
+		t.Fatalf("sqlTransactionListDatedFromOnlySearchExpenseDescLimit drift")
+	}
+	wantTo := sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+	if sqlTransactionListDatedToOnlySearchNoKindAscLimit != wantTo {
+		t.Fatalf("sqlTransactionListDatedToOnlySearchNoKindAscLimit drift")
+	}
+}
+
 func TestSqlListCategoryAmountsRange_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
 	t.Parallel()
 	if g, w := sqlListCategoryAmountsIncomeRangeBoth, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlFilterAmountIncome+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderIncome; g != w {
