@@ -22,12 +22,12 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
   if (historySortWiredSelects.has(select)) {
     return
   }
-  const form = select.form
-  if (!form) {
+  if (!select.form) {
     return
   }
+  /* Read `select.form` when `change` fires — not the closure from wire time — so a reassigned `form` still submits the right target. */
   select.addEventListener('change', () => {
-    form.requestSubmit()
+    select.form?.requestSubmit()
   })
   historySortWiredSelects.add(select)
 }
