@@ -14,13 +14,30 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 	}
 	kind := strings.TrimSpace(f.Kind)
 	search := strings.TrimSpace(f.Search)
-	if f.FromUTC == nil && f.ToUTC == nil && kind == "" && search == "" && !f.OldestFirst && limit > 0 {
-		rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimit, householdID, limit)
-		if err != nil {
-			return nil, err
+	if f.FromUTC == nil && f.ToUTC == nil && search == "" && !f.OldestFirst && limit > 0 {
+		switch kind {
+		case "":
+			rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimit, householdID, limit)
+			if err != nil {
+				return nil, err
+			}
+			defer rows.Close()
+			return scanTransactionRows(rows, limit)
+		case "income":
+			rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimitIncome, householdID, limit)
+			if err != nil {
+				return nil, err
+			}
+			defer rows.Close()
+			return scanTransactionRows(rows, limit)
+		case "expense":
+			rows, err := s.DB.QueryContext(ctx, sqlTransactionListRecentDescLimitExpense, householdID, limit)
+			if err != nil {
+				return nil, err
+			}
+			defer rows.Close()
+			return scanTransactionRows(rows, limit)
 		}
-		defer rows.Close()
-		return scanTransactionRows(rows, limit)
 	}
 	var b strings.Builder
 	b.Grow(512)

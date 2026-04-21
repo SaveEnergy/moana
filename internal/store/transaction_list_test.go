@@ -22,6 +22,49 @@ func TestListTransactions_recentLimitOnly_cancelledContext(t *testing.T) {
 	assertErrIsContextCanceled(t, err)
 }
 
+func TestListTransactions_kindIncomeRecentLimit_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListTransactions(alreadyCancelledContext(t), 1, TransactionFilter{Kind: "income", Limit: 5})
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestListTransactions_kindExpenseWithLimit_newestFirst(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "kind-exp-limit@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	base := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -100, base, "old", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -200, base.Add(time.Hour), "mid", nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -300, base.Add(2*time.Hour), "new", nil); err != nil {
+		t.Fatal(err)
+	}
+	txs, err := st.ListTransactions(ctx, hid, TransactionFilter{Kind: "expense", Limit: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txs) != 2 {
+		t.Fatalf("want 2, got %d %+v", len(txs), txs)
+	}
+	if txs[0].Description != "new" || txs[1].Description != "mid" {
+		t.Fatalf("want newest first: %+v %+v", txs[0], txs[1])
+	}
+}
+
 func TestListTransactions_respectsLimit(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

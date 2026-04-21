@@ -15,6 +15,11 @@ WHERE owner.household_id = ?`
 // sqlTransactionListRecentDescLimit is [ListTransactions] when only Limit is set (default sort, no filters).
 const sqlTransactionListRecentDescLimit = sqlTransactionListFromHousehold + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
 
+// sqlTransactionListRecentDescLimitIncome / Expense are [ListTransactions] with kind income|expense, Limit, and no other filters.
+const sqlTransactionListRecentDescLimitIncome = sqlTransactionListFromHousehold + sqlFilterAmountIncome + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+
+const sqlTransactionListRecentDescLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + ` ORDER BY t.occurred_at DESC, t.id DESC LIMIT ?`
+
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `
 WHERE t.id = ? AND owner.household_id = ?`
