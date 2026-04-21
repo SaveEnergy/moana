@@ -29,3 +29,17 @@ func TestRun_userUnknownSubcommand(t *testing.T) {
 		t.Fatalf("exit %d want 2", g)
 	}
 }
+
+func TestRun_userAdd_missingEmailPassword(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "user", "add"}); g != 2 {
+		t.Fatalf("exit %d want 2", g)
+	}
+}
+
+func TestRun_userPassword_missingEmailPassword(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "user", "password"}); g != 2 {
+		t.Fatalf("exit %d want 2", g)
+	}
+}

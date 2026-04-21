@@ -21,7 +21,7 @@ func runUserAdd(args []string) int {
 		return 2
 	}
 	if strings.TrimSpace(*email) == "" || *password == "" {
-		fmt.Fprintf(os.Stderr, "-email and -password are required\n")
+		fmt.Fprint(os.Stderr, cliEmailPasswordRequired)
 		return 2
 	}
 	r := strings.ToLower(strings.TrimSpace(*role))
