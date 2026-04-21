@@ -138,6 +138,24 @@ SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = 'idx_notifica
 	}
 }
 
+func TestOpen_idxNotificationsUserUnreadPartialIndex(t *testing.T) {
+	t.Parallel()
+	d, err := Open(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	var n int
+	err = d.QueryRowContext(context.Background(), `
+SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = 'idx_notifications_user_unread'`).Scan(&n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 1 {
+		t.Fatalf("idx_notifications_user_unread: count %d want 1", n)
+	}
+}
+
 func TestOpen_idxTransactionsOccurredAt(t *testing.T) {
 	t.Parallel()
 	d, err := Open(":memory:")

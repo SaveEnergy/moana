@@ -106,3 +106,46 @@ func TestMarkNotificationRead_cancelledContext(t *testing.T) {
 	err := st.MarkNotificationRead(alreadyCancelledContext(t), 1, 1)
 	assertErrIsContextCanceled(t, err)
 }
+
+func TestCountUnreadNotificationsForUser(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "notif-count@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := st.CountUnreadNotificationsForUser(ctx, uid)
+	if err != nil || n != 0 {
+		t.Fatalf("count0: n=%d err=%v", n, err)
+	}
+	if _, err := st.InsertNotification(ctx, uid, "one"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.InsertNotification(ctx, uid, "two"); err != nil {
+		t.Fatal(err)
+	}
+	n, err = st.CountUnreadNotificationsForUser(ctx, uid)
+	if err != nil || n != 2 {
+		t.Fatalf("count2: n=%d err=%v", n, err)
+	}
+	list, err := st.ListNotificationsForUser(ctx, uid, 10)
+	if err != nil || len(list) != 2 {
+		t.Fatal(err)
+	}
+	if err := st.MarkNotificationRead(ctx, uid, list[0].ID); err != nil {
+		t.Fatal(err)
+	}
+	n, err = st.CountUnreadNotificationsForUser(ctx, uid)
+	if err != nil || n != 1 {
+		t.Fatalf("count1: n=%d err=%v", n, err)
+	}
+}
+
+func TestCountUnreadNotificationsForUser_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.CountUnreadNotificationsForUser(alreadyCancelledContext(t), 1)
+	assertErrIsContextCanceled(t, err)
+}

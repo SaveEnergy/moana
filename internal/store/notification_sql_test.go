@@ -26,3 +26,11 @@ func TestSqlNotificationMarkRead_stable(t *testing.T) {
 		t.Fatalf("sqlNotificationMarkRead drift")
 	}
 }
+
+func TestSqlNotificationCountUnreadForUser_stable(t *testing.T) {
+	t.Parallel()
+	want := `SELECT COUNT(*) FROM notifications WHERE user_id = ? AND read_at IS NULL`
+	if sqlNotificationCountUnreadForUser != want {
+		t.Fatalf("sqlNotificationCountUnreadForUser drift")
+	}
+}

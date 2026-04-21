@@ -71,3 +71,10 @@ func (s *Store) InsertNotification(ctx context.Context, userID int64, body strin
 	}
 	return res.LastInsertId()
 }
+
+// CountUnreadNotificationsForUser returns how many notifications are unread (read_at IS NULL) for userID.
+func (s *Store) CountUnreadNotificationsForUser(ctx context.Context, userID int64) (int64, error) {
+	var n int64
+	err := s.DB.QueryRowContext(ctx, sqlNotificationCountUnreadForUser, userID).Scan(&n)
+	return n, err
+}

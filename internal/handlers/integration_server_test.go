@@ -508,6 +508,25 @@ func TestNotificationsPage_markReadPost(t *testing.T) {
 	}
 }
 
+func TestNotificationsMarkRead_unknownIdReturns404(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "notif-404@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "notif-404@moana.test", "pw")
+	resp, err := client.PostForm(srv.URL+handlers.NotificationsMarkReadPath, url.Values{
+		handlers.NotificationFieldID: {"999999"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d want 404", resp.StatusCode)
+	}
+}
+
 func TestSettingsPageOKForLoggedInUser(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)

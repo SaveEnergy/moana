@@ -122,6 +122,18 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 	assertSeeOtherToLogin(t, mux, http.MethodPost, handlers.LogoutPath, nil, false)
 }
 
+// TestRegisterRoutes_notificationsReadGET_methodNotAllowed verifies GET /notifications/read is POST-only (stdlib returns 405).
+func TestRegisterRoutes_notificationsReadGET_methodNotAllowed(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.NotificationsMarkReadPath, nil))
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("GET %s: status %d want 405", handlers.NotificationsMarkReadPath, rec.Code)
+	}
+}
+
 // TestRegisterRoutes_unknownGET_404 verifies paths not matched by RegisterRoutes yield 404 (not the dashboard).
 func TestRegisterRoutes_unknownGET_404(t *testing.T) {
 	t.Parallel()
