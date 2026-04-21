@@ -48,6 +48,22 @@ func TestOpenMemory(t *testing.T) {
 	}
 }
 
+func TestOpen_memoryDoesNotUseWALJournalMode(t *testing.T) {
+	t.Parallel()
+	d, err := Open(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	var jm string
+	if err := d.QueryRowContext(context.Background(), `PRAGMA journal_mode`).Scan(&jm); err != nil {
+		t.Fatal(err)
+	}
+	if strings.EqualFold(jm, "wal") {
+		t.Fatalf("PRAGMA journal_mode = %q want non-wal (Open skips WAL pragma for :memory:)", jm)
+	}
+}
+
 func TestOpen_secondPingSucceeds(t *testing.T) {
 	t.Parallel()
 	d, err := Open(":memory:")
