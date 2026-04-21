@@ -20,6 +20,12 @@ export const APP_SIDEBAR_CLOSE = '#app-sidebar-close' as const
 export const APP_SIDEBAR_NAV = '#app-sidebar-nav' as const
 export const APP_GLOBAL_SEARCH = '#app-global-search' as const
 
+// --- Topbar user menu (`layout.html`; open state uses `APP_USER_MENU_OPEN_SELECTOR` in TS)
+export const SETTINGS_PATH = '/settings' as const
+export const APP_USER_MENU = 'details.app-user-menu' as const
+export const APP_USER_MENU_SUMMARY = 'details.app-user-menu summary.app-user-menu-btn' as const
+export const USER_MENU_SETTINGS_LINK = `a.app-user-menu-settings[href="${SETTINGS_PATH}"]` as const
+
 // --- Settings add-member (`settings.html`; `SETTINGS_ADD_MEMBER_*_ELEMENT_ID`)
 export const SETTINGS_ADD_MEMBER_DIALOG_ID = 'settings-add-member-dialog' as const
 export const SETTINGS_ADD_MEMBER_DIALOG = `#${SETTINGS_ADD_MEMBER_DIALOG_ID}` as const
@@ -45,6 +51,10 @@ export const CATEGORY_MODAL_TITLE = '#cat-modal-title' as const
 export const CATEGORY_MODAL_CLOSE = '#cat-modal-close' as const
 export const CATEGORY_MODAL_NAME = '#cat-modal-name' as const
 export const CATEGORY_MODAL_SUBMIT = '#cat-modal-submit' as const
+
+// --- Transaction forms (shared `name` attrs on `transactions_new.html` / `transactions_edit.html`)
+export const TX_INPUT_AMOUNT = 'input[name="amount"]' as const
+export const TX_INPUT_OCCURRED_ON = 'input[name="occurred_on"]' as const
 
 // --- Transaction edit (`transactions_edit.html`)
 export const TX_EDIT_NOTE = '#tx-edit-note' as const

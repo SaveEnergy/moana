@@ -7,6 +7,8 @@ import {
   APP_SIDEBAR_BACKDROP,
   APP_SIDEBAR_CLOSE,
   APP_SIDEBAR_NAV,
+  APP_USER_MENU,
+  APP_USER_MENU_SUMMARY,
   NOTIFICATIONS_PATH,
   TOPBAR_NOTIFICATIONS_LINK,
 } from '../helpers/shellSelectors'
@@ -147,8 +149,8 @@ test('mobile: Escape does not collapse drawer while account menu is open', async
   await page.setViewportSize({ width: 600, height: 800 })
   await page.goto('/')
   const shell = page.locator(APP_SHELL)
-  const menu = page.locator('details.app-user-menu')
-  await page.locator('details.app-user-menu summary.app-user-menu-btn').click()
+  const menu = page.locator(APP_USER_MENU)
+  await page.locator(APP_USER_MENU_SUMMARY).click()
   await expect(menu).toHaveAttribute('open', '')
   await page.getByRole('button', { name: 'Open navigation menu' }).click()
   await expect(shell).toHaveClass(/sidebar-open/)

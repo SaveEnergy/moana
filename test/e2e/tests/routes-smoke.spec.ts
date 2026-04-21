@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 import { E2E_USER_EMAIL, signInAsTestUser } from '../helpers/auth'
 import { todayLocalISODate } from '../helpers/dates'
 import { APP_CSS_STYLESHEET, APP_JS_MODULE_PRELOAD } from '../helpers/modulePreload'
-import { SETTINGS_EMAIL, TX_EDIT_NOTE } from '../helpers/shellSelectors'
+import { SETTINGS_EMAIL, TX_EDIT_NOTE, TX_INPUT_AMOUNT, TX_INPUT_OCCURRED_ON } from '../helpers/shellSelectors'
 
 test('categories page renders', async ({ page }) => {
   await signInAsTestUser(page)
@@ -31,8 +31,8 @@ test('new transaction kind pills switch income and expense', async ({ page }) =>
 test('new transaction shows alert for zero amount', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/transactions')
-  await page.locator('input[name="amount"]').fill('0.00')
-  await page.locator('input[name="occurred_on"]').fill(todayLocalISODate())
+  await page.locator(TX_INPUT_AMOUNT).fill('0.00')
+  await page.locator(TX_INPUT_OCCURRED_ON).fill(todayLocalISODate())
   await page.getByRole('button', { name: 'Save entry' }).click()
   await expect(page).toHaveURL(/\/transactions/)
   await expect(page.getByRole('alert')).toContainText('Amount must be greater than zero.')
@@ -49,8 +49,8 @@ test('settings profile loads', async ({ page }) => {
 test('transaction edit loads from history and save returns to history', async ({ page }) => {
   await signInAsTestUser(page)
   await page.goto('/transactions')
-  await page.locator('input[name="amount"]').fill('1.00')
-  await page.locator('input[name="occurred_on"]').fill(todayLocalISODate())
+  await page.locator(TX_INPUT_AMOUNT).fill('1.00')
+  await page.locator(TX_INPUT_OCCURRED_ON).fill(todayLocalISODate())
   await page.getByRole('button', { name: 'Save entry' }).click()
   await expect(page).toHaveURL(/\/history/)
 
