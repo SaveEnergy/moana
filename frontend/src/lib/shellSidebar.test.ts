@@ -6,6 +6,7 @@ import {
   APP_SIDEBAR_TOGGLE_SELECTOR,
 } from './domSelectors'
 import * as dialogKeyboard from './dialogKeyboard'
+import * as mobileShellDismiss from './mobileShellDismiss'
 import {
   initShellSidebar,
   queryAppShell,
@@ -243,6 +244,63 @@ describe('initShellSidebar', () => {
 
     expect(backdrop.setAttribute).not.toHaveBeenCalled()
     expect(toggle.setAttribute).not.toHaveBeenCalled()
+  })
+
+  it('shell click does not run dismiss predicate when drawer is closed', () => {
+    const dismissSpy = vi.spyOn(mobileShellDismiss, 'shouldCloseMobileSidebarFromShellClick')
+
+    const matchMedia = vi.fn()
+    const mq = {
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }
+    matchMedia.mockReturnValue(mq)
+
+    const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
+    const backdrop = { setAttribute: vi.fn() }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
+
+    const contains = vi.fn().mockReturnValue(false)
+    const appShell = {
+      classList: {
+        add: vi.fn(),
+        remove: vi.fn(),
+        contains,
+      },
+      addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
+    }
+
+    const doc = {
+      querySelector: vi.fn((sel: string) => (sel === APP_SHELL_SELECTOR ? appShell : null)),
+      addEventListener: vi.fn(),
+    }
+
+    vi.stubGlobal('document', doc)
+    vi.stubGlobal('window', { matchMedia })
+
+    initShellSidebar()
+
+    const shellClick = appShell.addEventListener.mock.calls.find((c) => c[0] === 'click')?.[1] as (
+      e: unknown,
+    ) => void
+    expect(shellClick).toBeDefined()
+
+    dismissSpy.mockClear()
+    shellClick!({} as MouseEvent)
+    expect(dismissSpy).not.toHaveBeenCalled()
+
+    contains.mockReturnValue(true)
+    shellClick!({} as MouseEvent)
+    expect(dismissSpy).toHaveBeenCalledTimes(1)
+
+    dismissSpy.mockRestore()
   })
 
   it('does not stack listeners when initShellSidebar runs twice', () => {

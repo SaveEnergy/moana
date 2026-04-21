@@ -90,6 +90,9 @@ export function initShellSidebar(): void {
     if (!mqMobile.matches) {
       return
     }
+    if (!appShell.classList.contains('sidebar-open')) {
+      return
+    }
     if (shouldCloseMobileSidebarFromShellClick(e, backdrop)) {
       closeMobileSidebar()
     }
