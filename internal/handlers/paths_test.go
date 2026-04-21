@@ -19,6 +19,13 @@ func TestDashboardRootPattern_exactRootServeMuxString(t *testing.T) {
 	}
 }
 
+func TestDashboardPath_isRoot(t *testing.T) {
+	t.Parallel()
+	if DashboardPath != "/" {
+		t.Fatalf("DashboardPath=%q must be / for redirects and mux root pattern", DashboardPath)
+	}
+}
+
 func TestLoginRedirectAuth_matchesLoginPathWithErrorQuery(t *testing.T) {
 	t.Parallel()
 	if want := LoginPath + "?" + LoginErrorQueryParam + "=1"; LoginRedirectAuth != want {
