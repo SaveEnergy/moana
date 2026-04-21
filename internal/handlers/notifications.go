@@ -13,7 +13,7 @@ import (
 // Notifications renders GET /notifications (user-scoped inbox from the store).
 func (a *App) Notifications(w http.ResponseWriter, r *http.Request, u *store.User) {
 	ctx := r.Context()
-	items, err := a.Store.ListNotificationsForUser(ctx, u.ID, 0)
+	items, err := a.Store.ListNotificationsForUser(ctx, u.ID, store.DefaultNotificationListLimit)
 	if err != nil {
 		httperr.Internal(w, r, err)
 		return

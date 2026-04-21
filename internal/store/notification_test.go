@@ -45,6 +45,31 @@ func TestInsertNotification_emptyBody(t *testing.T) {
 	}
 }
 
+func TestListNotificationsForUser_zeroLimitSameAsDefaultConstant(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "notif-limit0@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.InsertNotification(ctx, uid, "x"); err != nil {
+		t.Fatal(err)
+	}
+	a, err := st.ListNotificationsForUser(ctx, uid, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := st.ListNotificationsForUser(ctx, uid, DefaultNotificationListLimit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(a) != len(b) || len(a) != 1 {
+		t.Fatalf("len a=%d b=%d", len(a), len(b))
+	}
+}
+
 func TestListNotificationsForUser_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

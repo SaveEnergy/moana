@@ -12,19 +12,19 @@ import (
 // ErrInvalidNotificationBody is returned when [Store.InsertNotification] gets an empty body after trim.
 var ErrInvalidNotificationBody = errors.New("notification body must not be empty")
 
-// defaultNotificationListLimit caps list size when callers pass non-positive limits.
-const defaultNotificationListLimit = 50
+// DefaultNotificationListLimit is applied when [Store.ListNotificationsForUser] is called with limit < 1.
+const DefaultNotificationListLimit = 50
 
-// maxNotificationListLimit avoids unbounded reads.
-const maxNotificationListLimit = 500
+// MaxNotificationListLimit avoids unbounded reads when callers pass a larger limit.
+const MaxNotificationListLimit = 500
 
 // ListNotificationsForUser returns notifications for the user, newest first.
 func (s *Store) ListNotificationsForUser(ctx context.Context, userID int64, limit int) ([]Notification, error) {
 	if limit < 1 {
-		limit = defaultNotificationListLimit
+		limit = DefaultNotificationListLimit
 	}
-	if limit > maxNotificationListLimit {
-		limit = maxNotificationListLimit
+	if limit > MaxNotificationListLimit {
+		limit = MaxNotificationListLimit
 	}
 	rows, err := s.DB.QueryContext(ctx, sqlNotificationListForUser, userID, limit)
 	if err != nil {

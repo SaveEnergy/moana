@@ -602,6 +602,32 @@ func TestNotificationsMarkRead_unknownIdReturns404(t *testing.T) {
 	}
 }
 
+func TestNotificationsMarkRead_nonNumericIdRedirectsToInbox(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	testutil.MustCreateUser(t, app, "notif-bad-id@moana.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "notif-bad-id@moana.test", "pw")
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	resp, err := client.PostForm(srv.URL+handlers.NotificationsMarkReadPath, url.Values{
+		handlers.NotificationFieldID: {"not-a-number"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusSeeOther {
+		t.Fatalf("status %d want 303", resp.StatusCode)
+	}
+	loc := resp.Header.Get("Location")
+	if !strings.Contains(loc, handlers.NotificationsPath) {
+		t.Fatalf("Location %q want %s", loc, handlers.NotificationsPath)
+	}
+}
+
 func TestSettingsPageOKForLoggedInUser(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
