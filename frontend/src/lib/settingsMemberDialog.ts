@@ -21,8 +21,7 @@ export function querySettingsAddMemberOpenButton(root: ParentNode): HTMLElement 
 }
 
 export function initSettingsMemberDialog(): void {
-  const contentRoot = resolveBootContentQueryRoot()
-  const dialog = querySettingsAddMemberDialog(contentRoot)
+  const dialog = queryBootContent<HTMLDialogElement>(SETTINGS_ADD_MEMBER_DIALOG_SELECTOR)
   if (!dialog) {
     return
   }
@@ -30,7 +29,7 @@ export function initSettingsMemberDialog(): void {
     return
   }
 
-  /* Open control sits next to the dialog under the same parent (`settings.html`); fall back to main landmark scope. */
+  /* Open control sits next to the dialog under the same parent (`settings.html`); fall back to boot content root. */
   const openBtn = querySettingsAddMemberOpenButton(dialog.parentElement ?? resolveBootContentQueryRoot())
 
   openBtn?.addEventListener('click', () => {
