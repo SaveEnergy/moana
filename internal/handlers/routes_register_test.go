@@ -123,7 +123,7 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 }
 
 // TestRegisterRoutes_disallowedMethodsReturn405 verifies unregistered method+path pairs get 405 (Go 1.22+ ServeMux).
-// Covers dashboard (GET-only), auth (POST logout only), ledger (GET+POST), history (GET-only), mark-read (POST-only).
+// Covers dashboard (GET-only), auth (GET+POST login; POST logout), settings (GET-only shell), ledger (GET+POST), history (GET-only), mark-read (POST-only).
 func TestRegisterRoutes_disallowedMethodsReturn405(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
@@ -132,6 +132,8 @@ func TestRegisterRoutes_disallowedMethodsReturn405(t *testing.T) {
 	}{
 		{http.MethodPost, handlers.DashboardPath},
 		{http.MethodGet, handlers.LogoutPath},
+		{http.MethodPatch, handlers.LoginPath},
+		{http.MethodPut, handlers.SettingsPath},
 		{http.MethodDelete, handlers.TransactionsPath},
 		{http.MethodDelete, handlers.CategoriesPath},
 		{http.MethodPost, handlers.HistoryPath},
