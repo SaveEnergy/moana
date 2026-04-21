@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -16,6 +17,11 @@ import (
 // (e.g. [moana/internal/dashboard.BuildPageData] overlapping aggregate + heatmap + recent + outflow queries).
 // Keep this greater than 1 so those reads can run concurrently.
 const MaxOpenConns = 8
+
+// maxIdleConnLifetime is passed to [sql.DB.SetConnMaxIdleTime]. The stdlib default is unlimited
+// (idle connections never age out), which can retain driver state in long-lived servers with
+// sparse traffic; SQLite reconnects are cheap.
+const maxIdleConnLifetime = 5 * time.Minute
 
 var memoryDBSeq atomic.Uint64
 
@@ -48,6 +54,7 @@ func Open(path string) (*sql.DB, error) {
 	}
 	d.SetMaxOpenConns(MaxOpenConns)
 	d.SetMaxIdleConns(MaxOpenConns)
+	d.SetConnMaxIdleTime(maxIdleConnLifetime)
 
 	if path != ":memory:" {
 		if _, err := d.ExecContext(context.Background(), `PRAGMA journal_mode = WAL;`); err != nil {
