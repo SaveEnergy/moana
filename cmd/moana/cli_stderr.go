@@ -24,3 +24,7 @@ func stderrUpdate(err error) {
 func stderrCreateUser(err error) {
 	fmt.Fprintf(os.Stderr, "create user: %v\n", err)
 }
+
+func stderrUnknownUserSubcommand(name string) {
+	fmt.Fprintf(os.Stderr, "unknown user subcommand %q\n", name)
+}

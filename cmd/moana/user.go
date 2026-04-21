@@ -31,7 +31,7 @@ func runUser(args []string) int {
 	case "password":
 		return runUserPassword(args[1:])
 	default:
-		fmt.Fprintf(os.Stderr, "unknown user subcommand %q\n", args[0])
+		stderrUnknownUserSubcommand(args[0])
 		return 2
 	}
 }
