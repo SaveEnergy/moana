@@ -10,7 +10,7 @@ export type SettingsAddMemberInitContext = {
 
 /**
  * **`SETTINGS_ADD_MEMBER_OPEN_SELECTOR`** on **`dialog.parentElement`** when present (`settings.html` sibling), else **`contentRoot`**
- * (same **`resolveBootContentQueryRoot()`** node as **`queryBootContent`** for the **`dialog`**).
+ * (same **`ParentNode`** as the single **`resolveBootContentQueryRoot()`** in **`initSettingsMemberDialog`** — equivalent to **`queryBootContent`** for the **`dialog`** **`querySelector`**).
  */
 export function querySettingsAddMemberInitContext(
   contentRoot: ParentNode,

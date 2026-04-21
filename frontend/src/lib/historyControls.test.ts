@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import * as contentRoot from './contentRoot'
 import { HISTORY_SORT_SELECTOR } from './domSelectors'
 import { initHistoryControls, queryHistorySortSelect, wireHistorySortAutoSubmit } from './historyControls'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
@@ -119,6 +120,28 @@ describe('initHistoryControls', () => {
   it('no-ops when #history-sort is absent', () => {
     vi.stubGlobal('document', stubDocumentWithoutMainLandmark())
     expect(() => initHistoryControls()).not.toThrow()
+  })
+
+  it('calls resolveBootContentQueryRoot only once per init', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+      }),
+    )
+
+    const spy = vi.spyOn(contentRoot, 'resolveBootContentQueryRoot')
+    try {
+      initHistoryControls()
+      expect(spy).toHaveBeenCalledTimes(1)
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('delegates to wireHistorySortAutoSubmit when select is present', () => {

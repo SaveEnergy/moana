@@ -44,7 +44,7 @@ export const APP_MAIN_SELECTOR = 'main.app-main' as const
 /** History page sort `<select>` (`history.html`). */
 export const HISTORY_SORT_ELEMENT_ID = 'history-sort' as const
 
-/** `#` + {@link HISTORY_SORT_ELEMENT_ID} — **`queryBootContent`** / **`queryHistorySortSelect`** / `querySelector`. */
+/** `#` + {@link HISTORY_SORT_ELEMENT_ID} — **`resolveBootContentQueryRoot`** + **`queryHistorySortSelect`**, **`queryBootContent`**, or `querySelector`. */
 export const HISTORY_SORT_SELECTOR = `#${HISTORY_SORT_ELEMENT_ID}` as const
 
 /** Settings → add household member dialog (`settings.html`). */

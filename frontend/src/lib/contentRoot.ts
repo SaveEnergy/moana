@@ -8,7 +8,7 @@ const contentRootMemo = new WeakMap<Document, ParentNode>()
  * so scans skip shell chrome. Falls back to `document` when the landmark is absent (e.g. `login.html`).
  * Returns `parent` unchanged when it is not the global `document` (tests, explicit subtrees) or when `document` is undefined (Node).
  *
- * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses {@link queryBootContentAll} (**`LOCAL_TIME_ELEMENTS_SELECTOR`**) when given the global `document`, else {@link resolveContentQueryRoot} on an explicit subtree. Other boot features: **`initConfirmSubmitForms`** ({@link queryBootContentAll} for **`form[data-confirm]`**), **`initCategoryModal`**, **`initHistoryControls`** ({@link queryBootContent} for **`#history-sort`**), **`initSettingsMemberDialog`** ({@link queryBootContent} for **`SETTINGS_ADD_MEMBER_DIALOG_SELECTOR`**).
+ * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses {@link queryBootContentAll} (**`LOCAL_TIME_ELEMENTS_SELECTOR`**) when given the global `document`, else {@link resolveContentQueryRoot} on an explicit subtree. Other boot features: **`initConfirmSubmitForms`** ({@link queryBootContentAll} for **`form[data-confirm]`**), **`initCategoryModal`**, **`initHistoryControls`** ({@link resolveBootContentQueryRoot} + **`queryHistorySortSelect`** — same **`ParentNode`** as {@link queryBootContent} with **`HISTORY_SORT_SELECTOR`**), **`initSettingsMemberDialog`** (one {@link resolveBootContentQueryRoot} for **`dialog`** **`querySelector`** + **`querySettingsAddMemberInitContext`**). {@link queryBootContent} / {@link queryBootContentAll} remain for ad-hoc boot-scoped queries.
  */
 export function resolveContentQueryRoot(parent: ParentNode): ParentNode {
   if (typeof document === 'undefined') {
@@ -35,8 +35,8 @@ export function resolveBootContentQueryRoot(): ParentNode {
 }
 
 /**
- * `resolveBootContentQueryRoot().querySelector` — one call site for single-selector boot wiring
- * (e.g. **`initHistoryControls`**); keeps **`WeakMap`** memo reuse without repeating the resolve + query pattern.
+ * `resolveBootContentQueryRoot().querySelector` — convenience for single-selector boot wiring; keeps **`WeakMap`** memo reuse.
+ * **`initHistoryControls`** / **`initSettingsMemberDialog`** call {@link resolveBootContentQueryRoot} once explicitly, then domain **`querySelector`** helpers.
  */
 export function queryBootContent<E extends Element = Element>(selector: string): E | null {
   return resolveBootContentQueryRoot().querySelector<E>(selector)
