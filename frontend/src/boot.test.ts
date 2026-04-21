@@ -18,9 +18,25 @@ vi.mock('./lib/categoryModal', () => ({ initCategoryModal: stubs.initCategoryMod
 vi.mock('./lib/historyControls', () => ({ initHistoryControls: stubs.initHistoryControls }))
 vi.mock('./lib/confirmSubmitForms', () => ({ initConfirmSubmitForms: stubs.initConfirmSubmitForms }))
 
-import { BOOT_APP_INITIALIZERS, bootApp } from './boot'
+import { BOOT_APP_INITIALIZERS, bootApp, runBootInitializers } from './boot'
 import { BOOT_APP_INITIALIZERS as bootInitializersModuleList } from './bootInitializers'
 import { BOOT_INITIALIZER_COUNT, BOOT_INITIALIZER_NAMES } from './bootInitializerNames'
+
+describe('runBootInitializers', () => {
+  it('no-ops on an empty list', () => {
+    expect(() => runBootInitializers([])).not.toThrow()
+  })
+
+  it('invokes each initializer in order', () => {
+    const order: string[] = []
+    runBootInitializers([
+      () => order.push('a'),
+      () => order.push('b'),
+      () => order.push('c'),
+    ])
+    expect(order).toEqual(['a', 'b', 'c'])
+  })
+})
 
 describe('bootApp', () => {
   beforeEach(() => {
