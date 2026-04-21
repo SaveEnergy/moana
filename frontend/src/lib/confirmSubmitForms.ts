@@ -1,4 +1,4 @@
-import { resolveBootContentQueryRoot } from './contentRoot'
+import { queryBootContentAll } from './contentRoot'
 import { DATA_CONFIRM_ATTRIBUTE, FORM_DATA_CONFIRM_SELECTOR } from './domSelectors'
 import { stripCfTrimEdges } from './unicodeCf'
 
@@ -45,12 +45,11 @@ export function attachConfirmBeforeSubmit(form: HTMLFormElement, message: string
   confirmSubmitWiredForms.add(form)
 }
 
-/** One `querySelectorAll` + Cf strip / trim filter — boot wires without building an intermediate list. */
-function forEachConfirmableForm(
-  root: ParentNode,
+/** Shared indexed walk: Cf strip / trim filter — no intermediate `Array` for boot or subtree scans. */
+function forEachConfirmableFormList(
+  forms: ArrayLike<HTMLFormElement>,
   fn: (form: HTMLFormElement, message: string) => void,
 ): void {
-  const forms = root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)
   for (let i = 0, n = forms.length; i < n; i++) {
     const form = forms[i]
     const msg = readDataConfirmMessage(form)
@@ -58,6 +57,14 @@ function forEachConfirmableForm(
       fn(form, msg)
     }
   }
+}
+
+/** One `querySelectorAll` on `root` + Cf strip / trim filter. */
+function forEachConfirmableForm(
+  root: ParentNode,
+  fn: (form: HTMLFormElement, message: string) => void,
+): void {
+  forEachConfirmableFormList(root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR), fn)
 }
 
 /**
@@ -74,7 +81,7 @@ export function findDataConfirmForms(root: ParentNode): Array<{ form: HTMLFormEl
 
 /** Wire all matching `form[data-confirm]` under the layout main landmark when present. Idempotent via `attachConfirmBeforeSubmit`. */
 export function initConfirmSubmitForms(): void {
-  forEachConfirmableForm(resolveBootContentQueryRoot(), (form, message) => {
+  forEachConfirmableFormList(queryBootContentAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR), (form, message) => {
     attachConfirmBeforeSubmit(form, message)
   })
 }

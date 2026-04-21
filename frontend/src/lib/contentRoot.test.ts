@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { APP_MAIN_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
-import { queryBootContent, resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
+import { APP_MAIN_SELECTOR, FORM_DATA_CONFIRM_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
+import { queryBootContent, queryBootContentAll, resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('resolveContentQueryRoot', () => {
@@ -60,6 +60,27 @@ describe('queryBootContent', () => {
     } as unknown as ParentNode
     vi.stubGlobal('document', stubDocumentMainLandmark(main))
     expect(queryBootContent<HTMLSelectElement>(HISTORY_SORT_SELECTOR)).toBe(select)
+  })
+})
+
+describe('queryBootContentAll', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('querySelectorAll on the resolved boot content root', () => {
+    const f1 = { _: 'f1' } as unknown as HTMLFormElement
+    const f2 = { _: 'f2' } as unknown as HTMLFormElement
+    const list = [f1, f2] as unknown as NodeListOf<HTMLFormElement>
+    const main = {
+      querySelectorAll: (sel: string) => (sel === FORM_DATA_CONFIRM_SELECTOR ? list : ([] as unknown as NodeListOf<HTMLFormElement>)),
+    } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
+    const out = queryBootContentAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)
+    expect(out).toBe(list)
+    expect(out.length).toBe(2)
+    expect(out[0]).toBe(f1)
+    expect(out[1]).toBe(f2)
   })
 })
 

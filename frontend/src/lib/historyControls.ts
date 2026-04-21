@@ -5,7 +5,7 @@ import { HISTORY_SORT_SELECTOR } from './domSelectors'
 const historySortWiredSelects = new WeakSet<HTMLSelectElement>()
 
 /**
- * Resolve the history sort `<select>` from a root (`initHistoryControls` uses `resolveBootContentQueryRoot()`).
+ * Resolve the history sort `<select>` from a root (`initHistoryControls` uses {@link queryBootContent} with {@link HISTORY_SORT_SELECTOR}).
  * Uses {@link HISTORY_SORT_SELECTOR} so the id string lives only in `domSelectors.ts`.
  */
 export function queryHistorySortSelect(root: ParentNode): HTMLSelectElement | null {

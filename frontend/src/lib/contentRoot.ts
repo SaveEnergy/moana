@@ -8,7 +8,7 @@ const contentRootMemo = new WeakMap<Document, ParentNode>()
  * so scans skip shell chrome. Falls back to `document` when the landmark is absent (e.g. `login.html`).
  * Returns `parent` unchanged when it is not the global `document` (tests, explicit subtrees) or when `document` is undefined (Node).
  *
- * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses the same when given the global `document`, else passes an explicit subtree. Other boot features: **`initConfirmSubmitForms`**, **`initCategoryModal`**, **`initHistoryControls`** ({@link queryBootContent} for **`#history-sort`**), **`initSettingsMemberDialog`**.
+ * Boot modules call {@link resolveBootContentQueryRoot} (→ `document` here). **`applyLocalTimeElements`** uses the same when given the global `document`, else passes an explicit subtree. Other boot features: **`initConfirmSubmitForms`** ({@link queryBootContentAll} for **`form[data-confirm]`**), **`initCategoryModal`**, **`initHistoryControls`** ({@link queryBootContent} for **`#history-sort`**), **`initSettingsMemberDialog`**.
  */
 export function resolveContentQueryRoot(parent: ParentNode): ParentNode {
   if (typeof document === 'undefined') {
@@ -40,4 +40,11 @@ export function resolveBootContentQueryRoot(): ParentNode {
  */
 export function queryBootContent<E extends Element = Element>(selector: string): E | null {
   return resolveBootContentQueryRoot().querySelector<E>(selector)
+}
+
+/**
+ * `resolveBootContentQueryRoot().querySelectorAll` — boot-scoped list queries (e.g. **`initConfirmSubmitForms`**).
+ */
+export function queryBootContentAll<E extends Element = Element>(selector: string): NodeListOf<E> {
+  return resolveBootContentQueryRoot().querySelectorAll<E>(selector)
 }
