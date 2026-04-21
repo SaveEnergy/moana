@@ -47,6 +47,12 @@ describe('resolveCategoryModalPreviewBackground', () => {
     expect(resolveCategoryModalPreviewBackground('#abc123', undefined)).toBe('#abc123')
   })
 
+  it('ignores native color input when a preset swatch is selected', () => {
+    expect(
+      resolveCategoryModalPreviewBackground('#abc123', '#ff0000'),
+    ).toBe('#abc123')
+  })
+
   it('returns the same native color string when custom is selected and hex has no edge whitespace', () => {
     const native = '#abcdef'
     expect(

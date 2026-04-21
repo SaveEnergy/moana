@@ -102,10 +102,9 @@ export function initCategoryModal(): void {
       CATEGORY_MODAL_COLOR_RADIO_GROUP_NAME,
       opts?.colorRadioTarget,
     )
-    const nextBg = resolveCategoryModalPreviewBackground(
-      colorVal || undefined,
-      colorNativeInput?.value,
-    )
+    const nativeForPreview =
+      colorVal === CATEGORY_MODAL_COLOR_RADIO_VALUE_CUSTOM ? colorNativeInput?.value : undefined
+    const nextBg = resolveCategoryModalPreviewBackground(colorVal || undefined, nativeForPreview)
     if (shouldUpdateCategoryModalPreviewBackground(lastResolvedPreviewBackground, nextBg)) {
       catPreview.style.background = nextBg
       lastResolvedPreviewBackground = nextBg
