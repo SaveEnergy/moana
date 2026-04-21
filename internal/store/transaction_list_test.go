@@ -97,6 +97,15 @@ func TestListTransactions_searchNoDate_zeroLimit_returnsAllMatches(t *testing.T)
 	}
 }
 
+func TestListTransactions_datedBothSearch_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
+	_, err := st.ListTransactions(alreadyCancelledContext(t), 1, TransactionFilter{FromUTC: &from, ToUTC: &to, Search: "x", Limit: 10})
+	assertErrIsContextCanceled(t, err)
+}
+
 func TestListTransactions_datedNoSearch_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

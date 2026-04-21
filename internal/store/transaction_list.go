@@ -53,6 +53,21 @@ func (s *Store) ListTransactions(ctx context.Context, householdID int64, f Trans
 			return scanTransactionRows(rows, limit)
 		}
 	}
+	if search != "" && f.FromUTC != nil && f.ToUTC != nil {
+		if q, ok := staticListTransactionsDatedBothSearchQuery(kind, f.OldestFirst, limit); ok {
+			term := "%" + escapeSQLLikePattern(search) + "%"
+			args := []any{householdID, timeutil.FormatSQLiteUTC(*f.FromUTC), timeutil.FormatSQLiteUTC(*f.ToUTC), term, term}
+			if limit > 0 {
+				args = append(args, limit)
+			}
+			rows, err := s.DB.QueryContext(ctx, q, args...)
+			if err != nil {
+				return nil, err
+			}
+			defer rows.Close()
+			return scanTransactionRows(rows, limit)
+		}
+	}
 	var b strings.Builder
 	b.Grow(512)
 	b.WriteString(sqlTransactionListFromHousehold)
@@ -288,6 +303,48 @@ func staticListTransactionsSearchNoDateQuery(kind string, oldestFirst bool, limi
 			return sqlTransactionListSearchNoDateExpenseDescLimit, true
 		}
 		return sqlTransactionListSearchNoDateExpenseDesc, true
+	}
+	return "", false
+}
+
+// staticListTransactionsDatedBothSearchQuery returns fixed SQL when [ListTransactions] has both date bounds and a search term.
+func staticListTransactionsDatedBothSearchQuery(kind string, oldestFirst bool, limit int) (string, bool) {
+	withLimit := limit > 0
+	frag := sqlAmountKindFilter(kind)
+	switch frag {
+	case "":
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListDatedBothSearchNoKindAscLimit, true
+			}
+			return sqlTransactionListDatedBothSearchNoKindAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListDatedBothSearchNoKindDescLimit, true
+		}
+		return sqlTransactionListDatedBothSearchNoKindDesc, true
+	case sqlFilterAmountIncome:
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListDatedBothSearchIncomeAscLimit, true
+			}
+			return sqlTransactionListDatedBothSearchIncomeAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListDatedBothSearchIncomeDescLimit, true
+		}
+		return sqlTransactionListDatedBothSearchIncomeDesc, true
+	case sqlFilterAmountExpense:
+		if oldestFirst {
+			if withLimit {
+				return sqlTransactionListDatedBothSearchExpenseAscLimit, true
+			}
+			return sqlTransactionListDatedBothSearchExpenseAsc, true
+		}
+		if withLimit {
+			return sqlTransactionListDatedBothSearchExpenseDescLimit, true
+		}
+		return sqlTransactionListDatedBothSearchExpenseDesc, true
 	}
 	return "", false
 }

@@ -104,6 +104,23 @@ const (
 	sqlTransactionListSearchNoDateExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
 )
 
+// sqlTransactionListDatedBothSearch* are [ListTransactions] with both occurred_at bounds, LIKE search, optional kind, optional LIMIT.
+const (
+	sqlTransactionListDatedBothSearchNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothSearchNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedBothSearchIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothSearchIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+	sqlTransactionListDatedBothSearchExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
+	sqlTransactionListDatedBothSearchExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
+
+	sqlTransactionListDatedBothSearchNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
+	sqlTransactionListDatedBothSearchNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
+	sqlTransactionListDatedBothSearchIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
+	sqlTransactionListDatedBothSearchIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
+	sqlTransactionListDatedBothSearchExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
+	sqlTransactionListDatedBothSearchExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
+)
+
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `
 WHERE t.id = ? AND owner.household_id = ?`
