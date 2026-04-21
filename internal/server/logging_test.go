@@ -115,7 +115,7 @@ func TestStatusWriter_pushDelegatesToUnderlying(t *testing.T) {
 }
 
 func TestRequestLogging_delegatesToInner(t *testing.T) {
-	// Not parallel: shares process-wide [slog.Default] with [TestRequestLogging_skipsSlogForHealthGET].
+	// Not parallel: shares process-wide [slog.Default] with [TestRequestLogging_healthPathRules].
 	var saw bool
 	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		saw = true
@@ -131,7 +131,7 @@ func TestRequestLogging_delegatesToInner(t *testing.T) {
 	}
 }
 
-func TestRequestLogging_skipsSlogForHealthGET(t *testing.T) {
+func TestRequestLogging_healthPathRules(t *testing.T) {
 	// Not parallel: mutates [slog.Default] for this package's tests.
 	var buf bytes.Buffer
 	h := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelInfo}))
@@ -144,17 +144,29 @@ func TestRequestLogging_skipsSlogForHealthGET(t *testing.T) {
 	})
 	chained := RequestLogging(inner)
 	rec := httptest.NewRecorder()
-	chained.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, HealthPath, nil))
-	if buf.Len() != 0 {
-		t.Fatalf("expected no slog output for GET %s, got %q", HealthPath, buf.String())
-	}
-	if rec.Code != http.StatusOK {
-		t.Fatalf("code %d", rec.Code)
-	}
 
-	buf.Reset()
-	chained.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api", nil))
-	if buf.Len() == 0 {
-		t.Fatal("expected slog output for non-health GET")
-	}
+	t.Run("GET skips", func(t *testing.T) {
+		buf.Reset()
+		chained.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, HealthPath, nil))
+		if buf.Len() != 0 {
+			t.Fatalf("expected no slog output for GET %s, got %q", HealthPath, buf.String())
+		}
+		if rec.Code != http.StatusOK {
+			t.Fatalf("code %d", rec.Code)
+		}
+	})
+	t.Run("GET other logs", func(t *testing.T) {
+		buf.Reset()
+		chained.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api", nil))
+		if buf.Len() == 0 {
+			t.Fatal("expected slog output for non-health GET")
+		}
+	})
+	t.Run("POST health still logs", func(t *testing.T) {
+		buf.Reset()
+		chained.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, HealthPath, nil))
+		if buf.Len() == 0 {
+			t.Fatal("expected slog output for POST /health (skip is GET-only)")
+		}
+	})
 }
