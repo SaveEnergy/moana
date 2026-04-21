@@ -1,6 +1,6 @@
 /**
  * Playwright locator strings aligned with `frontend/src/lib/domSelectors.ts` and
- * `internal/assets/templates/` (`layout.html`, `settings.html`, `history.html`).
+ * `internal/assets/templates/` (`layout.html`, `settings.html`, `history.html`, transaction forms).
  * Single place to update when template ids change.
  */
 
@@ -45,3 +45,11 @@ export const CATEGORY_MODAL_TITLE = '#cat-modal-title' as const
 export const CATEGORY_MODAL_CLOSE = '#cat-modal-close' as const
 export const CATEGORY_MODAL_NAME = '#cat-modal-name' as const
 export const CATEGORY_MODAL_SUBMIT = '#cat-modal-submit' as const
+
+// --- Transaction edit (`transactions_edit.html`)
+export const TX_EDIT_NOTE = '#tx-edit-note' as const
+
+/**
+ * Row stamps after save / history — prefix of **`LOCAL_TIME_ELEMENTS_SELECTOR`** (`time.js-local-time[datetime]`).
+ */
+export const LOCAL_TIME_DISPLAY = 'time.js-local-time' as const

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 import { E2E_USER_EMAIL, signInAsTestUser } from '../helpers/auth'
 import { todayLocalISODate } from '../helpers/dates'
 import { APP_CSS_STYLESHEET, APP_JS_MODULE_PRELOAD } from '../helpers/modulePreload'
-import { SETTINGS_EMAIL } from '../helpers/shellSelectors'
+import { SETTINGS_EMAIL, TX_EDIT_NOTE } from '../helpers/shellSelectors'
 
 test('categories page renders', async ({ page }) => {
   await signInAsTestUser(page)
@@ -60,7 +60,7 @@ test('transaction edit loads from history and save returns to history', async ({
   await expect(page.locator(APP_CSS_STYLESHEET)).toHaveCount(1)
   await expect(page.locator(APP_JS_MODULE_PRELOAD)).toHaveCount(1)
 
-  await page.locator('#tx-edit-note').fill('e2e edit smoke')
+  await page.locator(TX_EDIT_NOTE).fill('e2e edit smoke')
   await page.getByRole('button', { name: 'Save changes' }).click()
   await expect(page).toHaveURL(/\/history/)
 })

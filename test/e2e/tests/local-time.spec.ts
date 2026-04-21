@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 
 import { signInAsTestUser } from '../helpers/auth'
 import { todayLocalISODate } from '../helpers/dates'
+import { LOCAL_TIME_DISPLAY } from '../helpers/shellSelectors'
 
 test('transaction create hydrates local time on history', async ({ page }) => {
   await signInAsTestUser(page)
@@ -11,7 +12,7 @@ test('transaction create hydrates local time on history', async ({ page }) => {
   await page.getByRole('button', { name: 'Save entry' }).click()
   await expect(page).toHaveURL(/\/history/)
 
-  const stamp = page.locator('time.js-local-time').first()
+  const stamp = page.locator(LOCAL_TIME_DISPLAY).first()
   await expect(stamp).toBeVisible()
   await expect(stamp).not.toHaveText('…')
 })
