@@ -122,27 +122,28 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 	assertSeeOtherToLogin(t, mux, http.MethodPost, handlers.LogoutPath, nil, false)
 }
 
-// TestRegisterRoutes_transactionsDELETE_methodNotAllowed verifies DELETE /transactions is not registered (GET+POST only).
-func TestRegisterRoutes_transactionsDELETE_methodNotAllowed(t *testing.T) {
-	t.Parallel()
+// TestRegisterRoutes_disallowedMethodsReturn405 verifies unregistered method+path pairs get 405 (Go 1.22+ ServeMux).
+// Covers ledger surface (GET+POST only), history (GET only), and notification mark-read (POST only).
+func TestRegisterRoutes_disallowedMethodsReturn405(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, handlers.TransactionsPath, nil))
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("DELETE %s: status %d want 405", handlers.TransactionsPath, rec.Code)
+	cases := []struct {
+		method, path string
+	}{
+		{http.MethodDelete, handlers.TransactionsPath},
+		{http.MethodDelete, handlers.CategoriesPath},
+		{http.MethodPost, handlers.HistoryPath},
+		{http.MethodGet, handlers.NotificationsMarkReadPath},
 	}
-}
-
-// TestRegisterRoutes_notificationsReadGET_methodNotAllowed verifies GET /notifications/read is POST-only (stdlib returns 405).
-func TestRegisterRoutes_notificationsReadGET_methodNotAllowed(t *testing.T) {
-	t.Parallel()
-	mux, cleanup := newRegisterRoutesTestMux(t)
-	defer cleanup()
-	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.NotificationsMarkReadPath, nil))
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("GET %s: status %d want 405", handlers.NotificationsMarkReadPath, rec.Code)
+	for _, tc := range cases {
+		t.Run(tc.method+"_"+strings.ReplaceAll(strings.TrimPrefix(tc.path, "/"), "/", "_"), func(t *testing.T) {
+			t.Parallel()
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, httptest.NewRequest(tc.method, tc.path, nil))
+			if rec.Code != http.StatusMethodNotAllowed {
+				t.Fatalf("%s %s: status %d want 405", tc.method, tc.path, rec.Code)
+			}
+		})
 	}
 }
 
