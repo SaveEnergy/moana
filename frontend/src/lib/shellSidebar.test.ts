@@ -370,6 +370,58 @@ describe('initShellSidebar', () => {
     dismissSpy.mockRestore()
   })
 
+  it('does not duplicate toggle or shell click listeners when document keydown wiring fails once', () => {
+    const matchMedia = vi.fn()
+    const mq = {
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }
+    matchMedia.mockReturnValue(mq)
+
+    const toggle = { addEventListener: vi.fn(), setAttribute: vi.fn() }
+    const backdrop = { setAttribute: vi.fn() }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
+    const appShell = {
+      classList: {
+        add: vi.fn(),
+        remove: vi.fn(),
+        contains: vi.fn(() => false),
+      },
+      addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
+    }
+
+    const querySelector = vi.fn((sel: string) => (sel === APP_SHELL_SELECTOR ? appShell : null))
+
+    let keydownWiringAttempts = 0
+    const addEventListener = vi.fn((type: string, _fn: unknown, _opts?: unknown) => {
+      if (type === 'keydown') {
+        keydownWiringAttempts += 1
+        if (keydownWiringAttempts === 1) {
+          throw new Error('keydown wiring failed')
+        }
+      }
+    })
+
+    const doc = { querySelector, addEventListener }
+    vi.stubGlobal('document', doc)
+    vi.stubGlobal('window', { matchMedia })
+
+    expect(() => initShellSidebar()).toThrow('keydown wiring failed')
+
+    initShellSidebar()
+
+    expect(toggle.addEventListener).toHaveBeenCalledTimes(1)
+    expect(appShell.addEventListener).toHaveBeenCalledTimes(1)
+    expect(addEventListener.mock.calls.filter((c) => c[0] === 'keydown')).toHaveLength(2)
+  })
+
   it('does not stack listeners when initShellSidebar runs twice', () => {
     const matchMedia = vi.fn()
     const mq = {

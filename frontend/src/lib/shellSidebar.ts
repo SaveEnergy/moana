@@ -10,6 +10,10 @@ import { MOBILE_SHELL_MEDIA_QUERY, onMediaQueryChange } from './shellBreakpoints
 
 const shellSidebarWiredShells = new WeakSet<HTMLElement>()
 
+/** Partial **`initShellSidebar`** retries (throw before **`shellSidebarWiredShells`** records the shell) must not stack these listeners. */
+const shellSidebarToggleClickWired = new WeakSet<HTMLElement>()
+const shellSidebarShellClickWired = new WeakSet<HTMLElement>()
+
 /** `#app-shell` — mobile drawer root (`layout.html`). */
 export function queryAppShell(root: ParentNode): HTMLElement | null {
   return root.querySelector<HTMLElement>(APP_SHELL_SELECTOR)
@@ -78,25 +82,31 @@ export function initShellSidebar(): void {
     }
   }
 
-  toggle?.addEventListener('click', () => {
-    if (!mqMobile.matches) {
-      return
-    }
-    toggleMobileSidebar()
-  })
+  if (toggle && !shellSidebarToggleClickWired.has(toggle)) {
+    toggle.addEventListener('click', () => {
+      if (!mqMobile.matches) {
+        return
+      }
+      toggleMobileSidebar()
+    })
+    shellSidebarToggleClickWired.add(toggle)
+  }
 
   /** Backdrop + in-drawer close — one bubbling listener (see `mobileShellDismiss.ts`). */
-  appShell.addEventListener('click', (e) => {
-    if (!mqMobile.matches) {
-      return
-    }
-    if (!appShell.classList.contains('sidebar-open')) {
-      return
-    }
-    if (shouldCloseMobileSidebarFromShellClick(e, backdrop)) {
-      closeMobileSidebar()
-    }
-  })
+  if (!shellSidebarShellClickWired.has(appShell)) {
+    appShell.addEventListener('click', (e) => {
+      if (!mqMobile.matches) {
+        return
+      }
+      if (!appShell.classList.contains('sidebar-open')) {
+        return
+      }
+      if (shouldCloseMobileSidebarFromShellClick(e, backdrop)) {
+        closeMobileSidebar()
+      }
+    })
+    shellSidebarShellClickWired.add(appShell)
+  }
 
   onMediaQueryChange(mqMobile, () => {
     if (!mqMobile.matches) {
