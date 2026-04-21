@@ -21,7 +21,7 @@ export const CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT = '#818cf8' as const
 
 /**
  * CSS `background` for the category modal preview strip from the checked color `value` and native hex.
- * Pure helper for `categoryModal.ts` (`syncCatModalPreview`).
+ * Pure helper for {@link createCategoryModalPreviewController} (`categoryModalPreview.ts`).
  */
 export function resolveCategoryModalPreviewBackground(
   checkedColorValue: string | undefined,
@@ -39,7 +39,7 @@ export function resolveCategoryModalPreviewBackground(
 
 /**
  * Whether {@link resolveCategoryModalPreviewBackground} produced a different string than last paint —
- * `categoryModal.ts` uses this to skip redundant `style.background` writes on the preview strip.
+ * {@link createCategoryModalPreviewController} uses this to skip redundant `style.background` writes on the preview strip.
  */
 export function shouldUpdateCategoryModalPreviewBackground(
   lastResolved: string | undefined,

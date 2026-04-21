@@ -4,6 +4,9 @@ export const TIMEZONE_COOKIE_NAME = 'moana_tz'
 
 const TZ_MAX_AGE_SEC = 365 * 24 * 60 * 60
 
+/** Lazy singleton for **`resolvedOptions().timeZone`** — duplicate **`bootApp()`** must not allocate another `Intl.DateTimeFormat`. */
+let browserTimeZoneFormat: Intl.DateTimeFormat | undefined
+
 /** Cookie `document.cookie` value segment for one IANA zone (deterministic; unit-tested). */
 export function timezoneCookieSegment(tz: string): string {
   return `${TIMEZONE_COOKIE_NAME}=${encodeURIComponent(tz)}; Path=/; Max-Age=${TZ_MAX_AGE_SEC}; SameSite=Lax`
@@ -48,7 +51,10 @@ export function parseMoanaTimezoneCookie(cookieHeader: string): string | null {
 /** Persist browser IANA timezone for server-side date handling. */
 export function setBrowserTimezoneCookie(): void {
   try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (!browserTimeZoneFormat) {
+      browserTimeZoneFormat = new Intl.DateTimeFormat()
+    }
+    const tz = browserTimeZoneFormat.resolvedOptions().timeZone
     if (!tz) return
     if (parseMoanaTimezoneCookie(document.cookie) === tz) {
       return
