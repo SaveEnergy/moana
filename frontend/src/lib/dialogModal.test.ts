@@ -63,6 +63,24 @@ describe('attachShowModalOnClick', () => {
     const dialog = { open: false, showModal: vi.fn() } as unknown as HTMLDialogElement
     expect(() => attachShowModalOnClick(null, dialog)).not.toThrow()
   })
+
+  it('does not stack listeners when attachShowModalOnClick runs twice on the same button', () => {
+    const showModal = vi.fn()
+    const dialog = { open: false, showModal } as unknown as HTMLDialogElement
+    const handlers: Array<() => void> = []
+    const openBtn = {
+      addEventListener: (_type: string, fn: () => void) => {
+        handlers.push(fn)
+      },
+    } as unknown as HTMLElement
+
+    attachShowModalOnClick(openBtn, dialog)
+    attachShowModalOnClick(openBtn, dialog)
+
+    expect(handlers).toHaveLength(1)
+    handlers[0]()
+    expect(showModal).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('closeDialogIfOpen', () => {
