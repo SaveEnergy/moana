@@ -69,6 +69,16 @@ describe('readCategoryEditRowDataset', () => {
     expect(readCategoryEditRowDataset(ds)?.customHex).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
   })
 
+  it('uses empty name, rawColor, and iconVal when those attributes are omitted', () => {
+    const row = readCategoryEditRowDataset({ id: '1' } as unknown as DOMStringMap)
+    expect(row).not.toBeNull()
+    expect(row!.name).toBe('')
+    expect(row!.rawColor).toBe('')
+    expect(row!.iconVal).toBe('')
+    expect(row!.isCustom).toBe(false)
+    expect(row!.customHex).toBe(CATEGORY_MODAL_CUSTOM_COLOR_INPUT_DEFAULT)
+  })
+
   it('accepts id "0" (only empty/whitespace id is rejected)', () => {
     const ds = { id: '0', name: 'edge' } as unknown as DOMStringMap
     expect(readCategoryEditRowDataset(ds)?.id).toBe('0')
