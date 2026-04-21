@@ -58,6 +58,9 @@ export function attachNativeDialogDismiss(
     selectors = closeWithinSelectors
   }
   dialog.addEventListener('click', (e) => {
+    if (dialog.open === false) {
+      return
+    }
     if (!shouldCloseNativeDialogFromClick(e, dialog, selectors)) {
       return
     }

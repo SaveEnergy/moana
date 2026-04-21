@@ -95,6 +95,26 @@ describe('attachNativeDialogDismiss', () => {
     expect(close).not.toHaveBeenCalled()
   })
 
+  it('does not run dismiss matching when dialog is already closed (inner clicks)', () => {
+    const close = vi.fn()
+    const addEventListener = vi.fn()
+    const closest = vi.fn(() => null)
+    const inner = { closest } as unknown as Element
+    const dialog = {
+      close,
+      open: false,
+      addEventListener,
+    } as unknown as HTMLDialogElement
+
+    attachNativeDialogDismiss(dialog, ['#cat-modal-close'])
+
+    const onClick = addEventListener.mock.calls[0][1] as (e: ClickTargetEvent) => void
+    onClick(stubClickTargetEvent(inner))
+
+    expect(close).not.toHaveBeenCalled()
+    expect(closest).not.toHaveBeenCalled()
+  })
+
   it('calls close when open is true and shouldClose applies', () => {
     const close = vi.fn()
     const addEventListener = vi.fn()
