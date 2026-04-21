@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
  */
 import { BOOT_APP_INITIALIZERS, BOOT_INITIALIZER_NAMES } from './bootInitializers'
 
-/** Must match `design.md` boot order — update when changing {@link BOOT_APP_INITIALIZERS}. */
+/** Must match `design.md` §2 JS row and **Boot content root** table — update when changing {@link BOOT_APP_INITIALIZERS}. */
 const DOCUMENTED_BOOT_NAME_ORDER = [
   'setBrowserTimezoneCookie',
   'applyLocalTimeElements',
