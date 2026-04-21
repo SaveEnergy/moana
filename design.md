@@ -147,7 +147,7 @@ Pattern: **desktop-first shell** with a **1023px** cutoff for drawer navigation.
 
 ### Cards
 
-- **Dashboard:** `.dashboard-card`, `.dashboard-kpi-row`, heatmap-specific wrappers  
+- **Dashboard:** `.dashboard-card`, `.dashboard-kpi-row` (**`var(--shadow-card)`**, same token as **`.entry-card`**), heatmap-specific wrappers  
 - **Generic:** `.entry-card`, `.layer-card`, `.settings-card`  
 - **Elevation:** `var(--shadow-card)` or float shadow
 
