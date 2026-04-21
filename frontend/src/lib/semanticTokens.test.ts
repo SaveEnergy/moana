@@ -73,6 +73,14 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines native dialog ::backdrop scrim tokens', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(/--backdrop-cat-modal:\s*rgba\(15,\s*17,\s*18,\s*0\.42\)\s*;/)
+    expect(src).toMatch(
+      /--backdrop-admin-add-dialog:\s*color-mix\(in srgb, var\(--on-surface\) 45%, transparent\)\s*;/,
+    )
+  })
+
   it('defines admin add-member dialog shadow stack', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toContain('--shadow-admin-add-dialog:')

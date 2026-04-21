@@ -372,7 +372,7 @@
 }
 
 .cat-modal::backdrop {
-  background: rgba(15, 17, 18, 0.42);
+  background: var(--backdrop-cat-modal);
   backdrop-filter: blur(2px);
 }
 

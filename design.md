@@ -55,6 +55,7 @@ Tokens follow **Material-style naming** (surface / on-surface / primary / contai
 - **`--shadow-raise-xs`** / **`--shadow-raise-xs-strong`** — paper “lift” inside tinted pill rails (`.history-seg-active` vs `.kind-option` checked; same blur/spread, **0.06** vs **0.08** alpha so the two controls keep their tuned contrast)
 - **`--shadow-modal-panel`** — `.cat-modal-panel` (native category dialog stack)
 - **`--shadow-admin-add-dialog`** — settings **add-member** `.admin-add-dialog` (`--shadow-float` + outline-variant hairline)
+- **`--backdrop-cat-modal`** / **`--backdrop-admin-add-dialog`** — **`::backdrop`** fills for `.cat-modal` vs `.admin-add-dialog`
 - **`--shadow-picker-stack`** — `.cat-picker-card` (dense picker chrome when that pattern is used)
 - **`--shadow-category-tile`** / **`--shadow-category-tile-hover`** / **`--shadow-category-tile-selected`** — `.category-picker-card` default, hover, and checked elevation (checked state still adds a **2px** `color-mix` ring in the declaration)
 - **`--shadow-drawer-edge`** / **`--shadow-shell-control`** — mobile **`.app-sidebar`** off-canvas stack and **`.app-sidebar-close`** floating control (`color-mix` on **`--on-surface`**, `03-dashboard.css`)
@@ -168,7 +169,7 @@ Pattern: **desktop-first shell** with a **1023px** cutoff for drawer navigation.
 
 ### Dialogs
 
-Native `<dialog>`: `.admin-add-dialog` (settings add member), `.cat-modal` (categories) with `.cat-modal-panel`, header, footer, full-width primary actions.
+Native `<dialog>`: `.admin-add-dialog` (settings add member), `.cat-modal` (categories) with `.cat-modal-panel`, header, footer, full-width primary actions. **`::backdrop`** scrims use **`--backdrop-cat-modal`** (fixed rgba + blur on the category dialog) and **`--backdrop-admin-add-dialog`** (`color-mix` on **`--on-surface`** for add-member).
 
 ### Chips / status
 

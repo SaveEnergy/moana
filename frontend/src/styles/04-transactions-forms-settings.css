@@ -885,7 +885,7 @@ input[type='date'].float-input {
 }
 
 .admin-add-dialog::backdrop {
-  background: color-mix(in srgb, var(--on-surface) 45%, transparent);
+  background: var(--backdrop-admin-add-dialog);
 }
 
 .admin-add-dialog-header {

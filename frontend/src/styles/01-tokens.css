@@ -48,6 +48,9 @@
   --shadow-float: 0 12px 32px rgba(44, 47, 48, 0.06);
   /* Native `<dialog>.admin-add-dialog` — float + outline hairline (`04-transactions-forms-settings.css`) */
   --shadow-admin-add-dialog: var(--shadow-float), 0 0 0 1px color-mix(in srgb, var(--outline-variant) 40%, transparent);
+  /* `<dialog>::backdrop` scrims (`05-history-categories.css`, `04-transactions-forms-settings.css`) */
+  --backdrop-cat-modal: rgba(15, 17, 18, 0.42);
+  --backdrop-admin-add-dialog: color-mix(in srgb, var(--on-surface) 45%, transparent);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
   /* Mobile shell (≤1023px): off-canvas drawer stack + floating close control (`03-dashboard.css`) */
   --shadow-drawer-edge: 8px 0 32px color-mix(in srgb, var(--on-surface) 18%, transparent);
