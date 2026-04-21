@@ -6,6 +6,20 @@ import (
 	"testing"
 )
 
+func TestRegisterHealth_HEADReturnsOK(t *testing.T) {
+	t.Parallel()
+	mux := http.NewServeMux()
+	registerHealth(mux)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodHead, HealthPath, nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("HEAD: code %d want 200", rec.Code)
+	}
+	if ct := rec.Header().Get("Content-Type"); ct != "text/plain; charset=utf-8" {
+		t.Fatalf("HEAD: Content-Type %q", ct)
+	}
+}
+
 func TestRegisterHealth_returnsOKBody(t *testing.T) {
 	t.Parallel()
 	mux := http.NewServeMux()

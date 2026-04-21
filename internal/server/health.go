@@ -9,6 +9,7 @@ const HealthPath = "/health"
 var healthOKBody = []byte("ok")
 
 func registerHealth(mux *http.ServeMux) {
+	// GET only; [http.ServeMux] also answers HEAD via the GET handler (implicit HEAD).
 	mux.HandleFunc(http.MethodGet+" "+HealthPath, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
