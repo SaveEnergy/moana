@@ -31,6 +31,19 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     )
   })
 
+  it('defines primary-tinted control shadows (soft / action / fab)', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(
+      /--shadow-primary-soft:\s*0 1px 2px color-mix\(in srgb, var\(--primary\) 28%, transparent\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-primary-action:\s*0 2px 8px color-mix\(in srgb, var\(--primary\) 35%, transparent\)\s*;/,
+    )
+    expect(src).toMatch(
+      /--shadow-primary-fab:\s*0 2px 12px color-mix\(in srgb, var\(--primary\) 35%, transparent\)\s*;/,
+    )
+  })
+
   it('defines mobile shell drawer and close-control shadows (on-surface color-mix)', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(

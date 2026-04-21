@@ -489,7 +489,7 @@
   background: var(--primary);
   color: var(--on-primary);
   border: none;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 35%, transparent);
+  box-shadow: var(--shadow-primary-action);
 }
 
 .cat-modal-submit:hover {

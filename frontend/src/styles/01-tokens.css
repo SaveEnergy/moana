@@ -50,6 +50,10 @@
   /* Mobile shell (≤1023px): off-canvas drawer stack + floating close control (`03-dashboard.css`) */
   --shadow-drawer-edge: 8px 0 32px color-mix(in srgb, var(--on-surface) 18%, transparent);
   --shadow-shell-control: 0 1px 4px color-mix(in srgb, var(--on-surface) 10%, transparent);
+  /* Primary-tinted elevation (legacy `.btn-indigo`, settings save, category modal submit, sidebar FAB) */
+  --shadow-primary-soft: 0 1px 2px color-mix(in srgb, var(--primary) 28%, transparent);
+  --shadow-primary-action: 0 2px 8px color-mix(in srgb, var(--primary) 35%, transparent);
+  --shadow-primary-fab: 0 2px 12px color-mix(in srgb, var(--primary) 35%, transparent);
   /* App shell — rails share page canvas; cards/content use --app-paper */
   --app-sidebar-width: 13.75rem;
   --sidebar-bg: var(--app-canvas);

@@ -222,7 +222,7 @@ body.app-body {
   font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.2;
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--primary) 35%, transparent);
+  box-shadow: var(--shadow-primary-fab);
 }
 
 .sidebar-fab:hover {

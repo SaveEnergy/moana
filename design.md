@@ -57,6 +57,7 @@ Tokens follow **Material-style naming** (surface / on-surface / primary / contai
 - **`--shadow-picker-stack`** — `.cat-picker-card` (dense picker chrome when that pattern is used)
 - **`--shadow-category-tile`** / **`--shadow-category-tile-hover`** / **`--shadow-category-tile-selected`** — `.category-picker-card` default, hover, and checked elevation (checked state still adds a **2px** `color-mix` ring in the declaration)
 - **`--shadow-drawer-edge`** / **`--shadow-shell-control`** — mobile **`.app-sidebar`** off-canvas stack and **`.app-sidebar-close`** floating control (`color-mix` on **`--on-surface`**, `03-dashboard.css`)
+- **`--shadow-primary-soft`** / **`--shadow-primary-action`** / **`--shadow-primary-fab`** — primary-filled controls (`.btn-indigo`, `.btn-settings-save`, `.cat-modal-submit`, `.sidebar-fab`; `28%` vs `35%` mixes per original tuning)
 - `--shadow-float`, `--shadow-card`
 
 ### Typography tokens
@@ -99,7 +100,7 @@ Heavy use of **`color-mix(in srgb, …)`** for hovers, selection, and tinted bac
 
 **Structure:** `.app-shell` → `.app-sidebar` + `.app-content`.
 
-- **Sidebar:** Sticky, full height, `z-index: 50`, wordmark, `.sidebar-nav` links (current route: **`.sidebar-link-active`** from `layout.html` **`Active`**), `.sidebar-fab` primary CTA (“Add transaction”).
+- **Sidebar:** Sticky, full height, `z-index: 50`, wordmark, `.sidebar-nav` links (current route: **`.sidebar-link-active`** from `layout.html` **`Active`**), `.sidebar-fab` primary CTA (“Add transaction”) uses **`--shadow-primary-fab`**.
 - **Top bar:** `.app-topbar` — mobile menu control, global search (`.app-search`, GET `/history`), notifications link (`.app-topbar-icon-btn` + **`.app-topbar-notif-btn`** — **`APP_TOPBAR_NOTIF_LINK_SELECTOR`** / **`APP_NOTIF_BADGE_CLASS`** in **`domSelectors.ts`**; **`.app-notif-badge`** when **`LayoutData.UnreadNotificationCount`** is positive; **`aria-current="page"`** when **Active** is notifications), `<details class="app-user-menu">` for account (panel **Settings** link **`aria-current="page"`** when **Active** is settings).  
 - **Mobile drawer (≤1023px):** Open via `#app-sidebar-toggle`; close via toggle, **Escape**, or **delegated `click` on `#app-shell`** (backdrop `#app-sidebar-backdrop` or `#app-sidebar-close`; predicate **`mobileShellDismiss.ts`**). Drawer / close-button depth use **`--shadow-drawer-edge`** and **`--shadow-shell-control`** (see §3).
 - **Main:** `.app-main`; optional **`.dashboard-page`** narrows `.app-content-container` to `max-width: 72rem` versus default `80rem`.
