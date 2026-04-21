@@ -123,20 +123,26 @@ func TestRegisterRoutes_logoutPOST_redirectsToLogin(t *testing.T) {
 }
 
 // TestRegisterRoutes_disallowedMethodsReturn405 verifies unregistered method+path pairs get 405 (Go 1.22+ ServeMux).
-// Covers ledger surface (GET+POST only), history (GET only), and notification mark-read (POST only).
+// Covers dashboard (GET-only), auth (POST logout only), ledger (GET+POST), history (GET-only), mark-read (POST-only).
 func TestRegisterRoutes_disallowedMethodsReturn405(t *testing.T) {
 	mux, cleanup := newRegisterRoutesTestMux(t)
 	defer cleanup()
 	cases := []struct {
 		method, path string
 	}{
+		{http.MethodPost, handlers.DashboardPath},
+		{http.MethodGet, handlers.LogoutPath},
 		{http.MethodDelete, handlers.TransactionsPath},
 		{http.MethodDelete, handlers.CategoriesPath},
 		{http.MethodPost, handlers.HistoryPath},
 		{http.MethodGet, handlers.NotificationsMarkReadPath},
 	}
 	for _, tc := range cases {
-		t.Run(tc.method+"_"+strings.ReplaceAll(strings.TrimPrefix(tc.path, "/"), "/", "_"), func(t *testing.T) {
+		sub := strings.TrimPrefix(tc.path, "/")
+		if sub == "" {
+			sub = "root"
+		}
+		t.Run(tc.method+"_"+strings.ReplaceAll(sub, "/", "_"), func(t *testing.T) {
 			t.Parallel()
 			rec := httptest.NewRecorder()
 			mux.ServeHTTP(rec, httptest.NewRequest(tc.method, tc.path, nil))
