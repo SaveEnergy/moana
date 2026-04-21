@@ -246,6 +246,73 @@ describe('initShellSidebar', () => {
     expect(toggle.setAttribute).not.toHaveBeenCalled()
   })
 
+  it('keydown Escape skips shouldDeferMobileShellEscape when drawer is closed', () => {
+    const deferSpy = vi.spyOn(dialogKeyboard, 'shouldDeferMobileShellEscape')
+
+    const matchMedia = vi.fn()
+    const mq = {
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }
+    matchMedia.mockReturnValue(mq)
+
+    const toggle = {
+      addEventListener: vi.fn(),
+      getAttribute: vi.fn(() => null),
+      setAttribute: vi.fn(),
+    }
+    const backdrop = { getAttribute: vi.fn(() => null), setAttribute: vi.fn() }
+
+    const shellQuerySelector = vi.fn((sel: string) => {
+      if (sel === APP_SIDEBAR_TOGGLE_SELECTOR) return toggle
+      if (sel === APP_SIDEBAR_BACKDROP_SELECTOR) return backdrop
+      return null
+    })
+
+    const contains = vi.fn(() => false)
+    const appShell = {
+      classList: {
+        add: vi.fn(),
+        remove: vi.fn(),
+        contains,
+      },
+      addEventListener: vi.fn(),
+      querySelector: shellQuerySelector,
+    }
+
+    const doc = {
+      querySelector: vi.fn((sel: string) => (sel === APP_SHELL_SELECTOR ? appShell : null)),
+      addEventListener: vi.fn(),
+    }
+
+    vi.stubGlobal('document', doc)
+    vi.stubGlobal('window', { matchMedia })
+
+    initShellSidebar()
+
+    const keydown = doc.addEventListener.mock.calls.find((c) => c[0] === 'keydown')?.[1] as (
+      e: KeyboardEvent,
+    ) => void
+    expect(keydown).toBeDefined()
+
+    deferSpy.mockClear()
+    keydown!({
+      key: 'Escape',
+      composedPath: () => {
+        throw new Error('composedPath should not run when drawer is closed')
+      },
+    } as unknown as KeyboardEvent)
+    expect(deferSpy).not.toHaveBeenCalled()
+
+    contains.mockReturnValue(true)
+    deferSpy.mockClear()
+    keydown!({ key: 'Escape', composedPath: () => [] } as unknown as KeyboardEvent)
+    expect(deferSpy).toHaveBeenCalledTimes(1)
+
+    deferSpy.mockRestore()
+  })
+
   it('shell click does not run dismiss predicate when drawer is closed', () => {
     const dismissSpy = vi.spyOn(mobileShellDismiss, 'shouldCloseMobileSidebarFromShellClick')
 

@@ -104,11 +104,15 @@ export function initShellSidebar(): void {
     }
   })
 
-  /* Capture phase: decide before bubble so we still see `dialog.open` during the same Escape. */
+  /* Capture phase: decide before bubble so we still see `dialog.open` during the same Escape.
+   * When the drawer is already closed, skip defer work (`composedPath` + optional menu `querySelector`) — hot path on mobile. */
   document.addEventListener(
     'keydown',
     (e) => {
       if (e.key !== 'Escape' || !mqMobile.matches) {
+        return
+      }
+      if (!appShell.classList.contains('sidebar-open')) {
         return
       }
       if (shouldDeferMobileShellEscape(e)) {
