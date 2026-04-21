@@ -25,6 +25,17 @@ func TestRegisterStatic_servesCSSWithCacheControl(t *testing.T) {
 	}
 }
 
+func TestRegisterStatic_POSTReturns405(t *testing.T) {
+	t.Parallel()
+	mux := http.NewServeMux()
+	registerStatic(mux)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, StaticURLPrefix+"css/app.css", nil))
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("POST %scss/app.css: status %d want 405", StaticURLPrefix, rec.Code)
+	}
+}
+
 func TestStaticURLPrefix_matchesServeMuxStripPrefix(t *testing.T) {
 	t.Parallel()
 	const legacy = "GET /static/"
