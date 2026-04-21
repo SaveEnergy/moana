@@ -88,6 +88,15 @@ func TestLoadLocation(t *testing.T) {
 	}
 }
 
+func TestLoadLocation_repeatedCallsReturnSamePointer(t *testing.T) {
+	t.Parallel()
+	a := LoadLocation("Europe/Berlin")
+	b := LoadLocation("Europe/Berlin")
+	if a != b {
+		t.Fatal("expected cached *time.Location pointer identity for repeated lookups")
+	}
+}
+
 func TestDayRangeUTCFromLocalDates(t *testing.T) {
 	t.Parallel()
 	loc, err := time.LoadLocation("America/New_York")
