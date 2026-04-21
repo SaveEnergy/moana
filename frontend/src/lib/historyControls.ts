@@ -1,4 +1,4 @@
-import { resolveBootContentQueryRoot } from './contentRoot'
+import { queryBootContent } from './contentRoot'
 import { HISTORY_SORT_SELECTOR } from './domSelectors'
 
 /** Avoid duplicate `change` → `requestSubmit` if history wiring runs twice. */
@@ -38,5 +38,5 @@ export function wireHistorySortAutoSubmit(select: HTMLSelectElement | null): voi
  * Skips when that element is already wired (duplicate `bootApp`).
  */
 export function initHistoryControls(): void {
-  wireHistorySortAutoSubmit(queryHistorySortSelect(resolveBootContentQueryRoot()))
+  wireHistorySortAutoSubmit(queryBootContent<HTMLSelectElement>(HISTORY_SORT_SELECTOR))
 }

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { APP_MAIN_SELECTOR } from './domSelectors'
-import { resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
+import { APP_MAIN_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
+import { queryBootContent, resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('resolveContentQueryRoot', () => {
@@ -45,6 +45,21 @@ describe('resolveContentQueryRoot', () => {
     expect(resolveContentQueryRoot(p)).toBe(main)
     expect(qs).toHaveBeenCalledTimes(1)
     expect(qs).toHaveBeenCalledWith(APP_MAIN_SELECTOR)
+  })
+})
+
+describe('queryBootContent', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('querySelectors on the resolved boot content root', () => {
+    const select = { _: 'history-sort' } as unknown as HTMLSelectElement
+    const main = {
+      querySelector: (sel: string) => (sel === HISTORY_SORT_SELECTOR ? select : null),
+    } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
+    expect(queryBootContent<HTMLSelectElement>(HISTORY_SORT_SELECTOR)).toBe(select)
   })
 })
 
