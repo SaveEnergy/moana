@@ -200,6 +200,55 @@ func TestDashboard_showsNotificationBadgeWhenUnread(t *testing.T) {
 	}
 }
 
+func TestDashboard_notificationBadgeClearsAfterMarkRead(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	uid := testutil.MustCreateUser(t, app, "badge-clear@moana.test", "pw", "user")
+	ctx := context.Background()
+	nid, err := app.Store.InsertNotification(ctx, uid, "only unread")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "badge-clear@moana.test", "pw")
+
+	respDash, err := client.Get(srv.URL + handlers.DashboardPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(respDash.Body)
+	_ = respDash.Body.Close()
+	if respDash.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard status %d", respDash.StatusCode)
+	}
+	if !strings.Contains(string(body), `class="app-notif-badge"`) {
+		t.Fatalf("expected badge before mark-read, got prefix %q", string(body)[:min(1200, len(body))])
+	}
+
+	respPost, err := client.PostForm(srv.URL+handlers.NotificationsMarkReadPath, url.Values{
+		handlers.NotificationFieldID: {strconv.FormatInt(nid, 10)},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = io.Copy(io.Discard, respPost.Body)
+	_ = respPost.Body.Close()
+
+	respAfter, err := client.Get(srv.URL + handlers.DashboardPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer respAfter.Body.Close()
+	if respAfter.StatusCode != http.StatusOK {
+		t.Fatalf("dashboard after mark-read status %d", respAfter.StatusCode)
+	}
+	bodyAfter, _ := io.ReadAll(respAfter.Body)
+	if strings.Contains(string(bodyAfter), `class="app-notif-badge"`) {
+		t.Fatalf("expected no topbar badge after marking only notification read, got prefix %q", string(bodyAfter)[:min(1200, len(bodyAfter))])
+	}
+}
+
 func TestDashboardWithPeriodQuery(t *testing.T) {
 	t.Parallel()
 	app, srv, cleanup := testutil.NewAppServer(t)
