@@ -1,6 +1,10 @@
 package auth
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +18,22 @@ func sessionCookieValue(w *httptest.ResponseRecorder) string {
 		}
 	}
 	return ""
+}
+
+// signedSessionCookieValue builds a valid HMAC-signed cookie (same wire format as [SignSession]) for tests.
+func signedSessionCookieValue(t *testing.T, secret []byte, p SessionPayload) string {
+	t.Helper()
+	if p.Exp == 0 {
+		p.Exp = time.Now().Add(time.Hour).Unix()
+	}
+	body, err := json.Marshal(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mac := hmac.New(sha256.New, secret)
+	mac.Write(body)
+	sig := mac.Sum(nil)
+	return base64.RawURLEncoding.EncodeToString(body) + "." + base64.RawURLEncoding.EncodeToString(sig)
 }
 
 func TestSignReadSessionRoundTrip(t *testing.T) {
@@ -72,6 +92,15 @@ func TestReadSession_wrongSecret(t *testing.T) {
 	}
 }
 
+func TestReadSession_noCookie(t *testing.T) {
+	t.Parallel()
+	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
+	req := httptest.NewRequest("GET", "/", nil)
+	if _, err := ReadSession(req, secret); err == nil {
+		t.Fatal("expected error without session cookie")
+	}
+}
+
 func TestClearSession_expiresCookie(t *testing.T) {
 	t.Parallel()
 	t.Run("secure", func(t *testing.T) {
@@ -98,17 +127,48 @@ func TestClearSession_expiresCookie(t *testing.T) {
 	})
 }
 
-func TestReadSession_invalidRole(t *testing.T) {
+func TestSignSession_rejectsInvalidRole(t *testing.T) {
 	t.Parallel()
 	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
 	w := httptest.NewRecorder()
-	if err := SignSession(w, secret, SessionPayload{UserID: 1, Role: "guest"}, time.Hour, false); err != nil {
-		t.Fatal(err)
+	if err := SignSession(w, secret, SessionPayload{UserID: 1, Role: "guest"}, time.Hour, false); err == nil {
+		t.Fatal("expected error")
 	}
-	raw := sessionCookieValue(w)
+	if sessionCookieValue(w) != "" {
+		t.Fatal("expected no Set-Cookie on validation failure")
+	}
+}
+
+func TestSignSession_rejectsNonPositiveUserID(t *testing.T) {
+	t.Parallel()
+	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
+	w := httptest.NewRecorder()
+	if err := SignSession(w, secret, SessionPayload{UserID: 0, Role: "user"}, time.Hour, false); err == nil {
+		t.Fatal("expected error")
+	}
+	if sessionCookieValue(w) != "" {
+		t.Fatal("expected no Set-Cookie on validation failure")
+	}
+}
+
+func TestReadSession_invalidRole(t *testing.T) {
+	t.Parallel()
+	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
+	raw := signedSessionCookieValue(t, secret, SessionPayload{UserID: 1, Role: "guest", Exp: time.Now().Add(time.Hour).Unix()})
 	req := httptest.NewRequest("GET", "/", nil)
 	req.AddCookie(&http.Cookie{Name: cookieName, Value: raw})
 	if _, err := ReadSession(req, secret); err == nil {
 		t.Fatal("expected error for invalid role")
+	}
+}
+
+func TestReadSession_nonPositiveUserID(t *testing.T) {
+	t.Parallel()
+	secret := []byte("test-hmac-secret-at-least-32-bytes-long-ok")
+	raw := signedSessionCookieValue(t, secret, SessionPayload{UserID: 0, Role: "user", Exp: time.Now().Add(time.Hour).Unix()})
+	req := httptest.NewRequest("GET", "/", nil)
+	req.AddCookie(&http.Cookie{Name: cookieName, Value: raw})
+	if _, err := ReadSession(req, secret); err == nil {
+		t.Fatal("expected error for non-positive user id")
 	}
 }
