@@ -1,7 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { runBootInitializers } from '../boot'
 import { APP_MAIN_SELECTOR, FORM_DATA_CONFIRM_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
-import { queryBootContent, queryBootContentAll, resolveBootContentQueryRoot, resolveContentQueryRoot } from './contentRoot'
+import {
+  queryBootContent,
+  queryBootContentAll,
+  resolveBootContentQueryRoot,
+  resolveContentQueryRoot,
+  withBootContentRootScope,
+} from './contentRoot'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
 
 describe('resolveContentQueryRoot', () => {
@@ -120,5 +127,57 @@ describe('resolveBootContentQueryRoot', () => {
     vi.stubGlobal('document', doc)
     expect(resolveBootContentQueryRoot()).toBe(main)
     expect(resolveContentQueryRoot(doc as unknown as ParentNode)).toBe(main)
+  })
+})
+
+describe('withBootContentRootScope', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('keeps a stable boot content root for nested resolveBootContentQueryRoot during the callback', () => {
+    const main = { _: 'main' } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
+    withBootContentRootScope(() => {
+      const a = resolveBootContentQueryRoot()
+      const b = resolveBootContentQueryRoot()
+      expect(a).toBe(main)
+      expect(b).toBe(main)
+      expect(a).toBe(b)
+    })
+  })
+
+  it('restores the outer pin after nested scopes (different document globals)', () => {
+    const mainOuter = { _: 'outer' } as unknown as ParentNode
+    const mainInner = { _: 'inner' } as unknown as ParentNode
+    const docOuter = stubDocumentMainLandmark(mainOuter) as unknown as Document
+    const docInner = stubDocumentMainLandmark(mainInner) as unknown as Document
+    vi.stubGlobal('document', docOuter)
+    withBootContentRootScope(() => {
+      expect(resolveBootContentQueryRoot()).toBe(mainOuter)
+      vi.stubGlobal('document', docInner)
+      withBootContentRootScope(() => {
+        expect(resolveBootContentQueryRoot()).toBe(mainInner)
+      })
+      vi.stubGlobal('document', docOuter)
+      expect(resolveBootContentQueryRoot()).toBe(mainOuter)
+    })
+  })
+
+  it('runBootInitializers exposes the same boot content root to each step', () => {
+    const main = { _: 'main' } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
+    runBootInitializers([
+      () => {
+        expect(resolveBootContentQueryRoot()).toBe(main)
+      },
+      () => {
+        expect(resolveBootContentQueryRoot()).toBe(main)
+      },
+    ])
+  })
+
+  it('runBootInitializers([]) is a no-op', () => {
+    expect(() => runBootInitializers([])).not.toThrow()
   })
 })

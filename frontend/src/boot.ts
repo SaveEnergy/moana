@@ -1,3 +1,4 @@
+import { withBootContentRootScope } from './lib/contentRoot'
 import { type BootInitializer, BOOT_APP_INITIALIZERS } from './bootInitializers'
 
 export type { BootInitializer } from './bootInitializers'
@@ -5,12 +6,18 @@ export { BOOT_APP_INITIALIZERS, DOCUMENTED_BOOT_INITIALIZER_NAMES } from './boot
 
 /**
  * Run an initializer list in order (indexed loop — no iterator allocation on duplicate **`bootApp()`**).
+ * Non-empty lists run inside {@link withBootContentRootScope} so each step shares one resolved boot content root.
  * **`bootApp`** passes {@link BOOT_APP_INITIALIZERS}; tests may pass shorter arrays.
  */
 export function runBootInitializers(initializers: ReadonlyArray<BootInitializer>): void {
-  for (let i = 0, n = initializers.length; i < n; i++) {
-    initializers[i]()
+  if (initializers.length === 0) {
+    return
   }
+  withBootContentRootScope(() => {
+    for (let i = 0, n = initializers.length; i < n; i++) {
+      initializers[i]()
+    }
+  })
 }
 
 /**
