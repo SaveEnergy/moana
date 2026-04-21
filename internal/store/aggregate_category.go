@@ -75,6 +75,7 @@ type CategoryAmount struct {
 // ListCategoryAmountsInRange returns per-category totals for income (amount_cents > 0)
 // or expense (amount_cents < 0, returned as positive magnitudes), ordered by size.
 func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) ([]CategoryAmount, error) {
+	kind = strings.TrimSpace(kind)
 	if kind != "income" && kind != "expense" {
 		return nil, ErrInvalidCategoryAmountKind
 	}

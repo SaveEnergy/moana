@@ -50,7 +50,7 @@ func (s *Store) SumRunningTotalAndIncomeExpenseInTwoRanges(ctx context.Context, 
 	return running, aIncome, aExpense, bIncome, bExpense, err
 }
 
-// SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense".
+// SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense" (ASCII trim applied, same as listing filters).
 func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) (int64, error) {
 	if fromUTC == nil && toUTC == nil {
 		var sum int64
@@ -59,10 +59,10 @@ func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fro
 			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold, householdID).Scan(&sum)
 			return sum, err
 		case sqlFilterAmountIncome:
-			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold+sqlFilterAmountIncome, householdID).Scan(&sum)
+			err := s.DB.QueryRowContext(ctx, sqlSumAmountIncomeHouseholdNoBounds, householdID).Scan(&sum)
 			return sum, err
 		case sqlFilterAmountExpense:
-			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold+sqlFilterAmountExpense, householdID).Scan(&sum)
+			err := s.DB.QueryRowContext(ctx, sqlSumAmountExpenseHouseholdNoBounds, householdID).Scan(&sum)
 			return sum, err
 		}
 	}

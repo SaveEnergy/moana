@@ -17,7 +17,8 @@ func TestSqlAmountKindFilter(t *testing.T) {
 		{"net", ""},
 		{" ", ""},
 		{"INCOME", ""},
-		{" income ", ""},
+		{" income ", sqlFilterAmountIncome},
+		{"  expense\t", sqlFilterAmountExpense},
 	}
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("kind_%q", tc.kind), func(t *testing.T) {

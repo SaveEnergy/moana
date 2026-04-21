@@ -244,6 +244,33 @@ func TestSumAmountCentsByKind_nilNil_cancelledContext(t *testing.T) {
 	assertErrIsContextCanceled(t, err)
 }
 
+func TestSumAmountCentsByKind_trimmedKindMatchesIncome(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "sum-trim-kind@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	day := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, 1000, day, "i", nil); err != nil {
+		t.Fatal(err)
+	}
+	got, err := st.SumAmountCentsByKind(ctx, hid, nil, nil, "  income ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != 1000 {
+		t.Fatalf("got %d want 1000", got)
+	}
+}
+
 func TestSumAmountCentsByKind_nilNil_kindsMatchExpected(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

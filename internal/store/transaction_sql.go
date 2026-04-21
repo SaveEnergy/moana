@@ -55,6 +55,12 @@ const sqlSelectOccurredAtAmountFromHousehold = `SELECT t.occurred_at, t.amount_c
 // sqlSumAmountAllHousehold is [SumAmountCentsByKind] with no date bounds and no income/expense sign filter (kind "").
 const sqlSumAmountAllHousehold = `SELECT COALESCE(SUM(t.amount_cents), 0) ` + sqlFromHouseholdTx
 
+// sqlSumAmountIncomeHouseholdNoBounds / sqlSumAmountExpenseHouseholdNoBounds are [SumAmountCentsByKind] with no date bounds and kind income|expense.
+const (
+	sqlSumAmountIncomeHouseholdNoBounds  = sqlSumAmountAllHousehold + sqlFilterAmountIncome
+	sqlSumAmountExpenseHouseholdNoBounds = sqlSumAmountAllHousehold + sqlFilterAmountExpense
+)
+
 // sqlSumIncomeExpenseBase is [SumIncomeExpenseCentsInRange] with no date bounds (appendOccurredAtRange adds optional ANDs).
 const sqlSumIncomeExpenseBase = `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
 COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx

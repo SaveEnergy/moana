@@ -11,6 +11,34 @@ import (
 	"moana/internal/passwordtest"
 )
 
+func TestListCategoryAmountsInRange_trimmedKindAcceptsExpense(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "cat-trim-kind@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	from := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 2, 28, 23, 59, 59, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -5000, time.Date(2026, 2, 1, 12, 0, 0, 0, time.UTC), "x", nil); err != nil {
+		t.Fatal(err)
+	}
+	rows, err := st.ListCategoryAmountsInRange(ctx, hid, &from, &to, " expense ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 || rows[0].AmountCents != 5000 {
+		t.Fatalf("got %+v", rows)
+	}
+}
+
 func TestListCategoryAmountsInRange_invalidKind(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
