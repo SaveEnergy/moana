@@ -11,7 +11,7 @@ function optionalTrimmedNonEmpty(s: string | undefined): string | undefined {
 
 /** Default preview strip when color = Auto; aligns with server-rendered modal gradient. */
 export const CATEGORY_MODAL_DEFAULT_PREVIEW_BG =
-  'color-mix(in srgb, var(--primary) 12%, #fff8f0)' as const
+  'color-mix(in srgb, var(--primary) 12%, var(--surface-tint-warm))' as const
 
 /**
  * Default for native `<input type="color">` and invalid `data-custom-hex` — matches

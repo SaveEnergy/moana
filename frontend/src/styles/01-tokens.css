@@ -28,6 +28,8 @@
   --font-body: "Inter", system-ui, sans-serif;
   --dashboard-canvas: #f0ebe3;
   --dashboard-paper: #ffffff;
+  /* Warm cream mixed with `--primary` for category modal preview default (see `categoryColor.ts`) */
+  --surface-tint-warm: #fff8f0;
   --dashboard-edge: rgba(28, 29, 30, 0.08);
   --app-canvas: var(--dashboard-canvas);
   --app-paper: var(--dashboard-paper);

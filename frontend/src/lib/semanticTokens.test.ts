@@ -17,4 +17,9 @@ describe('01-tokens.css semantic + indicator tokens', () => {
     const src = readFileSync(tokensPath, 'utf8')
     expect(src).toMatch(/--indicator-live:\s*#2196f3\s*;/)
   })
+
+  it('defines --surface-tint-warm for category modal preview mix', () => {
+    const src = readFileSync(tokensPath, 'utf8')
+    expect(src).toMatch(/--surface-tint-warm:\s*#fff8f0\s*;/)
+  })
 })
