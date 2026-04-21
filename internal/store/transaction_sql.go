@@ -49,8 +49,11 @@ FROM transactions t
 INNER JOIN users owner ON owner.id = t.user_id
 WHERE owner.household_id = ?`
 
-// sqlSelectOccurredAtAmountFromHousehold is the prefix for [DailyAbsMovementByLocalDate] (date bounds appended).
+// sqlSelectOccurredAtAmountFromHousehold is the SELECT + FROM/WHERE prefix for per-row occurred_at + amount reads.
 const sqlSelectOccurredAtAmountFromHousehold = `SELECT t.occurred_at, t.amount_cents ` + sqlFromHouseholdTx
+
+// sqlSelectOccurredAtAmountFromHouseholdInRange is [DailyAbsMovementByLocalDate]: household id plus inclusive UTC bounds on occurred_at (same shape as [appendOccurredAtRange] with both bounds set).
+const sqlSelectOccurredAtAmountFromHouseholdInRange = sqlSelectOccurredAtAmountFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo
 
 // sqlSumAmountAllHousehold is [SumAmountCentsByKind] with no date bounds and no income/expense sign filter (kind "").
 const sqlSumAmountAllHousehold = `SELECT COALESCE(SUM(t.amount_cents), 0) ` + sqlFromHouseholdTx

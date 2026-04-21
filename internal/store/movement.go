@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"math"
-	"strings"
 	"time"
 
 	"moana/internal/money"
@@ -14,13 +13,8 @@ import (
 // Per-day totals use overflow-checked addition; if the sum exceeds int64, the bucket saturates at [math.MaxInt64].
 func (s *Store) DailyAbsMovementByLocalDate(ctx context.Context, householdID int64, fromUTC, toUTC time.Time, loc *time.Location) (map[string]int64, error) {
 	loc = timeutil.OrUTC(loc)
-	var b strings.Builder
-	b.Grow(256)
-	b.WriteString(sqlSelectOccurredAtAmountFromHousehold)
-	args := make([]any, 0, 3)
-	args = append(args, householdID)
-	args = appendOccurredAtRange(&b, args, &fromUTC, &toUTC)
-	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
+	rows, err := s.DB.QueryContext(ctx, sqlSelectOccurredAtAmountFromHouseholdInRange,
+		householdID, timeutil.FormatSQLiteUTC(fromUTC), timeutil.FormatSQLiteUTC(toUTC))
 	if err != nil {
 		return nil, err
 	}

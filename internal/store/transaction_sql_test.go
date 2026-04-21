@@ -2,6 +2,14 @@ package store
 
 import "testing"
 
+func TestSqlSelectOccurredAtAmountFromHouseholdInRange_matchesAppendOccurredAtShape(t *testing.T) {
+	t.Parallel()
+	want := sqlSelectOccurredAtAmountFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo
+	if sqlSelectOccurredAtAmountFromHouseholdInRange != want {
+		t.Fatalf("sqlSelectOccurredAtAmountFromHouseholdInRange must match prefix + from/to filters")
+	}
+}
+
 func TestSqlTransactionListFromHousehold_matchesSelectPlusHouseholdWhere(t *testing.T) {
 	t.Parallel()
 	want := sqlTransactionSelectFromHousehold + "\nWHERE owner.household_id = ?"
