@@ -39,6 +39,107 @@ func TestListCategoryAmountsInRange_trimmedKindAcceptsExpense(t *testing.T) {
 	}
 }
 
+func TestListCategoryAmountsInRange_fromOnly_toOnly_matchBothBounds(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "cat-one-bound@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	catID, err := st.CreateCategory(ctx, hid, "Food", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 4, 10, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -9000, day, "lunch", &catID); err != nil {
+		t.Fatal(err)
+	}
+	from := day.Add(-time.Hour)
+	to := day.Add(time.Hour)
+	gotBoth, err := st.ListCategoryAmountsInRange(ctx, hid, &from, &to, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotFrom, err := st.ListCategoryAmountsInRange(ctx, hid, &from, nil, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotTo, err := st.ListCategoryAmountsInRange(ctx, hid, nil, &to, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gotBoth) != 1 || len(gotFrom) != 1 || len(gotTo) != 1 {
+		t.Fatalf("both=%+v from=%+v to=%+v", gotBoth, gotFrom, gotTo)
+	}
+	if gotBoth[0].AmountCents != gotFrom[0].AmountCents || gotBoth[0].AmountCents != gotTo[0].AmountCents {
+		t.Fatalf("amount mismatch both=%d from=%d to=%d", gotBoth[0].AmountCents, gotFrom[0].AmountCents, gotTo[0].AmountCents)
+	}
+}
+
+func TestListTopExpenseCategories_fromOnly_toOnly_matchBothBounds(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "top-exp-bounds@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	a, err := st.CreateCategory(ctx, hid, "A", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := st.CreateCategory(ctx, hid, "B", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 4, 11, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -3000, day, "a", &a); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -8000, day, "b", &b); err != nil {
+		t.Fatal(err)
+	}
+	from := day.Add(-time.Hour)
+	to := day.Add(time.Hour)
+	limit := 2
+	gotBoth, err := st.ListTopExpenseCategories(ctx, hid, &from, &to, limit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotFrom, err := st.ListTopExpenseCategories(ctx, hid, &from, nil, limit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotTo, err := st.ListTopExpenseCategories(ctx, hid, nil, &to, limit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gotBoth) != 2 || len(gotFrom) != 2 || len(gotTo) != 2 {
+		t.Fatalf("both=%+v from=%+v to=%+v", gotBoth, gotFrom, gotTo)
+	}
+	for i := range gotBoth {
+		if gotBoth[i].CategoryName != gotFrom[i].CategoryName || gotBoth[i].TotalCents != gotFrom[i].TotalCents {
+			t.Fatalf("row %d both vs from: %+v %+v", i, gotBoth[i], gotFrom[i])
+		}
+		if gotBoth[i].CategoryName != gotTo[i].CategoryName || gotBoth[i].TotalCents != gotTo[i].TotalCents {
+			t.Fatalf("row %d both vs to: %+v %+v", i, gotBoth[i], gotTo[i])
+		}
+	}
+}
+
 func TestListCategoryAmountsInRange_invalidKind(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

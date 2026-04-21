@@ -115,6 +115,13 @@ const sqlListTopExpenseCategoriesSuffix = ` GROUP BY t.category_id, c.name ORDER
 // sqlListTopExpenseCategoriesNoDate is [ListTopExpenseCategories] with no date bounds.
 const sqlListTopExpenseCategoriesNoDate = sqlListTopExpenseCategoriesPrefix + sqlListTopExpenseCategoriesSuffix
 
+// sqlListTopExpenseCategoriesFromOnly / ToOnly / Both are [ListTopExpenseCategories] with optional occurred_at bounds (same fragments as [appendOccurredAtRange]).
+const (
+	sqlListTopExpenseCategoriesFromOnly = sqlListTopExpenseCategoriesPrefix + sqlFilterOccurredAtFrom + sqlListTopExpenseCategoriesSuffix
+	sqlListTopExpenseCategoriesToOnly   = sqlListTopExpenseCategoriesPrefix + sqlFilterOccurredAtTo + sqlListTopExpenseCategoriesSuffix
+	sqlListTopExpenseCategoriesBoth     = sqlListTopExpenseCategoriesPrefix + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlListTopExpenseCategoriesSuffix
+)
+
 // sqlListCategoryAmountsSelectPrefix is the SELECT + FROM for [ListCategoryAmountsInRange] (date + kind filters appended).
 const sqlListCategoryAmountsSelectPrefix = `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
 ` + sqlAggregateFromHouseholdTx
@@ -128,6 +135,17 @@ const sqlListCategoryAmountsOrderExpense = ` ORDER BY SUM(t.amount_cents) ASC`
 const sqlListCategoryAmountsIncomeFullHousehold = sqlListCategoryAmountsSelectPrefix + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
 
 const sqlListCategoryAmountsExpenseFullHousehold = sqlListCategoryAmountsSelectPrefix + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
+
+// sqlListCategoryAmountsIncomeRange* / ExpenseRange* are [ListCategoryAmountsInRange] with date bounds and kind (same fragment order as dynamic builder).
+const (
+	sqlListCategoryAmountsIncomeRangeBoth     = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
+	sqlListCategoryAmountsIncomeRangeFromOnly = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
+	sqlListCategoryAmountsIncomeRangeToOnly   = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
+
+	sqlListCategoryAmountsExpenseRangeBoth     = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
+	sqlListCategoryAmountsExpenseRangeFromOnly = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
+	sqlListCategoryAmountsExpenseRangeToOnly   = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
+)
 
 // sqlTransactionInsertConditional inserts a row only if user_id belongs to household_id.
 const sqlTransactionInsertConditional = `

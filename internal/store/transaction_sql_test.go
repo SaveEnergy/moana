@@ -54,6 +54,41 @@ func TestSqlSumAmountHouseholdRange_matchesAppendOccurredAtAndKindShapes(t *test
 	}
 }
 
+func TestSqlListTopExpenseCategoriesRange_matchesAppendOccurredAtShapes(t *testing.T) {
+	t.Parallel()
+	if g, w := sqlListTopExpenseCategoriesFromOnly, sqlListTopExpenseCategoriesPrefix+sqlFilterOccurredAtFrom+sqlListTopExpenseCategoriesSuffix; g != w {
+		t.Fatalf("sqlListTopExpenseCategoriesFromOnly drift")
+	}
+	if g, w := sqlListTopExpenseCategoriesToOnly, sqlListTopExpenseCategoriesPrefix+sqlFilterOccurredAtTo+sqlListTopExpenseCategoriesSuffix; g != w {
+		t.Fatalf("sqlListTopExpenseCategoriesToOnly drift")
+	}
+	if g, w := sqlListTopExpenseCategoriesBoth, sqlListTopExpenseCategoriesPrefix+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlListTopExpenseCategoriesSuffix; g != w {
+		t.Fatalf("sqlListTopExpenseCategoriesBoth drift")
+	}
+}
+
+func TestSqlListCategoryAmountsRange_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
+	t.Parallel()
+	if g, w := sqlListCategoryAmountsIncomeRangeBoth, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlFilterAmountIncome+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderIncome; g != w {
+		t.Fatalf("sqlListCategoryAmountsIncomeRangeBoth drift")
+	}
+	if g, w := sqlListCategoryAmountsIncomeRangeFromOnly, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterAmountIncome+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderIncome; g != w {
+		t.Fatalf("sqlListCategoryAmountsIncomeRangeFromOnly drift")
+	}
+	if g, w := sqlListCategoryAmountsIncomeRangeToOnly, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtTo+sqlFilterAmountIncome+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderIncome; g != w {
+		t.Fatalf("sqlListCategoryAmountsIncomeRangeToOnly drift")
+	}
+	if g, w := sqlListCategoryAmountsExpenseRangeBoth, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlFilterAmountExpense+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderExpense; g != w {
+		t.Fatalf("sqlListCategoryAmountsExpenseRangeBoth drift")
+	}
+	if g, w := sqlListCategoryAmountsExpenseRangeFromOnly, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterAmountExpense+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderExpense; g != w {
+		t.Fatalf("sqlListCategoryAmountsExpenseRangeFromOnly drift")
+	}
+	if g, w := sqlListCategoryAmountsExpenseRangeToOnly, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtTo+sqlFilterAmountExpense+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderExpense; g != w {
+		t.Fatalf("sqlListCategoryAmountsExpenseRangeToOnly drift")
+	}
+}
+
 func TestSqlTransactionListFromHousehold_matchesSelectPlusHouseholdWhere(t *testing.T) {
 	t.Parallel()
 	want := sqlTransactionSelectFromHousehold + "\nWHERE owner.household_id = ?"

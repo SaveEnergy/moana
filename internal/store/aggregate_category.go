@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"moana/internal/money"
+	"moana/internal/timeutil"
 )
 
 // ErrInvalidCategoryAmountKind is returned when [Store.ListCategoryAmountsInRange] is called with kind other than "income" or "expense".
@@ -33,17 +34,19 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 		defer rows.Close()
 		return scanCategoryExpenseRows(rows, limit)
 	}
-	var b strings.Builder
-	b.Grow(512)
-	b.WriteString(sqlListTopExpenseCategoriesPrefix)
-	// cap: household + optional from/to + limit.
-	args := make([]any, 0, 4)
-	args = append(args, householdID)
-	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	b.WriteString(sqlListTopExpenseCategoriesSuffix)
-	args = append(args, limit)
-
-	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
+	var rows *sql.Rows
+	var err error
+	switch {
+	case fromUTC != nil && toUTC != nil:
+		rows, err = s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesBoth,
+			householdID, timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC), limit)
+	case fromUTC != nil:
+		rows, err = s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesFromOnly,
+			householdID, timeutil.FormatSQLiteUTC(*fromUTC), limit)
+	default:
+		rows, err = s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesToOnly,
+			householdID, timeutil.FormatSQLiteUTC(*toUTC), limit)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -94,22 +97,34 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 		defer rows.Close()
 		return scanCategoryAmountRows(rows)
 	}
-	var b strings.Builder
-	b.Grow(768)
-	b.WriteString(sqlListCategoryAmountsSelectPrefix)
-	// cap: household + optional from/to.
-	args := make([]any, 0, 3)
-	args = append(args, householdID)
-	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
-	b.WriteString(sqlAmountKindFilter(kind))
-	b.WriteString(sqlListCategoryAmountsGroupBy)
-	if kind == "income" {
-		b.WriteString(sqlListCategoryAmountsOrderIncome)
-	} else {
-		b.WriteString(sqlListCategoryAmountsOrderExpense)
+	var rows *sql.Rows
+	var err error
+	switch {
+	case fromUTC != nil && toUTC != nil:
+		f, t := timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC)
+		switch kind {
+		case "income":
+			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsIncomeRangeBoth, householdID, f, t)
+		case "expense":
+			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsExpenseRangeBoth, householdID, f, t)
+		}
+	case fromUTC != nil:
+		f := timeutil.FormatSQLiteUTC(*fromUTC)
+		switch kind {
+		case "income":
+			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsIncomeRangeFromOnly, householdID, f)
+		case "expense":
+			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsExpenseRangeFromOnly, householdID, f)
+		}
+	default:
+		t := timeutil.FormatSQLiteUTC(*toUTC)
+		switch kind {
+		case "income":
+			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsIncomeRangeToOnly, householdID, t)
+		case "expense":
+			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsExpenseRangeToOnly, householdID, t)
+		}
 	}
-
-	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
 	}
