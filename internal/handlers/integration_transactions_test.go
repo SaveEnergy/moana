@@ -95,6 +95,7 @@ func TestTransactionCreate_zeroAmountShowsMessage(t *testing.T) {
 	}
 	body, _ := io.ReadAll(resp.Body)
 	s := string(body)
+	assertBodyHasErrorAlert(t, s)
 	if !strings.Contains(s, "Amount must be greater than zero.") {
 		t.Fatalf("expected zero-amount copy, got: %s", s[:min(500, len(s))])
 	}
