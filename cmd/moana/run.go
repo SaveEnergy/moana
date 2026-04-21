@@ -10,9 +10,17 @@ import (
 var version = "dev"
 
 // runUsage is printed for unknown top-level commands and invalid "serve" invocation.
-const runUsage = "usage: moana [serve | version | user <add|password> ...]\n"
+const runUsage = "usage: moana [serve | version | help | user <add|password> ...]\n"
 
 func run(args []string) int {
+	if len(args) >= 2 && helpArg(args[1]) {
+		if len(args) > 2 {
+			fmt.Fprint(os.Stderr, runUsage)
+			return 1
+		}
+		fmt.Fprint(os.Stdout, runUsage)
+		return 0
+	}
 	if len(args) >= 2 && versionArg(args[1]) {
 		if len(args) > 2 {
 			fmt.Fprint(os.Stderr, runUsage)
@@ -43,6 +51,15 @@ func run(args []string) int {
 func versionArg(s string) bool {
 	switch s {
 	case "version", "-version", "--version":
+		return true
+	default:
+		return false
+	}
+}
+
+func helpArg(s string) bool {
+	switch s {
+	case "help", "-h", "--help", "-help":
 		return true
 	default:
 		return false

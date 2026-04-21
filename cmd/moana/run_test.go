@@ -2,6 +2,41 @@ package main
 
 import "testing"
 
+func TestRun_help(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "help"}); g != 0 {
+		t.Fatalf("exit %d want 0", g)
+	}
+}
+
+func TestRun_helpExtraArgs(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "help", "extra"}); g != 1 {
+		t.Fatalf("exit %d want 1", g)
+	}
+}
+
+func TestRun_dashH(t *testing.T) {
+	t.Parallel()
+	if g := run([]string{"moana", "-h"}); g != 0 {
+		t.Fatalf("exit %d want 0", g)
+	}
+}
+
+func TestHelpArg(t *testing.T) {
+	t.Parallel()
+	for _, s := range []string{"help", "-h", "--help", "-help"} {
+		if !helpArg(s) {
+			t.Fatalf("helpArg(%q) want true", s)
+		}
+	}
+	for _, s := range []string{"", "halp", "serve", "--halp"} {
+		if helpArg(s) {
+			t.Fatalf("helpArg(%q) want false", s)
+		}
+	}
+}
+
 func TestRun_version(t *testing.T) {
 	t.Parallel()
 	if g := run([]string{"moana", "version"}); g != 0 {
