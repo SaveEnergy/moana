@@ -1,5 +1,5 @@
 /**
- * Expected `function.name` for each entry in {@link BOOT_APP_INITIALIZERS} (`boot.ts`), in order.
+ * Expected `function.name` for each entry in {@link BOOT_APP_INITIALIZERS} (`bootInitializers.ts`), in order.
  * Keep in sync when changing initializer order; `bootInitializers.test.ts` asserts against `BOOT_APP_INITIALIZERS`.
  */
 export const BOOT_INITIALIZER_NAMES = [
