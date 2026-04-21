@@ -111,6 +111,19 @@ func TestNewRouterWithRouterOptions_healthOKWithTimeoutAndMaxBodyStack(t *testin
 	}
 }
 
+func TestNewRouterWithRouterOptions_healthPOSTReturns405(t *testing.T) {
+	t.Parallel()
+	cfg := &config.Config{RequestTimeout: 30 * time.Second}
+	app := &handlers.App{Config: cfg}
+	opts := &RouterOptions{DisableRequestLogging: true}
+	h := NewRouterWithRouterOptions(opts, app)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, HealthPath, nil))
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("POST %s: status %d want 405", HealthPath, rec.Code)
+	}
+}
+
 func TestRouterMiddlewareComposition_matchesNewRouterWithRouterOptions(t *testing.T) {
 	t.Parallel()
 	// Mirrors [NewRouterWithRouterOptions] when timeout > 0 (without [RequestLogging]):
