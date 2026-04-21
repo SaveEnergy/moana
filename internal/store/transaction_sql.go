@@ -55,6 +55,20 @@ const sqlListTopExpenseCategoriesPrefix = `SELECT t.category_id, COALESCE(c.name
 
 const sqlListTopExpenseCategoriesSuffix = ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
 
+// sqlListCategoryAmountsSelectPrefix is the SELECT + FROM for [ListCategoryAmountsInRange] (date + kind filters appended).
+const sqlListCategoryAmountsSelectPrefix = `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
+` + sqlAggregateFromHouseholdTx
+
+const sqlListCategoryAmountsGroupBy = ` GROUP BY t.category_id`
+
+const sqlListCategoryAmountsOrderIncome = ` ORDER BY SUM(t.amount_cents) DESC`
+const sqlListCategoryAmountsOrderExpense = ` ORDER BY SUM(t.amount_cents) ASC`
+
+// sqlListCategoryAmountsIncomeFullHousehold / ExpenseFullHousehold are [ListCategoryAmountsInRange] with no date bounds.
+const sqlListCategoryAmountsIncomeFullHousehold = sqlListCategoryAmountsSelectPrefix + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
+
+const sqlListCategoryAmountsExpenseFullHousehold = sqlListCategoryAmountsSelectPrefix + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
+
 // sqlTransactionInsertConditional inserts a row only if user_id belongs to household_id.
 const sqlTransactionInsertConditional = `
 INSERT INTO transactions (user_id, amount_cents, occurred_at, description, category_id, created_at)

@@ -253,6 +253,59 @@ func TestListCategoryAmountsInRange_cancelledContext(t *testing.T) {
 	assertErrIsContextCanceled(t, err)
 }
 
+func TestListCategoryAmountsInRange_nilNil_cancelledContext(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	_, err := st.ListCategoryAmountsInRange(alreadyCancelledContext(t), 1, nil, nil, "expense")
+	assertErrIsContextCanceled(t, err)
+}
+
+func TestListCategoryAmountsInRange_nilNil_expenseMatchesWideRange(t *testing.T) {
+	t.Parallel()
+	st := testStore(t)
+	ctx := context.Background()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, "cat-nil-wide@example.com", hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil || u == nil {
+		t.Fatal(err)
+	}
+	hid := u.HouseholdID
+	catID, err := st.CreateCategory(ctx, hid, "Food", "utensils", "#112233")
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2026, 6, 15, 12, 0, 0, 0, time.UTC)
+	if _, err := st.CreateTransaction(ctx, uid, hid, -10000, day, "groceries", &catID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.CreateTransaction(ctx, uid, hid, -4000, day, "cash", nil); err != nil {
+		t.Fatal(err)
+	}
+	wideFrom := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	wideTo := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
+	gotWide, err := st.ListCategoryAmountsInRange(ctx, hid, &wideFrom, &wideTo, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotNil, err := st.ListCategoryAmountsInRange(ctx, hid, nil, nil, "expense")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gotWide) != len(gotNil) {
+		t.Fatalf("len wide=%d nil=%d wide=%+v nil=%+v", len(gotWide), len(gotNil), gotWide, gotNil)
+	}
+	for i := range gotWide {
+		a, b := gotWide[i], gotNil[i]
+		if a.Name != b.Name || a.AmountCents != b.AmountCents || a.Icon != b.Icon || a.Color != b.Color {
+			t.Fatalf("row %d wide=%+v nil=%+v", i, a, b)
+		}
+	}
+}
+
 func TestListTopExpenseCategories_cancelledContext(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

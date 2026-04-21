@@ -66,21 +66,34 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 	if kind != "income" && kind != "expense" {
 		return nil, ErrInvalidCategoryAmountKind
 	}
+	if fromUTC == nil && toUTC == nil {
+		var q string
+		switch kind {
+		case "income":
+			q = sqlListCategoryAmountsIncomeFullHousehold
+		case "expense":
+			q = sqlListCategoryAmountsExpenseFullHousehold
+		}
+		rows, err := s.DB.QueryContext(ctx, q, householdID)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		return scanCategoryAmountRows(rows)
+	}
 	var b strings.Builder
 	b.Grow(768)
-	b.WriteString(`SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
-`)
-	b.WriteString(sqlAggregateFromHouseholdTx)
+	b.WriteString(sqlListCategoryAmountsSelectPrefix)
 	// cap: household + optional from/to.
 	args := make([]any, 0, 3)
 	args = append(args, householdID)
 	args = appendOccurredAtRange(&b, args, fromUTC, toUTC)
 	b.WriteString(sqlAmountKindFilter(kind))
-	b.WriteString(` GROUP BY t.category_id`)
+	b.WriteString(sqlListCategoryAmountsGroupBy)
 	if kind == "income" {
-		b.WriteString(` ORDER BY SUM(t.amount_cents) DESC`)
+		b.WriteString(sqlListCategoryAmountsOrderIncome)
 	} else {
-		b.WriteString(` ORDER BY SUM(t.amount_cents) ASC`)
+		b.WriteString(sqlListCategoryAmountsOrderExpense)
 	}
 
 	rows, err := s.DB.QueryContext(ctx, b.String(), args...)
@@ -88,6 +101,10 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 		return nil, err
 	}
 	defer rows.Close()
+	return scanCategoryAmountRows(rows)
+}
+
+func scanCategoryAmountRows(rows *sql.Rows) ([]CategoryAmount, error) {
 	out := make([]CategoryAmount, 0, 32)
 	for rows.Next() {
 		var ca CategoryAmount
