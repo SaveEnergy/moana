@@ -94,6 +94,19 @@ describe('queryBootContentAll', () => {
     expect(out[0]).toBe(f1)
     expect(out[1]).toBe(f2)
   })
+
+  it('matches resolveBootContentQueryRoot().querySelectorAll (API equivalence)', () => {
+    const f1 = { _: 'f1' } as unknown as HTMLFormElement
+    const list = [f1] as unknown as NodeListOf<HTMLFormElement>
+    const main = {
+      querySelectorAll: (sel: string) => (sel === FORM_DATA_CONFIRM_SELECTOR ? list : ([] as unknown as NodeListOf<HTMLFormElement>)),
+    } as unknown as ParentNode
+    vi.stubGlobal('document', stubDocumentMainLandmark(main))
+    const root = resolveBootContentQueryRoot()
+    expect(queryBootContentAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR)).toBe(
+      root.querySelectorAll<HTMLFormElement>(FORM_DATA_CONFIRM_SELECTOR),
+    )
+  })
 })
 
 describe('resolveBootContentQueryRoot', () => {

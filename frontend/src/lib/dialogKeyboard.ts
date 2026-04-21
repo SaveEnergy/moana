@@ -22,13 +22,9 @@ function readOpenTagNameIfOpen(n: unknown): string | null {
   return raw.toUpperCase()
 }
 
-/**
- * True when an event path includes a native `dialog` element that is currently open
- * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
- */
-export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
+function pathIncludesOpenTag(path: readonly unknown[], tag: 'DIALOG' | 'DETAILS'): boolean {
   for (let i = 0, n = path.length; i < n; i++) {
-    if (readOpenTagNameIfOpen(path[i]) === 'DIALOG') {
+    if (readOpenTagNameIfOpen(path[i]) === tag) {
       return true
     }
   }
@@ -36,15 +32,18 @@ export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
 }
 
 /**
+ * True when an event path includes a native `dialog` element that is currently open
+ * (Escape and other keys should not be handled by layered chrome, e.g. mobile shell).
+ */
+export function eventPathIncludesOpenDialog(path: readonly unknown[]): boolean {
+  return pathIncludesOpenTag(path, 'DIALOG')
+}
+
+/**
  * True when the path includes an open `<details>` (e.g. focus inside the disclosure). See also {@link isAppUserMenuDetailsOpen}.
  */
 export function eventPathIncludesOpenDetails(path: readonly unknown[]): boolean {
-  for (let i = 0, n = path.length; i < n; i++) {
-    if (readOpenTagNameIfOpen(path[i]) === 'DETAILS') {
-      return true
-    }
-  }
-  return false
+  return pathIncludesOpenTag(path, 'DETAILS')
 }
 
 export function keyEventInvolvesOpenDialog(e: KeyboardEvent): boolean {
@@ -56,7 +55,10 @@ export function isAppUserMenuDetailsOpen(): boolean {
   return document.querySelector(APP_USER_MENU_OPEN_SELECTOR) !== null
 }
 
-/** One pass over `composedPath()` — used by {@link shouldDeferMobileShellEscape} to avoid two scans + a query when the path already answers. */
+/**
+ * One pass over `composedPath()` — used by {@link shouldDeferMobileShellEscape}.
+ * Not two {@link pathIncludesOpenTag} calls (would double-scan the path on every Escape).
+ */
 function pathIncludesOpenDialogOrDetails(path: readonly unknown[]): boolean {
   for (let i = 0, n = path.length; i < n; i++) {
     const tag = readOpenTagNameIfOpen(path[i])
