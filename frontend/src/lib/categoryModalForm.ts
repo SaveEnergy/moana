@@ -7,14 +7,21 @@ import {
   CATEGORY_MODAL_ICON_RADIO_GROUP_NAME,
 } from './domSelectors'
 
+/** Forms that already have preview **`input`** / **`change`** listeners (`attachCategoryModalFormPreviewListeners` is safe to call more than once). */
+const categoryModalFormPreviewWired = new WeakSet<HTMLFormElement>()
+
 /**
  * Form-level preview delegation for the category modal: one `input` + one `change` listener
  * on `#cat-modal-form` instead of per-swatch wiring. Used by {@link initCategoryModal}.
+ * Idempotent per form (**`WeakSet`**, same pattern as **`attachNativeDialogDismiss`**).
  */
 export function attachCategoryModalFormPreviewListeners(
   form: HTMLFormElement,
   previewCtl: CategoryModalPreviewController,
 ): void {
+  if (categoryModalFormPreviewWired.has(form)) {
+    return
+  }
   form.addEventListener('input', (e) => {
     const t = e.target
     if (!(t instanceof Element) || !t.classList.contains(CATEGORY_COLOR_NATIVE_CLASS)) {
@@ -40,4 +47,5 @@ export function attachCategoryModalFormPreviewListeners(
       previewCtl.sync({ iconRadioTarget: t })
     }
   })
+  categoryModalFormPreviewWired.add(form)
 }

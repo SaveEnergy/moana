@@ -17,6 +17,9 @@ import { buildRadioMapByValue } from './radioMap'
 /** Full modal wiring once per `<dialog>` (duplicate `bootApp` must not stack listeners). */
 const categoryModalInitialized = new WeakSet<HTMLDialogElement>()
 
+/** **Add category** controls that already have a **`click`** listener from **`initCategoryModal`**. */
+const categoryModalOpenCreateWired = new WeakSet<HTMLElement>()
+
 export function initCategoryModal(): void {
   const contentRoot = resolveBootContentQueryRoot()
   const dialog = contentRoot.querySelector<HTMLDialogElement>(CATEGORY_MODAL_SELECTOR)
@@ -73,7 +76,10 @@ export function initCategoryModal(): void {
     previewCtl: catPreviewCtl,
   })
 
-  addCategoryBtn?.addEventListener('click', () => openCreateModal())
+  if (addCategoryBtn && !categoryModalOpenCreateWired.has(addCategoryBtn)) {
+    addCategoryBtn.addEventListener('click', () => openCreateModal())
+    categoryModalOpenCreateWired.add(addCategoryBtn)
+  }
 
   /** Scoped to the list card so topbar/sidebar clicks do not run this handler (`categories.html`: list is sibling of intro under the same parent). */
   if (editDelegationRoot) {

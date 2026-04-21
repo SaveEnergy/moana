@@ -85,4 +85,19 @@ describe('attachCategoryListEditDelegation', () => {
 
     expect(onEditClick).not.toHaveBeenCalled()
   })
+
+  it('does not stack listeners when attachCategoryListEditDelegation runs twice on the same root', () => {
+    const onEditClick = vi.fn()
+    let addClickCalls = 0
+    const listRoot = {
+      addEventListener: vi.fn((type: string, _fn: (e: unknown) => void) => {
+        if (type === 'click') addClickCalls += 1
+      }),
+    } as unknown as ParentNode
+
+    attachCategoryListEditDelegation(listRoot, onEditClick)
+    attachCategoryListEditDelegation(listRoot, onEditClick)
+
+    expect(addClickCalls).toBe(1)
+  })
 })

@@ -143,4 +143,28 @@ describe('attachCategoryModalFormPreviewListeners', () => {
 
     expect(sync).not.toHaveBeenCalled()
   })
+
+  it('does not stack listeners when attachCategoryModalFormPreviewListeners runs twice on the same form', () => {
+    stubBrowserElementTypes()
+    const previewCtl = {
+      raf: { schedule: vi.fn() },
+      sync: vi.fn(),
+      resetPaintState: vi.fn(),
+    } as unknown as CategoryModalPreviewController
+
+    let inputCount = 0
+    let changeCount = 0
+    const form = {
+      addEventListener(type: string, _fn: EventListener) {
+        if (type === 'input') inputCount += 1
+        if (type === 'change') changeCount += 1
+      },
+    } as unknown as HTMLFormElement
+
+    attachCategoryModalFormPreviewListeners(form, previewCtl)
+    attachCategoryModalFormPreviewListeners(form, previewCtl)
+
+    expect(inputCount).toBe(1)
+    expect(changeCount).toBe(1)
+  })
 })
