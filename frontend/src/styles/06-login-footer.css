@@ -135,6 +135,16 @@
   cursor: not-allowed;
 }
 
+.login-forgot--link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.login-forgot--link:hover,
+.login-forgot--link:focus-visible {
+  text-decoration: underline;
+}
+
 .login-forgot:disabled {
   opacity: 1;
   color: var(--primary);

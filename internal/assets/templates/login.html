@@ -43,7 +43,7 @@
               <input type="checkbox" name="remember" value="on" class="login-checkbox">
               <span>Remember me</span>
             </label>
-            <button type="button" class="login-forgot" disabled aria-disabled="true" title="Reset via whoever runs this Moana instance">Forgot password?</button>
+            <a href="{{.ForgotPasswordPath}}" class="login-forgot login-forgot--link">Forgot password?</a>
           </div>
 
           <button type="submit" class="btn btn-primary btn-block login-submit">Sign in</button>

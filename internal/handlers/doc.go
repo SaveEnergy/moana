@@ -1,6 +1,6 @@
 // Package handlers implements Moana HTTP handlers: [App] holds config, store, and templates.
 //
-// Routing: [RegisterRoutes] delegates to routes_auth.go, routes_dashboard.go (dashboard uses `GET /{$}` for exact `/` only), routes_ledger.go,
+// Routing: [RegisterRoutes] delegates to routes_auth.go (login, forgot/reset password, logout), routes_dashboard.go (dashboard uses `GET /{$}` for exact `/` only), routes_ledger.go,
 // routes_settings.go, routes_notifications.go (GET /notifications [App.Notifications], POST /notifications/read [App.NotificationMarkRead], notifications.html). Form field names for login/settings: formnames.go.
 // Auth: [App.WithAuth] loads the user plus unread notification count in one store query; [App.CurrentUser] (e.g. login redirect) uses GetUserByID only (no unread subquery). Form parse failures: [requireParseForm] / [requireParseFormSettings] (see forms_test.go).
 // Rendering: layout.go,

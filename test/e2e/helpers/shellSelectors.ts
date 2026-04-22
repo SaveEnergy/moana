@@ -7,8 +7,8 @@
 // --- Login (`login.html`; `login-email`, `login-password`, `login-forgot`)
 export const LOGIN_INPUT_EMAIL = '#login-email' as const
 export const LOGIN_INPUT_PASSWORD = '#login-password' as const
-/** Disabled stub until reset flow exists (`button.login-forgot`). */
-export const LOGIN_BUTTON_FORGOT = 'button.login-forgot' as const
+/** Forgot password link on the sign-in page (`a.login-forgot`). */
+export const LOGIN_BUTTON_FORGOT = 'a.login-forgot' as const
 
 // --- Notifications (`layout.html` topbar; `APP_TOPBAR_NOTIF_*`, `NOTIFICATIONS_PATH`)
 export const NOTIFICATIONS_PATH = '/notifications' as const

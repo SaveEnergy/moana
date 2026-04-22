@@ -73,6 +73,22 @@ func TestRegisterRoutes_loginGET_ok(t *testing.T) {
 	}
 }
 
+// TestRegisterRoutes_forgotPasswordGET_ok verifies GET /forgot-password is registered (SMTP not configured in test; page still renders).
+func TestRegisterRoutes_forgotPasswordGET_ok(t *testing.T) {
+	t.Parallel()
+	mux, cleanup := newRegisterRoutesTestMux(t)
+	defer cleanup()
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, handlers.ForgotPasswordPath, nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /forgot-password: status %d want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "Reset your password") {
+		t.Fatalf("expected forgot-password HTML, body len %d", len(body))
+	}
+}
+
 // TestRegisterRoutes_loginPOST_emptyFields_redirects verifies POST /login is registered; missing email/password redirects to /login.
 func TestRegisterRoutes_loginPOST_emptyFields_redirects(t *testing.T) {
 	t.Parallel()
@@ -138,6 +154,8 @@ func TestRegisterRoutes_disallowedMethodsReturn405(t *testing.T) {
 		{http.MethodDelete, handlers.CategoriesPath},
 		{http.MethodPost, handlers.HistoryPath},
 		{http.MethodGet, handlers.NotificationsMarkReadPath},
+		{http.MethodDelete, handlers.ForgotPasswordPath},
+		{http.MethodPatch, handlers.ResetPasswordPath},
 	}
 	for _, tc := range cases {
 		sub := strings.TrimPrefix(tc.path, "/")

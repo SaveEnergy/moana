@@ -6,6 +6,7 @@ import (
 
 	"moana/internal/config"
 	"moana/internal/handlers"
+	"moana/internal/mail"
 	"moana/internal/render"
 	"moana/internal/server"
 	"moana/internal/store"
@@ -18,10 +19,15 @@ func New(cfg *config.Config, st *store.Store) (*handlers.App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse templates: %w", err)
 	}
+	var reset mail.PasswordResetSender
+	if s := mail.NewSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPassword, cfg.SMTPFrom); s != nil {
+		reset = s
+	}
 	return &handlers.App{
-		Config: cfg,
-		Store:  st,
-		Render: &render.Engine{Templates: tmpl},
+		Config:        cfg,
+		Store:         st,
+		Render:        &render.Engine{Templates: tmpl},
+		PasswordReset: reset,
 	}, nil
 }
 

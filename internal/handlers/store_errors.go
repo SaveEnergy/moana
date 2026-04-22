@@ -38,4 +38,5 @@ var storeUserMessages = []struct {
 	{store.ErrInvalidUserEmail, "That email address is not valid."},
 	{store.ErrNotificationNotFound, "That notification could not be found."},
 	{store.ErrInvalidNotificationBody, "Notification text cannot be empty."},
+	{store.ErrPasswordResetInvalid, "This reset link is invalid or has expired. Request a new one from the sign-in page."},
 }

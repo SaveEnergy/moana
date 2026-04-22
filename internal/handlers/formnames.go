@@ -8,6 +8,14 @@ const (
 	LoginFieldRemember = "remember"
 )
 
+// Password reset: forgot-password and reset-password forms ([forgot_password.html], [reset_password.html]).
+const (
+	// ResetFieldToken is the query key and form field for the one-time token.
+	ResetFieldToken = "token"
+	// ResetFieldPassword reuses the same control name as [LoginFieldPassword] ("password").
+	ResetFieldPasswordConfirm = "password_confirm"
+)
+
 const (
 	SettingsFieldFirstName          = "first_name"
 	SettingsFieldLastName           = "last_name"

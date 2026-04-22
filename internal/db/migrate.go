@@ -17,6 +17,7 @@ var migrationSteps = []func(context.Context, *sql.Tx) error{
 	migrateV8,
 	migrateV9,
 	migrateV10,
+	migrateV11,
 }
 
 // LatestMigrationVersion is the schema_version after [Open] runs all steps (len(migrationSteps)).

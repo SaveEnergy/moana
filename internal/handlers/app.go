@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"moana/internal/config"
+	"moana/internal/mail"
 	"moana/internal/render"
 	"moana/internal/store"
 )
@@ -11,4 +12,6 @@ type App struct {
 	Config *config.Config
 	Store  *store.Store
 	Render *render.Engine
+	// PasswordReset sends “forgot password” email when SMTP is configured; nil otherwise.
+	PasswordReset mail.PasswordResetSender
 }

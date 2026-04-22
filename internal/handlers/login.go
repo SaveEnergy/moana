@@ -71,17 +71,19 @@ func (a *App) Logout(w http.ResponseWriter, r *http.Request) {
 
 // loginTemplateData is passed to login.html (standalone, no app layout).
 type loginTemplateData struct {
-	Title   string
-	Error   string
-	Year    int
-	RepoURL string
+	Title              string
+	Error              string
+	Year               int
+	RepoURL            string
+	ForgotPasswordPath string
 }
 
 func (a *App) loginTemplateData(err string) loginTemplateData {
 	return loginTemplateData{
-		Title:   "Sign in",
-		Error:   err,
-		Year:    time.Now().UTC().Year(),
-		RepoURL: a.Config.RepoURL,
+		Title:              "Sign in",
+		Error:              err,
+		Year:               time.Now().UTC().Year(),
+		RepoURL:            a.Config.RepoURL,
+		ForgotPasswordPath: ForgotPasswordPath,
 	}
 }

@@ -11,6 +11,11 @@ const (
 	// Use with [http.MethodGet]; bare "GET /" matches every path as a prefix — see routes_dashboard.go.
 	DashboardRootPattern = "/{$}"
 	LoginPath            = "/login"
+	// ForgotPasswordPath and ResetPasswordPath back the SMTP password reset flow; see [registerAuthRoutes].
+	ForgotPasswordPath = "/forgot-password"
+	ResetPasswordPath  = "/reset-password"
+	// PasswordResetQuerySent is set to 1 after a successful forgot-password POST (anti-enumeration copy).
+	PasswordResetQuerySent = "sent"
 	// LoginErrorQueryParam is the query key set when [WithAuth] redirects anonymous users ([LoginRedirectAuth]).
 	LoginErrorQueryParam = "error"
 	LoginRedirectAuth    = LoginPath + "?" + LoginErrorQueryParam + "=1" // WithAuth redirect; see paths_test.

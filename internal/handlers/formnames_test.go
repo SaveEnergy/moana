@@ -6,6 +6,7 @@ func TestFormFieldNameConstants_nonEmpty(t *testing.T) {
 	t.Parallel()
 	names := []string{
 		LoginFieldEmail, LoginFieldPassword, LoginFieldRemember,
+		ResetFieldToken, ResetFieldPasswordConfirm,
 		SettingsFieldFirstName, SettingsFieldLastName,
 		SettingsFieldCurrentPassword, SettingsFieldNewPassword, SettingsFieldNewPasswordConfirm,
 		SettingsFieldHouseholdName, SettingsFieldMemberUserID,
