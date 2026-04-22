@@ -47,6 +47,8 @@ import {
   APP_TOPBAR_NOTIF_LINK_SELECTOR,
   HISTORY_SORT_ELEMENT_ID,
   HISTORY_SORT_SELECTOR,
+  HISTORY_N_ELEMENT_ID,
+  HISTORY_N_SELECTOR,
   SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID,
   SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID,
   SETTINGS_ADD_MEMBER_CANCEL_ELEMENT_ID,
@@ -152,6 +154,12 @@ describe('domSelectors app main', () => {
 describe('domSelectors history sort', () => {
   it('builds #id from HISTORY_SORT_ELEMENT_ID', () => {
     expect(HISTORY_SORT_SELECTOR).toBe(`#${HISTORY_SORT_ELEMENT_ID}`)
+  })
+})
+
+describe('domSelectors history row cap', () => {
+  it('builds #id from HISTORY_N_ELEMENT_ID', () => {
+    expect(HISTORY_N_SELECTOR).toBe(`#${HISTORY_N_ELEMENT_ID}`)
   })
 })
 

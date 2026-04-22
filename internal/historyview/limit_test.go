@@ -8,30 +8,20 @@ import (
 
 func TestApplyHistoryFetchLimit(t *testing.T) {
 	t.Parallel()
-	t.Run("sets default when unset", func(t *testing.T) {
+	t.Run("sets limit to pageSize+1", func(t *testing.T) {
 		t.Parallel()
 		f := store.TransactionFilter{}
-		if probe := applyHistoryFetchLimit(&f); !probe {
-			t.Fatal("want probe when applying default cap")
+		if probe := applyHistoryFetchLimit(&f, defaultHistoryPageSize); !probe {
+			t.Fatal("want probe when applying cap")
 		}
-		want := defaultHistoryFetchLimit + 1
+		want := defaultHistoryPageSize + 1
 		if f.Limit != want {
 			t.Fatalf("Limit=%d want %d (cap+1 probe)", f.Limit, want)
 		}
 	})
-	t.Run("preserves explicit limit", func(t *testing.T) {
-		t.Parallel()
-		f := store.TransactionFilter{Limit: 42}
-		if probe := applyHistoryFetchLimit(&f); probe {
-			t.Fatal("unexpected probe")
-		}
-		if f.Limit != 42 {
-			t.Fatalf("Limit=%d want 42", f.Limit)
-		}
-	})
 	t.Run("nil filter is noop", func(t *testing.T) {
 		t.Parallel()
-		applyHistoryFetchLimit(nil) // must not panic
+		applyHistoryFetchLimit(nil, defaultHistoryPageSize) // must not panic
 	})
 }
 
@@ -44,10 +34,11 @@ func TestTrimHistoryRows(t *testing.T) {
 		}
 		return out
 	}
+	ps := 100
 	t.Run("no probe never truncates", func(t *testing.T) {
 		t.Parallel()
-		txs := makeTxs(defaultHistoryFetchLimit + 10)
-		out, tr := trimHistoryRows(txs, false)
+		txs := makeTxs(ps + 10)
+		out, tr := trimHistoryRows(txs, false, ps)
 		if tr || len(out) != len(txs) {
 			t.Fatalf("len=%d truncated=%v", len(out), tr)
 		}
@@ -55,24 +46,24 @@ func TestTrimHistoryRows(t *testing.T) {
 	t.Run("probe under cap", func(t *testing.T) {
 		t.Parallel()
 		txs := makeTxs(10)
-		out, tr := trimHistoryRows(txs, true)
+		out, tr := trimHistoryRows(txs, true, ps)
 		if tr || len(out) != 10 {
 			t.Fatalf("len=%d truncated=%v", len(out), tr)
 		}
 	})
 	t.Run("probe at cap not truncated", func(t *testing.T) {
 		t.Parallel()
-		txs := makeTxs(defaultHistoryFetchLimit)
-		out, tr := trimHistoryRows(txs, true)
-		if tr || len(out) != defaultHistoryFetchLimit {
+		txs := makeTxs(ps)
+		out, tr := trimHistoryRows(txs, true, ps)
+		if tr || len(out) != ps {
 			t.Fatalf("len=%d truncated=%v", len(out), tr)
 		}
 	})
 	t.Run("probe over cap", func(t *testing.T) {
 		t.Parallel()
-		txs := makeTxs(defaultHistoryFetchLimit + 1)
-		out, tr := trimHistoryRows(txs, true)
-		if !tr || len(out) != defaultHistoryFetchLimit {
+		txs := makeTxs(ps + 1)
+		out, tr := trimHistoryRows(txs, true, ps)
+		if !tr || len(out) != ps {
 			t.Fatalf("len=%d truncated=%v", len(out), tr)
 		}
 	})

@@ -40,7 +40,7 @@ test('history apply dates submits from and to on GET', async ({ page }) => {
   await page.goto('/history')
   await page.locator(HISTORY_FROM).fill('2026-01-10')
   await page.locator(HISTORY_TO).fill('2026-04-19')
-  await page.getByRole('button', { name: 'Apply dates' }).click()
+  await page.getByRole('button', { name: 'Apply' }).click()
   await expect(page).toHaveURL(/[?&]from=2026-01-10(?:&|$)/)
   await expect(page).toHaveURL(/[?&]to=2026-04-19(?:&|$)/)
 })

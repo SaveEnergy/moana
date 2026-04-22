@@ -60,7 +60,7 @@ func (a *App) ForgotPasswordPage(w http.ResponseWriter, r *http.Request) {
 	a.renderSimple(w, r, "forgot_password.html", a.forgotTemplate("", "", false, r.URL.Query().Get(PasswordResetQuerySent) == "1"))
 }
 
-// ForgotPasswordSubmit issues a reset link when SMTP is enabled (POST /forgot-password).
+// ForgotPasswordSubmit issues a reset link when outbound mail is enabled (POST /forgot-password).
 func (a *App) ForgotPasswordSubmit(w http.ResponseWriter, r *http.Request) {
 	_, err := a.CurrentUser(r)
 	if err == nil {
@@ -133,7 +133,7 @@ func (a *App) ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if a.PasswordReset == nil {
-		a.renderSimple(w, r, "reset_password.html", a.resetTemplate("Password reset is not available on this server (SMTP is not configured).", ""))
+		a.renderSimple(w, r, "reset_password.html", a.resetTemplate("Password reset is not available on this server (outbound email is not configured).", ""))
 		return
 	}
 	a.renderSimple(w, r, "reset_password.html", a.resetTemplate("", token))
@@ -154,7 +154,7 @@ func (a *App) ResetPasswordSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if a.PasswordReset == nil {
-		a.renderSimple(w, r, "reset_password.html", a.resetTemplate("Password reset is not available on this server (SMTP is not configured).", r.FormValue(ResetFieldToken)))
+		a.renderSimple(w, r, "reset_password.html", a.resetTemplate("Password reset is not available on this server (outbound email is not configured).", r.FormValue(ResetFieldToken)))
 		return
 	}
 	token := strings.TrimSpace(r.FormValue(ResetFieldToken))

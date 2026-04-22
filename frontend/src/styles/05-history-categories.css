@@ -175,23 +175,75 @@
   padding-left: 1.65rem;
 }
 
-.history-sort-field {
-  min-width: 10rem;
+/* Match width for Sort + Rows float selects (same system as other float fields). */
+.history-select-field {
+  flex: 0 1 11rem;
+  min-width: min(100%, 10rem);
 }
 
-.history-sort {
-  min-width: 10rem;
+.history-control-select {
+  min-width: 0;
+}
+
+/* One row: range, from, to, actions — grid keeps a single horizontal band (no flex min-width:100% wrap bug). */
+.history-date-toolbar {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: minmax(10rem, 1.1fr) minmax(7.5rem, 0.9fr) minmax(7.5rem, 0.9fr) minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: end;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Grid items must shrink; without min-width:0, columns refuse to share a row. */
+.history-date-toolbar > .float-field {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .history-date-field {
-  min-width: min(100%, 11rem);
+  max-width: 100%;
 }
 
-.history-date-row {
+/* Range can use remaining space; still capped so dates stay usable. */
+.history-range-field {
+  min-width: 10rem;
+  max-width: 100%;
+}
+
+/* Segmented control lives inside the bordered float cell (same system as type tabs, tighter). */
+.history-range-field .history-range-seg {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.1rem 0.15rem;
+  box-sizing: border-box;
+}
+
+.history-range-seg__link {
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 0.38rem 0.5rem;
+}
+
+.history-toolbar-actions {
+  min-width: max-content;
+  justify-self: end;
+}
+
+.history-toolbar-actions__btns {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.75rem 1rem;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
 }
 
 .history-day-block {

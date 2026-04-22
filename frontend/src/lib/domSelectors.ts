@@ -47,6 +47,12 @@ export const HISTORY_SORT_ELEMENT_ID = 'history-sort' as const
 /** `#` + {@link HISTORY_SORT_ELEMENT_ID} — **`resolveBootContentQueryRoot`** + **`queryHistorySortSelect`**, **`queryBootContent`**, or `querySelector`. */
 export const HISTORY_SORT_SELECTOR = `#${HISTORY_SORT_ELEMENT_ID}` as const
 
+/** History page max-rows `<select name="n">` (`history.html`). */
+export const HISTORY_N_ELEMENT_ID = 'history-n' as const
+
+/** `#` + {@link HISTORY_N_ELEMENT_ID} — pairs with {@link initHistoryControls}. */
+export const HISTORY_N_SELECTOR = `#${HISTORY_N_ELEMENT_ID}` as const
+
 /** Settings → add household member dialog (`settings.html`). */
 export const SETTINGS_ADD_MEMBER_DIALOG_ELEMENT_ID = 'settings-add-member-dialog' as const
 export const SETTINGS_ADD_MEMBER_OPEN_ELEMENT_ID = 'settings-add-member-open' as const

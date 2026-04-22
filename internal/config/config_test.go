@@ -223,53 +223,60 @@ func TestDBPath_fromEnv(t *testing.T) {
 	}
 }
 
-func TestLoad_smtpHostRequiresFromAndPublicBase(t *testing.T) {
+func TestLoad_sendgridKeyRequiresFromAndPublicBase(t *testing.T) {
 	t.Setenv("MOANA_ENV", "development")
 	t.Setenv("MOANA_SESSION_SECRET", "")
-	t.Setenv("MOANA_SMTP_HOST", "smtp.example.com")
-	t.Setenv("MOANA_SMTP_FROM", "noreply@example.com")
+	t.Setenv("MOANA_SENDGRID_API_KEY", "SG.xxx")
+	t.Setenv("MOANA_MAIL_FROM", "noreply@example.com")
 	t.Setenv("MOANA_PUBLIC_BASE_URL", "")
 	_, err := Load()
 	if err == nil {
-		t.Fatal("expected error when MOANA_PUBLIC_BASE_URL is empty but SMTP host is set")
+		t.Fatal("expected error when MOANA_PUBLIC_BASE_URL is empty but SendGrid key is set")
 	}
 	if !strings.Contains(err.Error(), "MOANA_PUBLIC_BASE_URL") {
 		t.Fatalf("unexpected: %v", err)
 	}
 }
 
-func TestLoad_smtpFromWithoutHost_rejected(t *testing.T) {
+func TestLoad_mailFromWithoutSendgridKey_rejected(t *testing.T) {
 	t.Setenv("MOANA_ENV", "development")
 	t.Setenv("MOANA_SESSION_SECRET", "")
-	t.Setenv("MOANA_SMTP_HOST", "")
-	t.Setenv("MOANA_SMTP_FROM", "noreply@example.com")
+	t.Setenv("MOANA_SENDGRID_API_KEY", "")
+	t.Setenv("MOANA_MAIL_FROM", "noreply@example.com")
 	_, err := Load()
 	if err == nil {
-		t.Fatal("expected error when MOANA_SMTP_FROM is set without host")
+		t.Fatal("expected error when MOANA_MAIL_FROM is set without API key")
 	}
 }
 
-func TestLoad_smtpConfig_ok(t *testing.T) {
+func TestLoad_sendgridConfig_ok(t *testing.T) {
 	t.Setenv("MOANA_ENV", "development")
 	t.Setenv("MOANA_SESSION_SECRET", "")
-	t.Setenv("MOANA_SMTP_HOST", "smtp.example.com")
-	t.Setenv("MOANA_SMTP_PORT", "465")
-	t.Setenv("MOANA_SMTP_USER", "u")
-	t.Setenv("MOANA_SMTP_PASSWORD", "p")
-	t.Setenv("MOANA_SMTP_FROM", "moana@example.com")
+	t.Setenv("MOANA_SENDGRID_API_KEY", "SG.xxx")
+	t.Setenv("MOANA_MAIL_FROM", "moana@example.com")
 	t.Setenv("MOANA_PUBLIC_BASE_URL", "https://app.example.com")
 	c, err := Load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.SMTPHost != "smtp.example.com" || c.SMTPFrom != "moana@example.com" {
-		t.Fatalf("smtp fields: %#v", c)
-	}
-	if c.SMTPPort != 465 {
-		t.Fatalf("SMTPPort %d", c.SMTPPort)
+	if c.SendGridAPIKey != "SG.xxx" || c.MailFrom != "moana@example.com" {
+		t.Fatalf("SendGrid / mail: %#v", c)
 	}
 	if c.PublicBaseURL != "https://app.example.com" {
 		t.Fatalf("PublicBaseURL %q", c.PublicBaseURL)
+	}
+}
+
+func TestLoad_legacySMTPEnv_rejected(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_SMTP_HOST", "old.example.com")
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected error when a legacy MOANA_SMTP_* variable is set")
+	}
+	if !strings.Contains(err.Error(), "MOANA_SENDGRID_API_KEY") {
+		t.Fatalf("unexpected: %v", err)
 	}
 }
 

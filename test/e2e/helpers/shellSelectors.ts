@@ -51,6 +51,8 @@ export const HISTORY_FROM = '#history-from' as const
 export const HISTORY_TO = '#history-to' as const
 /** `HISTORY_SORT_ELEMENT_ID` */
 export const HISTORY_SORT = '#history-sort' as const
+/** `HISTORY_N_ELEMENT_ID` */
+export const HISTORY_N = '#history-n' as const
 
 // --- Category modal (`categories.html`; `CATEGORY_MODAL_*_ELEMENT_ID`)
 export const CATEGORY_MODAL_ID = 'cat-modal' as const

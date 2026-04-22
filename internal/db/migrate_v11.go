@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-// migrateV11 adds one-time password reset token storage for SMTP "forgot password" flows.
+// migrateV11 adds one-time password reset token storage for "forgot password" email flows.
 func migrateV11(ctx context.Context, tx *sql.Tx) error {
 	if _, err := tx.ExecContext(ctx, `
 CREATE TABLE password_reset_tokens (

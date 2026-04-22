@@ -14,7 +14,7 @@
   {{end}}
 
   {{if .Truncated}}
-  <p class="alert alert-info" role="status">Showing the first {{.TruncationLimit}} entries by date. Narrow your filters or date range to see more.</p>
+  <p class="alert alert-info" role="status">More entries match your filters than we are loading. Showing at most <strong>{{.TruncationLimit}}</strong> (per your sort). Raise the row limit or narrow the range.</p>
   {{end}}
 
   <form class="history-controls" method="get" action="/history">
@@ -27,15 +27,31 @@
           <input id="history-q" class="float-input history-search-input" type="search" name="q" value="{{.Search}}" placeholder="Search by note, category…" autocomplete="off">
         </div>
       </div>
-      <div class="float-field history-sort-field">
+      <div class="float-field history-select-field">
         <label class="float-label" for="history-sort">Sort</label>
-        <select id="history-sort" class="float-input history-sort" name="sort">
+        <select id="history-sort" class="float-input history-control-select" name="sort">
           <option value="newest" {{if eq .Sort "newest"}}selected{{end}}>Newest first</option>
           <option value="oldest" {{if eq .Sort "oldest"}}selected{{end}}>Oldest first</option>
         </select>
       </div>
+      <div class="float-field history-select-field">
+        <label class="float-label" for="history-n">Rows</label>
+        <select id="history-n" class="float-input history-control-select" name="n" title="Cap for how many entries load (per sort order)">
+          {{range .RowOptions}}
+          <option value="{{.}}" {{if eq $.Rows .}}selected{{end}}>{{.}}</option>
+          {{end}}
+        </select>
+      </div>
     </div>
-    <div class="history-date-row">
+    <div class="history-date-toolbar">
+      <div class="float-field history-range-field" role="group" aria-label="Quick local date range">
+        <span class="float-label" id="history-range-label">Range</span>
+        <div class="history-segmented history-range-seg" aria-labelledby="history-range-label">
+          <a href="{{.QuickLast7URL}}" class="history-seg history-range-seg__link">7 days</a>
+          <a href="{{.QuickLast30URL}}" class="history-seg history-range-seg__link">30 days</a>
+          <a href="{{.QuickLast90URL}}" class="history-seg history-range-seg__link">90 days</a>
+        </div>
+      </div>
       <div class="float-field history-date-field">
         <label class="float-label" for="history-from">From</label>
         <input class="float-input" id="history-from" type="date" name="from" value="{{.FilterFrom}}">
@@ -44,8 +60,13 @@
         <label class="float-label" for="history-to">To</label>
         <input class="float-input" id="history-to" type="date" name="to" value="{{.FilterTo}}">
       </div>
-      <button type="submit" class="btn btn-secondary">Apply dates</button>
-      <a class="btn btn-tertiary" href="/history">Clear filters</a>
+      <div class="float-field history-toolbar-actions" role="group" aria-label="Apply or clear date filters">
+        <span class="float-label" id="history-dates-actions-label">Actions</span>
+        <div class="history-toolbar-actions__btns" aria-labelledby="history-dates-actions-label">
+          <button type="submit" class="btn btn-secondary">Apply</button>
+          <a class="btn btn-tertiary" href="/history">Clear filters</a>
+        </div>
+      </div>
     </div>
   </form>
 

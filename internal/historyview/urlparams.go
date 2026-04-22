@@ -10,6 +10,8 @@ const (
 	QuerySort   = "sort"
 	QueryFrom   = "from"
 	QueryTo     = "to"
+	// QueryRows (n) caps how many transactions load per request (log-style; see historyview [defaultHistoryPageSize]).
+	QueryRows = "n"
 )
 
 // SortOldestValue is the query value that means oldest-first ordering.

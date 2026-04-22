@@ -54,21 +54,19 @@ Then open `http://localhost:8080`. The SQLite file persists in the named volume 
 ## Configuration
 
 
-| Variable                                  | Default                               | Notes                                                                                                    |
-| ----------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `MOANA_LISTEN`                            | `:8080`                               | HTTP listen address                                                                                      |
-| `MOANA_DB_PATH`                           | `data/moana.db`                       | SQLite file path                                                                                         |
-| `MOANA_ENV`                               | `development`                         | `production` enables secure cookies and **requires** `MOANA_SESSION_SECRET`                              |
-| `MOANA_SESSION_SECRET`                    | *(dev fallback)*                      | Must be set in production                                                                                |
-| `MOANA_SESSION_MAX_AGE_SEC`               | `604800`                              | Session cookie max age (seconds)                                                                         |
-| `MOANA_REQUEST_TIMEOUT_SEC`               | `60`                                  | Per-request timeout                                                                                      |
-| `MOANA_REPO_URL`                          | `https://github.com/SaveEnergy/moana` | Shown in the app footer                                                                                  |
-| `MOANA_PUBLIC_BASE_URL`                   | —                                     | Public site URL (`https://…`), **required** with SMTP so password reset links are absolute               |
-| `MOANA_PASSWORD_RESET_TTL_MIN`            | `60`                                  | How long a reset link stays valid (minutes)                                                              |
-| `MOANA_SMTP_HOST`                         | —                                     | Outbound mail server; with `MOANA_SMTP_FROM` and `MOANA_PUBLIC_BASE_URL` enables “forgot password” email |
-| `MOANA_SMTP_PORT`                         | `587`*                                | *Default applied in code if unset.                                                                       |
-| `MOANA_SMTP_USER` / `MOANA_SMTP_PASSWORD` | —                                     | SMTP auth (optional for open relays)                                                                     |
-| `MOANA_SMTP_FROM`                         | —                                     | Envelope From address; **required** if `MOANA_SMTP_HOST` is set                                          |
+| Variable                       | Default                               | Notes                                                                                                                                              |
+| ------------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MOANA_LISTEN`                 | `:8080`                               | HTTP listen address                                                                                                                                |
+| `MOANA_DB_PATH`                | `data/moana.db`                       | SQLite file path                                                                                                                                   |
+| `MOANA_ENV`                    | `development`                         | `production` enables secure cookies and **requires** `MOANA_SESSION_SECRET`                                                                        |
+| `MOANA_SESSION_SECRET`         | *(dev fallback)*                      | Must be set in production                                                                                                                          |
+| `MOANA_SESSION_MAX_AGE_SEC`    | `604800`                              | Session cookie max age (seconds)                                                                                                                   |
+| `MOANA_REQUEST_TIMEOUT_SEC`    | `60`                                  | Per-request timeout                                                                                                                                |
+| `MOANA_REPO_URL`               | `https://github.com/SaveEnergy/moana` | Shown in the app footer                                                                                                                            |
+| `MOANA_PUBLIC_BASE_URL`        | —                                     | Public site URL (`https://…`), **required** with `MOANA_SENDGRID_API_KEY` so password reset links are absolute                                     |
+| `MOANA_PASSWORD_RESET_TTL_MIN` | `60`                                  | How long a reset link stays valid (minutes)                                                                                                        |
+| `MOANA_SENDGRID_API_KEY`       | —                                     | [SendGrid](https://sendgrid.com/) API key; with `MOANA_MAIL_FROM` and `MOANA_PUBLIC_BASE_URL` enables “forgot password” email (HTTP API, not SMTP) |
+| `MOANA_MAIL_FROM`              | —                                     | Sender address, must be verified in SendGrid; **required** if `MOANA_SENDGRID_API_KEY` is set                                                      |
 
 
 ## Tests

@@ -15,6 +15,7 @@ type HistoryURLParams struct {
 	from         string
 	to           string
 	filterActive bool
+	rows         int
 }
 
 // ParseHistoryURL extracts normalized filters from a /history URL.
@@ -49,6 +50,7 @@ func parseHistoryURLValues(v url.Values) HistoryURLParams {
 	from := strings.TrimSpace(v.Get(QueryFrom))
 	to := strings.TrimSpace(v.Get(QueryTo))
 	filterActive := from != "" && to != ""
+	rows := parseHistoryPageSize(v)
 	return HistoryURLParams{
 		kind:         kind,
 		filterKind:   filterKind,
@@ -58,6 +60,7 @@ func parseHistoryURLValues(v url.Values) HistoryURLParams {
 		from:         from,
 		to:           to,
 		filterActive: filterActive,
+		rows:         rows,
 	}
 }
 

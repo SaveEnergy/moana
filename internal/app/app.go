@@ -20,7 +20,7 @@ func New(cfg *config.Config, st *store.Store) (*handlers.App, error) {
 		return nil, fmt.Errorf("parse templates: %w", err)
 	}
 	var reset mail.PasswordResetSender
-	if s := mail.NewSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPassword, cfg.SMTPFrom); s != nil {
+	if s := mail.NewSendGridSender(cfg.SendGridAPIKey, cfg.MailFrom); s != nil {
 		reset = s
 	}
 	return &handlers.App{

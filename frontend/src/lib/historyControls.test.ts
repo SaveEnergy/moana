@@ -1,9 +1,29 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import * as contentRoot from './contentRoot'
-import { HISTORY_SORT_SELECTOR } from './domSelectors'
-import { initHistoryControls, queryHistorySortSelect, wireHistorySortAutoSubmit } from './historyControls'
+import { HISTORY_N_SELECTOR, HISTORY_SORT_SELECTOR } from './domSelectors'
+import {
+  initHistoryControls,
+  queryHistoryRowsSelect,
+  queryHistorySortSelect,
+  wireHistoryRowsAutoSubmit,
+  wireHistorySortAutoSubmit,
+} from './historyControls'
 import { stubDocumentMainLandmark, stubDocumentWithoutMainLandmark } from './stubDocumentMainLandmark'
+
+describe('queryHistoryRowsSelect', () => {
+  it('uses HISTORY_N_SELECTOR on root', () => {
+    let seen = ''
+    const root = {
+      querySelector: (sel: string) => {
+        seen = sel
+        return null
+      },
+    } as unknown as ParentNode
+    queryHistoryRowsSelect(root)
+    expect(seen).toBe(HISTORY_N_SELECTOR)
+  })
+})
 
 describe('queryHistorySortSelect', () => {
   it('uses HISTORY_SORT_SELECTOR on root', () => {
@@ -112,6 +132,34 @@ describe('wireHistorySortAutoSubmit', () => {
   })
 })
 
+describe('wireHistoryRowsAutoSubmit', () => {
+  it('no-ops on null', () => {
+    wireHistoryRowsAutoSubmit(null)
+  })
+
+  it('requests submit on change when form exists', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+    wireHistoryRowsAutoSubmit(select)
+    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    const onChange = addEventListener.mock.calls[0][1] as () => void
+    onChange()
+    expect(requestSubmit).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not subscribe twice on the same select', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+    wireHistoryRowsAutoSubmit(select)
+    wireHistoryRowsAutoSubmit(select)
+    expect(addEventListener).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('initHistoryControls', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -184,6 +232,34 @@ describe('initHistoryControls', () => {
     expect(addEventListener).toHaveBeenCalledTimes(1)
   })
 
+  it('wires max-rows when both selects exist', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addSort = vi.fn()
+    const addRows = vi.fn()
+    const sort = { addEventListener: addSort, form } as unknown as HTMLSelectElement
+    const n = { addEventListener: addRows, form } as unknown as HTMLSelectElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => {
+          if (sel === HISTORY_SORT_SELECTOR) return sort
+          if (sel === HISTORY_N_SELECTOR) return n
+          return null
+        },
+      }),
+    )
+
+    initHistoryControls()
+
+    expect(addSort).toHaveBeenCalledTimes(1)
+    expect(addRows).toHaveBeenCalledTimes(1)
+    const onN = addRows.mock.calls[0][1] as () => void
+    onN()
+    expect(requestSubmit).toHaveBeenCalledTimes(1)
+  })
+
   it('resolves #history-sort under main.app-main when the landmark exists', () => {
     const requestSubmit = vi.fn()
     const form = { requestSubmit } as unknown as HTMLFormElement
@@ -234,6 +310,26 @@ describe('initHistoryControls', () => {
     )
 
     wireHistorySortAutoSubmit(select)
+    addEventListener.mockClear()
+    initHistoryControls()
+
+    expect(addEventListener).not.toHaveBeenCalled()
+  })
+
+  it('does not re-wire when wireHistoryRowsAutoSubmit ran before init', () => {
+    const requestSubmit = vi.fn()
+    const form = { requestSubmit } as unknown as HTMLFormElement
+    const addEventListener = vi.fn()
+    const select = { addEventListener, form } as unknown as HTMLSelectElement
+
+    vi.stubGlobal(
+      'document',
+      stubDocumentWithoutMainLandmark({
+        querySelector: (sel: string) => (sel === HISTORY_N_SELECTOR ? select : null),
+      }),
+    )
+
+    wireHistoryRowsAutoSubmit(select)
     addEventListener.mockClear()
     initHistoryControls()
 

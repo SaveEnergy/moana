@@ -12,6 +12,6 @@ type App struct {
 	Config *config.Config
 	Store  *store.Store
 	Render *render.Engine
-	// PasswordReset sends “forgot password” email when SMTP is configured; nil otherwise.
+	// PasswordReset sends “forgot password” email when SendGrid is configured; nil otherwise.
 	PasswordReset mail.PasswordResetSender
 }

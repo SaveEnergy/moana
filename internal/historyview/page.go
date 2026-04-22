@@ -23,31 +23,38 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 	historyReturn := historyReturnOrDefault(requestURI)
 
 	if partialDateFilter(p.from, p.to) {
-		return invalidDateRangePage(p, historyReturn, q), nil
+		return invalidDateRangePage(p, historyReturn, q, loc), nil
 	}
 
 	if p.filterActive {
 		fu, tu, err := timeutil.DayRangeUTCFromLocalDates(loc, p.from, p.to)
 		if err != nil {
-			return invalidDateRangePage(p, historyReturn, q), nil
+			return invalidDateRangePage(p, historyReturn, q, loc), nil
 		}
 		f.FromUTC = &fu
 		f.ToUTC = &tu
 	}
 
-	probe := applyHistoryFetchLimit(&f)
+	pageSize := p.rows
+	probe := applyHistoryFetchLimit(&f, pageSize)
 
 	txs, err := st.ListTransactions(ctx, householdID, f)
 	if err != nil {
 		return PageData{}, err
 	}
-	txs, truncated := trimHistoryRows(txs, probe)
+	txs, truncated := trimHistoryRows(txs, probe, pageSize)
 	groups := GroupByDay(txs, loc, !p.oldestFirst)
+	q7, q30, q90 := buildAllQuickRangeLinks(q, loc)
 	return PageData{
 		Error:            "",
 		Kind:             p.kind,
 		Search:           p.search,
 		Sort:             p.sortLabel,
+		Rows:             pageSize,
+		RowOptions:       DefaultHistoryPageSizes,
+		QuickLast7URL:    q7,
+		QuickLast30URL:   q30,
+		QuickLast90URL:   q90,
 		FilterFrom:       p.from,
 		FilterTo:         p.to,
 		FilterActive:     p.filterActive,
@@ -55,24 +62,30 @@ func BuildPage(ctx context.Context, st *store.Store, householdID int64, loc *tim
 		Groups:           groups,
 		HistoryReturnURL: historyReturn,
 		Truncated:        truncated,
-		TruncationLimit:  defaultHistoryFetchLimit,
+		TruncationLimit:  pageSize,
 	}, nil
 }
 
 // invalidDateRangePage builds the standard /history payload when from/to cannot be applied.
-func invalidDateRangePage(p HistoryURLParams, historyReturn string, q url.Values) PageData {
+func invalidDateRangePage(p HistoryURLParams, historyReturn string, q url.Values, loc *time.Location) PageData {
+	q7, q30, q90 := buildAllQuickRangeLinks(q, loc)
 	return PageData{
 		Error:            InvalidDateRangeMessage,
 		Kind:             p.kind,
 		Search:           p.search,
 		Sort:             p.sortLabel,
+		Rows:             p.rows,
+		RowOptions:       DefaultHistoryPageSizes,
+		QuickLast7URL:    q7,
+		QuickLast30URL:   q30,
+		QuickLast90URL:   q90,
 		FilterFrom:       p.from,
 		FilterTo:         p.to,
 		FilterActive:     true,
 		Nav:              buildNavFromValues(q),
 		Groups:           nil,
 		HistoryReturnURL: historyReturn,
-		TruncationLimit:  defaultHistoryFetchLimit,
+		TruncationLimit:  p.rows,
 	}
 }
 

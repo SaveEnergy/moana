@@ -73,7 +73,7 @@ func TestRegisterRoutes_loginGET_ok(t *testing.T) {
 	}
 }
 
-// TestRegisterRoutes_forgotPasswordGET_ok verifies GET /forgot-password is registered (SMTP not configured in test; page still renders).
+// TestRegisterRoutes_forgotPasswordGET_ok verifies GET /forgot-password is registered (SendGrid not configured in test; page still renders).
 func TestRegisterRoutes_forgotPasswordGET_ok(t *testing.T) {
 	t.Parallel()
 	mux, cleanup := newRegisterRoutesTestMux(t)

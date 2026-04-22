@@ -34,16 +34,14 @@ type Config struct {
 	// Zero means use the server's default limit (1 MiB in [moana/internal/server]).
 	MaxRequestBodyBytes int64
 	// PublicBaseURL is the public site origin (e.g. https://moana.example.com) used in password-reset
-	// emails. Required when [SMTPHost] is set (MOANA_PUBLIC_BASE_URL).
+	// emails. Required when [SendGridAPIKey] is set (MOANA_PUBLIC_BASE_URL).
 	PublicBaseURL string
 	// PasswordResetTTL is how long a reset link remains valid (MOANA_PASSWORD_RESET_TTL_MIN).
 	PasswordResetTTL time.Duration
-	// SMTP* configure outbound mail when [SMTPHost] and MOANA_SMTP_FROM are set.
-	SMTPHost     string
-	SMTPPort     int
-	SMTPUser     string
-	SMTPPassword string
-	SMTPFrom     string
+	// SendGridAPIKey enables outbound mail via SendGrid (MOANA_SENDGRID_API_KEY). Do not log.
+	SendGridAPIKey string
+	// MailFrom is the verified sender address in SendGrid (MOANA_MAIL_FROM).
+	MailFrom string
 }
 
 // Load reads configuration from the environment. MOANA_SESSION_SECRET is required
@@ -74,33 +72,24 @@ func Load() (*Config, error) {
 	repoURL := getenv("MOANA_REPO_URL", "https://github.com/SaveEnergy/moana")
 
 	publicBase := strings.TrimSpace(os.Getenv("MOANA_PUBLIC_BASE_URL"))
-	smtpHost := strings.TrimSpace(os.Getenv("MOANA_SMTP_HOST"))
-	smtpFrom := strings.TrimSpace(os.Getenv("MOANA_SMTP_FROM"))
-	smtpUser := strings.TrimSpace(os.Getenv("MOANA_SMTP_USER"))
-	smtpPass := os.Getenv("MOANA_SMTP_PASSWORD")
-	smtpPort, err := parseSMTPPortEnv()
-	if err != nil {
+	if err := validateLegacySMTPEnv(); err != nil {
 		return nil, err
 	}
+	sendgridKey := strings.TrimSpace(os.Getenv("MOANA_SENDGRID_API_KEY"))
+	mailFrom := strings.TrimSpace(os.Getenv("MOANA_MAIL_FROM"))
 	if err := validatePublicBaseURLOptional(publicBase); err != nil {
 		return nil, err
 	}
-	if smtpHost != "" {
-		if smtpFrom == "" {
-			return nil, fmt.Errorf("MOANA_SMTP_FROM is required when MOANA_SMTP_HOST is set")
+	if sendgridKey != "" {
+		if mailFrom == "" {
+			return nil, fmt.Errorf("MOANA_MAIL_FROM is required when MOANA_SENDGRID_API_KEY is set (verified sender email in SendGrid)")
 		}
 		if publicBase == "" {
-			return nil, fmt.Errorf("MOANA_PUBLIC_BASE_URL is required when MOANA_SMTP_HOST is set (password reset links must be absolute)")
+			return nil, fmt.Errorf("MOANA_PUBLIC_BASE_URL is required when MOANA_SENDGRID_API_KEY is set (password reset links must be absolute)")
 		}
 	} else {
-		if smtpFrom != "" {
-			return nil, fmt.Errorf("MOANA_SMTP_FROM is set but MOANA_SMTP_HOST is empty; set both or unset MOANA_SMTP_FROM")
-		}
-		if smtpUser != "" || smtpPass != "" {
-			return nil, fmt.Errorf("MOANA_SMTP_USER or MOANA_SMTP_PASSWORD is set but MOANA_SMTP_HOST is empty")
-		}
-		if smtpPort != 0 {
-			return nil, fmt.Errorf("MOANA_SMTP_PORT is set but MOANA_SMTP_HOST is empty")
+		if mailFrom != "" {
+			return nil, fmt.Errorf("MOANA_MAIL_FROM is set but MOANA_SENDGRID_API_KEY is empty; set both or clear MOANA_MAIL_FROM")
 		}
 	}
 
@@ -117,24 +106,29 @@ func Load() (*Config, error) {
 		MaxRequestBodyBytes: parseMaxRequestBodyBytesEnv(),
 		PublicBaseURL:       publicBase,
 		PasswordResetTTL:    time.Duration(resetMin) * time.Minute,
-		SMTPHost:            smtpHost,
-		SMTPPort:            smtpPort,
-		SMTPUser:            smtpUser,
-		SMTPPassword:        smtpPass,
-		SMTPFrom:            smtpFrom,
+		SendGridAPIKey:      sendgridKey,
+		MailFrom:            mailFrom,
 	}, nil
 }
 
-func parseSMTPPortEnv() (int, error) {
-	s := strings.TrimSpace(os.Getenv("MOANA_SMTP_PORT"))
-	if s == "" {
-		return 0, nil
+// validateLegacySMTPEnv returns an error if deprecated MOANA_SMTP_* variables are set.
+func validateLegacySMTPEnv() error {
+	legacy := []struct {
+		key, val string
+	}{
+		{"MOANA_SMTP_HOST", os.Getenv("MOANA_SMTP_HOST")},
+		{"MOANA_SMTP_PORT", os.Getenv("MOANA_SMTP_PORT")},
+		{"MOANA_SMTP_USER", os.Getenv("MOANA_SMTP_USER")},
+		{"MOANA_SMTP_PASSWORD", os.Getenv("MOANA_SMTP_PASSWORD")},
+		{"MOANA_SMTP_FROM", os.Getenv("MOANA_SMTP_FROM")},
 	}
-	p, err := strconv.Atoi(s)
-	if err != nil || p <= 0 || p > 65535 {
-		return 0, fmt.Errorf("MOANA_SMTP_PORT must be an integer 1–65535, got %q", s)
+	for _, row := range legacy {
+		if strings.TrimSpace(row.val) == "" {
+			continue
+		}
+		return fmt.Errorf("%s is set but Moana no longer uses SMTP: use MOANA_SENDGRID_API_KEY and MOANA_MAIL_FROM instead (remove or unset legacy MOANA_SMTP_* variables)", row.key)
 	}
-	return p, nil
+	return nil
 }
 
 func validatePublicBaseURLOptional(raw string) error {
