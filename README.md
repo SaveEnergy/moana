@@ -52,6 +52,8 @@ Then open `http://localhost:8080`. The SQLite file persists in the named volume 
 
 `MOANA_SESSION_SECRET` is **required** when `MOANA_ENV=production` (see [Configuration](#configuration)).
 
+**Build notes (VPS/CI):** The first `docker compose up --build` can sit on the **assets** step (`bun run build`) or **apk** for several minutes while layers download and Vite compiles. That is expected on a small machine or a slow path to Docker Hub. If the **Go** compile step is killed, the host is likely OOM: add swap, build on a machine with more RAM, or run `go build` with less parallelism (for example `GOMAXPROCS=1` when invoking `go build` in a custom image). Rebuilds are faster thanks to layer and module caches when BuildKit is enabled.
+
 ## Configuration
 
 

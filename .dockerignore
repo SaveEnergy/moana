@@ -1,0 +1,20 @@
+# Git and CI
+.git
+.github
+
+# Not needed in build context
+node_modules
+playwright-report
+test-results
+air.log
+bin
+tmp
+/data
+
+# Local secrets (use env at runtime, not in image)
+.env
+.env.*
+!.env.example
+
+# E2E: not required to compile the Go binary
+test/e2e
