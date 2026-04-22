@@ -1,7 +1,7 @@
 package store
 
 // sqlUserSelectColumns lists user table columns (no SELECT/FROM) for composing queries.
-const sqlUserSelectColumns = `id, email, password_hash, role, created_at, household_id, first_name, last_name, household_role`
+const sqlUserSelectColumns = `id, email, password_hash, role, created_at, household_id, first_name, last_name, household_role, avatar_rev`
 
 // Full user row (credentials + household fields) for scanUser.
 const sqlUserSelectFull = `SELECT ` + sqlUserSelectColumns + ` FROM users`
@@ -20,7 +20,7 @@ const sqlUserGetByIDWithUnreadCount = `SELECT ` + sqlUserSelectColumns + `, (SEL
 const sqlUserListSummaryAdmin = `SELECT id, email, role, created_at FROM users ORDER BY id`
 
 // sqlUserListHouseholdMembers lists members of one household (display fields + role).
-const sqlUserListHouseholdMembers = `SELECT id, email, IFNULL(first_name, ''), IFNULL(last_name, ''), household_role
+const sqlUserListHouseholdMembers = `SELECT id, email, IFNULL(first_name, ''), IFNULL(last_name, ''), household_role, avatar_rev
 FROM users WHERE household_id = ? ORDER BY id`
 
 // sqlUserUpdatePassword sets the password hash for one user.
@@ -28,6 +28,12 @@ const sqlUserUpdatePassword = `UPDATE users SET password_hash = ? WHERE id = ?`
 
 // sqlUserUpdateProfile sets first/last name for one user.
 const sqlUserUpdateProfile = `UPDATE users SET first_name = ?, last_name = ? WHERE id = ?`
+
+// sqlUserClearAvatar sets avatar revision to 0 (remove custom image).
+const sqlUserClearAvatar = `UPDATE users SET avatar_rev = 0 WHERE id = ?`
+
+// sqlUserIncrementAvatarRev bumps the avatar version after a new file is written.
+const sqlUserIncrementAvatarRev = `UPDATE users SET avatar_rev = COALESCE(avatar_rev, 0) + 1 WHERE id = ?`
 
 // sqlUserDetachToSoloHousehold moves a user to a new household as owner ([DetachUserToSoloHousehold]).
 const sqlUserDetachToSoloHousehold = `UPDATE users SET household_id = ?, household_role = 'owner' WHERE id = ?`

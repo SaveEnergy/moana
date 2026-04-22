@@ -13,6 +13,8 @@ type User struct {
 	FirstName     string
 	LastName      string
 	HouseholdRole string
+	// AvatarRev is 0 if no custom photo; increment when a new image is stored (served at /avatars/{id} with ?v=).
+	AvatarRev int64
 }
 
 // UserSummary is a user row without secret fields (for admin lists).
@@ -30,4 +32,5 @@ type HouseholdMember struct {
 	FirstName     string
 	LastName      string
 	HouseholdRole string
+	AvatarRev     int64
 }

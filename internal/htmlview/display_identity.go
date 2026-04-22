@@ -1,6 +1,7 @@
 package htmlview
 
 import (
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -70,4 +71,12 @@ func ProfileInitial(first, last, email string) string {
 		return string(r)
 	}
 	return UserInitial(email)
+}
+
+// UserAvatarURL returns a cache-busted path for a user JPEG, or empty when [rev] is 0 (use initials).
+func UserAvatarURL(id, rev int64) string {
+	if rev == 0 {
+		return ""
+	}
+	return "/avatars/" + strconv.FormatInt(id, 10) + "?v=" + strconv.FormatInt(rev, 10)
 }

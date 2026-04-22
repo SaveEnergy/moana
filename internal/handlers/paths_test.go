@@ -112,6 +112,8 @@ func TestSettingsPOSTPaths_haveSettingsPrefix(t *testing.T) {
 	t.Parallel()
 	for _, p := range []string{
 		SettingsProfilePath,
+		SettingsAvatarPath,
+		SettingsAvatarRemovePath,
 		SettingsHouseholdPath,
 		SettingsHouseholdMembersPath,
 		SettingsHouseholdMembersRemovePath,

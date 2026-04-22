@@ -33,6 +33,9 @@ type Config struct {
 	// MaxRequestBodyBytes, if positive, caps HTTP POST body size (MOANA_MAX_REQUEST_BODY_BYTES).
 	// Zero means use the server's default limit (1 MiB in [moana/internal/server]).
 	MaxRequestBodyBytes int64
+	// AvatarDataDir, if set, is the directory for profile JPEGs (MOANA_AVATAR_DIR). Empty means
+	// a directory next to the SQLite file ([filepath.Dir] on DBPath + "/avatars") or, for :memory: DB, a host temp path resolved in [moana/internal/app.New].
+	AvatarDataDir string
 	// PublicBaseURL is the public site origin (e.g. https://moana.example.com) used in password-reset
 	// emails. Required when [SendGridAPIKey] is set (MOANA_PUBLIC_BASE_URL).
 	PublicBaseURL string
@@ -42,6 +45,9 @@ type Config struct {
 	SendGridAPIKey string
 	// MailFrom is the verified sender address in SendGrid (MOANA_MAIL_FROM).
 	MailFrom string
+	// SendGridPasswordResetTemplateID is a SendGrid dynamic template id (d-…) for password reset
+	// (MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID). The template should use {{reset_url}} in the body.
+	SendGridPasswordResetTemplateID string
 }
 
 // Load reads configuration from the environment. MOANA_SESSION_SECRET is required
@@ -77,6 +83,7 @@ func Load() (*Config, error) {
 	}
 	sendgridKey := strings.TrimSpace(os.Getenv("MOANA_SENDGRID_API_KEY"))
 	mailFrom := strings.TrimSpace(os.Getenv("MOANA_MAIL_FROM"))
+	sendgridTmpl := strings.TrimSpace(os.Getenv("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID"))
 	if err := validatePublicBaseURLOptional(publicBase); err != nil {
 		return nil, err
 	}
@@ -87,27 +94,37 @@ func Load() (*Config, error) {
 		if publicBase == "" {
 			return nil, fmt.Errorf("MOANA_PUBLIC_BASE_URL is required when MOANA_SENDGRID_API_KEY is set (password reset links must be absolute)")
 		}
+		if sendgridTmpl == "" {
+			return nil, fmt.Errorf("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID is required when MOANA_SENDGRID_API_KEY is set (use a dynamic transactional template; pass {{reset_url}} in the template body)")
+		}
 	} else {
 		if mailFrom != "" {
 			return nil, fmt.Errorf("MOANA_MAIL_FROM is set but MOANA_SENDGRID_API_KEY is empty; set both or clear MOANA_MAIL_FROM")
+		}
+		if sendgridTmpl != "" {
+			return nil, fmt.Errorf("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID is set but MOANA_SENDGRID_API_KEY is empty; set both or clear the template id")
 		}
 	}
 
 	resetMin := parsePositiveIntEnv("MOANA_PASSWORD_RESET_TTL_MIN", defaultPasswordResetMin)
 
+	avatarDataDir := strings.TrimSpace(os.Getenv("MOANA_AVATAR_DIR"))
+
 	return &Config{
-		Listen:              listen,
-		DBPath:              dbPath,
-		SessionSecret:       secret,
-		SecureCookies:       env == "production",
-		SessionMaxAge:       durationSecondsClamped(maxAgeSec),
-		RequestTimeout:      durationSecondsClamped(timeoutSec),
-		RepoURL:             repoURL,
-		MaxRequestBodyBytes: parseMaxRequestBodyBytesEnv(),
-		PublicBaseURL:       publicBase,
-		PasswordResetTTL:    time.Duration(resetMin) * time.Minute,
-		SendGridAPIKey:      sendgridKey,
-		MailFrom:            mailFrom,
+		Listen:                          listen,
+		DBPath:                          dbPath,
+		AvatarDataDir:                   avatarDataDir,
+		SessionSecret:                   secret,
+		SecureCookies:                   env == "production",
+		SessionMaxAge:                   durationSecondsClamped(maxAgeSec),
+		RequestTimeout:                  durationSecondsClamped(timeoutSec),
+		RepoURL:                         repoURL,
+		MaxRequestBodyBytes:             parseMaxRequestBodyBytesEnv(),
+		PublicBaseURL:                   publicBase,
+		PasswordResetTTL:                time.Duration(resetMin) * time.Minute,
+		SendGridAPIKey:                  sendgridKey,
+		MailFrom:                        mailFrom,
+		SendGridPasswordResetTemplateID: sendgridTmpl,
 	}, nil
 }
 

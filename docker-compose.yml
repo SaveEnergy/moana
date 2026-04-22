@@ -1,12 +1,49 @@
+# Copy .env.example to .env and set MOANA_SESSION_SECRET (and public URL / SendGrid for mail).
+# Compose substitutes ${VAR} from your shell and from a .env file next to this file.
+#
+# Traefik: labels work with a reverse proxy (Traefik) on a shared Docker network. Create
+# the network if needed (`docker network create traefik`) and add under this service:
+#   networks: [default, traefik]
+# plus top-level: networks: { traefik: { external: true, name: traefik } }
+
 services:
   moana:
     build: .
     ports:
       - "8080:8080"
     environment:
+      # --- Required in production (see config.Load) ---
       MOANA_ENV: production
       MOANA_LISTEN: ":8080"
-      MOANA_SESSION_SECRET: ${MOANA_SESSION_SECRET:?Set MOANA_SESSION_SECRET in the environment or a .env file next to this compose file}
+      MOANA_DB_PATH: /data/moana.db
+      MOANA_SESSION_SECRET: ${MOANA_SESSION_SECRET:?Set MOANA_SESSION_SECRET in .env (32+ random chars in production) or export in the shell}
+
+      # --- Defaults; override per instance ---
+      MOANA_SESSION_MAX_AGE_SEC: ${MOANA_SESSION_MAX_AGE_SEC:-604800}
+      MOANA_REQUEST_TIMEOUT_SEC: ${MOANA_REQUEST_TIMEOUT_SEC:-60}
+      MOANA_REPO_URL: ${MOANA_REPO_URL:-https://github.com/SaveEnergy/moana}
+      # 0 = use server’s built-in request body cap
+      MOANA_MAX_REQUEST_BODY_BYTES: ${MOANA_MAX_REQUEST_BODY_BYTES:-0}
+
+      # --- Public origin (password reset links, etc.) — use real https URL behind a reverse proxy ---
+      MOANA_PUBLIC_BASE_URL: ${MOANA_PUBLIC_BASE_URL:-http://localhost:8080}
+      MOANA_PASSWORD_RESET_TTL_MIN: ${MOANA_PASSWORD_RESET_TTL_MIN:-60}
+
+      # --- SendGrid (forgot password); leave all three empty to disable outbound mail ---
+      MOANA_SENDGRID_API_KEY: ${MOANA_SENDGRID_API_KEY:-}
+      MOANA_MAIL_FROM: ${MOANA_MAIL_FROM:-}
+      MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID: ${MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID:-}
+
+    # Traefik (v2/v3) — ${...} from .env; align MOANA_TRAEFIK_HOST with MOANA_PUBLIC_BASE_URL
+    # when TLS terminates at Traefik. Add extra labels (tls, certresolver, middlewares) in
+    # docker-compose.override.yml if needed.
+    labels:
+      - "traefik.enable=${MOANA_TRAEFIK_ENABLE:-true}"
+      - "traefik.http.routers.${MOANA_TRAEFIK_ROUTER_NAME:-moana}.rule=Host(`${MOANA_TRAEFIK_HOST:-moana.localhost}`)"
+      - "traefik.http.routers.${MOANA_TRAEFIK_ROUTER_NAME:-moana}.entrypoints=${MOANA_TRAEFIK_ENTRYPOINTS:-web}"
+      - "traefik.http.routers.${MOANA_TRAEFIK_ROUTER_NAME:-moana}.service=${MOANA_TRAEFIK_SERVICE_NAME:-moana}"
+      - "traefik.http.services.${MOANA_TRAEFIK_SERVICE_NAME:-moana}.loadbalancer.server.port=8080"
+
     volumes:
       - moana-data:/data
     restart: unless-stopped

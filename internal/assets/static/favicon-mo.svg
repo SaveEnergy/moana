@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mo">
+  <!-- --dashboard-canvas / app warmth + primary hairline; wordmark Mo on-surface -->
+  <rect width="64" height="64" rx="14" fill="#f0ebe3" stroke="#306369" stroke-opacity="0.22" stroke-width="1"/>
+  <text
+    x="50%"
+    y="51%"
+    dominant-baseline="middle"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', Times, serif"
+    font-size="36"
+    font-weight="600"
+    letter-spacing="-0.05em"
+    fill="#1c1d1e">Mo</text>
+</svg>

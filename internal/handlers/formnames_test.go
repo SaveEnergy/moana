@@ -9,7 +9,7 @@ func TestFormFieldNameConstants_nonEmpty(t *testing.T) {
 		ResetFieldToken, ResetFieldPasswordConfirm,
 		SettingsFieldFirstName, SettingsFieldLastName,
 		SettingsFieldCurrentPassword, SettingsFieldNewPassword, SettingsFieldNewPasswordConfirm,
-		SettingsFieldHouseholdName, SettingsFieldMemberUserID,
+		SettingsFieldHouseholdName, SettingsFieldMemberUserID, SettingsFieldAvatar,
 	}
 	for _, name := range names {
 		if name == "" {

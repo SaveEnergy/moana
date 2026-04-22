@@ -16,6 +16,7 @@ func TemplateFuncs() template.FuncMap {
 		"adminRoleLabel":      AdminRoleLabel,
 		"profileDisplayName":  ProfileDisplayName,
 		"profileInitial":      ProfileInitial,
+		"userAvatarURL":       UserAvatarURL,
 		"householdRoleLabel":  HouseholdRoleLabel,
 		"attr":                Attr,
 	}

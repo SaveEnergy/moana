@@ -40,7 +40,7 @@ func (s *Store) ListHouseholdMembers(ctx context.Context, householdID int64) ([]
 	out := make([]HouseholdMember, 0, 16)
 	for rows.Next() {
 		var m HouseholdMember
-		if err := rows.Scan(&m.ID, &m.Email, &m.FirstName, &m.LastName, &m.HouseholdRole); err != nil {
+		if err := rows.Scan(&m.ID, &m.Email, &m.FirstName, &m.LastName, &m.HouseholdRole, &m.AvatarRev); err != nil {
 			return nil, err
 		}
 		out = append(out, m)

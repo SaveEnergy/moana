@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}} · Moana</title>
+  <link rel="icon" href="/static/favicon-mo.svg" type="image/svg+xml" sizes="any">
   <link rel="stylesheet" href="/static/css/app.css">
   <link rel="modulepreload" href="/static/js/app.js" as="script">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,7 +81,11 @@
         <div class="app-topbar-rule app-topbar-rule--desktop" aria-hidden="true"></div>
         <details class="app-user-menu">
           <summary class="app-user-menu-btn">
-            <span class="app-user-avatar" aria-hidden="true">{{userInitial .User.Email}}</span>
+            <span class="app-user-avatar" aria-hidden="true">
+              {{if userAvatarURL .User.ID .User.AvatarRev}}
+              <img class="app-user-avatar-img" src="{{userAvatarURL .User.ID .User.AvatarRev}}" alt="" width="32" height="32" decoding="async" fetchpriority="low">
+              {{else}}{{userInitial .User.Email}}{{end}}
+            </span>
             <span class="app-user-label">
               <span class="app-user-name">{{.User.Email}}</span>
               <svg class="app-user-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" width="16" height="16">

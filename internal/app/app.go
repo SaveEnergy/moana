@@ -19,8 +19,12 @@ func New(cfg *config.Config, st *store.Store) (*handlers.App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse templates: %w", err)
 	}
+	avatarDir, err := resolveAvatarDir(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("avatar data directory: %w", err)
+	}
 	var reset mail.PasswordResetSender
-	if s := mail.NewSendGridSender(cfg.SendGridAPIKey, cfg.MailFrom); s != nil {
+	if s := mail.NewSendGridSender(cfg.SendGridAPIKey, cfg.MailFrom, cfg.SendGridPasswordResetTemplateID); s != nil {
 		reset = s
 	}
 	return &handlers.App{
@@ -28,6 +32,7 @@ func New(cfg *config.Config, st *store.Store) (*handlers.App, error) {
 		Store:         st,
 		Render:        &render.Engine{Templates: tmpl},
 		PasswordReset: reset,
+		AvatarDir:     avatarDir,
 	}, nil
 }
 

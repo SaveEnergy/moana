@@ -1,8 +1,13 @@
 package handlers_test
 
 import (
+	"bytes"
 	"context"
+	"image"
+	"image/color"
+	"image/png"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -578,5 +583,62 @@ func TestSettingsProfileUpdate_newPasswordMismatchShowsError(t *testing.T) {
 	s := string(body)
 	if !strings.Contains(s, "New passwords do not match.") {
 		t.Fatalf("expected mismatch copy, got: %s", s[:min(900, len(s))])
+	}
+}
+
+func TestSettingsAvatarUpload_thenGETAvatarJPEG(t *testing.T) {
+	t.Parallel()
+	app, srv, cleanup := testutil.NewAppServer(t)
+	defer cleanup()
+	uid := testutil.MustCreateUser(t, app, "avatar-up@integration.test", "pw", "user")
+	client := testutil.NewCookieClient(t)
+	testutil.MustLogin(t, client, srv.URL, "avatar-up@integration.test", "pw")
+
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	part, err := mw.CreateFormFile(handlers.SettingsFieldAvatar, "tiny.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := image.NewNRGBA(image.Rect(0, 0, 8, 8))
+	img.Set(0, 0, color.NRGBA{R: 20, G: 120, B: 200, A: 255})
+	if err := png.Encode(part, img); err != nil {
+		t.Fatal(err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	req, err := http.NewRequest(http.MethodPost, srv.URL+handlers.SettingsAvatarPath, &body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("after upload redirect chain: status %d want 200", resp.StatusCode)
+	}
+	u, err := app.Store.GetUserByID(context.Background(), uid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u == nil || u.AvatarRev < 1 {
+		t.Fatalf("avatar rev want >= 1, got u=%v", u)
+	}
+	getURL := srv.URL + "/avatars/" + strconv.FormatInt(uid, 10) + "?v=" + strconv.FormatInt(u.AvatarRev, 10)
+	avResp, err := client.Get(getURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer avResp.Body.Close()
+	if avResp.StatusCode != http.StatusOK {
+		t.Fatalf("GET avatar: status %d", avResp.StatusCode)
+	}
+	if got := avResp.Header.Get("Content-Type"); !strings.HasPrefix(got, "image/jpeg") {
+		t.Fatalf("Content-Type %q want image/jpeg", got)
 	}
 }

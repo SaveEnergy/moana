@@ -22,7 +22,7 @@ export function runBootInitializers(initializers: ReadonlyArray<BootInitializer>
 
 /**
  * Wire all client behaviors; each initializer no-ops when its DOM is missing.
- * Order: timezone cookie → local time labels → shell (listeners) → settings dialog → category modal → history controls → confirm-before-submit forms.
+ * Order: timezone cookie → local time labels → shell (listeners) → settings add-member dialog → settings avatar dialog → category modal → history controls → confirm-before-submit forms.
  * Cookie and time text run before interactive modules attach handlers.
  * Name order: {@link DOCUMENTED_BOOT_INITIALIZER_NAMES} and `design.md` §2 **Boot content root**.
  */

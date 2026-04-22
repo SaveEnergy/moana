@@ -5,6 +5,7 @@ const stubs = vi.hoisted(() => ({
   setBrowserTimezoneCookie: vi.fn(),
   initShellSidebar: vi.fn(),
   initSettingsMemberDialog: vi.fn(),
+  initSettingsAvatarDialog: vi.fn(),
   initCategoryModal: vi.fn(),
   initHistoryControls: vi.fn(),
   initConfirmSubmitForms: vi.fn(),
@@ -14,6 +15,7 @@ vi.mock('./lib/localTime', () => ({ applyLocalTimeElements: stubs.applyLocalTime
 vi.mock('./lib/timezoneCookie', () => ({ setBrowserTimezoneCookie: stubs.setBrowserTimezoneCookie }))
 vi.mock('./lib/shellSidebar', () => ({ initShellSidebar: stubs.initShellSidebar }))
 vi.mock('./lib/settingsMemberDialog', () => ({ initSettingsMemberDialog: stubs.initSettingsMemberDialog }))
+vi.mock('./lib/settingsAvatarDialog', () => ({ initSettingsAvatarDialog: stubs.initSettingsAvatarDialog }))
 vi.mock('./lib/categoryModal', () => ({ initCategoryModal: stubs.initCategoryModal }))
 vi.mock('./lib/historyControls', () => ({ initHistoryControls: stubs.initHistoryControls }))
 vi.mock('./lib/confirmSubmitForms', () => ({ initConfirmSubmitForms: stubs.initConfirmSubmitForms }))
@@ -70,6 +72,7 @@ describe('bootApp', () => {
     expect(stubs.applyLocalTimeElements).toHaveBeenCalledTimes(2)
     expect(stubs.initShellSidebar).toHaveBeenCalledTimes(2)
     expect(stubs.initSettingsMemberDialog).toHaveBeenCalledTimes(2)
+    expect(stubs.initSettingsAvatarDialog).toHaveBeenCalledTimes(2)
     expect(stubs.initCategoryModal).toHaveBeenCalledTimes(2)
     expect(stubs.initHistoryControls).toHaveBeenCalledTimes(2)
     expect(stubs.initConfirmSubmitForms).toHaveBeenCalledTimes(2)
@@ -89,6 +92,9 @@ describe('bootApp', () => {
     stubs.initSettingsMemberDialog.mockImplementation(() => {
       order.push('settingsDialog')
     })
+    stubs.initSettingsAvatarDialog.mockImplementation(() => {
+      order.push('settingsAvatarDialog')
+    })
     stubs.initCategoryModal.mockImplementation(() => {
       order.push('categoryModal')
     })
@@ -104,6 +110,7 @@ describe('bootApp', () => {
       'localTime',
       'shell',
       'settingsDialog',
+      'settingsAvatarDialog',
       'categoryModal',
       'historyControls',
       'confirmSubmitForms',

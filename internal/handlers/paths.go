@@ -25,6 +25,11 @@ const (
 	SettingsErrorQueryParam            = "err"
 	SettingsOKQueryParam               = "ok"
 	SettingsProfilePath                = SettingsPath + "/profile"
+	// SettingsAvatarPath and SettingsAvatarRemovePath handle profile image upload/removal; see [registerSettingsRoutes] and [UserAvatarGet] for [AvatarsPathPattern].
+	SettingsAvatarPath       = SettingsPath + "/avatar"
+	SettingsAvatarRemovePath = SettingsAvatarPath + "/remove"
+	// AvatarsPathPattern serves processed JPEGs for the signed-in user’s household; must match [UserAvatarGet].
+	AvatarsPathPattern = "/avatars/{id}"
 	SettingsHouseholdPath              = SettingsPath + "/household"
 	SettingsHouseholdMembersPath       = SettingsHouseholdPath + "/members"
 	SettingsHouseholdMembersRemovePath = SettingsHouseholdMembersPath + "/remove"

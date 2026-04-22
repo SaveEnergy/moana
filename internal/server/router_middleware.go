@@ -7,6 +7,9 @@ import (
 	"moana/internal/handlers"
 )
 
+// larger than [defaultMaxRequestBodyBytes] for multipart image uploads; see [WithMaxRequestBodyBytesAdaptive].
+const settingsAvatarPostMaxBytes = 4 * 1 << 20
+
 func requestTimeout(opts *RouterOptions, app *handlers.App) time.Duration {
 	if opts != nil && opts.RequestTimeout > 0 {
 		return opts.RequestTimeout
@@ -32,7 +35,12 @@ func maxRequestBodyBytes(opts *RouterOptions) int64 {
 // [WithRequestTimeout] so the deadline covers body reads and handlers. This helper is the single
 // composition used by [NewRouterWithRouterOptions] and by tests that assert middleware behavior.
 func wrapRouterMiddleware(inner http.Handler, opts *RouterOptions, app *handlers.App) http.Handler {
-	inner = WithMaxRequestBodyBytes(maxRequestBodyBytes(opts))(inner)
+	inner = WithMaxRequestBodyBytesAdaptive(
+		maxRequestBodyBytes(opts),
+		http.MethodPost,
+		handlers.SettingsAvatarPath,
+		settingsAvatarPostMaxBytes,
+	)(inner)
 	if d := requestTimeout(opts, app); d > 0 {
 		inner = WithRequestTimeout(d)(inner)
 	}

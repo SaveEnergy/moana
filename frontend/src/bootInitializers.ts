@@ -2,6 +2,7 @@ import { applyLocalTimeElements } from './lib/localTime'
 import { setBrowserTimezoneCookie } from './lib/timezoneCookie'
 import { initShellSidebar } from './lib/shellSidebar'
 import { initSettingsMemberDialog } from './lib/settingsMemberDialog'
+import { initSettingsAvatarDialog } from './lib/settingsAvatarDialog'
 import { initCategoryModal } from './lib/categoryModal'
 import { initHistoryControls } from './lib/historyControls'
 import { initConfirmSubmitForms } from './lib/confirmSubmitForms'
@@ -19,6 +20,7 @@ export const BOOT_APP_INITIALIZERS: ReadonlyArray<BootInitializer> = [
   applyLocalTimeElements,
   initShellSidebar,
   initSettingsMemberDialog,
+  initSettingsAvatarDialog,
   initCategoryModal,
   initHistoryControls,
   initConfirmSubmitForms,
@@ -33,6 +35,7 @@ export const DOCUMENTED_BOOT_INITIALIZER_NAMES = [
   'applyLocalTimeElements',
   'initShellSidebar',
   'initSettingsMemberDialog',
+  'initSettingsAvatarDialog',
   'initCategoryModal',
   'initHistoryControls',
   'initConfirmSubmitForms',

@@ -23,6 +23,12 @@
   {{if eq .Success "left"}}
   <p class="alert alert-success settings-alert" role="status">You left the household.</p>
   {{end}}
+  {{if eq .Success "avatar"}}
+  <p class="alert alert-success settings-alert" role="status">Profile photo updated.</p>
+  {{end}}
+  {{if eq .Success "avatar-removed"}}
+  <p class="alert alert-success settings-alert" role="status">Profile photo removed.</p>
+  {{end}}
 
   <section class="settings-card settings-card--personal">
     <header class="settings-card-header settings-card-header--personal">
@@ -30,12 +36,20 @@
     </header>
 
     <div class="settings-personal-media">
-      <div class="settings-photo-ring" aria-hidden="true">
-        <div class="settings-photo-inner">
-          <span class="settings-photo-initial">{{profileInitial .User.FirstName .User.LastName .User.Email}}</span>
-        </div>
+      <div class="settings-avatar-hero">
+        <button type="button" class="settings-avatar-open-btn" id="settings-avatar-open" aria-haspopup="dialog" aria-controls="settings-avatar-dialog" aria-label="Change profile photo">
+          <span class="settings-photo-figure" aria-hidden="true">
+            {{if userAvatarURL .User.ID .User.AvatarRev}}
+            <img class="settings-photo-img" src="{{userAvatarURL .User.ID .User.AvatarRev}}" alt="" width="124" height="124" decoding="async" fetchpriority="low">
+            {{else}}
+            <span class="settings-photo-inner settings-photo-inner--empty">
+              <span class="settings-photo-initial">{{profileInitial .User.FirstName .User.LastName .User.Email}}</span>
+            </span>
+            {{end}}
+          </span>
+        </button>
+        <p class="muted small settings-avatar-hero-cue" role="note">Round crop, same image in the header. Click your photo to add or change.</p>
       </div>
-      <p class="muted small settings-photo-hint" role="note">Custom profile photos are not available in this build. Your initial appears here and in the header.</p>
     </div>
 
     <form class="settings-form settings-form--personal" method="post" action="/settings/profile">
@@ -113,7 +127,7 @@
       <ul class="settings-member-list">
         {{range .Members}}
         <li class="settings-member-row">
-          <div class="settings-member-avatar" aria-hidden="true">{{profileInitial .FirstName .LastName .Email}}</div>
+          <div class="settings-member-avatar" aria-hidden="true">{{if userAvatarURL .ID .AvatarRev}}<img class="settings-member-avatar-img" src="{{userAvatarURL .ID .AvatarRev}}" alt="" width="40" height="40" decoding="async">{{else}}{{profileInitial .FirstName .LastName .Email}}{{end}}</div>
           <div class="settings-member-body">
             <div class="settings-member-name">{{profileDisplayName .FirstName .LastName .Email}}</div>
             <div class="settings-member-email muted small">{{.Email}}</div>
@@ -146,6 +160,40 @@
       {{end}}
     </div>
   </section>
+
+  <dialog id="settings-avatar-dialog" class="admin-add-dialog" aria-labelledby="settings-avatar-title">
+    <div class="admin-add-dialog-header">
+      <h2 id="settings-avatar-title" class="admin-add-dialog-title">Profile photo</h2>
+    </div>
+    <div class="settings-avatar-dialog-body">
+      <p class="muted small settings-avatar-dialog-hint">We crop to a circle (256px) for display. Max 1 MB — PNG, JPEG, GIF, or WebP. <strong>Click the photo or drop a file</strong>, then <strong>Save</strong>.</p>
+      <form id="settings-avatar-upload-form" class="settings-avatar-upload-form" method="post" action="/settings/avatar" enctype="multipart/form-data">
+        <input id="settings-avatar-file" class="sr-only" type="file" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp,.png,.jpg,.jpeg,.gif,.webp" aria-label="Profile image file" tabindex="-1">
+        <div class="settings-avatar-dropzone" id="settings-avatar-dropzone" role="button" tabindex="0" aria-label="Click to choose an image, or drop a file here">
+          <div class="settings-avatar-dropzone-inner" aria-hidden="true">
+            {{if userAvatarURL .User.ID .User.AvatarRev}}
+            <img class="settings-avatar-dialog-preview-img" src="{{userAvatarURL .User.ID .User.AvatarRev}}" alt="" width="200" height="200" decoding="async" fetchpriority="low" draggable="false">
+            {{else}}
+            <div class="settings-avatar-dialog-preview-fallback">
+              <span class="settings-avatar-dialog-initial">{{profileInitial .User.FirstName .User.LastName .User.Email}}</span>
+            </div>
+            {{end}}
+          </div>
+        </div>
+        <div class="settings-avatar-form-actions">
+          <button type="submit" class="settings-avatar-save-btn" id="settings-avatar-save" disabled aria-label="Save photo">
+            <svg class="settings-avatar-save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          </button>
+        </div>
+      </form>
+      {{if userAvatarURL .User.ID .User.AvatarRev}}
+      <form class="settings-avatar-modal-remove" method="post" action="/settings/avatar/remove">
+        <p class="settings-avatar-modal-remove-label muted small">Or remove the current photo (initials will show).</p>
+        <button type="submit" class="btn btn-ghost btn-small">Remove current photo</button>
+      </form>
+      {{end}}
+    </div>
+  </dialog>
 
   <dialog id="settings-add-member-dialog" class="admin-add-dialog" aria-labelledby="settings-add-member-title">
     <div class="admin-add-dialog-header">

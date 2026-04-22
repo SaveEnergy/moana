@@ -228,6 +228,7 @@ func TestLoad_sendgridKeyRequiresFromAndPublicBase(t *testing.T) {
 	t.Setenv("MOANA_SESSION_SECRET", "")
 	t.Setenv("MOANA_SENDGRID_API_KEY", "SG.xxx")
 	t.Setenv("MOANA_MAIL_FROM", "noreply@example.com")
+	t.Setenv("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID", "d-test0000")
 	t.Setenv("MOANA_PUBLIC_BASE_URL", "")
 	_, err := Load()
 	if err == nil {
@@ -254,6 +255,7 @@ func TestLoad_sendgridConfig_ok(t *testing.T) {
 	t.Setenv("MOANA_SESSION_SECRET", "")
 	t.Setenv("MOANA_SENDGRID_API_KEY", "SG.xxx")
 	t.Setenv("MOANA_MAIL_FROM", "moana@example.com")
+	t.Setenv("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID", "d-abc123template")
 	t.Setenv("MOANA_PUBLIC_BASE_URL", "https://app.example.com")
 	c, err := Load()
 	if err != nil {
@@ -262,8 +264,38 @@ func TestLoad_sendgridConfig_ok(t *testing.T) {
 	if c.SendGridAPIKey != "SG.xxx" || c.MailFrom != "moana@example.com" {
 		t.Fatalf("SendGrid / mail: %#v", c)
 	}
+	if c.SendGridPasswordResetTemplateID != "d-abc123template" {
+		t.Fatalf("SendGridPasswordResetTemplateID %q", c.SendGridPasswordResetTemplateID)
+	}
 	if c.PublicBaseURL != "https://app.example.com" {
 		t.Fatalf("PublicBaseURL %q", c.PublicBaseURL)
+	}
+}
+
+func TestLoad_sendgridKeyRequiresTemplateID(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_SENDGRID_API_KEY", "SG.xxx")
+	t.Setenv("MOANA_MAIL_FROM", "noreply@example.com")
+	t.Setenv("MOANA_PUBLIC_BASE_URL", "https://app.example.com")
+	t.Setenv("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID", "")
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected error when template id is empty but SendGrid key is set")
+	}
+	if !strings.Contains(err.Error(), "MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID") {
+		t.Fatalf("unexpected: %v", err)
+	}
+}
+
+func TestLoad_sendgridTemplateWithoutKey_rejected(t *testing.T) {
+	t.Setenv("MOANA_ENV", "development")
+	t.Setenv("MOANA_SESSION_SECRET", "")
+	t.Setenv("MOANA_SENDGRID_API_KEY", "")
+	t.Setenv("MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID", "d-only")
+	_, err := Load()
+	if err == nil {
+		t.Fatal("expected error when template id is set without API key")
 	}
 }
 

@@ -43,29 +43,26 @@
         </select>
       </div>
     </div>
-    <div class="history-date-toolbar">
-      <div class="float-field history-range-field" role="group" aria-label="Quick local date range">
-        <span class="float-label" id="history-range-label">Range</span>
+    <div class="history-date-toolbar history-secondary-bar">
+      <div class="history-secondary-slot history-secondary-slot--range" role="group" aria-labelledby="history-range-label">
+        <span class="history-secondary-inline-label" id="history-range-label">Range</span>
         <div class="history-segmented history-range-seg" aria-labelledby="history-range-label">
           <a href="{{.QuickLast7URL}}" class="history-seg history-range-seg__link">7 days</a>
           <a href="{{.QuickLast30URL}}" class="history-seg history-range-seg__link">30 days</a>
           <a href="{{.QuickLast90URL}}" class="history-seg history-range-seg__link">90 days</a>
         </div>
       </div>
-      <div class="float-field history-date-field">
-        <label class="float-label" for="history-from">From</label>
-        <input class="float-input" id="history-from" type="date" name="from" value="{{.FilterFrom}}">
+      <div class="history-secondary-slot">
+        <label class="history-secondary-inline-label" for="history-from">From</label>
+        <input class="history-secondary-date" id="history-from" type="date" name="from" value="{{.FilterFrom}}">
       </div>
-      <div class="float-field history-date-field">
-        <label class="float-label" for="history-to">To</label>
-        <input class="float-input" id="history-to" type="date" name="to" value="{{.FilterTo}}">
+      <div class="history-secondary-slot">
+        <label class="history-secondary-inline-label" for="history-to">To</label>
+        <input class="history-secondary-date" id="history-to" type="date" name="to" value="{{.FilterTo}}">
       </div>
-      <div class="float-field history-toolbar-actions" role="group" aria-label="Apply or clear date filters">
-        <span class="float-label" id="history-dates-actions-label">Actions</span>
-        <div class="history-toolbar-actions__btns" aria-labelledby="history-dates-actions-label">
-          <button type="submit" class="btn btn-secondary">Apply</button>
-          <a class="btn btn-tertiary" href="/history">Clear filters</a>
-        </div>
+      <div class="history-toolbar-actions" role="group" aria-label="Apply or clear date filters">
+        <a class="history-toolbar-sublink" href="/history">Clear filters</a>
+        <button type="submit" class="btn btn-secondary btn-small">Apply</button>
       </div>
     </div>
   </form>

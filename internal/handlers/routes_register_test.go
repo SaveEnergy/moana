@@ -123,6 +123,7 @@ func TestRegisterRoutes_protectedGET_redirectsAnonymous(t *testing.T) {
 		handlers.HistoryPath,
 		handlers.CategoriesPath,
 		handlers.SettingsPath,
+		strings.Replace(handlers.AvatarsPathPattern, "{id}", "1", 1),
 		handlers.NotificationsPath,
 	}
 	for _, path := range paths {
@@ -198,6 +199,8 @@ func TestRegisterRoutes_protectedPOST_redirectsAnonymous(t *testing.T) {
 		{http.MethodPost, handlers.CategoriesUpdatePath},
 		{http.MethodPost, handlers.CategoriesDeletePath},
 		{http.MethodPost, handlers.SettingsProfilePath},
+		{http.MethodPost, handlers.SettingsAvatarPath},
+		{http.MethodPost, handlers.SettingsAvatarRemovePath},
 		{http.MethodPost, handlers.SettingsHouseholdPath},
 		{http.MethodPost, handlers.SettingsHouseholdMembersPath},
 		{http.MethodPost, handlers.SettingsHouseholdMembersRemovePath},

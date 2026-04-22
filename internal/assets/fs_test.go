@@ -1,6 +1,7 @@
 package assets
 
 import (
+	"bytes"
 	"io/fs"
 	"testing"
 )
@@ -32,5 +33,12 @@ func TestStaticFS_servesAppCSS(t *testing.T) {
 	}
 	if len(b) < 200 {
 		t.Fatalf("expected non-trivial css, got %d bytes", len(b))
+	}
+	ico, err := fs.ReadFile(fsys, "favicon-mo.svg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ico) < 50 || !bytes.Contains(ico, []byte("<svg")) {
+		t.Fatalf("expected favicon svg, got %d bytes", len(ico))
 	}
 }

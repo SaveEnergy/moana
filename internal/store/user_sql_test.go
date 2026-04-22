@@ -28,7 +28,7 @@ func TestSqlUserListSummaryAdmin_stable(t *testing.T) {
 
 func TestSqlUserListHouseholdMembers_stable(t *testing.T) {
 	t.Parallel()
-	want := `SELECT id, email, IFNULL(first_name, ''), IFNULL(last_name, ''), household_role
+	want := `SELECT id, email, IFNULL(first_name, ''), IFNULL(last_name, ''), household_role, avatar_rev
 FROM users WHERE household_id = ? ORDER BY id`
 	if sqlUserListHouseholdMembers != want {
 		t.Fatalf("sqlUserListHouseholdMembers drift")

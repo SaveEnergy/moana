@@ -32,6 +32,19 @@ func TestProfileDisplayName(t *testing.T) {
 	}
 }
 
+func TestUserAvatarURL(t *testing.T) {
+	t.Parallel()
+	if got := UserAvatarURL(0, 0); got != "" {
+		t.Fatalf("UserAvatarURL(0,0) = %q want empty", got)
+	}
+	if got := UserAvatarURL(7, 0); got != "" {
+		t.Fatalf("UserAvatarURL(7,0) = %q want empty", got)
+	}
+	if got := UserAvatarURL(7, 2); got != "/avatars/7?v=2" {
+		t.Fatalf("UserAvatarURL(7,2) = %q", got)
+	}
+}
+
 func TestProfileInitial(t *testing.T) {
 	t.Parallel()
 	if got := ProfileInitial("Jane", "", ""); got != "J" {

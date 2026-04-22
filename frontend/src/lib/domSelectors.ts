@@ -72,6 +72,16 @@ export const SETTINGS_ADD_MEMBER_DISMISS_SELECTORS: readonly string[] = [
   SETTINGS_ADD_MEMBER_CANCEL_SELECTOR,
 ]
 
+/** Settings → profile photo dialog (`settings.html`). */
+export const SETTINGS_AVATAR_DIALOG_ELEMENT_ID = 'settings-avatar-dialog' as const
+export const SETTINGS_AVATAR_OPEN_ELEMENT_ID = 'settings-avatar-open' as const
+
+export const SETTINGS_AVATAR_DIALOG_SELECTOR = `#${SETTINGS_AVATAR_DIALOG_ELEMENT_ID}` as const
+export const SETTINGS_AVATAR_OPEN_SELECTOR = `#${SETTINGS_AVATAR_OPEN_ELEMENT_ID}` as const
+
+/** `attachNativeDialogDismiss` for the profile-photo `dialog` — backdrop / outside click only (no in-dialog close control). */
+export const SETTINGS_AVATAR_DISMISS_SELECTORS: readonly string[] = []
+
 /** Intro block with Add category (`categories.html`); `initCategoryModal` resolves the open control here first. */
 export const CATEGORY_PAGE_INTRO_SECTION_SELECTOR = '.cat-page-intro' as const
 /** Categories list (`categories.html`). */

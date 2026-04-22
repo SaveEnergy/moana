@@ -20,7 +20,7 @@ func scanUser(row *sql.Row) (*User, error) {
 	var u User
 	var created string
 	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.Role, &created,
-		&u.HouseholdID, &u.FirstName, &u.LastName, &u.HouseholdRole)
+		&u.HouseholdID, &u.FirstName, &u.LastName, &u.HouseholdRole, &u.AvatarRev)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -39,7 +39,7 @@ func scanUserAndUnread(row *sql.Row) (*User, int64, error) {
 	var created string
 	var unread int64
 	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.Role, &created,
-		&u.HouseholdID, &u.FirstName, &u.LastName, &u.HouseholdRole, &unread)
+		&u.HouseholdID, &u.FirstName, &u.LastName, &u.HouseholdRole, &u.AvatarRev, &unread)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, 0, nil
 	}

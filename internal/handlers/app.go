@@ -14,4 +14,6 @@ type App struct {
 	Render *render.Engine
 	// PasswordReset sends “forgot password” email when SendGrid is configured; nil otherwise.
 	PasswordReset mail.PasswordResetSender
+	// AvatarDir is the on-disk directory for user profile JPEGs (see [App.UserAvatarGet]).
+	AvatarDir string
 }

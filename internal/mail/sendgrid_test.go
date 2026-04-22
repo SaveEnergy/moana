@@ -26,6 +26,15 @@ func TestSendGridSender_SendPasswordReset_roundTrip(t *testing.T) {
 		if err := json.Unmarshal(b, &m); err != nil {
 			t.Fatal(err)
 		}
+		if m["template_id"] != "d-testtemplate" {
+			t.Errorf("template_id: got %v", m["template_id"])
+		}
+		if _, has := m["subject"]; has {
+			t.Error("dynamic template request must not set root subject")
+		}
+		if _, has := m["content"]; has {
+			t.Error("dynamic template request must not set root content")
+		}
 		from, ok := m["from"].(map[string]any)
 		if !ok {
 			t.Fatalf("from missing: %#v", m)
@@ -45,19 +54,24 @@ func TestSendGridSender_SendPasswordReset_roundTrip(t *testing.T) {
 					t.Errorf("to email: got %v", t0["email"])
 				}
 			}
-		}
-		if subj, _ := m["subject"].(string); subj == "" {
-			t.Fatal("empty subject")
+			dtd, _ := p0["dynamic_template_data"].(map[string]any)
+			if dtd == nil {
+				t.Fatalf("dynamic_template_data missing: %#v", p0)
+			}
+			if dtd["reset_url"] != "https://app/reset?token=1" {
+				t.Errorf("reset_url: got %v", dtd["reset_url"])
+			}
 		}
 		w.WriteHeader(http.StatusAccepted)
 	}))
 	t.Cleanup(srv.Close)
 
 	sg := &sendGridSender{
-		apiKey:   "testkey",
-		from:     "from@moana.test",
-		endpoint: srv.URL,
-		client:   srv.Client(),
+		apiKey:     "testkey",
+		from:       "from@moana.test",
+		templateID: "d-testtemplate",
+		endpoint:   srv.URL,
+		client:     srv.Client(),
 	}
 	ctx := context.Background()
 	if err := sg.SendPasswordReset(ctx, "u@u.test", "https://app/reset?token=1"); err != nil {
@@ -67,10 +81,13 @@ func TestSendGridSender_SendPasswordReset_roundTrip(t *testing.T) {
 
 func TestNewSendGridSender_emptyReturnsNil(t *testing.T) {
 	t.Parallel()
-	if NewSendGridSender("", "a@b.com") != nil {
+	if NewSendGridSender("", "a@b.com", "d-x") != nil {
 		t.Fatal("empty key")
 	}
-	if NewSendGridSender("key", "") != nil {
+	if NewSendGridSender("key", "", "d-x") != nil {
 		t.Fatal("empty from")
+	}
+	if NewSendGridSender("key", "a@b.com", "") != nil {
+		t.Fatal("empty template id")
 	}
 }

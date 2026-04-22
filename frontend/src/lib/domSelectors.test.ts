@@ -58,6 +58,11 @@ import {
   SETTINGS_ADD_MEMBER_OPEN_SELECTOR,
   SETTINGS_ADD_MEMBER_CLOSE_SELECTOR,
   SETTINGS_ADD_MEMBER_CANCEL_SELECTOR,
+  SETTINGS_AVATAR_DIALOG_ELEMENT_ID,
+  SETTINGS_AVATAR_DIALOG_SELECTOR,
+  SETTINGS_AVATAR_DISMISS_SELECTORS,
+  SETTINGS_AVATAR_OPEN_ELEMENT_ID,
+  SETTINGS_AVATAR_OPEN_SELECTOR,
   LOCAL_TIME_ELEMENTS_SELECTOR,
   TIME_DATETIME_ATTRIBUTE,
 } from './domSelectors'
@@ -179,5 +184,16 @@ describe('domSelectors settings add-member', () => {
       SETTINGS_ADD_MEMBER_CLOSE_SELECTOR,
       SETTINGS_ADD_MEMBER_CANCEL_SELECTOR,
     ])
+  })
+})
+
+describe('domSelectors settings avatar', () => {
+  it('builds #id selectors for profile photo dialog', () => {
+    expect(SETTINGS_AVATAR_DIALOG_SELECTOR).toBe(`#${SETTINGS_AVATAR_DIALOG_ELEMENT_ID}`)
+    expect(SETTINGS_AVATAR_OPEN_SELECTOR).toBe(`#${SETTINGS_AVATAR_OPEN_ELEMENT_ID}`)
+  })
+
+  it('uses no in-dialog dismiss buttons (backdrop click only)', () => {
+    expect(SETTINGS_AVATAR_DISMISS_SELECTORS).toEqual([])
   })
 })
