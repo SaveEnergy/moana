@@ -65,6 +65,9 @@ func TestNewRouterWithRouterOptions_healthOKWithTimeoutAndMaxBodyStack(t *testin
 	if ct := rec.Header().Get("Content-Type"); ct != "text/plain; charset=utf-8" {
 		t.Fatalf("Content-Type %q", ct)
 	}
+	if rec.Header().Get("X-Frame-Options") != "DENY" {
+		t.Fatalf("X-Frame-Options: %q", rec.Header().Get("X-Frame-Options"))
+	}
 }
 
 // TestNewRouterWithRouterOptions_healthNonGETReturns405 verifies [registerHealth] is GET-only on the full router stack.

@@ -26,16 +26,18 @@ func NewRouter(app *handlers.App) http.Handler {
 // NewRouterWithRouterOptions registers routes with optional logging disabled (integration tests).
 //
 // Middleware order (outermost first): [RequestLogging] unless [RouterOptions.DisableRequestLogging];
-// then [wrapRouterMiddleware] — [WithRequestTimeout] when a positive deadline is configured
-// ([RouterOptions.RequestTimeout] or [handlers.App.Config.RequestTimeout]), wrapping
-// [WithMaxRequestBodyBytes] from [maxRequestBodyBytes] (default 1 MiB unless overridden), wrapping
-// the [http.ServeMux] (static, health, [handlers.RegisterRoutes]).
+// then [WithSecurityHeaders]; then [wrapRouterMiddleware] — [WithPostAuthRateLimit], then
+// [WithRequestTimeout] when a positive deadline is configured ([RouterOptions.RequestTimeout] or
+// [handlers.App.Config.RequestTimeout]), then [WithMaxRequestBodyBytesAdaptive] (default 1 MiB
+// unless overridden, avatar route higher cap), then the [http.ServeMux] (static, health,
+// [handlers.RegisterRoutes]).
 func NewRouterWithRouterOptions(opts *RouterOptions, app *handlers.App) http.Handler {
 	mux := http.NewServeMux()
 	registerStaticAndHealth(mux)
 	handlers.RegisterRoutes(mux, app)
 
 	h := wrapRouterMiddleware(mux, opts, app)
+	h = WithSecurityHeaders(h)
 	if opts == nil || !opts.DisableRequestLogging {
 		h = RequestLogging(h)
 	}

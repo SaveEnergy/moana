@@ -29,6 +29,11 @@ services:
       MOANA_PUBLIC_BASE_URL: ${MOANA_PUBLIC_BASE_URL:-http://localhost:8080}
       MOANA_PASSWORD_RESET_TTL_MIN: ${MOANA_PASSWORD_RESET_TTL_MIN:-60}
 
+      # --- Auth: rate limits (0 disables); trust X-Forwarded-For only behind a trusted reverse proxy
+      MOANA_TRUST_X_FORWARDED_FOR: ${MOANA_TRUST_X_FORWARDED_FOR:-}
+      MOANA_RATE_LIMIT_LOGIN_PER_MIN: ${MOANA_RATE_LIMIT_LOGIN_PER_MIN:-20}
+      MOANA_RATE_LIMIT_FORGOT_PASSWORD_PER_MIN: ${MOANA_RATE_LIMIT_FORGOT_PASSWORD_PER_MIN:-10}
+
       # --- SendGrid (forgot password); leave all three empty to disable outbound mail ---
       MOANA_SENDGRID_API_KEY: ${MOANA_SENDGRID_API_KEY:-}
       MOANA_MAIL_FROM: ${MOANA_MAIL_FROM:-}

@@ -18,6 +18,9 @@ const (
 	defaultSessionMaxAgeSec  = 604800 // 7 days
 	defaultRequestTimeoutSec = 60
 	defaultPasswordResetMin  = 60
+	// defaultRateLimitLoginPerMin and defaultRateLimitForgotPerMin cap abuse of auth POST routes; 0 disables.
+	defaultRateLimitLoginPerMin       = 20
+	defaultRateLimitForgotPasswordMin = 10
 )
 
 // Config holds runtime settings loaded from the environment.
@@ -48,6 +51,13 @@ type Config struct {
 	// SendGridPasswordResetTemplateID is a SendGrid dynamic template id (d-…) for password reset
 	// (MOANA_SENDGRID_PASSWORD_RESET_TEMPLATE_ID). The template should use {{reset_url}} in the body.
 	SendGridPasswordResetTemplateID string
+	// TrustForwardedAddr treats the first X-Forwarded-For as the client IP (MOANA_TRUST_X_FORWARDED_FOR).
+	// Use only when Moana is behind a trusted reverse proxy, not exposed directly to clients.
+	TrustForwardedAddr bool
+	// RateLimitLoginPerMin limits POST /login per client IP per rolling minute; 0 disables.
+	RateLimitLoginPerMin int
+	// RateLimitForgotPasswordPerMin limits POST /forgot-password per client IP per rolling minute; 0 disables.
+	RateLimitForgotPasswordPerMin int
 }
 
 // Load reads configuration from the environment. MOANA_SESSION_SECRET is required
@@ -109,6 +119,9 @@ func Load() (*Config, error) {
 	resetMin := parsePositiveIntEnv("MOANA_PASSWORD_RESET_TTL_MIN", defaultPasswordResetMin)
 
 	avatarDataDir := strings.TrimSpace(os.Getenv("MOANA_AVATAR_DIR"))
+	trustFwd := parseBoolTruthy("MOANA_TRUST_X_FORWARDED_FOR")
+	rateLogin := parseRateLimitPerMinute("MOANA_RATE_LIMIT_LOGIN_PER_MIN", defaultRateLimitLoginPerMin)
+	rateForgot := parseRateLimitPerMinute("MOANA_RATE_LIMIT_FORGOT_PASSWORD_PER_MIN", defaultRateLimitForgotPasswordMin)
 
 	return &Config{
 		Listen:                          listen,
@@ -125,6 +138,9 @@ func Load() (*Config, error) {
 		SendGridAPIKey:                  sendgridKey,
 		MailFrom:                        mailFrom,
 		SendGridPasswordResetTemplateID: sendgridTmpl,
+		TrustForwardedAddr:              trustFwd,
+		RateLimitLoginPerMin:              rateLogin,
+		RateLimitForgotPasswordPerMin:     rateForgot,
 	}, nil
 }
 

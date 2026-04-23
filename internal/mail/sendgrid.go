@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -77,6 +78,12 @@ func (s *sendGridSender) SendPasswordReset(ctx context.Context, toEmail, resetUR
 	}
 	defer func() { _, _ = io.Copy(io.Discard, resp.Body); _ = resp.Body.Close() }()
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		// 202 Accepted: queued for send — correlate in SendGrid “Email activity” (search this id).
+		if id := strings.TrimSpace(resp.Header.Get("X-Message-Id")); id != "" {
+			slog.Info("sendgrid", "op", "password_reset_accepted", "x_message_id", id, "http_status", resp.StatusCode)
+		} else {
+			slog.Info("sendgrid", "op", "password_reset_accepted", "http_status", resp.StatusCode)
+		}
 		return nil
 	}
 	lim := io.LimitReader(resp.Body, 4096)
