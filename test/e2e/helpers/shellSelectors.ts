@@ -79,8 +79,3 @@ export const TX_INPUT_KIND_INCOME = 'input[name="kind"][value="income"]' as cons
 
 // --- Transaction edit (`transactions_edit.html`)
 export const TX_EDIT_NOTE = '#tx-edit-note' as const
-
-/**
- * Row stamps after save / history — prefix of **`LOCAL_TIME_ELEMENTS_SELECTOR`** (`time.js-local-time[datetime]`).
- */
-export const LOCAL_TIME_DISPLAY = 'time.js-local-time' as const

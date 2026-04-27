@@ -142,9 +142,11 @@
         <div class="dashboard-recent-icon{{if lt $t.AmountCents 0}} dashboard-recent-icon-expense{{else}} dashboard-recent-icon-income{{end}}" aria-hidden="true">{{dashboardRecentIcon $t $i}}</div>
         <div class="dashboard-recent-body">
           <div class="dashboard-recent-title">{{if $t.Description}}{{$t.Description}}{{else}}<span class="muted">No description</span>{{end}}</div>
+          {{if $t.CategoryName}}
           <div class="dashboard-recent-meta muted small">
-            {{if $t.CategoryName}}{{$t.CategoryName}} · {{end}}<time class="js-local-time" datetime="{{formatRFC3339UTC $t.OccurredAt}}">…</time>
+            {{$t.CategoryName}}
           </div>
+          {{end}}
         </div>
         <div class="dashboard-recent-amt">
           {{if lt $t.AmountCents 0}}

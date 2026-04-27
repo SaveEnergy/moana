@@ -85,9 +85,11 @@
         <div class="history-card-icon{{if lt .AmountCents 0}} history-card-icon-expense{{else}} history-card-icon-income{{end}}" aria-hidden="true">{{if lt .AmountCents 0}}{{moanaIconPlain "trending-down"}}{{else}}{{moanaIconPlain "trending-up"}}{{end}}</div>
         <div class="history-card-body">
           <div class="history-card-title">{{if .Description}}{{.Description}}{{else}}<span class="muted">No description</span>{{end}}</div>
+          {{if .CategoryName}}
           <div class="history-card-meta muted small">
-            {{if .CategoryName}}<span>{{.CategoryName}}</span> · {{end}}<time class="js-local-time" datetime="{{formatRFC3339UTC .OccurredAt}}">…</time>
+            <span>{{.CategoryName}}</span>
           </div>
+          {{end}}
         </div>
         <div class="history-card-right">
           <div class="history-card-amt">
