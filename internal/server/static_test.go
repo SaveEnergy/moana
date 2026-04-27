@@ -7,6 +7,29 @@ import (
 	"testing"
 )
 
+func TestRegisterStatic_faviconICORedirectsToStaticSVG(t *testing.T) {
+	t.Parallel()
+	mux := http.NewServeMux()
+	registerStatic(mux)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/favicon.ico", nil))
+	// [registerStatic] only registers /static/ — /favicon.ico is on [registerStaticAndHealth].
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("registerStatic only: GET /favicon.ico: status %d", rec.Code)
+	}
+
+	mux2 := http.NewServeMux()
+	registerStaticAndHealth(mux2)
+	rec2 := httptest.NewRecorder()
+	mux2.ServeHTTP(rec2, httptest.NewRequest(http.MethodGet, "/favicon.ico", nil))
+	if rec2.Code != http.StatusFound {
+		t.Fatalf("status %d want 302", rec2.Code)
+	}
+	if g, w := rec2.Header().Get("Location"), StaticURLPrefix+"favicon-mo.svg"; g != w {
+		t.Fatalf("Location %q want %q", g, w)
+	}
+}
+
 func TestRegisterStatic_servesCSSWithCacheControl(t *testing.T) {
 	t.Parallel()
 	mux := http.NewServeMux()

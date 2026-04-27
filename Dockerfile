@@ -14,7 +14,10 @@ COPY frontend ./frontend
 COPY internal/assets/static ./internal/assets/static
 # Bun download cache: speeds rebuilds; safe to change path with Bun major upgrades
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-  bun install --frozen-lockfile && bun run build
+  bun install --frozen-lockfile && bun run build \
+  && test -f internal/assets/static/favicon-mo.svg \
+  && test -f internal/assets/static/css/app.css \
+  && test -f internal/assets/static/js/app.js
 
 # Go binary
 FROM golang:1.26-alpine AS build
@@ -24,6 +27,9 @@ RUN --mount=type=cache,target=/go/pkg/mod \
   go mod download
 COPY . .
 COPY --from=assets /app/internal/assets/static ./internal/assets/static
+RUN test -f internal/assets/static/favicon-mo.svg \
+  && test -f internal/assets/static/css/app.css \
+  && test -f internal/assets/static/js/app.js
 # module cache: speeds rebuild; public modules need no `git` in the image
 RUN --mount=type=cache,target=/go/pkg/mod \
   CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/moana ./cmd/moana

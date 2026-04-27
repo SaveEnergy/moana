@@ -42,6 +42,21 @@ test('static app.js is served with bytes', async ({ request }) => {
   expect(len).toBeGreaterThan(100)
 })
 
+test('favicon SVG is embedded and served (production image must keep file pre-go:embed)', async ({
+  request,
+}) => {
+  const res = await request.get('/static/favicon-mo.svg')
+  expect(res.ok()).toBeTruthy()
+  const text = await res.text()
+  expect(text).toContain('<svg')
+})
+
+test('GET /favicon.ico redirects to static SVG', async ({ request }) => {
+  const res = await request.get('/favicon.ico', { maxRedirects: 0 })
+  expect(res.status()).toBe(302)
+  expect(res.headers().location).toBe('/static/favicon-mo.svg')
+})
+
 test('login page head links app.css and modulepreloads app.js', async ({ page }) => {
   await page.goto('/login')
   await expect(page.locator(APP_CSS_STYLESHEET)).toHaveCount(1)
