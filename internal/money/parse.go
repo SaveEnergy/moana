@@ -11,7 +11,43 @@ import (
 // ErrAmountTooLarge is returned when the parsed euro amount cannot fit in cents as int64.
 var ErrAmountTooLarge = errors.New("amount too large")
 
-// ParseEURToCents parses a decimal euro amount (e.g. "1234.56", "1234") into integer cents.
+// normalizeDecimalSeparators makes amounts parseable with the existing dot-based logic.
+// It supports US (1,234.56) and common European (1.234,56 or 12,50) keypads where only a comma
+// is available for the fractional part.
+func normalizeDecimalSeparators(s string) string {
+	lastDot := strings.LastIndex(s, ".")
+	lastComma := strings.LastIndex(s, ",")
+	if lastDot >= 0 && lastComma >= 0 {
+		if lastComma > lastDot {
+			// European: thousands are dots, decimal is the last comma.
+			s = strings.ReplaceAll(s, ".", "")
+			s = strings.ReplaceAll(s, ",", ".")
+		} else {
+			// US/UK: thousands are commas, dot is decimal.
+			s = strings.ReplaceAll(s, ",", "")
+		}
+		return s
+	}
+	if lastComma >= 0 {
+		switch strings.Count(s, ",") {
+		case 1:
+			frac := s[strings.Index(s, ",")+1:]
+			if len(frac) <= 2 {
+				// e.g. 12,50 or 0,5
+				return strings.Replace(s, ",", ".", 1)
+			}
+			// e.g. 1,234 (thousands) or 12,123
+			return strings.ReplaceAll(s, ",", "")
+		default:
+			// 1,234,567
+			return strings.ReplaceAll(s, ",", "")
+		}
+	}
+	// Dots only (or no separator): drop stray commas in US thousands form.
+	return strings.ReplaceAll(s, ",", "")
+}
+
+// ParseEURToCents parses a decimal euro amount (e.g. "1234.56", "1.234,56", "12,50") into integer cents.
 func ParseEURToCents(s string) (int64, error) {
 	s = strings.TrimSpace(s)
 	s = strings.ReplaceAll(s, "€", "")
@@ -25,7 +61,7 @@ func ParseEURToCents(s string) (int64, error) {
 		s = strings.TrimPrefix(s, "-")
 		s = strings.TrimSpace(s)
 	}
-	s = strings.ReplaceAll(s, ",", "")
+	s = normalizeDecimalSeparators(s)
 	parts := strings.SplitN(s, ".", 3)
 	if len(parts) > 2 {
 		return 0, fmt.Errorf("invalid amount")
