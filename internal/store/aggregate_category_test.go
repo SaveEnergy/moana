@@ -7,24 +7,13 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	"moana/internal/passwordtest"
 )
 
 func TestListCategoryAmountsInRange_trimmedKindAcceptsExpense(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-trim-kind@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-trim-kind@example.com")
 	from := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2026, 2, 28, 23, 59, 59, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, -5000, time.Date(2026, 2, 1, 12, 0, 0, 0, time.UTC), "x", nil); err != nil {
@@ -43,16 +32,7 @@ func TestListCategoryAmountsInRange_fromOnly_toOnly_matchBothBounds(t *testing.T
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-one-bound@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-one-bound@example.com")
 	catID, err := st.CreateCategory(ctx, hid, "Food", "", "")
 	if err != nil {
 		t.Fatal(err)
@@ -87,16 +67,7 @@ func TestListTopExpenseCategories_fromOnly_toOnly_matchBothBounds(t *testing.T) 
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "top-exp-bounds@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "top-exp-bounds@example.com")
 	a, err := st.CreateCategory(ctx, hid, "A", "", "")
 	if err != nil {
 		t.Fatal(err)
@@ -144,20 +115,11 @@ func TestListCategoryAmountsInRange_invalidKind(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-kind@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	_, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-kind@example.com")
 	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
 
-	_, err = st.ListCategoryAmountsInRange(ctx, hid, &from, &to, "net")
+	_, err := st.ListCategoryAmountsInRange(ctx, hid, &from, &to, "net")
 	if !errors.Is(err, ErrInvalidCategoryAmountKind) {
 		t.Fatalf("got %v want %v", err, ErrInvalidCategoryAmountKind)
 	}
@@ -167,16 +129,7 @@ func TestListCategoryAmountsInRange_expenseUncategorizedAndCategory(t *testing.T
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-exp@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-exp@example.com")
 	catID, err := st.CreateCategory(ctx, hid, "Food", "utensils", "#112233")
 	if err != nil {
 		t.Fatal(err)
@@ -211,16 +164,7 @@ func TestListCategoryAmountsInRange_incomeOrderedBySize(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-inc@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-inc@example.com")
 	small, err := st.CreateCategory(ctx, hid, "Side", "", "")
 	if err != nil {
 		t.Fatal(err)
@@ -258,16 +202,7 @@ func TestListCategoryAmountsInRange_expenseMinInt64SumUsesAbsCents(t *testing.T)
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-exp-min64@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-exp-min64@example.com")
 	day := time.Date(2026, 6, 15, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, day, "edge", nil); err != nil {
 		t.Fatal(err)
@@ -290,16 +225,7 @@ func TestListTopExpenseCategories_mostNegativeFirst(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "top-exp@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "top-exp@example.com")
 	food, err := st.CreateCategory(ctx, hid, "Food", "", "")
 	if err != nil {
 		t.Fatal(err)
@@ -336,16 +262,7 @@ func TestListTopExpenseCategories_limitBelowOneDefaultsToFive(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "top-exp-limit@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "top-exp-limit@example.com")
 	day := time.Date(2026, 4, 2, 12, 0, 0, 0, time.UTC)
 	for i := range 6 {
 		name := "C" + strconv.Itoa(i)
@@ -393,16 +310,7 @@ func TestListCategoryAmountsInRange_nilNil_expenseMatchesWideRange(t *testing.T)
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "cat-nil-wide@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "cat-nil-wide@example.com")
 	catID, err := st.CreateCategory(ctx, hid, "Food", "utensils", "#112233")
 	if err != nil {
 		t.Fatal(err)
@@ -455,16 +363,7 @@ func TestListTopExpenseCategories_nilNil_matchesWideRange(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "top-nil-wide@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "top-nil-wide@example.com")
 	food, err := st.CreateCategory(ctx, hid, "Food", "", "")
 	if err != nil {
 		t.Fatal(err)

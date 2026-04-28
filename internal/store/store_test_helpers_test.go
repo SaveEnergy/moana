@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"moana/internal/db"
+	"moana/internal/passwordtest"
 )
 
 // testStore opens an in-memory SQLite DB, applies migrations, wraps it in a [Store], and registers t.Cleanup.
@@ -36,4 +37,21 @@ func assertErrIsContextCanceled(t *testing.T, err error) {
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("got %v want %v", err, context.Canceled)
 	}
+}
+
+func mustCreateUserWithHousehold(t *testing.T, st *Store, ctx context.Context, email string) (userID, householdID int64) {
+	t.Helper()
+	hash := passwordtest.MustHash(t, "x")
+	uid, err := st.CreateUser(ctx, email, hash, "user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err := st.GetUserByID(ctx, uid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u == nil {
+		t.Fatalf("created user %d not found", uid)
+	}
+	return uid, u.HouseholdID
 }
