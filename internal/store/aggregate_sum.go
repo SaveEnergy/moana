@@ -15,28 +15,9 @@ func (s *Store) SumAmountCents(ctx context.Context, householdID int64, fromUTC, 
 // SumIncomeExpenseCentsInRange returns income (positive amounts) and expense (negative amounts) sums
 // for the household in one query. Net equals incomeSum + expenseSum.
 func (s *Store) SumIncomeExpenseCentsInRange(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time) (incomeSum int64, expenseSum int64, err error) {
-	if fromUTC == nil && toUTC == nil {
-		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseBase, householdID).Scan(&incomeSum, &expenseSum)
-		return incomeSum, expenseSum, err
-	}
-	switch {
-	case fromUTC != nil && toUTC != nil:
-		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseInRangeBoth,
-			householdID,
-			timeutil.FormatSQLiteUTC(*fromUTC),
-			timeutil.FormatSQLiteUTC(*toUTC),
-		).Scan(&incomeSum, &expenseSum)
-	case fromUTC != nil:
-		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseInRangeFromOnly,
-			householdID,
-			timeutil.FormatSQLiteUTC(*fromUTC),
-		).Scan(&incomeSum, &expenseSum)
-	default:
-		err = s.DB.QueryRowContext(ctx, sqlSumIncomeExpenseInRangeToOnly,
-			householdID,
-			timeutil.FormatSQLiteUTC(*toUTC),
-		).Scan(&incomeSum, &expenseSum)
-	}
+	q := sqlWithOccurredAtRange(sqlSumIncomeExpenseBase, fromUTC, toUTC, "")
+	args := appendOccurredAtRangeArgs([]any{householdID}, fromUTC, toUTC)
+	err = s.DB.QueryRowContext(ctx, q, args...).Scan(&incomeSum, &expenseSum)
 	return incomeSum, expenseSum, err
 }
 
@@ -61,55 +42,10 @@ func (s *Store) SumRunningTotalAndIncomeExpenseInTwoRanges(ctx context.Context, 
 
 // SumAmountCentsByKind sums amounts in [from, to]; kind is "", "income", or "expense" (ASCII trim applied, same as listing filters).
 func (s *Store) SumAmountCentsByKind(ctx context.Context, householdID int64, fromUTC, toUTC *time.Time, kind string) (int64, error) {
-	if fromUTC == nil && toUTC == nil {
-		var sum int64
-		switch frag := sqlAmountKindFilter(kind); frag {
-		case "":
-			err := s.DB.QueryRowContext(ctx, sqlSumAmountAllHousehold, householdID).Scan(&sum)
-			return sum, err
-		case sqlFilterAmountIncome:
-			err := s.DB.QueryRowContext(ctx, sqlSumAmountIncomeHouseholdNoBounds, householdID).Scan(&sum)
-			return sum, err
-		case sqlFilterAmountExpense:
-			err := s.DB.QueryRowContext(ctx, sqlSumAmountExpenseHouseholdNoBounds, householdID).Scan(&sum)
-			return sum, err
-		}
-	}
-	frag := sqlAmountKindFilter(kind)
 	var sum int64
-	var err error
-	switch {
-	case fromUTC != nil && toUTC != nil:
-		f, t := timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC)
-		switch frag {
-		case "":
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeBoth, householdID, f, t).Scan(&sum)
-		case sqlFilterAmountIncome:
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeBothIncome, householdID, f, t).Scan(&sum)
-		case sqlFilterAmountExpense:
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeBothExpense, householdID, f, t).Scan(&sum)
-		}
-	case fromUTC != nil:
-		f := timeutil.FormatSQLiteUTC(*fromUTC)
-		switch frag {
-		case "":
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeFromOnly, householdID, f).Scan(&sum)
-		case sqlFilterAmountIncome:
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeFromOnlyIncome, householdID, f).Scan(&sum)
-		case sqlFilterAmountExpense:
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeFromOnlyExpense, householdID, f).Scan(&sum)
-		}
-	default:
-		t := timeutil.FormatSQLiteUTC(*toUTC)
-		switch frag {
-		case "":
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeToOnly, householdID, t).Scan(&sum)
-		case sqlFilterAmountIncome:
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeToOnlyIncome, householdID, t).Scan(&sum)
-		case sqlFilterAmountExpense:
-			err = s.DB.QueryRowContext(ctx, sqlSumAmountHouseholdRangeToOnlyExpense, householdID, t).Scan(&sum)
-		}
-	}
+	q := sqlWithOccurredAtRange(sqlSumAmountAllHousehold, fromUTC, toUTC, sqlAmountKindFilter(kind))
+	args := appendOccurredAtRangeArgs([]any{householdID}, fromUTC, toUTC)
+	err := s.DB.QueryRowContext(ctx, q, args...).Scan(&sum)
 	if err != nil {
 		return 0, err
 	}

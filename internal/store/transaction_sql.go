@@ -40,36 +40,9 @@ const sqlSelectOccurredAtAmountFromHouseholdInRange = sqlSelectOccurredAtAmountF
 // sqlSumAmountAllHousehold is [SumAmountCentsByKind] with no date bounds and no income/expense sign filter (kind "").
 const sqlSumAmountAllHousehold = `SELECT COALESCE(SUM(t.amount_cents), 0) ` + sqlFromHouseholdTx
 
-// sqlSumAmountIncomeHouseholdNoBounds / sqlSumAmountExpenseHouseholdNoBounds are [SumAmountCentsByKind] with no date bounds and kind income|expense.
-const (
-	sqlSumAmountIncomeHouseholdNoBounds  = sqlSumAmountAllHousehold + sqlFilterAmountIncome
-	sqlSumAmountExpenseHouseholdNoBounds = sqlSumAmountAllHousehold + sqlFilterAmountExpense
-)
-
-// sqlSumAmountHouseholdRange* are [SumAmountCentsByKind] with date bounds (income|expense filters after occurred_at, same order as [appendOccurredAtRange] + [sqlAmountKindFilter]).
-const (
-	sqlSumAmountHouseholdRangeBoth     = sqlSumAmountAllHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo
-	sqlSumAmountHouseholdRangeFromOnly = sqlSumAmountAllHousehold + sqlFilterOccurredAtFrom
-	sqlSumAmountHouseholdRangeToOnly   = sqlSumAmountAllHousehold + sqlFilterOccurredAtTo
-
-	sqlSumAmountHouseholdRangeBothIncome      = sqlSumAmountHouseholdRangeBoth + sqlFilterAmountIncome
-	sqlSumAmountHouseholdRangeBothExpense     = sqlSumAmountHouseholdRangeBoth + sqlFilterAmountExpense
-	sqlSumAmountHouseholdRangeFromOnlyIncome  = sqlSumAmountHouseholdRangeFromOnly + sqlFilterAmountIncome
-	sqlSumAmountHouseholdRangeFromOnlyExpense = sqlSumAmountHouseholdRangeFromOnly + sqlFilterAmountExpense
-	sqlSumAmountHouseholdRangeToOnlyIncome    = sqlSumAmountHouseholdRangeToOnly + sqlFilterAmountIncome
-	sqlSumAmountHouseholdRangeToOnlyExpense   = sqlSumAmountHouseholdRangeToOnly + sqlFilterAmountExpense
-)
-
 // sqlSumIncomeExpenseBase is [SumIncomeExpenseCentsInRange] with no date bounds (appendOccurredAtRange adds optional ANDs).
 const sqlSumIncomeExpenseBase = `SELECT COALESCE(SUM(CASE WHEN t.amount_cents > 0 THEN t.amount_cents ELSE 0 END), 0),
 COALESCE(SUM(CASE WHEN t.amount_cents < 0 THEN t.amount_cents ELSE 0 END), 0) ` + sqlFromHouseholdTx
-
-// sqlSumIncomeExpenseInRange* are [SumIncomeExpenseCentsInRange] with optional occurred_at bounds (same fragments as [appendOccurredAtRange]).
-const (
-	sqlSumIncomeExpenseInRangeFromOnly = sqlSumIncomeExpenseBase + sqlFilterOccurredAtFrom
-	sqlSumIncomeExpenseInRangeToOnly   = sqlSumIncomeExpenseBase + sqlFilterOccurredAtTo
-	sqlSumIncomeExpenseInRangeBoth     = sqlSumIncomeExpenseBase + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo
-)
 
 // sqlSumRunningTotalAndIncomeExpenseInTwoRanges is the dashboard aggregate: one scan for all-time net plus
 // income/expense in two closed ranges. Placeholders: aFrom, aTo (each range uses two CASE branches); then household_id.
@@ -94,16 +67,6 @@ const sqlListTopExpenseCategoriesPrefix = `SELECT t.category_id, COALESCE(c.name
 
 const sqlListTopExpenseCategoriesSuffix = ` GROUP BY t.category_id, c.name ORDER BY SUM(t.amount_cents) ASC LIMIT ?`
 
-// sqlListTopExpenseCategoriesNoDate is [ListTopExpenseCategories] with no date bounds.
-const sqlListTopExpenseCategoriesNoDate = sqlListTopExpenseCategoriesPrefix + sqlListTopExpenseCategoriesSuffix
-
-// sqlListTopExpenseCategoriesFromOnly / ToOnly / Both are [ListTopExpenseCategories] with optional occurred_at bounds (same fragments as [appendOccurredAtRange]).
-const (
-	sqlListTopExpenseCategoriesFromOnly = sqlListTopExpenseCategoriesPrefix + sqlFilterOccurredAtFrom + sqlListTopExpenseCategoriesSuffix
-	sqlListTopExpenseCategoriesToOnly   = sqlListTopExpenseCategoriesPrefix + sqlFilterOccurredAtTo + sqlListTopExpenseCategoriesSuffix
-	sqlListTopExpenseCategoriesBoth     = sqlListTopExpenseCategoriesPrefix + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlListTopExpenseCategoriesSuffix
-)
-
 // sqlListCategoryAmountsSelectPrefix is the SELECT + FROM for [ListCategoryAmountsInRange] (date + kind filters appended).
 const sqlListCategoryAmountsSelectPrefix = `SELECT t.category_id, COALESCE(MAX(c.name), 'Uncategorized'), COALESCE(MAX(IFNULL(c.icon, '')), ''), COALESCE(MAX(IFNULL(c.color, '')), ''), COALESCE(SUM(t.amount_cents), 0)
 ` + sqlAggregateFromHouseholdTx
@@ -112,22 +75,6 @@ const sqlListCategoryAmountsGroupBy = ` GROUP BY t.category_id`
 
 const sqlListCategoryAmountsOrderIncome = ` ORDER BY SUM(t.amount_cents) DESC`
 const sqlListCategoryAmountsOrderExpense = ` ORDER BY SUM(t.amount_cents) ASC`
-
-// sqlListCategoryAmountsIncomeFullHousehold / ExpenseFullHousehold are [ListCategoryAmountsInRange] with no date bounds.
-const sqlListCategoryAmountsIncomeFullHousehold = sqlListCategoryAmountsSelectPrefix + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
-
-const sqlListCategoryAmountsExpenseFullHousehold = sqlListCategoryAmountsSelectPrefix + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
-
-// sqlListCategoryAmountsIncomeRange* / ExpenseRange* are [ListCategoryAmountsInRange] with date bounds and kind (same fragment order as dynamic builder).
-const (
-	sqlListCategoryAmountsIncomeRangeBoth     = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
-	sqlListCategoryAmountsIncomeRangeFromOnly = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
-	sqlListCategoryAmountsIncomeRangeToOnly   = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderIncome
-
-	sqlListCategoryAmountsExpenseRangeBoth     = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
-	sqlListCategoryAmountsExpenseRangeFromOnly = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
-	sqlListCategoryAmountsExpenseRangeToOnly   = sqlListCategoryAmountsSelectPrefix + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
-)
 
 // sqlTransactionInsertConditional inserts a row only if user_id belongs to household_id.
 const sqlTransactionInsertConditional = `

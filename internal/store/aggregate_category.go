@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"moana/internal/money"
-	"moana/internal/timeutil"
 )
 
 // ErrInvalidCategoryAmountKind is returned when [Store.ListCategoryAmountsInRange] is called with kind other than "income" or "expense".
@@ -26,27 +25,10 @@ func (s *Store) ListTopExpenseCategories(ctx context.Context, householdID int64,
 	if limit < 1 {
 		limit = 5
 	}
-	if fromUTC == nil && toUTC == nil {
-		rows, err := s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesNoDate, householdID, limit)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-		return scanCategoryExpenseRows(rows, limit)
-	}
-	var rows *sql.Rows
-	var err error
-	switch {
-	case fromUTC != nil && toUTC != nil:
-		rows, err = s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesBoth,
-			householdID, timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC), limit)
-	case fromUTC != nil:
-		rows, err = s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesFromOnly,
-			householdID, timeutil.FormatSQLiteUTC(*fromUTC), limit)
-	default:
-		rows, err = s.DB.QueryContext(ctx, sqlListTopExpenseCategoriesToOnly,
-			householdID, timeutil.FormatSQLiteUTC(*toUTC), limit)
-	}
+	q := sqlWithOccurredAtRange(sqlListTopExpenseCategoriesPrefix, fromUTC, toUTC, sqlListTopExpenseCategoriesSuffix)
+	args := appendOccurredAtRangeArgs([]any{householdID}, fromUTC, toUTC)
+	args = append(args, limit)
+	rows, err := s.DB.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,49 +64,14 @@ func (s *Store) ListCategoryAmountsInRange(ctx context.Context, householdID int6
 	if kind != "income" && kind != "expense" {
 		return nil, ErrInvalidCategoryAmountKind
 	}
-	if fromUTC == nil && toUTC == nil {
-		var q string
-		switch kind {
-		case "income":
-			q = sqlListCategoryAmountsIncomeFullHousehold
-		case "expense":
-			q = sqlListCategoryAmountsExpenseFullHousehold
-		}
-		rows, err := s.DB.QueryContext(ctx, q, householdID)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-		return scanCategoryAmountRows(rows)
+	order := sqlListCategoryAmountsOrderExpense
+	if kind == "income" {
+		order = sqlListCategoryAmountsOrderIncome
 	}
-	var rows *sql.Rows
-	var err error
-	switch {
-	case fromUTC != nil && toUTC != nil:
-		f, t := timeutil.FormatSQLiteUTC(*fromUTC), timeutil.FormatSQLiteUTC(*toUTC)
-		switch kind {
-		case "income":
-			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsIncomeRangeBoth, householdID, f, t)
-		case "expense":
-			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsExpenseRangeBoth, householdID, f, t)
-		}
-	case fromUTC != nil:
-		f := timeutil.FormatSQLiteUTC(*fromUTC)
-		switch kind {
-		case "income":
-			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsIncomeRangeFromOnly, householdID, f)
-		case "expense":
-			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsExpenseRangeFromOnly, householdID, f)
-		}
-	default:
-		t := timeutil.FormatSQLiteUTC(*toUTC)
-		switch kind {
-		case "income":
-			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsIncomeRangeToOnly, householdID, t)
-		case "expense":
-			rows, err = s.DB.QueryContext(ctx, sqlListCategoryAmountsExpenseRangeToOnly, householdID, t)
-		}
-	}
+	suffix := sqlAmountKindFilter(kind) + sqlListCategoryAmountsGroupBy + order
+	q := sqlWithOccurredAtRange(sqlListCategoryAmountsSelectPrefix, fromUTC, toUTC, suffix)
+	args := appendOccurredAtRangeArgs([]any{householdID}, fromUTC, toUTC)
+	rows, err := s.DB.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}

@@ -77,3 +77,69 @@ func TestAppendOccurredAtRange(t *testing.T) {
 		}
 	})
 }
+
+func TestSQLWithOccurredAtRange(t *testing.T) {
+	t.Parallel()
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
+
+	cases := []struct {
+		name string
+		from *time.Time
+		to   *time.Time
+		want string
+	}{
+		{
+			name: "neither",
+			want: "SELECT 1 ORDER BY 1",
+		},
+		{
+			name: "from only",
+			from: &from,
+			want: "SELECT 1" + sqlFilterOccurredAtFrom + " ORDER BY 1",
+		},
+		{
+			name: "to only",
+			to:   &to,
+			want: "SELECT 1" + sqlFilterOccurredAtTo + " ORDER BY 1",
+		},
+		{
+			name: "both",
+			from: &from,
+			to:   &to,
+			want: "SELECT 1" + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + " ORDER BY 1",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := sqlWithOccurredAtRange("SELECT 1", tc.from, tc.to, " ORDER BY 1"); got != tc.want {
+				t.Fatalf("query %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestAggregateQueryShapeHelpers(t *testing.T) {
+	t.Parallel()
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 1, 31, 23, 59, 59, 0, time.UTC)
+
+	if got, want := sqlWithOccurredAtRange(sqlSumAmountAllHousehold, &from, &to, sqlFilterAmountIncome),
+		sqlSumAmountAllHousehold+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlFilterAmountIncome; got != want {
+		t.Fatalf("sum amount query %q want %q", got, want)
+	}
+
+	if got, want := sqlWithOccurredAtRange(sqlListTopExpenseCategoriesPrefix, &from, nil, sqlListTopExpenseCategoriesSuffix),
+		sqlListTopExpenseCategoriesPrefix+sqlFilterOccurredAtFrom+sqlListTopExpenseCategoriesSuffix; got != want {
+		t.Fatalf("top expense query %q want %q", got, want)
+	}
+
+	categorySuffix := sqlFilterAmountExpense + sqlListCategoryAmountsGroupBy + sqlListCategoryAmountsOrderExpense
+	if got, want := sqlWithOccurredAtRange(sqlListCategoryAmountsSelectPrefix, nil, &to, categorySuffix),
+		sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtTo+categorySuffix; got != want {
+		t.Fatalf("category amounts query %q want %q", got, want)
+	}
+}
