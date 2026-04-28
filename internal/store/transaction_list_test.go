@@ -263,34 +263,6 @@ func TestListTransactions_kindExpenseWithLimit_newestFirst(t *testing.T) {
 	}
 }
 
-func TestStaticListTransactionsQuery(t *testing.T) {
-	t.Parallel()
-	cases := []struct {
-		old    bool
-		kind   string
-		wantOK bool
-	}{
-		{false, "", true},
-		{false, "income", true},
-		{false, "expense", true},
-		{false, "bogus", false},
-		{true, "", true},
-		{true, "income", true},
-		{true, "expense", true},
-		{true, "bogus", false},
-	}
-	for _, tc := range cases {
-		tc := tc
-		t.Run(fmt.Sprintf("old_%v_kind_%q", tc.old, tc.kind), func(t *testing.T) {
-			t.Parallel()
-			_, ok := staticListTransactionsQuery(tc.old, tc.kind)
-			if ok != tc.wantOK {
-				t.Fatalf("ok=%v want %v", ok, tc.wantOK)
-			}
-		})
-	}
-}
-
 func TestListTransactions_oldestFirstIncomeWithLimit_oldestFirst(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)

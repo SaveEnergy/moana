@@ -12,145 +12,14 @@ INNER JOIN users owner ON owner.id = t.user_id`
 const sqlTransactionListFromHousehold = sqlTransactionSelectFromHousehold + `
 WHERE owner.household_id = ?`
 
-// sqlTransactionListOrderDesc / Asc are shared by [ListTransactions] static queries and the dynamic SQL builder.
+// sqlTransactionListOrderDesc / Asc are shared by [ListTransactions] query planning.
 const sqlTransactionListOrderDesc = ` ORDER BY t.occurred_at DESC, t.id DESC`
 const sqlTransactionListOrderAsc = ` ORDER BY t.occurred_at ASC, t.id ASC`
 
 const sqlTransactionListLimitSuffix = ` LIMIT ?`
 
-const sqlTransactionListOrderDescLimit = sqlTransactionListOrderDesc + sqlTransactionListLimitSuffix
-const sqlTransactionListOrderAscLimit = sqlTransactionListOrderAsc + sqlTransactionListLimitSuffix
-
-// sqlTransactionListRecentDescLimit is [ListTransactions] when only Limit is set (default sort, no filters).
-const sqlTransactionListRecentDescLimit = sqlTransactionListFromHousehold + sqlTransactionListOrderDescLimit
-
-// sqlTransactionListRecentDescLimitIncome / Expense are [ListTransactions] with kind income|expense, Limit, and no other filters.
-const sqlTransactionListRecentDescLimitIncome = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-
-const sqlTransactionListRecentDescLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
-
-// sqlTransactionListOldestAscLimit variants are [ListTransactions] with OldestFirst, Limit, and no date/search filters.
-const sqlTransactionListOldestAscLimit = sqlTransactionListFromHousehold + sqlTransactionListOrderAscLimit
-
-const sqlTransactionListOldestAscLimitIncome = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
-
-const sqlTransactionListOldestAscLimitExpense = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
-
-// sqlTransactionListDated* are [ListTransactions] with optional occurred_at bounds, no search, LIMIT ? (same fragment order as the dynamic builder).
-const (
-	sqlTransactionListDatedBothNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedBothIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedBothExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
-
-	sqlTransactionListDatedFromOnlyNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlyNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedFromOnlyIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlyIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedFromOnlyExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlyExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
-
-	sqlTransactionListDatedToOnlyNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlyNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedToOnlyIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlyIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedToOnlyExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlyExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAscLimit
-)
-
-// sqlTransactionListDated*NoLimit are [ListTransactions] with date bounds and no search, without LIMIT (unbounded scan for the filter).
-const (
-	sqlTransactionListDatedBothNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderDesc
-	sqlTransactionListDatedBothNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListOrderAsc
-	sqlTransactionListDatedBothIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDesc
-	sqlTransactionListDatedBothIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAsc
-	sqlTransactionListDatedBothExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDesc
-	sqlTransactionListDatedBothExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAsc
-
-	sqlTransactionListDatedFromOnlyNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderDesc
-	sqlTransactionListDatedFromOnlyNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListOrderAsc
-	sqlTransactionListDatedFromOnlyIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderDesc
-	sqlTransactionListDatedFromOnlyIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListOrderAsc
-	sqlTransactionListDatedFromOnlyExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderDesc
-	sqlTransactionListDatedFromOnlyExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListOrderAsc
-
-	sqlTransactionListDatedToOnlyNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderDesc
-	sqlTransactionListDatedToOnlyNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListOrderAsc
-	sqlTransactionListDatedToOnlyIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderDesc
-	sqlTransactionListDatedToOnlyIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListOrderAsc
-	sqlTransactionListDatedToOnlyExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderDesc
-	sqlTransactionListDatedToOnlyExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListOrderAsc
-)
-
 // sqlTransactionListSearchLike is appended after household/date/kind filters for [ListTransactions] search (two LIKE placeholders).
 const sqlTransactionListSearchLike = ` AND (t.description LIKE ? ESCAPE '!' OR COALESCE(c.name, '') LIKE ? ESCAPE '!')`
-
-// sqlTransactionListSearchNoDate* are [ListTransactions] with no date bounds, a search term, optional kind filter, and optional LIMIT.
-const (
-	sqlTransactionListSearchNoDateNoKindDescLimit  = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListSearchNoDateNoKindAscLimit   = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListSearchNoDateIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListSearchNoDateIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListSearchNoDateExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListSearchNoDateExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-
-	sqlTransactionListSearchNoDateNoKindDesc  = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListSearchNoDateNoKindAsc   = sqlTransactionListFromHousehold + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListSearchNoDateIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListSearchNoDateIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListSearchNoDateExpenseDesc = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListSearchNoDateExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-)
-
-// sqlTransactionListDatedBothSearch* are [ListTransactions] with both occurred_at bounds, LIKE search, optional kind, optional LIMIT.
-const (
-	sqlTransactionListDatedBothSearchNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothSearchNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedBothSearchIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothSearchIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedBothSearchExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedBothSearchExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-
-	sqlTransactionListDatedBothSearchNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedBothSearchNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListDatedBothSearchIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedBothSearchIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListDatedBothSearchExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedBothSearchExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-)
-
-// sqlTransactionListDatedFromOnlySearch* / ToOnlySearch* are [ListTransactions] with one occurred_at bound, LIKE search, optional kind, optional LIMIT.
-const (
-	sqlTransactionListDatedFromOnlySearchNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlySearchNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedFromOnlySearchIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlySearchIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedFromOnlySearchExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedFromOnlySearchExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-
-	sqlTransactionListDatedFromOnlySearchNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedFromOnlySearchNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListDatedFromOnlySearchIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedFromOnlySearchIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListDatedFromOnlySearchExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedFromOnlySearchExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-
-	sqlTransactionListDatedToOnlySearchNoKindDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlySearchNoKindAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedToOnlySearchIncomeDescLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlySearchIncomeAscLimit   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	sqlTransactionListDatedToOnlySearchExpenseDescLimit = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	sqlTransactionListDatedToOnlySearchExpenseAscLimit  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-
-	sqlTransactionListDatedToOnlySearchNoKindDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedToOnlySearchNoKindAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListDatedToOnlySearchIncomeDesc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedToOnlySearchIncomeAsc   = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-	sqlTransactionListDatedToOnlySearchExpenseDesc = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDesc
-	sqlTransactionListDatedToOnlySearchExpenseAsc  = sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderAsc
-)
 
 // sqlTransactionGetByIDHousehold loads one row by transaction id, scoped to the owner household.
 const sqlTransactionGetByIDHousehold = sqlTransactionSelectFromHousehold + `

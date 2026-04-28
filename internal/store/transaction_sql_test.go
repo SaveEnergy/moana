@@ -67,52 +67,6 @@ func TestSqlListTopExpenseCategoriesRange_matchesAppendOccurredAtShapes(t *testi
 	}
 }
 
-func TestSqlTransactionListDated_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
-	t.Parallel()
-	if g, w := sqlTransactionListDatedBothNoKindDescLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlTransactionListOrderDescLimit; g != w {
-		t.Fatalf("sqlTransactionListDatedBothNoKindDescLimit drift")
-	}
-	if g, w := sqlTransactionListDatedFromOnlyIncomeAscLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtFrom+sqlFilterAmountIncome+sqlTransactionListOrderAscLimit; g != w {
-		t.Fatalf("sqlTransactionListDatedFromOnlyIncomeAscLimit drift")
-	}
-	if g, w := sqlTransactionListDatedToOnlyExpenseDescLimit, sqlTransactionListFromHousehold+sqlFilterOccurredAtTo+sqlFilterAmountExpense+sqlTransactionListOrderDescLimit; g != w {
-		t.Fatalf("sqlTransactionListDatedToOnlyExpenseDescLimit drift")
-	}
-	if g, w := sqlTransactionListDatedBothNoKindDesc, sqlTransactionListFromHousehold+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlTransactionListOrderDesc; g != w {
-		t.Fatalf("sqlTransactionListDatedBothNoKindDesc drift")
-	}
-}
-
-func TestSqlTransactionListSearchNoDate_matchesKindAndOrderShapes(t *testing.T) {
-	t.Parallel()
-	if g, w := sqlTransactionListSearchNoDateIncomeDescLimit, sqlTransactionListFromHousehold+sqlFilterAmountIncome+sqlTransactionListSearchLike+sqlTransactionListOrderDescLimit; g != w {
-		t.Fatalf("sqlTransactionListSearchNoDateIncomeDescLimit drift")
-	}
-	if g, w := sqlTransactionListSearchNoDateNoKindDesc, sqlTransactionListFromHousehold+sqlTransactionListSearchLike+sqlTransactionListOrderDesc; g != w {
-		t.Fatalf("sqlTransactionListSearchNoDateNoKindDesc drift")
-	}
-}
-
-func TestSqlTransactionListDatedBothSearch_matchesFragmentOrder(t *testing.T) {
-	t.Parallel()
-	want := sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterOccurredAtTo + sqlFilterAmountIncome + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	if sqlTransactionListDatedBothSearchIncomeDescLimit != want {
-		t.Fatalf("sqlTransactionListDatedBothSearchIncomeDescLimit drift")
-	}
-}
-
-func TestSqlTransactionListDatedSingleBoundSearch_matchesFragmentOrder(t *testing.T) {
-	t.Parallel()
-	wantFrom := sqlTransactionListFromHousehold + sqlFilterOccurredAtFrom + sqlFilterAmountExpense + sqlTransactionListSearchLike + sqlTransactionListOrderDescLimit
-	if sqlTransactionListDatedFromOnlySearchExpenseDescLimit != wantFrom {
-		t.Fatalf("sqlTransactionListDatedFromOnlySearchExpenseDescLimit drift")
-	}
-	wantTo := sqlTransactionListFromHousehold + sqlFilterOccurredAtTo + sqlTransactionListSearchLike + sqlTransactionListOrderAscLimit
-	if sqlTransactionListDatedToOnlySearchNoKindAscLimit != wantTo {
-		t.Fatalf("sqlTransactionListDatedToOnlySearchNoKindAscLimit drift")
-	}
-}
-
 func TestSqlListCategoryAmountsRange_matchesAppendOccurredAtAndKindShapes(t *testing.T) {
 	t.Parallel()
 	if g, w := sqlListCategoryAmountsIncomeRangeBoth, sqlListCategoryAmountsSelectPrefix+sqlFilterOccurredAtFrom+sqlFilterOccurredAtTo+sqlFilterAmountIncome+sqlListCategoryAmountsGroupBy+sqlListCategoryAmountsOrderIncome; g != w {
