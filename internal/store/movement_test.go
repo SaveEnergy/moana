@@ -5,8 +5,6 @@ import (
 	"math"
 	"testing"
 	"time"
-
-	"moana/internal/passwordtest"
 )
 
 func TestDailyAbsMovementByLocalDate_cancelledContext(t *testing.T) {
@@ -23,16 +21,7 @@ func TestDailyAbsMovementByLocalDate_bucketingBerlin(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash := passwordtest.MustHash(t, "pw-movement-test")
-	uid, err := st.CreateUser(ctx, "movement-tz@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByEmail(ctx, "movement-tz@example.com")
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "movement-tz@example.com")
 
 	loc, err := time.LoadLocation("Europe/Berlin")
 	if err != nil {
@@ -68,16 +57,7 @@ func TestDailyAbsMovementByLocalDate_nilLocationMatchesUTC(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "pw-movement-nil")
-	uid, err := st.CreateUser(ctx, "movement-nil@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByEmail(ctx, "movement-nil@example.com")
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "movement-nil@example.com")
 	occ := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, -1000, occ, "x", nil); err != nil {
 		t.Fatal(err)
@@ -106,16 +86,7 @@ func TestDailyAbsMovementByLocalDate_minInt64AmountUsesAbsCents(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "pw-movement-min64")
-	uid, err := st.CreateUser(ctx, "movement-min64@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByEmail(ctx, "movement-min64@example.com")
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "movement-min64@example.com")
 	occ := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, occ, "edge", nil); err != nil {
 		t.Fatal(err)
@@ -136,16 +107,7 @@ func TestDailyAbsMovementByLocalDate_sameDayAbsSumSaturatesOnOverflow(t *testing
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "pw-movement-day-overflow")
-	uid, err := st.CreateUser(ctx, "movement-day-overflow@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByEmail(ctx, "movement-day-overflow@example.com")
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "movement-day-overflow@example.com")
 	occ := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, math.MinInt64, occ, "a", nil); err != nil {
 		t.Fatal(err)
