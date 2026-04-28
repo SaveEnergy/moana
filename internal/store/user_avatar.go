@@ -11,14 +11,7 @@ func (s *Store) IncrementUserAvatarRev(ctx context.Context, userID int64) error 
 	if err != nil {
 		return err
 	}
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if n == 0 {
-		return sql.ErrNoRows
-	}
-	return nil
+	return execExactlyOneRow(res, sql.ErrNoRows)
 }
 
 // ClearUserAvatar removes the avatar revision (and the handler should delete the on-disk file).

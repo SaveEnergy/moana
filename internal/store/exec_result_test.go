@@ -24,6 +24,9 @@ func TestExecExactlyOneRow(t *testing.T) {
 	if err := execExactlyOneRow(fakeExecResult{n: 0}, errZero); !errors.Is(err, errZero) {
 		t.Fatalf("zero rows: got %v want %v", err, errZero)
 	}
+	if err := execExactlyOneRow(fakeExecResult{n: 2}, errZero); err == nil {
+		t.Fatal("two rows: got nil, want error")
+	}
 	if err := execExactlyOneRow(fakeExecResult{n: 0, err: io.ErrUnexpectedEOF}, errZero); !errors.Is(err, io.ErrUnexpectedEOF) {
 		t.Fatalf("rows affected error: got %v", err)
 	}
