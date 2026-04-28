@@ -4,24 +4,13 @@ import (
 	"context"
 	"testing"
 	"time"
-
-	"moana/internal/passwordtest"
 )
 
 func TestListTransactions_searchNoDate_incomeMatchesDescription(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "list-search-nodate@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "list-search-nodate@example.com")
 	day := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, 10000, day, "windfall bonus", nil); err != nil {
 		t.Fatal(err)
@@ -42,16 +31,7 @@ func TestListTransactions_searchNoDate_zeroLimit_returnsAllMatches(t *testing.T)
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "list-search-z@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "list-search-z@example.com")
 	day := time.Date(2026, 11, 2, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "alpha token", nil); err != nil {
 		t.Fatal(err)
@@ -72,16 +52,7 @@ func TestListTransactions_datedSingleBoundSearch_fromOnlyExpense(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "list-1bnd@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "list-1bnd@example.com")
 	from := time.Date(2026, 12, 1, 0, 0, 0, 0, time.UTC)
 	day := time.Date(2026, 12, 10, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, -500, day, "matchme latte", nil); err != nil {
@@ -103,16 +74,7 @@ func TestListTransactions_searchLiteralPercentDoesNotMatchAllRows(t *testing.T) 
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "like-pct@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "like-pct@example.com")
 	day := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, -100, day, "coffee", nil); err != nil {
 		t.Fatal(err)
@@ -133,16 +95,7 @@ func TestListTransactions_whitespaceOnlySearchSkipped(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "ws-search@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "ws-search@example.com")
 	day := time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, -100, day, "coffee", nil); err != nil {
 		t.Fatal(err)
@@ -160,16 +113,7 @@ func TestListTransactions_combinedFilterOldestFirstWithSearchAndBounds(t *testin
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "combo-list@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "combo-list@example.com")
 
 	day1 := time.Date(2026, 8, 10, 15, 0, 0, 0, time.UTC)
 	day2 := time.Date(2026, 8, 11, 15, 0, 0, 0, time.UTC)

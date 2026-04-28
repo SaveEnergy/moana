@@ -4,24 +4,13 @@ import (
 	"context"
 	"testing"
 	"time"
-
-	"moana/internal/passwordtest"
 )
 
 func TestListTransactions_kindExpenseWithLimit_newestFirst(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "kind-exp-limit@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "kind-exp-limit@example.com")
 	base := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, -100, base, "old", nil); err != nil {
 		t.Fatal(err)
@@ -48,16 +37,7 @@ func TestListTransactions_oldestFirstIncomeWithLimit_oldestFirst(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "old-inc@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "old-inc@example.com")
 	base := time.Date(2026, 12, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, 100, base, "first", nil); err != nil {
 		t.Fatal(err)
@@ -85,16 +65,7 @@ func TestListTransactions_respectsLimit(t *testing.T) {
 	st := testStore(t)
 	ctx := context.Background()
 
-	hash := passwordtest.MustHash(t, "pw-limit-test")
-	uid, err := st.CreateUser(ctx, "limit-list@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByEmail(ctx, "limit-list@example.com")
-	if err != nil || u == nil {
-		t.Fatalf("user: %+v err=%v", u, err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "limit-list@example.com")
 
 	base := time.Date(2026, 4, 1, 12, 0, 0, 0, time.UTC)
 	for i := range 5 {
@@ -145,16 +116,7 @@ func TestListTransactions_kindIgnoresSurroundingSpace(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "kind-trim@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "kind-trim@example.com")
 	day := time.Date(2026, 7, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "in", nil); err != nil {
 		t.Fatal(err)
@@ -175,16 +137,7 @@ func TestListTransactions_kindExpenseOnlyNegativeAmounts(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "kind-expense@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "kind-expense@example.com")
 	day := time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "in", nil); err != nil {
 		t.Fatal(err)
@@ -205,16 +158,7 @@ func TestListTransactions_unknownKindDoesNotFilterBySign(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "kind-unknown@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "kind-unknown@example.com")
 	day := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
 	if _, err := st.CreateTransaction(ctx, uid, hid, 100, day, "in", nil); err != nil {
 		t.Fatal(err)

@@ -5,24 +5,13 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
-	"moana/internal/passwordtest"
 )
 
 func TestListTransactions_datedNoSearch_boundsIncomeOldestFirst(t *testing.T) {
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "list-dated-ns@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "list-dated-ns@example.com")
 	day1 := time.Date(2026, 8, 10, 15, 0, 0, 0, time.UTC)
 	day2 := time.Date(2026, 8, 11, 15, 0, 0, 0, time.UTC)
 	from := time.Date(2026, 8, 10, 0, 0, 0, 0, time.UTC)
@@ -55,16 +44,7 @@ func TestListTransactions_datedNoSearch_zeroLimit_returnsAllInRange(t *testing.T
 	t.Parallel()
 	st := testStore(t)
 	ctx := context.Background()
-	hash := passwordtest.MustHash(t, "x")
-	uid, err := st.CreateUser(ctx, "list-dated-z@example.com", hash, "user")
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, err := st.GetUserByID(ctx, uid)
-	if err != nil || u == nil {
-		t.Fatal(err)
-	}
-	hid := u.HouseholdID
+	uid, hid := mustCreateUserWithHousehold(t, st, ctx, "list-dated-z@example.com")
 	from := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
 	to := time.Date(2026, 3, 31, 23, 59, 59, 0, time.UTC)
 	for i := 0; i < 3; i++ {
